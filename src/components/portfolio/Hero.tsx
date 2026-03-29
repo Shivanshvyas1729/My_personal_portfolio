@@ -13,7 +13,8 @@ const Hero = () => {
       <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/8 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="container mx-auto px-4 pt-24 pb-12">
-        <div className="max-w-4xl">
+        <div className="grid md:grid-cols-[1fr,auto] gap-12 items-center">
+        <div className="max-w-3xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
