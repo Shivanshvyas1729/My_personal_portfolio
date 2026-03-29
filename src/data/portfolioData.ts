@@ -34,6 +34,12 @@ export interface Service {
   icon?: string;
 }
 
+export interface ProjectMedia {
+  type: "image" | "video";
+  url: string;
+  caption?: string;
+}
+
 export interface Project {
   id: number;
   title: string;
@@ -45,6 +51,14 @@ export interface Project {
   featured: boolean;
   impact: string;
   architectureImage?: string;
+  media?: ProjectMedia[];
+  howItWorks?: string;
+}
+
+export interface EmailJSConfig {
+  serviceId: string;
+  templateId: string;
+  publicKey: string;
 }
 
 export interface PortfolioData {
@@ -80,6 +94,7 @@ export interface PortfolioData {
   techStack: string[];
   services: Service[];
   projects: Project[];
+  emailjs: EmailJSConfig;
 }
 
 export const portfolioData: PortfolioData = {
@@ -253,6 +268,17 @@ export const portfolioData: PortfolioData = {
       impact: "Automated weekly reporting saving 8 hours",
     },
   ],
+
+  // ========== EmailJS Configuration ==========
+  // Get these from https://www.emailjs.com/
+  // 1. Sign up → Dashboard → Account → Public Key
+  // 2. Email Services → Add Service → Get Service ID
+  // 3. Email Templates → Create Template → Get Template ID
+  emailjs: {
+    serviceId: "YOUR_EMAILJS_SERVICE_ID",
+    templateId: "YOUR_EMAILJS_TEMPLATE_ID",
+    publicKey: "YOUR_EMAILJS_PUBLIC_KEY",
+  },
 };
 
 // Utility functions
