@@ -93,7 +93,7 @@ export const portfolioData: PortfolioData = {
     location: "Bhilwara, Rajasthan, India",
     profileImage: {
       type: "local",
-      value: "",
+      value: "/assets/profile-placeholder.jpg",
       position: "right",
     },
   },

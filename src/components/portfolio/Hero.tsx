@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { portfolioData } from "@/data/portfolioData";
 import { ArrowRight, ChevronDown } from "lucide-react";
+import profileImg from "@/assets/profile-placeholder.jpg";
 
 const Hero = () => {
   const { hero, personal, stats } = portfolioData;
