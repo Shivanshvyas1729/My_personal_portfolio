@@ -88,6 +88,26 @@ const Hero = () => {
             </div>
           </motion.div>
         </div>
+
+        {/* Profile Image */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.5, duration: 0.8 }}
+          className="hidden md:block"
+        >
+          <div className="relative w-72 h-72 lg:w-80 lg:h-80">
+            <div className="absolute inset-0 rounded-full bg-primary/20 blur-3xl animate-glow-pulse" />
+            <img
+              src={profileImg}
+              alt={personal.name}
+              width={320}
+              height={320}
+              className="relative rounded-2xl object-cover w-full h-full glow-border"
+            />
+          </div>
+        </motion.div>
+        </div>
       </div>
 
       <motion.div
