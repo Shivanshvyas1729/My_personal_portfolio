@@ -86,7 +86,20 @@ export const handler: Handler = async (event, context) => {
       };
     }
 
-    // Step 3: Compute ID and Insert
+    // Duplicate Prevention
+    const isDuplicate = parsedYaml.blog.some((post: any) => 
+      post.title.toLowerCase() === blogData.title.trim().toLowerCase() && 
+      post.date === new Date().toISOString().split("T")[0]
+    );
+
+    if (isDuplicate) {
+      return {
+        statusCode: 409,
+        body: JSON.stringify({ error: "Duplicate blog entry detected for today." }),
+      };
+    }
+
+    // Step 3: Compute fields and Insert
     // Find highest ID to avoid duplicates
     let highestId = 0;
     for (const post of parsedYaml.blog) {
@@ -95,13 +108,28 @@ export const handler: Handler = async (event, context) => {
       }
     }
 
+    const words = blogData.content.trim().split(/\s+/).length;
+    const computedReadingTime = Math.max(1, Math.ceil(words / 200));
+
+    // Slug generator
+    const rawSlug = blogData.title.trim().toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
     const newPost = {
       id: highestId + 1,
       title: blogData.title.trim(),
+      slug: rawSlug,
+      readingTime: computedReadingTime,
       content: blogData.content.trim(),
       category: blogData.category.trim(),
+      type: Array.isArray(blogData.type) ? blogData.type : [], // Safely parse tags
       link: blogData.link ? blogData.link.trim() : "",
       date: new Date().toISOString().split("T")[0],
+      featured: !!blogData.featured,
+      draft: !!blogData.draft,
+      ...(Array.isArray(blogData.resources) && blogData.resources.length > 0 && { resources: blogData.resources })
     };
 
     // Prepend to top instead of push, or push to bottom?

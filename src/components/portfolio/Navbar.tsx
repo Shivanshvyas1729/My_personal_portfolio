@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, FileText } from "lucide-react";
+import { Menu, X, FileText, Sun, Moon } from "lucide-react";
 import { portfolioData } from "@/data/portfolioData";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTheme } from "@/hooks/useTheme";
 
 const navLinks = [
   { label: "Home", href: "#home" },
@@ -20,7 +21,10 @@ const Navbar = () => {
   const [activeSection, setActiveSection] = useState("home");
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme, setTheme } = useTheme();
   const resumeUrl = portfolioData?.resume?.url || "";
+
+  const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   useEffect(() => {
     const onScroll = () => {
@@ -95,14 +99,31 @@ const Navbar = () => {
               Resume
             </a>
           )}
+          
+          {/* Theme Toggle Desktop */}
+          <button
+            onClick={() => setTheme(isDark ? "light" : "dark")}
+            className="p-2 ml-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            title="Toggle Theme"
+          >
+            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
         </div>
 
-        <button
-          className="md:hidden text-foreground"
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
-          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <div className="md:hidden flex items-center gap-4">
+          <button
+            onClick={() => setTheme(isDark ? "light" : "dark")}
+            className="p-2 rounded-full text-foreground hover:bg-muted transition-colors"
+          >
+            {isDark ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+          <button
+            className="text-foreground"
+            onClick={() => setMobileOpen(!mobileOpen)}
+          >
+            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       <AnimatePresence>

@@ -14,7 +14,7 @@ const About = () => {
       <div className="mb-16 -mx-4 overflow-hidden">
         <div className="flex whitespace-nowrap marquee">
           {marquee.map((text, i) => (
-            <span key={i} className="text-6xl md:text-8xl font-heading font-bold text-muted/40 mx-8 select-none">
+            <span key={i} className="text-6xl md:text-8xl font-heading font-bold text-foreground/5 md:text-foreground/10 mx-8 select-none tracking-tight">
               {text}
             </span>
           ))}

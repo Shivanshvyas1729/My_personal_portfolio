@@ -6,6 +6,44 @@
 
 @layer base {
   :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 5%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 5%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 5%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 260 60% 55%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 20% 45%;
+    --accent: 260 60% 55%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 31% 91%;
+    --input: 214 31% 91%;
+    --ring: 217 91% 60%;
+    --radius: 0.75rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 222 47% 5%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 40% 96%;
+    --sidebar-accent-foreground: 222 47% 5%;
+    --sidebar-border: 214 31% 91%;
+    --sidebar-ring: 217 91% 60%;
+
+    --glow-primary: 217 91% 60%;
+    --glow-accent: 260 60% 55%;
+    --glass-bg: 0 0% 100% / 0.8;
+    --glass-border: 214 31% 91% / 0.5;
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(260 60% 55%));
+    --gradient-text: linear-gradient(135deg, hsl(217 91% 60%), hsl(260 60% 65%));
+  }
+  
+  .dark {
     --background: 222 47% 5%;
     --foreground: 210 40% 96%;
     --card: 222 47% 8%;
@@ -17,7 +55,7 @@
     --secondary: 260 60% 55%;
     --secondary-foreground: 210 40% 98%;
     --muted: 222 30% 14%;
-    --muted-foreground: 215 20% 55%;
+    --muted-foreground: 215 20% 65%;
     --accent: 260 60% 55%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 84% 60%;
@@ -25,7 +63,6 @@
     --border: 222 30% 16%;
     --input: 222 30% 16%;
     --ring: 217 91% 60%;
-    --radius: 0.75rem;
     --sidebar-background: 222 47% 5%;
     --sidebar-foreground: 210 40% 96%;
     --sidebar-primary: 217 91% 60%;
@@ -35,12 +72,8 @@
     --sidebar-border: 222 30% 16%;
     --sidebar-ring: 217 91% 60%;
 
-    --glow-primary: 217 91% 60%;
-    --glow-accent: 260 60% 55%;
     --glass-bg: 222 47% 8% / 0.6;
     --glass-border: 222 30% 20% / 0.3;
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(260 60% 55%));
-    --gradient-text: linear-gradient(135deg, hsl(217 91% 60%), hsl(260 60% 65%));
   }
 }
 
