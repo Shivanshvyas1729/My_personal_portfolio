@@ -10,6 +10,7 @@ const navLinks = [
   { label: "Skills", href: "#skills" },
   { label: "Projects", href: "#projects" },
   { label: "Services", href: "#services" },
+  { label: "Blog", href: "/blog" },
   { label: "Contact", href: "#contact" },
 ];
 
@@ -39,6 +40,10 @@ const Navbar = () => {
 
   const handleClick = (href: string) => {
     setMobileOpen(false);
+    if (href.startsWith("/")) {
+      navigate(href);
+      return;
+    }
     if (location.pathname !== "/") {
       navigate("/");
       setTimeout(() => {

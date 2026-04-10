@@ -1,0 +1,7 @@
+blog:
+  - id: 1
+    title: "Welcome to my new Blog system"
+    content: "This is the first dynamically generated post using the Antigravity setup! This system allows adding content via a secure chatbot interface that pushes commits directly to GitHub."
+    category: "Notes"
+    link: "https://github.com"
+    date: "2026-04-10"
