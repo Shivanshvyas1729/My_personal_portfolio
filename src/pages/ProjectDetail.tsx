@@ -3,8 +3,9 @@ import { portfolioData } from "@/data/portfolioData";
 import Navbar from "@/components/portfolio/Navbar";
 import Footer from "@/components/portfolio/Footer";
 import SEO from "@/components/portfolio/SEO";
-import { ArrowLeft, Github, ExternalLink, Play } from "lucide-react";
+import { ArrowLeft, Github, ExternalLink, Play, Lock } from "lucide-react";
 import { useState } from "react";
+import { ResourcesModal } from "@/components/portfolio/ResourcesModal";
 
 const ProjectDetail = () => {
   const { id } = useParams();
@@ -64,6 +65,13 @@ const ProjectDetail = () => {
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:shadow-[0_0_20px_-5px_hsl(var(--primary)/0.5)] transition-all">
                     <ExternalLink size={16} /> Live Demo
                   </a>
+                )}
+                {(project.resources?.length ?? 0) > 0 && (
+                  <ResourcesModal project={project}>
+                    <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-secondary text-secondary-foreground text-sm font-medium hover:bg-secondary/80 transition-all border border-border">
+                      <Lock size={16} className="text-primary" /> View Resources
+                    </button>
+                  </ResourcesModal>
                 )}
               </div>
             </div>

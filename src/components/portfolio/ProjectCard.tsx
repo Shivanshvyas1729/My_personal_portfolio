@@ -4,6 +4,7 @@ import { ExternalLink, Github, Star, GitFork, Image as ImageIcon } from "lucide-
 import type { Project } from "@/data/portfolioData";
 import { Link } from "react-router-dom";
 import { useGithubStats } from "@/hooks/useGithubStats";
+import { ResourcesModal } from "./ResourcesModal";
 
 interface Props {
   project: Project;
@@ -101,6 +102,9 @@ const ProjectCard = ({ project, index }: Props) => {
               >
                 <ExternalLink size={14} className="group-hover/link:text-primary transition-colors" /> Live
               </a>
+            )}
+            {(project.resources?.length ?? 0) > 0 && (
+              <ResourcesModal project={project} />
             )}
           </div>
 

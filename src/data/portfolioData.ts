@@ -56,6 +56,7 @@ export interface Project {
   architectureImage?: string;
   media?: ProjectMedia[];
   howItWorks?: string;
+  resources?: { label: string; url: string }[];
 }
 
 export interface EmailJSConfig {
@@ -65,6 +66,7 @@ export interface EmailJSConfig {
 }
 
 export interface PortfolioData {
+  resourcesPassword?: string;
   home?: {
     featuredProjectsCount?: number;
     featuredProjectIds?: number[];
@@ -120,6 +122,11 @@ try {
 }
 
 export const portfolioData: PortfolioData = parsedData as PortfolioData;
+
+// Sort projects by ID in descending order
+if (portfolioData.projects && Array.isArray(portfolioData.projects)) {
+  portfolioData.projects.sort((a, b) => b.id - a.id);
+}
 
 export const getFeaturedProjects = (): Project[] => {
   const config = portfolioData.home;

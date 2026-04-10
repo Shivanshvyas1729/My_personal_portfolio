@@ -37,11 +37,15 @@ home:
   featuredProjectsCount: 4
 # endregion
 
+# region GLOBAL SETTINGS
+resourcesPassword: "ShivaAnt"
+# endregion
+
 # region PERSONAL
 personal:
   name: "Shivansh Vyas"
   title: "Data Scientist | AI Engineer"
-  email: "shivanshvyas1729@example.com"
+  email: "shivanshvyas1729@gmail.com"
   phone: "+91 6377099494"
   linkedin: "https://linkedin.com/in/shivanshvyas"
   github: "https://github.com/Shivanshvyas1729"
@@ -214,7 +218,6 @@ projects:
   - id: 1
     title: "🎧 Automated YouTube Mixtape Creation"
     category:
-      - "Generative AI"
       - "Python"
     description: "Automated system that creates mixtapes..."
     media:
@@ -224,10 +227,18 @@ projects:
       - "Python"
       - "Streamlit"
       - "NLP"
-    github: "https://github.com/..."
+      - "Pydub"
+      - "MoviePy"
+      - "FFmpeg"
+    github: "https://github.com/Shivanshvyas1729/Automated-YouTube-Mixtape-Creation1/tree/main"
     live: "https://automated-youtube-mixtape-creation.streamlit.app/"
     featured: true
     impact: "Zero manual editing"
+    resources:
+      - label: "Architecture PDF"
+        url: "https://drive.google.com/drive/folders/1zYdh2-eu6yUfUA4IYokQsziallVQXCGr"
+      - label: "System Design Spec"
+        url: "https://example.com/design.pdf"
 
   - id: 2
     title: "🥤 Drink Quality Prediction System"
@@ -259,13 +270,14 @@ projects:
     title: "🌦 Thunderstorm Forecasting System"
     category:
       - "Machine Learning"
-      - "Weather Prediction"
+      
       - "Python"
     description: "Machine learning-based system for real-time thunderstorm prediction using atmospheric indices, featuring a FastAPI backend and interactive Streamlit interface."
     media:
       - type: "image"
         url: "https://www.reconnectwithnature.org/getContentAsset/a2de823c-a1ae-491e-a47b-f373af403d4e/dfc3d011-8f63-43f6-9ed8-4b444333a1d0/Thunderstorm-lightning-strike-shutterstock-1.jpg?language=en-US"
     tech:
+      - "Weather Prediction"
       - "Python"
       - "Scikit-learn"
       - "FastAPI"
@@ -277,6 +289,34 @@ projects:
     live: "https://thunderstromforcast.streamlit.app/"
     featured: true
     impact: "Real-time thunderstorm prediction with optimized ML model and interactive UI"
+ 
+  - id: 4
+    title: "☀️ Solar Panel Defect Detection System"
+    category:
+      - "Deep Learning"
+      - "Computer Vision"
+      
+    description: "An AI-powered solar panel defect detection system using transfer learning with EfficientNet-B0. The model leverages pretrained weights to achieve high accuracy with limited data, enabling fast and reliable classification of defects like dust, bird drops, and physical damage through an interactive Streamlit web app."
+    media:
+      - type: "image"
+        url: "https://watery-sapphire-sayld8w948.edgeone.app/Gemini_Generated_Image_14r8ms14r8ms14r8.png"
+    tech:
+      - "Python"
+      - "PyTorch"
+      - "Torchvision"
+      - "Streamlit"
+      - "NumPy"
+      - "PIL"
+      - "Transfer Learning"
+    github: "https://github.com/Shivanshvyas1729/solar_panel_defect_detection"
+    live: "https://solarpaneldefectdetection.streamlit.app/"
+    featured: true
+    impact: "Improves efficiency of solar panel maintenance by enabling quick and automated defect detection, reducing manual inspection effort and supporting scalable renewable energy operations."
+
+    resources:
+      - label: "Architecture PDF"
+        url: "https://drive.google.com/drive/folders/1zYdh2-eu6yUfUA4IYokQsziallVQXCGr"
+
 
 # endregion
 
