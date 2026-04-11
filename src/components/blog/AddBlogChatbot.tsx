@@ -67,7 +67,7 @@ export function AddBlogChatbot({ onSuccessPayload }: ChatbotProps) {
         setIsSubmitting(true);
         // Call the backend just to verify auth. If it's valid, it passes 401 and hits 400 (missing blog fields), which is acceptable for verification!
         try {
-          const checkRes = await fetch("/.netlify/functions/save-blog", {
+          const checkRes = await fetch("/api/save-blog", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ password: text.trim(), blogData: null }),
@@ -75,14 +75,14 @@ export function AddBlogChatbot({ onSuccessPayload }: ChatbotProps) {
           
           setIsSubmitting(false);
 
-          if (checkRes.status === 401) {
+          if (checkRes.ok || checkRes.status === 400) {
+            setPassword(text.trim());
+            addBotMessage("Authentication provisionally accepted. What type of post are you adding?", "category", ["Notes", "Thoughts", "Books", "Links"]);
+          } else if (checkRes.status === 401) {
             addBotMessage("Invalid Password. Access denied.", "error");
-            return; // stop execution, do not proceed!
+          } else {
+            addBotMessage("API Error. Ensure backend is deployed or run 'vercel dev'.", "error");
           }
-          
-          // Password passed the 401 check!
-          setPassword(text.trim());
-          addBotMessage("Authentication provisionally accepted. What type of post are you adding?", "category", ["Notes", "Thoughts", "Books", "Links"]);
         } catch (err) {
           setIsSubmitting(false);
           addBotMessage("Network Error: Could not reach the authentication server.", "error");
@@ -134,11 +134,24 @@ export function AddBlogChatbot({ onSuccessPayload }: ChatbotProps) {
     }]);
 
     try {
-      const response = await fetch("/.netlify/functions/save-blog", {
+      const response = await fetch("/api/save-blog", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password: authPass, blogData: finalData }),
       });
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        setMessages(prev => prev.filter(m => m.id !== "loading"));
+        setMessages(prev => [...prev, { 
+          id: "fail", 
+          sender: "bot", 
+          text: `Upload Failed: API returned HTML instead of JSON. Are you running 'vercel dev'?`,
+          type: "error" 
+        }]);
+        setIsSubmitting(false);
+        return;
+      }
 
       const result = await response.json();
 
@@ -148,12 +161,20 @@ export function AddBlogChatbot({ onSuccessPayload }: ChatbotProps) {
         setMessages(prev => [...prev, { 
           id: "success", 
           sender: "bot", 
-          text: "Success! The code was successfully committed. Netlify is redeploying.",
+          text: "Success! Post committed to GitHub. Deployment is batched — no rebuild spam.",
           type: "success" 
         }]);
         if (onSuccessPayload) {
            onSuccessPayload({ ...finalData, id: Date.now(), date: new Date().toISOString() });
         }
+      } else if (response.status === 429) {
+        const retryAfter = result.retryAfter || 30;
+        setMessages(prev => [...prev, { 
+          id: "ratelimit", 
+          sender: "bot", 
+          text: `⏳ Rate limited — wait ${retryAfter}s before submitting again. This prevents GitHub commit spam.`,
+          type: "error" 
+        }]);
       } else {
         setMessages(prev => [...prev, { 
           id: "fail", 
@@ -167,7 +188,7 @@ export function AddBlogChatbot({ onSuccessPayload }: ChatbotProps) {
       setMessages(prev => [...prev, { 
         id: "fail", 
         sender: "bot", 
-        text: `Network Error: Could not reach the Netlify Function. Ensure local dev server is running properly or check your connection.`,
+        text: `Network Error: Could not reach the Vercel API. Ensure local dev server is running properly or check your connection.`,
         type: "error" 
       }]);
     }

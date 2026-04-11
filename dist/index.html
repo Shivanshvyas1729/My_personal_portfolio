@@ -5,7 +5,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-```
 <!-- Title -->
 <title>Shivansh Vyas | AI Engineer & Data Scientist Portfolio</title>
 
@@ -28,10 +27,29 @@
 <meta name="twitter:title" content="Shivansh Vyas | AI Engineer & Data Scientist" />
 <meta name="twitter:description" content="Building end-to-end scalable AI systems that create real-world impact." />
 <meta name="twitter:image" content="/preview.png" />
-```
 
-    <script type="module" crossorigin src="/assets/index-Dp9JkTZX.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-oxMfVvAc.css">
+    <script>
+      (function() {
+        try {
+          var t = localStorage.getItem('vite-ui-theme');
+          if (t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+          } else if (t === 'light' || (t === 'system' && !window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
+          } else {
+            // Default "dark" as fallback
+             if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+               document.documentElement.classList.add('dark');
+             } else {
+               document.documentElement.classList.remove('dark');
+             }
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-Dr6HXkvW.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DQoGrbpk.css">
   </head>
 
   <body>

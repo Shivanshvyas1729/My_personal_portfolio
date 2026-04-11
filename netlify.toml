@@ -1,8 +1,26 @@
+# ─── Build Configuration ──────────────────────────────────────────────────────
 [build]
-  command = "npm install && npm run build"
-  publish = "dist"
+  command         = "npm run build"
+  publish         = "dist"
+  functions       = "netlify/functions"
+
+# ─── SPA Routing: all non-function paths fall back to index.html ─────────────
+[[redirects]]
+  from   = "/api/save-blog"
+  to     = "/.netlify/functions/save-blog"
+  status = 200
 
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from   = "/api/delete-blog"
+  to     = "/.netlify/functions/delete-blog"
   status = 200
+
+# Catch-all SPA fallback (must be last)
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+
+# ─── Functions Runtime ────────────────────────────────────────────────────────
+[functions]
+  node_bundler = "esbuild"

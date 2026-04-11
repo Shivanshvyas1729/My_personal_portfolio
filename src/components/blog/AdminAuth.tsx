@@ -35,21 +35,23 @@ export function AdminAuth({ isAdmin, setIsAdmin }: AdminAuthProps) {
 
     try {
       // We ping the save-blog endpoint with empty blog data just to hit the 401 gate
-      const checkRes = await fetch("/.netlify/functions/save-blog", {
+      const checkRes = await fetch("/api/save-blog", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password: password.trim(), blogData: null }),
       });
 
-      if (checkRes.status === 401) {
-        setError("Invalid credentials.");
-      } else {
+      if (checkRes.ok || checkRes.status === 400) {
         // Success (even if it's 400 bad request due to no blog data, auth passed!)
         sessionStorage.setItem("adminAuth", "true");
         sessionStorage.setItem("adminLoginTime", Date.now().toString());
         setIsAdmin(true);
         setIsOpen(false);
         setPassword("");
+      } else if (checkRes.status === 401) {
+        setError("Invalid credentials.");
+      } else {
+        setError("API Error. Are you running 'vercel dev' locally?");
       }
     } catch (err) {
       setError("Network fault connecting to Auth Gateway.");

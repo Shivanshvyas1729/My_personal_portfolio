@@ -86,7 +86,7 @@ const ChatAssistant = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.95 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed bottom-24 right-6 w-[360px] max-w-[calc(100vw-32px)] h-[520px] max-h-[calc(100vh-120px)] bg-background/95 backdrop-blur-xl border border-border/60 rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden"
+            className="fixed bottom-24 right-24 w-[360px] max-w-[calc(100vw-32px)] h-[520px] max-h-[calc(100vh-120px)] bg-background/95 backdrop-blur-xl border border-border/60 rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-border/50 bg-primary/5">
@@ -175,7 +175,7 @@ const ChatAssistant = () => {
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.94 }}
         onClick={() => setIsOpen(o => !o)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-[0_0_30px_rgba(59,130,246,0.45)] flex items-center justify-center z-50 transition-shadow hover:shadow-[0_0_45px_rgba(59,130,246,0.65)]"
+        className="fixed bottom-6 right-24 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-[0_0_30px_rgba(59,130,246,0.45)] flex items-center justify-center z-50 transition-shadow hover:shadow-[0_0_45px_rgba(59,130,246,0.65)]"
         aria-label="Toggle AI Chat"
       >
         <AnimatePresence mode="wait" initial={false}>

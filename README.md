@@ -1,8 +1,12 @@
 # 🚀 Antigravity Portfolio & Git-Based CMS
 
+
+vercel dev --listen 0.0.0.0:3000
+
+
 A completely unified, production-grade Web Application executing a dynamic Portfolio UI mapped identically to a headless Git-based Content Management System.
 
-Built entirely autonomously on top of React, Vite, Tailwind CSS, and Netlify Servless Functions.
+Built entirely autonomously on top of React, Vite, Tailwind CSS, and Vercel Serverless Functions.
 
 ---
 
@@ -13,7 +17,7 @@ Built entirely autonomously on top of React, Vite, Tailwind CSS, and Netlify Ser
 - **Advanced Filtering Pipeline:** Case-insensitive search mechanics automatically evaluating algorithms prioritizing Titles `(x3)`, Tags `(x2)`, and Content `(x1)`, completely wrapped natively in React `useMemo` hooks.
 - **Admin UI Override:** Employs a strict discreet session tracker locking `draft` rendering, manual Admin payload Panels, and a Floating Bot Terminal away from the general public.
 - **Optimistic UI Injections:** Mocks GitHub payload completions instantly upon submission, preventing redundant API refetches.
-- **Automated Deployments:** Fully tied to GitHub's internal webhook architecture, meaning generating a Post within the website triggers Netlify to instantly rebuild the live repository asynchronously!
+- **Automated Deployments:** Fully tied to GitHub's internal webhook architecture, meaning generating a Post within the website triggers Vercel to instantly rebuild the live repository asynchronously!
 - **Zero-Flicker Dark Mode:** A rigorously mounted local storage `prefers-color-scheme` implementation tied globally using React Context wrappers.
 
 ---
@@ -22,7 +26,7 @@ Built entirely autonomously on top of React, Vite, Tailwind CSS, and Netlify Ser
 
 - **Framework:** React + Vite (`vite` bundler optimization natively hooked).
 - **Styling UI:** Tailwind CSS v3 `class` strategy + Framer Motion animations.
-- **Backend Infrastructure:** Netlify Serverless Functions (`@netlify/functions`).
+- **Backend Infrastructure:** Vercel Serverless Functions (`/api` directory).
 - **REST Communication:** Octokit / GitHub API (`@octokit/rest`).
 - **Data Serialization:** Robust local evaluations via `yaml` / `js-yaml`.
 - **Typographic Engine:** Markdown mapped via `react-markdown` + `remark-gfm`.
@@ -33,23 +37,23 @@ Built entirely autonomously on top of React, Vite, Tailwind CSS, and Netlify Ser
 
 ```bash
 📦 shivansh-ai-forge
-┣ 📂 netlify
-┃ ┗ 📂 functions
-┃   ┗ 📜 save-blog.ts           # The Serverless Node securing the GitHub API Rest payload
+┣ 📂 api
+┃ ┗ 📜 save-blog.ts              # Vercel Serverless Function — GitHub CMS API endpoint
 ┣ 📂 src
 ┃ ┣ 📂 components
-┃ ┃ ┣ 📂 blog                   # Granular highly-isolated Chatbot & Filter interfaces
-┃ ┃ ┣ 📂 portfolio              # Core App Navigation & Global Layout UI elements
-┃ ┃ ┗ 📂 ui                     # Shadcn pre-built interactive layout primitives
+┃ ┃ ┣ 📂 blog                    # Granular highly-isolated Chatbot & Filter interfaces
+┃ ┃ ┣ 📂 portfolio               # Core App Navigation & Global Layout UI elements
+┃ ┃ ┗ 📂 ui                      # Shadcn pre-built interactive layout primitives
 ┃ ┣ 📂 data
-┃ ┃ ┣ 📜 blog.yaml              # The native Storage container acting as the Git CMS Database
-┃ ┃ ┗ 📜 portfolio.yaml         # Deep nested structural UI objects mapped to the root page
+┃ ┃ ┣ 📜 blog.yaml               # The native Storage container acting as the Git CMS Database
+┃ ┃ ┗ 📜 portfolio.yaml          # Deep nested structural UI objects mapped to the root page
 ┃ ┣ 📂 hooks
-┃ ┃ ┗ 📜 useTheme.tsx           # Global overarching Dark/Light logic provider context
-┃ ┣ 📂 pages                    # App Router index intersections 
-┃ ┗ 📜 App.tsx                  # Global Context Wrapping boundaries
-┣ 📜 index.html                 # Strict native HTML header mapping anti-flickering payload logic
-┗ 📜 tailwind.config.ts         # Central UI rendering configuration node
+┃ ┃ ┗ 📜 useTheme.tsx            # Global overarching Dark/Light logic provider context
+┃ ┣ 📂 pages                     # App Router index intersections 
+┃ ┗ 📜 App.tsx                   # Global Context Wrapping boundaries
+┣ 📜 vercel.json                  # Vercel deployment & rewrite configuration
+┣ 📜 index.html                   # Strict native HTML header mapping anti-flickering payload logic
+┗ 📜 tailwind.config.ts           # Central UI rendering configuration node
 ```
 
 ---
@@ -67,17 +71,22 @@ cd My_personal_portfolio
 npm install
 ```
 
-3. **Boot Netlify Local Dev Simulation:**
-Always utilize the Netlify wrapper locally to ensure the `.netlify/functions/save-blog` paths map securely without CORS exceptions:
+3. **Boot Vercel Local Dev Server:**
+Use the Vercel CLI locally to ensure `/api/save-blog` routes map correctly:
 ```bash
-npx netlify-cli dev
+npx vercel dev
+```
+
+Or for frontend-only development:
+```bash
+npm run dev
 ```
 
 ---
 
 ## 🔐 Environment Variables 
 
-To enable the backend Git-Based CMS locally without tripping authentication blockades, generate an explicit `.env` file in the exact core root of your project:
+Create a `.env` file in the project root:
 
 ```bash
 GITHUB_TOKEN=github_pat_...
@@ -85,30 +94,47 @@ ADMIN_PASSWORD=your_secure_password
 ```
 
 **Understanding the Keys:**
-- `GITHUB_TOKEN`: Produce a Fine-Grained Personal Access Token internally within your GitHub Developer Settings. **It must explicitly allow strict `Repo` (Read & Write) access to your portfolio repository.**
-- `ADMIN_PASSWORD`: A completely arbitrary password of your choosing. The frontend verifies this exact string instantly upon submission attempts avoiding local spoofing.
+- `GITHUB_TOKEN`: Generate a Fine-Grained Personal Access Token from your GitHub Developer Settings. **It must explicitly allow `Repo` (Read & Write) access to your portfolio repository.**
+- `ADMIN_PASSWORD`: An arbitrary password of your choosing. The backend verifies this string upon every API submission.
+
+> ⚠️ Your `.env` file is already included in `.gitignore`. Never commit secrets to the repository.
 
 ---
 
-## 🌐 Netlify Deployment
+## 🌐 Vercel Deployment
 
-Since the architecture natively runs on Netlify, deployment is perfectly seamless:
-1. Connect the Repository to the Netlify Dashboard.
-2. Under `Site Configuration > Environment Variables`, identically mount your `GITHUB_TOKEN` and `ADMIN_PASSWORD`.
-3. Set your Build Command natively as `npm run build` targeting the `dist` payload context directory.
-4. Auto-publishing natively registers automatically!
+1. Connect the Repository to the [Vercel Dashboard](https://vercel.com/dashboard).
+2. Under **Settings → Environment Variables**, add `GITHUB_TOKEN` and `ADMIN_PASSWORD`.
+3. Build command: `npm run build` → Output directory: `dist` (auto-detected by Vercel).
+4. Every push to `main` triggers an automatic production deployment.
 
 ---
 
 ## 🧠 Core Execution Flow
 
-The Magic Behind The Curtain:
-`User Frontend Entry` → `Discreet Admin Padlock (sessionStorage Auth` → `Post Validation` → `POST Netlify Function Payload (/save-blog)` → `Octokit evaluates SHA/Repo Bounds` → `GitHub Automatically Commits new node to /blog.yaml` → `Hook Triggers Netlify Prod Build Cycle`
+```
+User Frontend → Discreet Admin Padlock (sessionStorage Auth)
+→ Post Validation → POST /api/save-blog
+→ Octokit evaluates SHA/Repo Bounds
+→ GitHub Commits new entry to /blog.yaml
+→ Webhook Triggers Vercel Production Build
+```
+
+---
+
+## 👨‍💻 Usage
+
+1. Run the project locally with `npx vercel dev` or `npm run dev`.
+2. Navigate to `/blog` and click the 🔒 lock icon (bottom-left).
+3. Enter your admin password to unlock the Admin Panel and Chatbot.
+4. Create a blog post via the sidebar form or the floating chatbot.
+5. The post is committed to GitHub and auto-deployed to production.
 
 ---
 
 ## 🔒 Security Posture
 
-- The `.env` tracking configuration is structurally bound to `.gitignore`. **NEVER leak your Fine-Grained access token directly onto the active remote.**
-- `index.html` implements strict native UI blockers avoiding FOUC (Flash of un-styled content).
-- Passwords are strictly verified backend-only (the frontend simply attempts connection and observes the resulting 401 exceptions).
+- The `.env` file is structurally bound to `.gitignore`. **Never leak your access token onto the remote.**
+- `GITHUB_TOKEN` and `ADMIN_PASSWORD` are only accessed server-side inside `/api/save-blog.ts`.
+- `index.html` implements strict native UI blockers avoiding FOUC (Flash of Unstyled Content).
+- Passwords are verified backend-only — the frontend simply observes the resulting HTTP status codes.

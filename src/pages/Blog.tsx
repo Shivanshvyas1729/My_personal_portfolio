@@ -148,13 +148,16 @@ export default function Blog() {
   };
 
   const handleOptimisticInject = (newPost: BlogPost) => {
-    // Flag it as pending so UI displays "Publishing"
     const pended = { ...newPost, isPending: true };
     setPosts(prev => [...prev, pended]);
-    // Optionally remove pending after a delay to simulate refresh
     setTimeout(() => {
       setPosts(prev => prev.map(p => p.id === pended.id ? { ...p, isPending: false } : p));
     }, 4000);
+  };
+
+  const handleOptimisticDelete = (deleted: BlogPost) => {
+    // Immediately remove from local state — GitHub commit already sent
+    setPosts(prev => prev.filter(p => p.id !== deleted.id));
   };
 
   return (
@@ -220,7 +223,7 @@ export default function Blog() {
                       )}
 
                       <div className="h-full">
-                        <BlogCard post={post} onClick={() => setSelectedPost(post)} isAdmin={isAdmin} />
+                        <BlogCard post={post} onClick={() => setSelectedPost(post)} isAdmin={isAdmin} onDelete={handleOptimisticDelete} />
                       </div>
                     </div>
                   ))}
@@ -250,23 +253,17 @@ export default function Blog() {
                 </div>
               )}
 
-            </div>
-
-             {/* Admin Sidebar Area */}
-            {isAdmin && (
-               <div className="w-full lg:w-[400px] flex-shrink-0 animate-in slide-in-from-right-8 duration-500">
-                 <div className="sticky top-28 space-y-6">
-                   <AdminPanel onSuccess={handleOptimisticInject} />
-                 </div>
-               </div>
-            )}
-          </div>
-        </div>
-      </div>
+            </div>{/* /flex-1 min-w-0 */}
+          </div>{/* /flex flex-col lg:flex-row */}
+        </div>{/* /container */}
+      </div>{/* /section-padding */}
       
       <Footer />
 
-      {/* Floating Global Chatbot (only active when Admin) */}
+      {/* Floating Admin Panel (draggable + resizable) */}
+      {isAdmin && <AdminPanel onSuccess={handleOptimisticInject} />}
+
+      {/* Floating CMS Chatbot (only active when Admin) */}
       {isAdmin && <AddBlogChatbot onSuccessPayload={handleOptimisticInject} />}
 
       <BlogModal post={selectedPost} isOpen={!!selectedPost} onClose={() => setSelectedPost(null)} isAdmin={isAdmin} />
