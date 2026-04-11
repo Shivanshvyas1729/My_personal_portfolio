@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, Lock, Loader2, Bot, CheckCircle2, ShieldAlert, X, MessageSquarePlus } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { apiFetch, API_ROUTES } from "@/lib/apiClient";
 
 interface Message {
   id: string;
@@ -65,14 +66,12 @@ export function AddBlogChatbot({ onSuccessPayload }: ChatbotProps) {
     switch (currentExpectedType) {
       case "password":
         setIsSubmitting(true);
-        // Call the backend just to verify auth. If it's valid, it passes 401 and hits 400 (missing blog fields), which is acceptable for verification!
         try {
-          const checkRes = await fetch("/api/save-blog", {
-            method: "POST",
+          const checkRes = await fetch(API_ROUTES.saveBlog, {
+            method:  "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ password: text.trim(), blogData: null }),
+            body:    JSON.stringify({ password: text.trim(), blogData: null }),
           });
-          
           setIsSubmitting(false);
 
           if (checkRes.ok || checkRes.status === 400) {
@@ -81,7 +80,7 @@ export function AddBlogChatbot({ onSuccessPayload }: ChatbotProps) {
           } else if (checkRes.status === 401) {
             addBotMessage("Invalid Password. Access denied.", "error");
           } else {
-            addBotMessage("API Error. Ensure backend is deployed or run 'vercel dev'.", "error");
+            addBotMessage("API Error. Ensure the dev server is running (npm run dev).", "error");
           }
         } catch (err) {
           setIsSubmitting(false);
@@ -127,70 +126,29 @@ export function AddBlogChatbot({ onSuccessPayload }: ChatbotProps) {
 
   const triggerPipelineUpload = async (authPass: string, finalData: any) => {
     setIsSubmitting(true);
-    setMessages(prev => [...prev, { 
-      id: "loading", 
-      sender: "bot", 
-      text: "Initiating Antigravity Pipeline... Committing to GitHub." 
+    setMessages(prev => [...prev, {
+      id: "loading",
+      sender: "bot",
+      text: "Initiating Antigravity Pipeline... Committing to GitHub."
     }]);
 
     try {
-      const response = await fetch("/api/save-blog", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: authPass, blogData: finalData }),
-      });
-
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        setMessages(prev => prev.filter(m => m.id !== "loading"));
-        setMessages(prev => [...prev, { 
-          id: "fail", 
-          sender: "bot", 
-          text: `Upload Failed: API returned HTML instead of JSON. Are you running 'vercel dev'?`,
-          type: "error" 
-        }]);
-        setIsSubmitting(false);
-        return;
-      }
-
-      const result = await response.json();
+      const { ok, status, data } = await apiFetch(API_ROUTES.saveBlog, { password: authPass, blogData: finalData });
 
       setMessages(prev => prev.filter(m => m.id !== "loading"));
 
-      if (response.ok) {
-        setMessages(prev => [...prev, { 
-          id: "success", 
-          sender: "bot", 
-          text: "Success! Post committed to GitHub. Deployment is batched — no rebuild spam.",
-          type: "success" 
-        }]);
-        if (onSuccessPayload) {
-           onSuccessPayload({ ...finalData, id: Date.now(), date: new Date().toISOString() });
-        }
-      } else if (response.status === 429) {
-        const retryAfter = result.retryAfter || 30;
-        setMessages(prev => [...prev, { 
-          id: "ratelimit", 
-          sender: "bot", 
-          text: `⏳ Rate limited — wait ${retryAfter}s before submitting again. This prevents GitHub commit spam.`,
-          type: "error" 
-        }]);
+      if (ok) {
+        setMessages(prev => [...prev, { id: "success", sender: "bot", text: "Success! Post committed to GitHub. Deployment is batched — no rebuild spam.", type: "success" }]);
+        if (onSuccessPayload) onSuccessPayload({ ...finalData, id: Date.now(), date: new Date().toISOString() });
+      } else if (status === 429) {
+        const retryAfter = (data as any).retryAfter || 30;
+        setMessages(prev => [...prev, { id: "ratelimit", sender: "bot", text: `⏳ Rate limited — wait ${retryAfter}s before submitting again.`, type: "error" }]);
       } else {
-        setMessages(prev => [...prev, { 
-          id: "fail", 
-          sender: "bot", 
-          text: `Upload Failed: ${result.error}`,
-          type: "error" 
-        }]);
+        setMessages(prev => [...prev, { id: "fail", sender: "bot", text: `Upload Failed: ${(data as any).error}`, type: "error" }]);
       }
     } catch (err: any) {
       setMessages(prev => prev.filter(m => m.id !== "loading"));
-      setMessages(prev => [...prev, { 
-        id: "fail", 
-        sender: "bot", 
-        text: `Network Error: Could not reach the Vercel API. Ensure local dev server is running properly or check your connection.`,
-        type: "error" 
-      }]);
+      setMessages(prev => [...prev, { id: "fail", sender: "bot", text: `Network Error: ${err.message}`, type: "error" }]);
     }
 
     setIsSubmitting(false);

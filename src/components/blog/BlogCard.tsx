@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Calendar, Clock, Lock, Trash2, Loader2 } from "lucide-react";
 import { BlogPost } from "@/pages/Blog";
+import { apiFetch, API_ROUTES } from "@/lib/apiClient";
 
 interface BlogCardProps {
   post: BlogPost;
@@ -32,25 +33,14 @@ export function BlogCard({ post, onClick, isAdmin, onDelete }: BlogCardProps) {
     setDeleteError("");
 
     try {
-      const response = await fetch("/api/delete-blog", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          password: import.meta.env.VITE_ADMIN_PASSWORD || "ShivaAnt",
-          postId:   post.id,
-          postSlug: post.slug,
-        }),
+      const { ok, data } = await apiFetch(API_ROUTES.deleteBlog, {
+        password: import.meta.env.VITE_ADMIN_PASSWORD || "ShivaAnt",
+        postId:   post.id,
+        postSlug: post.slug,
       });
 
-      const contentType = response.headers.get("content-type");
-      if (!contentType?.includes("application/json")) {
-        throw new Error("API returned HTML. Is the dev server running with localApiProxy?");
-      }
+      if (!ok) throw new Error((data as any).error || "Deletion failed");
 
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Deletion failed");
-
-      // Notify parent to remove from UI
       onDelete?.(post);
     } catch (err: any) {
       setDeleteError(err.message || "Failed to delete");

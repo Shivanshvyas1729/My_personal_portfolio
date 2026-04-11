@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Save, Plus, Loader2, Link as LinkIcon, Trash2, GripHorizontal, Minimize2, Maximize2, Star, EyeOff } from "lucide-react";
 import { BlogPost } from "@/pages/Blog";
+import { apiFetch, API_ROUTES } from "@/lib/apiClient";
 
 interface AdminPanelProps {
   onSuccess: (post: BlogPost) => void;
@@ -185,24 +186,14 @@ export function AdminPanel({ onSuccess }: AdminPanelProps) {
     };
 
     try {
-      const response = await fetch("/api/save-blog", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          password: sessionStorage.getItem("adminAuth") === "true"
-            ? import.meta.env.VITE_ADMIN_PASSWORD || "ShivaAnt"
-            : "",
-          blogData: payload,
-        }),
+      const { ok, data } = await apiFetch(API_ROUTES.saveBlog, {
+        password: sessionStorage.getItem("adminAuth") === "true"
+          ? import.meta.env.VITE_ADMIN_PASSWORD || "ShivaAnt"
+          : "",
+        blogData: payload,
       });
 
-      const contentType = response.headers.get("content-type");
-      if (!contentType?.includes("application/json")) {
-        throw new Error("API returned HTML. Run 'npm run dev' with localApiProxy active.");
-      }
-
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Failed to commit");
+      if (!ok) throw new Error((data as any).error || "Failed to commit");
 
       onSuccess({
         id: Date.now(),

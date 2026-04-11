@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Lock, Unlock, Loader2, Key } from "lucide-react";
+import { API_ROUTES } from "@/lib/apiClient";
 
 interface AdminAuthProps {
   isAdmin: boolean;
@@ -34,15 +35,14 @@ export function AdminAuth({ isAdmin, setIsAdmin }: AdminAuthProps) {
     setError("");
 
     try {
-      // We ping the save-blog endpoint with empty blog data just to hit the 401 gate
-      const checkRes = await fetch("/api/save-blog", {
-        method: "POST",
+      // Ping the save-blog endpoint with null blogData to hit the 401 gate only
+      const checkRes = await fetch(API_ROUTES.saveBlog, {
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: password.trim(), blogData: null }),
+        body:    JSON.stringify({ password: password.trim(), blogData: null }),
       });
 
       if (checkRes.ok || checkRes.status === 400) {
-        // Success (even if it's 400 bad request due to no blog data, auth passed!)
         sessionStorage.setItem("adminAuth", "true");
         sessionStorage.setItem("adminLoginTime", Date.now().toString());
         setIsAdmin(true);
@@ -51,7 +51,7 @@ export function AdminAuth({ isAdmin, setIsAdmin }: AdminAuthProps) {
       } else if (checkRes.status === 401) {
         setError("Invalid credentials.");
       } else {
-        setError("API Error. Are you running 'vercel dev' locally?");
+        setError("API error. Ensure the dev server is running (npm run dev).");
       }
     } catch (err) {
       setError("Network fault connecting to Auth Gateway.");
