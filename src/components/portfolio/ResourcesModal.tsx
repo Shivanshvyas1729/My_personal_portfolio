@@ -2,11 +2,10 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Lock, FileText, ExternalLink, ShieldAlert } from "lucide-react";
+import { Lock, FileText, ExternalLink, ShieldAlert, Loader2 } from "lucide-react";
 import type { Project } from "@/data/portfolioData";
-import { portfolioData } from "@/data/portfolioData";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ResourcesModalProps {
   project: Project;
@@ -17,43 +16,32 @@ export function ResourcesModal({ project, children }: ResourcesModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [remember, setRemember] = useState(false);
+  const { login, hasAccess } = useAuth();
+  const isAuthenticated = hasAccess("secret");
+  const [loading, setLoading] = useState(false);
 
   // Check auth status when modal opens
   useEffect(() => {
     if (isOpen) {
-      const isAuth = sessionStorage.getItem("resources_access") === "true";
-      if (isAuth) {
-        setIsAuthenticated(true);
-      }
       setPassword("");
       setError("");
     }
   }, [isOpen]);
 
-  const handleAuth = (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Validate against the global password
-    if (password === portfolioData.resourcesPassword) {
-      setIsAuthenticated(true);
-      if (remember) {
-        sessionStorage.setItem("resources_access", "true");
-      }
+    setLoading(true);
+    const success = await login("secret", password);
+    if (success) {
       setError("");
     } else {
       setError("Incorrect password. Please try again.");
     }
+    setLoading(false);
   };
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
-    if (!open) {
-      // Reset local state if not remembered in session
-      if (sessionStorage.getItem("resources_access") !== "true") {
-        setIsAuthenticated(false);
-      }
-    }
   };
 
   // Safe checks: If no resources, we shouldn't really render the button.
@@ -123,11 +111,7 @@ export function ResourcesModal({ project, children }: ResourcesModalProps) {
               )}
               
             </div>
-            {sessionStorage.getItem("resources_access") !== "true" && (
-              <p className="text-xs text-muted-foreground text-center italic">
-                Authentication is only valid while this window is open.
-              </p>
-            )}
+
           </div>
         ) : (
           <form onSubmit={handleAuth} className="space-y-4 py-2">
@@ -149,19 +133,8 @@ export function ResourcesModal({ project, children }: ResourcesModalProps) {
               )}
             </div>
             
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="remember" 
-                checked={remember} 
-                onCheckedChange={(checked) => setRemember(checked as boolean)} 
-              />
-              <Label htmlFor="remember" className="text-sm font-normal cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Remember for this session
-              </Label>
-            </div>
-
-            <Button type="submit" className="w-full">
-              Unlock Resources
+            <Button type="submit" disabled={loading} className="w-full mt-4">
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Unlock Resources"}
             </Button>
           </form>
         )}

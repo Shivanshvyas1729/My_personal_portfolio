@@ -6,11 +6,12 @@ import { AddBlogChatbot } from "@/components/blog/AddBlogChatbot";
 import { FilterBar } from "@/components/blog/FilterBar";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { BlogModal } from "@/components/blog/BlogModal";
-import { AdminAuth } from "@/components/blog/AdminAuth";
+
 import { AdminPanel } from "@/components/blog/AdminPanel";
 import rawBlogData from "@/data/blog.yaml?raw";
 import yaml from "yaml";
 import { BookOpen, FileWarning, EyeOff } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export interface BlogPost {
   id: number;
@@ -32,7 +33,8 @@ const POSTS_PER_PAGE = 6;
 
 export default function Blog() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { hasAccess } = useAuth();
+  const isAdmin = hasAccess("admin");
 
   // Filters State
   const [activeCategory, setActiveCategory] = useState("All");
@@ -160,13 +162,12 @@ export default function Blog() {
     setPosts(prev => prev.filter(p => p.id !== deleted.id));
   };
 
+
   return (
     <div className="min-h-screen flex flex-col bg-background selection:bg-primary/20">
       <SEO title="Digital Garden | Blog CMS" description="Thoughts, notes, and technical architectures." />
       <Navbar />
 
-      <AdminAuth isAdmin={isAdmin} setIsAdmin={setIsAdmin} />
-      
       <div className="flex-1 section-padding pt-24 pb-20">
         <div className="container mx-auto max-w-7xl px-4 md:px-8">
           

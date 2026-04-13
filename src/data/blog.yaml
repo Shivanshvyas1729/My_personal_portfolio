@@ -1,3 +1,12 @@
+# =========================================================
+# 📝 BLOG CMS DATA
+# =========================================================
+# This file stores all your blog posts for the portfolio.
+# It is automatically updated when you add new posts via
+# the Admin panel or Antigravity CMS, but you can also edit
+# it manually here.
+# =========================================================
+
 blog:
   - id: 2
     title: Time
@@ -5,6 +14,8 @@ blog:
     category: Thoughts
     link: 'no'
     date: '2026-04-10'
+
+
   - id: 3
     title: NLP NOTES
     slug: nlp-notes
@@ -17,7 +28,7 @@ blog:
     link: ''
     date: '2026-04-11'
     featured: false
-    draft: true
+    draft: false
     resources:
       - label: Git hub
         url: https://github.com/Shivanshvyas1729/MY-Complete-NLP-NoteBook

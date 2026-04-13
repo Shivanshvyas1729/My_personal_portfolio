@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Lock, Unlock, Loader2, Key } from "lucide-react";
-import { API_ROUTES } from "@/lib/apiClient";
+import { Lock, Unlock, Loader2, ShieldCheck, Key } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface AdminAuthProps {
   isAdmin: boolean;
@@ -12,58 +12,36 @@ export function AdminAuth({ isAdmin, setIsAdmin }: AdminAuthProps) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+  const { login, logout, hasAccess } = useAuth();
 
-  // Check existing session on mount
+  // Sync isAdmin with Context state
   useEffect(() => {
-    const session = sessionStorage.getItem("adminAuth");
-    const loginTime = sessionStorage.getItem("adminLoginTime");
-    
-    if (session === "true" && loginTime) {
-      const elapsedMinutes = (Date.now() - parseInt(loginTime)) / (1000 * 60);
-      if (elapsedMinutes > 60) {
-        // Session expired (60 minute timeout)
-        handleLogout();
-      } else {
-        setIsAdmin(true);
-      }
-    }
-  }, [setIsAdmin]);
+    setIsAdmin(hasAccess("admin"));
+  }, [hasAccess, setIsAdmin]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    try {
-      // Ping the save-blog endpoint with null blogData to hit the 401 gate only
-      const checkRes = await fetch(API_ROUTES.saveBlog, {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ password: password.trim(), blogData: null }),
-      });
-
-      if (checkRes.ok || checkRes.status === 400) {
-        sessionStorage.setItem("adminAuth", "true");
-        sessionStorage.setItem("adminLoginTime", Date.now().toString());
-        setIsAdmin(true);
+    // Pass empty string as username so server uses password-only check
+    const success = await login("admin", password, "");
+    if (success) {
+      setSuccess(true);
+      setPassword("");
+      setTimeout(() => {
         setIsOpen(false);
-        setPassword("");
-      } else if (checkRes.status === 401) {
-        setError("Invalid credentials.");
-      } else {
-        setError("API error. Ensure the dev server is running (npm run dev).");
-      }
-    } catch (err) {
-      setError("Network fault connecting to Auth Gateway.");
+        setSuccess(false);
+      }, 1200);
+    } else {
+      setError("Incorrect password. Try again.");
     }
-
     setLoading(false);
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem("adminAuth");
-    sessionStorage.removeItem("adminLoginTime");
-    setIsAdmin(false);
+    logout();
     setIsOpen(false);
   };
 
@@ -72,61 +50,70 @@ export function AdminAuth({ isAdmin, setIsAdmin }: AdminAuthProps) {
       {/* Discreet bottom-left anchor */}
       <div className="fixed bottom-6 left-6 sm:bottom-10 sm:left-10 z-50">
         {isAdmin ? (
-          <button 
+          <button
             onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-destructive text-destructive-foreground text-sm font-medium shadow-lg hover:scale-105 transition-all"
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-destructive/90 text-destructive-foreground text-sm font-medium shadow-lg hover:scale-105 transition-all backdrop-blur-md"
           >
-            <Unlock size={16} /> Admin Logout
+            <Unlock size={14} /> Logout
           </button>
         ) : (
-          <button 
-            onClick={() => setIsOpen(!isOpen)}
-            className={`p-3 rounded-full text-muted-foreground bg-muted/50 border border-border/50 shadow-md transition-all duration-300 ${isOpen ? 'opacity-100 text-primary' : 'opacity-60 hover:opacity-100 hover:text-primary'} backdrop-blur-md`}
-            title="Authenticate Admin"
+          <button
+            onClick={() => { setIsOpen(!isOpen); setError(""); }}
+            className={`p-3 rounded-full border shadow-md transition-all duration-300 backdrop-blur-md
+              ${isOpen
+                ? "opacity-100 text-primary bg-primary/10 border-primary/30"
+                : "opacity-50 hover:opacity-100 text-muted-foreground bg-muted/50 border-border/50 hover:text-primary"
+              }`}
+            title="Global Site Unlock"
           >
-            <Lock size={18} />
+            <Lock size={16} />
           </button>
         )}
       </div>
 
       {/* Login Popup */}
       {isOpen && !isAdmin && (
-        <div className="fixed bottom-20 left-6 sm:bottom-24 sm:left-10 z-[60] w-[280px] p-4 bg-background border border-border/50 rounded-2xl shadow-2xl glass-card animate-in fade-in slide-in-from-bottom-2">
-          <div className="flex items-center gap-2 mb-4 text-foreground font-heading font-medium">
-            <Key size={16} className="text-primary" /> Admin Authentication
+        <div className="fixed bottom-20 left-6 sm:bottom-24 sm:left-10 z-[60] w-[260px] p-4 bg-background border border-border/50 rounded-2xl shadow-2xl glass-card animate-in fade-in slide-in-from-bottom-2">
+          <div className="flex items-center gap-2 mb-1 text-foreground font-heading font-medium text-sm">
+            <Key size={14} className="text-primary" /> Site Unlock
           </div>
-          
-          <form onSubmit={handleLogin} className="space-y-3">
-            <div className="space-y-2">
+          <p className="text-xs text-muted-foreground mb-3">Enter password to unlock Secret Resources & Blog CMS.</p>
+
+          {success ? (
+            <div className="flex items-center justify-center gap-2 py-3 text-green-500 font-medium text-sm animate-in fade-in">
+              <ShieldCheck size={16} /> Access Granted!
+            </div>
+          ) : (
+            <form onSubmit={handleLogin} className="space-y-3">
               <input
                 type="password"
-                placeholder="Enter passphrase..."
+                placeholder="Enter site password..."
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-muted/50 border border-border/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/50"
+                className="w-full bg-muted/50 border border-border/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all"
                 autoFocus
               />
-            </div>
-            
-            {error && <p className="text-xs text-destructive">{error}</p>}
-            
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setIsOpen(false)}
-                className="flex-1 px-3 py-2 rounded-lg text-xs font-medium bg-muted text-muted-foreground hover:bg-muted/80 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={!password || loading}
-                className="flex-1 px-3 py-2 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 flex justify-center items-center"
-              >
-                {loading ? <Loader2 size={14} className="animate-spin" /> : "Unlock"}
-              </button>
-            </div>
-          </form>
+
+              {error && <p className="text-xs text-destructive">{error}</p>}
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(false)}
+                  className="flex-1 px-3 py-2 rounded-lg text-xs font-medium bg-muted text-muted-foreground hover:bg-muted/80 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={!password || loading}
+                  className="flex-1 px-3 py-2 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 flex justify-center items-center gap-1.5"
+                >
+                  {loading ? <Loader2 size={12} className="animate-spin" /> : "Unlock"}
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       )}
     </>

@@ -1,4 +1,5 @@
 import rawData from "./portfolio.yaml?raw";
+import rawProjects from "./projects.yaml?raw";
 import YAML from "yaml";
 
 export interface ProfileImage {
@@ -57,16 +58,26 @@ export interface Project {
   media?: ProjectMedia[];
   howItWorks?: string;
   resources?: { label: string; url: string }[];
-}
-
-export interface EmailJSConfig {
-  serviceId: string;
-  templateId: string;
-  publicKey: string;
+  problem_statement?: string;
+  learning_outcomes?: string[];
+  architecture?: string;
+  objectives?: string[];
+  success_criteria?: string[];
+  data_sources?: string[];
+  target_variable?: string;
+  features?: string[];
+  preprocessing?: string[];
+  modeling?: string[];
+  evaluation_metrics?: string[];
+  validation_strategy?: string;
+  explainability?: string;
+  deployment?: string;
+  risks?: string[];
+  ethics?: string[];
+  open_resources?: { label: string; url: string }[];
 }
 
 export interface PortfolioData {
-  resourcesPassword?: string;
   home?: {
     featuredProjectsCount?: number;
     featuredProjectIds?: number[];
@@ -106,22 +117,32 @@ export interface PortfolioData {
   };
   services: Service[];
   projects: Project[];
-  emailjs: EmailJSConfig;
   resume?: {
     url: string;
   };
 }
 
 let parsedData: Partial<PortfolioData> = {};
+let parsedProjects: { projects: Project[] } = { projects: [] };
 
 try {
   parsedData = YAML.parse(rawData);
 } catch (error) {
   console.error("Failed to parse portfolio.yaml. Ensure the YAML syntax is correct. Using safe fallback.", error);
-  parsedData = { projects: [], skills: { categories: [] }, techStack: { featured: [], all: [] } } as any;
+  parsedData = { skills: { categories: [] }, techStack: { featured: [], all: [] } } as any;
 }
 
-export const portfolioData: PortfolioData = parsedData as PortfolioData;
+try {
+  parsedProjects = YAML.parse(rawProjects);
+} catch (error) {
+  console.error("Failed to parse projects.yaml. Ensure the YAML syntax is correct. Using safe fallback.", error);
+  parsedProjects = { projects: [] };
+}
+
+export const portfolioData: PortfolioData = {
+  ...parsedData,
+  projects: parsedProjects?.projects || []
+} as PortfolioData;
 
 // Sort projects by ID in descending order
 if (portfolioData.projects && Array.isArray(portfolioData.projects)) {

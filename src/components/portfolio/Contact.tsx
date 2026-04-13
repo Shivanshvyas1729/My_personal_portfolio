@@ -5,47 +5,36 @@ import { useState, FormEvent, useRef } from "react";
 import emailjs from "@emailjs/browser";
 
 const Contact = () => {
-  const { personal, emailjs: emailjsConfig } = portfolioData;
+  const { personal } = portfolioData;
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const formRef = useRef<HTMLFormElement>(null);
 
-  const isEmailJSConfigured =
-    emailjsConfig.serviceId !== "YOUR_EMAILJS_SERVICE_ID" &&
-    emailjsConfig.templateId !== "YOUR_EMAILJS_TEMPLATE_ID" &&
-    emailjsConfig.publicKey !== "YOUR_EMAILJS_PUBLIC_KEY" &&
-    emailjsConfig.serviceId &&
-    emailjsConfig.templateId &&
-    emailjsConfig.publicKey;
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
-    if (!isEmailJSConfigured) {
-      // Fallback to mailto
-      const mailto = `mailto:${personal.email}?subject=Portfolio Contact from ${form.name}&body=${encodeURIComponent(form.message)}`;
-      window.open(mailto);
-      return;
-    }
-
     setStatus("sending");
     try {
-      await emailjs.send(
-        emailjsConfig.serviceId,
-        emailjsConfig.templateId,
-        {
-          from_name: form.name,
-          from_email: form.email,
-          message: form.message,
-          to_name: personal.name,
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
         },
-        emailjsConfig.publicKey
-      );
-      setStatus("sent");
-      setForm({ name: "", email: "", message: "" });
-      setTimeout(() => setStatus("idle"), 4000);
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          message: form.message
+        })
+      });
+
+      if (response.ok) {
+        setStatus("sent");
+        setForm({ name: "", email: "", message: "" });
+      } else {
+        setStatus("error");
+      }
     } catch {
       setStatus("error");
+    } finally {
       setTimeout(() => setStatus("idle"), 4000);
     }
   };

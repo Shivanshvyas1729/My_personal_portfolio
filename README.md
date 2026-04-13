@@ -3,7 +3,7 @@
 A production-grade, fully autonomous **React + Vite portfolio** backed by a **headless Git-based CMS** running on both **Vercel** and **Netlify**. Every blog post you write from the admin panel is committed directly to GitHub — no database, no backend server, just serverless functions and YAML files.
 
 ---
-
+bash scripts/should-deploy.sh-> to turn of auto deploy
 ## ✨ Features
 
 | Feature | Description |
