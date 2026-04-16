@@ -59,18 +59,15 @@ personal:
 # region HERO
 hero:
   headline:
-    - "Building Scalable"
-    - "AI Systems"
-    - "That Create"
-    - "Real Impact..."
+    - Building Scalable
+    - AI Systems
+    - That Create
+    - Real Impact....
   description: "I specialize in designing and deploying intelligent systems..."
   ctas:
-  
-    - label: "View Projects" 
-      #do not touch this link
+    - label: View Projects
       link: "#projects"
-    - label: "Contact Me"
-    #do not touch this link
+    - label: Contact Me
       link: "#contact"
 # endregion
 
@@ -127,7 +124,7 @@ skills:
         - "Deep Learning"
         - "NLP"
         - "Computer Vision"
-        
+
         - "Data Analysis"
 
     - title: "Advanced AI"
@@ -140,7 +137,7 @@ skills:
       items:
         - "Docker"
         - "Flask"
-        
+
         - "FastAPI"
         - "Git"
         - "Github"
@@ -161,36 +158,28 @@ techStack:
     - "RAG"
 
   all:
-  - "Python"
-  - "Pandas"
-  - "NumPy"
-  - "Scikit-learn"
-  - "TensorFlow"
-  - "PyTorch"
- 
-  
+    - "Python"
+    - "Pandas"
+    - "NumPy"
+    - "Scikit-learn"
+    - "TensorFlow"
+    - "PyTorch"
 
-  - "LangChain"
-  - "MLflow"
- 
+    - "LangChain"
+    - "MLflow"
 
-  - "FastAPI"
-  - "Streamlit"
+    - "FastAPI"
+    - "Streamlit"
 
-  - "Docker"
-  
+    - "Docker"
 
- 
+    - "MySQL"
+    - "MongoDB"
 
-  - "MySQL"
-  - "MongoDB"
+    - "Git"
+    - "GitHub"
 
-
-  - "Git"
-  - "GitHub"
- 
-
-  - "AWS"
+    - "AWS"
 
 # endregion
 
