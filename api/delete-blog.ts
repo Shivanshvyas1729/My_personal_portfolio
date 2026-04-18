@@ -3,7 +3,7 @@
  * Delegates all logic to src/lib/blog-core.ts
  */
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { coreDeleteBlog } from "../src/lib/blog-core";
+import { coreDeleteBlog } from "../src/lib/blog-core.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST" && req.method !== "DELETE") {
@@ -14,7 +14,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const result = await coreDeleteBlog(body.password, body.postId, body.postSlug);
 
     if (result.headers) {
-      Object.entries(result.headers).forEach(([k, v]) => res.setHeader(k, v));
+      Object.entries(result.headers).forEach(([k, v]) => res.setHeader(k, v as string));
     }
     return res.status(result.status).json(result.body);
   } catch (err) {

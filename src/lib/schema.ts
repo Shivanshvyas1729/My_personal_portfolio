@@ -83,9 +83,27 @@ export const ResumeSchema = z.object({
   url: z.string().url("Must be a valid URL"),
 });
 
+export const GlobalSettingsSchema = z.object({
+  ropeLightColors: z.array(z.string()).min(1).optional(),
+  ropeLightSpeed: z.number().min(0.1).optional(),
+  ropeLightThickness: z.number().min(0.5).optional(),
+  ropeLightGlowIntensity: z.number().min(0).optional(),
+  ropeLightColorLight: z.string().optional(),
+  ropeLightColorDark: z.string().optional(),
+  ropeLightAccentLight: z.string().optional(),
+  ropeLightAccentDark: z.string().optional(),
+  textHoverColors: z.array(z.string()).optional(),
+  textTransitionSpeed: z.string().optional(),
+  textLeaveSpeed: z.string().optional(),
+  textAnimationSpeed: z.string().optional(),
+  textBaseOpacity: z.number().min(0).max(1).optional(),
+  textGlowIntensity: z.number().optional(),
+});
+
 // Used if storing entire portfolio.yaml 
 export const PortfolioSchema = z.object({
   home: HomeSchema.optional(),
+  settings: GlobalSettingsSchema.optional(),
   personal: PersonalSchema.optional(),
   hero: HeroSchema.optional(),
   stats: StatsSchema.optional(),
@@ -143,22 +161,6 @@ export function validateData<T>(schema: z.ZodSchema<T>, data: unknown): { succes
   }
 }
 
-export const GlobalSettingsSchema = z.object({
-  ropeLightColors: z.array(z.string()).min(1).optional(),
-  ropeLightSpeed: z.number().min(0.1).optional(),
-  ropeLightThickness: z.number().min(0.5).optional(),
-  ropeLightGlowIntensity: z.number().min(0).optional(),
-  ropeLightColorLight: z.string().optional(),
-  ropeLightColorDark: z.string().optional(),
-  ropeLightAccentLight: z.string().optional(),
-  ropeLightAccentDark: z.string().optional(),
-  textHoverColors: z.array(z.string()).optional(),
-  textTransitionSpeed: z.string().optional(),
-  textLeaveSpeed: z.string().optional(),
-  textAnimationSpeed: z.string().optional(),
-  textBaseOpacity: z.number().min(0).max(1).optional(),
-  textGlowIntensity: z.number().optional(),
-});
 
 // Global schema map to easily fetch specific section schemas later
 export const SECTION_SCHEMAS: Record<string, z.ZodSchema<any>> = {
