@@ -116,31 +116,45 @@ export const PortfolioSchema = z.object({
   resume: ResumeSchema.optional(),
 });
 
-// ─── PROJECT SCHEMA ───
-
 export const ProjectSchema = z.object({
-  id: z.number().int().positive(),
+  id: z.number().int().positive().optional(),
   title: z.string().min(1, "Title is required"),
-  category: z.array(z.string()),
+  category: z.array(z.string()).optional().default([]),
   description: z.string().min(1, "Description is required"),
-  tech: z.array(z.string()),
-  github: z.string().url().or(z.literal("")),
-  live: z.string().url().or(z.literal("")),
-  featured: z.boolean().default(false),
+  tech: z.array(z.string()).optional().default([]),
+  github: z.string().optional().default(""),
+  live: z.string().optional().default(""),
+  featured: z.boolean().optional().default(false),
   impact: z.string().optional(),
   
-  // Custom schema simplified (URLs only, no complex media)
+  // Media: fully optional, type and url both optional strings
   media: z.array(z.object({
-    type: z.enum(["image", "video"]),
-    url: z.string().url(),
+    type: z.string().optional(),
+    url: z.string().optional(),
     caption: z.string().optional()
   })).optional(),
   
-  // Specific data science fields
+  // Data science / extended fields - all optional
   problem_statement: z.string().optional(),
   learning_outcomes: z.array(z.string()).optional(),
   architecture: z.string().optional(),
-  architectureImage: z.string().url().or(z.literal("")).optional(), // allow empty string or valid URL
+  architectureImage: z.string().optional(),
+  resources: z.array(z.object({ label: z.string().optional(), url: z.string().optional() })).optional(),
+  howItWorks: z.string().optional(),
+  objectives: z.array(z.string()).optional(),
+  success_criteria: z.array(z.string()).optional(),
+  data_sources: z.array(z.string()).optional(),
+  target_variable: z.string().optional(),
+  features: z.array(z.string()).optional(),
+  preprocessing: z.array(z.string()).optional(),
+  modeling: z.array(z.string()).optional(),
+  evaluation_metrics: z.array(z.string()).optional(),
+  validation_strategy: z.string().optional(),
+  explainability: z.string().optional(),
+  deployment: z.string().optional(),
+  risks: z.array(z.string()).optional(),
+  ethics: z.array(z.string()).optional(),
+  open_resources: z.array(z.object({ label: z.string().optional(), url: z.string().optional() })).optional(),
 }).passthrough();
 
 export const ProjectsArraySchema = z.array(ProjectSchema);
