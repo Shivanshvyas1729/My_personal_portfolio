@@ -1,5 +1,13 @@
 # region PROJECTS
 projects:
+  - id: 5
+    title: hi
+    category: []
+    description: hi
+    tech: []
+    github: ""
+    live: ""
+    featured: false
   - id: 4
     title: ☀️ Solar Panel Defect Detection System
     category:
