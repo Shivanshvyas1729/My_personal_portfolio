@@ -8,7 +8,7 @@ import { useCMSState } from '@/context/CMSContext';
 interface ProjectsAdminProps {
   projects: Project[];
   onChange: (projects: Project[]) => void;
-  onSave: (data?: Project[]) => void;
+  onSave: (data?: Project[]) => Promise<{ success: boolean; error?: string } | undefined>;
   isLoading: boolean;
   mode: "local" | "github" | "unknown";
 }
@@ -18,6 +18,7 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
   const [editingId, setEditingId] = useState<number | null>(null);
   const [addingNew, setAddingNew] = useState(false);
   const [tempProject, setTempProject] = useState<Partial<Project>>({});
+  const [saveError, setSaveError] = useState("");
 
   const hasPendingChanges = JSON.stringify(projects) !== JSON.stringify(liveData.projects);
 
@@ -92,14 +93,25 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
             <Plus size={14} /> New Project
           </button>
           <button
-            onClick={onSave}
+            onClick={async () => {
+              setSaveError("");
+              const result = await onSave();
+              if (result && !result.success) {
+                setSaveError(result.error || "Save failed. Check the Logs tab for details.");
+              }
+            }}
             disabled={isLoading || !hasPendingChanges}
-            className="px-4 py-1.5 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors rounded-lg text-sm font-medium disabled:opacity-50"
+            className="px-4 py-1.5 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-1.5"
           >
-            {isLoading ? "Saving..." : (mode === 'local' ? "Save to Local" : "Save to GitHub")}
+            {isLoading ? <><span className="animate-spin inline-block w-3 h-3 border border-white/30 border-t-white rounded-full" /> Saving...</> : (mode === 'local' ? "Save to Local" : "Save to GitHub")}
           </button>
         </div>
       </div>
+      {saveError && (
+        <div className="mx-4 mb-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-xs font-medium">
+          ⚠️ {saveError}
+        </div>
+      )}
 
       {/* Grid of Projects */}
       <div className="flex-1 overflow-y-auto px-4 pb-12">

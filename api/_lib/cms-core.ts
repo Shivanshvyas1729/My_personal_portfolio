@@ -11,10 +11,12 @@ export const RATE_LIMIT_SECONDS = 30;
 // Path Security & Normalization
 const BASE_DATA_DIR = path.normalize(path.resolve(process.cwd(), "src/data"));
 
-const logCms = (msg: string, data?: any) => {
-  if (process.env.NODE_ENV === 'development') {
-    const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
-    console.log(`\x1b[36m[CMS ${timestamp}]\x1b[0m ${msg}`, data || '');
+const logCms = (msg: string, level: 'info' | 'error' = 'info') => {
+  const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
+  if (level === 'error') {
+    console.error(`[CMS ${timestamp}] ERROR: ${msg}`);
+  } else {
+    console.log(`[CMS ${timestamp}] ${msg}`);
   }
 };
 
@@ -57,6 +59,7 @@ const CMS_MODE = process.env.CMS_MODE || "local";
 const dataDirExists = fs.existsSync(BASE_DATA_DIR);
 const isDeployed = process.env.NODE_ENV === "production" || !!process.env.VERCEL || !!process.env.NETLIFY;
 const useLocalMode = !isDeployed && ((CMS_MODE === "local" && dataDirExists) || (IS_DEV && dataDirExists && CMS_MODE !== "github"));
+console.log(`[CMS INIT] NODE_ENV=${process.env.NODE_ENV} VERCEL=${process.env.VERCEL} CMS_MODE=${CMS_MODE} isDeployed=${isDeployed} useLocalMode=${useLocalMode}`);
 
 export function getOctokit() {
   const token = process.env.GITHUB_TOKEN;
@@ -136,14 +139,16 @@ export async function coreUpdateYamlSection(
     if (useLocalMode) {
       try {
         absolutePath = validateLocalPath(filePath);
-        logCms(`Backend: Local Mode active. Writing to: ${absolutePath} (Role: ${role})`);
+        logCms(`LOCAL MODE: Writing to ${absolutePath} (Role: ${role})`);
         rawContent = fs.readFileSync(absolutePath, "utf-8");
       } catch (e: any) {
+        logCms(`Local path error: ${e.message}`, 'error');
         return { success: false, error: `Path Error: ${e.message}`, code: 403, mode: "local" };
       }
     } else {
       const octokit = getOctokit();
-      logCms(`Backend: GitHub Mode active. File: ${filePath} (Role: ${role})`);
+      const token = process.env.GITHUB_TOKEN;
+      logCms(`GITHUB MODE: Saving ${filePath} | token present: ${!!token} | role: ${role}`);
       const fetched = await fetchFromGitHub(octokit, filePath);
       sha = fetched.sha;
       rawContent = fetched.content;
@@ -185,18 +190,24 @@ export async function coreUpdateYamlSection(
         throw e;
       }
     } else {
-      logCms(`Committing to GitHub: ${filePath} (Section: ${sectionKey})`);
+      logCms(`Committing to GitHub: ${filePath} section=${sectionKey}`);
       const octokit = getOctokit();
-      const result = await octokit.repos.createOrUpdateFileContents({
-        owner: OWNER,
-        repo: REPO,
-        path: filePath,
-        message: `feat: update ${sectionKey} content [skip ci]`,
-        content: Buffer.from(updatedContent, "utf-8").toString("base64"),
-        sha,
-        branch: "main",
-      });
-      sha = (result.data as any).content.sha;
+      try {
+        const result = await octokit.repos.createOrUpdateFileContents({
+          owner: OWNER,
+          repo: REPO,
+          path: filePath,
+          message: `feat: update ${sectionKey} content [skip ci]`,
+          content: Buffer.from(updatedContent, "utf-8").toString("base64"),
+          sha,
+          branch: "main",
+        });
+        sha = (result.data as any).content.sha;
+        logCms(`GitHub commit successful. New SHA: ${sha}`);
+      } catch (ghErr: any) {
+        logCms(`GitHub API commit failed: ${ghErr.message}`, 'error');
+        throw ghErr;
+      }
     }
 
     return { 
@@ -222,12 +233,10 @@ export async function coreGetLatestData(filePath: string): Promise<CmsApiResult>
       const absolutePath = validateLocalPath(filePath);
       rawContent = fs.readFileSync(absolutePath, "utf-8");
     } else {
-      // PRO TIP: Use Raw GitHub URL with timestamp to bust proxy cache for "Instant" updates
-      const RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/main/${filePath}?t=${Date.now()}`;
-      logCms(`Fetching absolute latest from GitHub Raw: ${filePath}`);
-      const res = await fetch(RAW_URL);
-      if (!res.ok) throw new Error(`GitHub Raw fetch failed: ${res.statusText}`);
-      rawContent = await res.text();
+      const octokit = getOctokit();
+      logCms(`Fetching absolute latest from GitHub API: ${filePath}`);
+      const fetched = await fetchFromGitHub(octokit, filePath);
+      rawContent = fetched.content;
     }
 
     const data = yaml.parse(rawContent);
