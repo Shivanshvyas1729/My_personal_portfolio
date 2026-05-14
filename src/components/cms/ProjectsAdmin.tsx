@@ -172,8 +172,14 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
                    Apply & Save to Local
                  </button>
                ) : (
-                 <button onClick={saveEdit} className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg">
-                   Apply Changes
+                 <button 
+                   onClick={async () => {
+                     saveEdit();
+                     setTimeout(() => onSave(), 0);
+                   }} 
+                   className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg"
+                 >
+                   Apply & Sync to GitHub
                  </button>
                )}
              </div>

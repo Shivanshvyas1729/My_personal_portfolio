@@ -193,10 +193,10 @@ const TechSphere = () => {
 
         {/* Adjusted Canvas Height and Spacing here */}
         <AnimatedSection>
-          <div className="relative w-full h-[300px] sm:h-[350px] md:h-[400px] max-w-[280px] sm:max-w-md md:max-w-lg mx-auto mb-10 md:mb-16">
+          <div className="relative w-full h-[350px] sm:h-[350px] md:h-[400px] max-w-full px-2 sm:px-0 sm:max-w-md md:max-w-lg mx-auto mb-10 md:mb-16">
             <div className="absolute inset-0 bg-primary/20 blur-[80px] rounded-full z-0 pointer-events-none" />
             <div className="relative z-10 w-full h-full">
-              <Canvas camera={{ position: [0, 0, 7.5], fov: 45 }}>
+              <Canvas camera={{ position: [0, 0, 8.5], fov: 45 }}>
                 <Suspense fallback={null}>
                   <Scene />
                 </Suspense>

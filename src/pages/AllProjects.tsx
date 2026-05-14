@@ -44,7 +44,7 @@ const AllProjects = () => {
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
                         selectedCategory === cat 
                           ? "bg-primary-foreground/20 text-primary-foreground" 
-                          : "bg-secondary text-muted-foreground"
+                          : "bg-secondary text-secondary-foreground"
                       }`}>
                         {counts[cat] || 0}
                       </span>
@@ -60,7 +60,7 @@ const AllProjects = () => {
                 <h2 className="text-xl font-heading font-semibold text-foreground">
                   {selectedCategory === "All" ? "All Projects" : `${selectedCategory} Projects`}
                 </h2>
-                <span className="text-sm font-medium text-muted-foreground bg-secondary px-3 py-1 rounded-full border border-border/50">
+                <span className="text-sm font-medium text-secondary-foreground bg-secondary px-3 py-1 rounded-full border border-border/50">
                   Showing {filteredProjects.length} result{filteredProjects.length !== 1 ? 's' : ''}
                 </span>
               </div>

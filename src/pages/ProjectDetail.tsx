@@ -36,13 +36,13 @@ const ProjectDetail = () => {
       />
       <Navbar />
       <div className="section-padding pt-28">
-        <div className="container mx-auto max-w-5xl">
+        <div className="w-full max-w-[1600px] mx-auto px-6 md:px-12 lg:px-16 xl:px-24">
           <Link to="/projects" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors">
             <ArrowLeft size={16} /> Back to Projects
           </Link>
 
           {/* Top: Title + Media side by side */}
-          <div className={`grid gap-8 mb-8 ${hasMedia ? "md:grid-cols-[1fr,1fr]" : ""}`}>
+          <div className={`grid gap-8 lg:gap-12 mb-12 ${hasMedia ? "lg:grid-cols-[1.1fr,1fr]" : ""}`}>
             {/* Left: Project Info */}
             <div>
               <div className="flex flex-wrap gap-2">
@@ -95,16 +95,16 @@ const ProjectDetail = () => {
               <div className="space-y-3">
                 {/* Active media display */}
                 <div className="glass-card rounded-xl overflow-hidden aspect-video">
-                  {project.media![activeMedia].type === "image" ? (
-                    <img
-                      src={project.media![activeMedia].url}
-                      alt={project.media![activeMedia].caption || project.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
+                  {project.media![activeMedia].type === "video" || (!project.media![activeMedia].type && project.media![activeMedia].url?.match(/\.(mp4|webm|ogg)$/i)) ? (
                     <video
                       src={project.media![activeMedia].url}
                       controls
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img
+                      src={project.media![activeMedia].url}
+                      alt={project.media![activeMedia].caption || project.title}
                       className="w-full h-full object-cover"
                     />
                   )}
@@ -123,12 +123,12 @@ const ProjectDetail = () => {
                           i === activeMedia ? "border-primary" : "border-border/30 opacity-60 hover:opacity-100"
                         }`}
                       >
-                        {m.type === "image" ? (
-                          <img src={m.url} alt="" className="w-full h-full object-cover" />
-                        ) : (
+                        {m.type === "video" || (!m.type && m.url?.match(/\.(mp4|webm|ogg)$/i)) ? (
                           <div className="w-full h-full bg-muted flex items-center justify-center">
                             <Play size={14} className="text-primary" />
                           </div>
+                        ) : (
+                          <img src={m.url} alt="" className="w-full h-full object-cover" />
                         )}
                       </button>
                     ))}

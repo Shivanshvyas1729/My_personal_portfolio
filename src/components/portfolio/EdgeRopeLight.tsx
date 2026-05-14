@@ -29,10 +29,16 @@ const EdgeRopeLight = () => {
       ? settings.ropeLightColors
       : [defaultColor];
 
+    const sharpColors = resolvedTheme === 'dark'
+      ? (settings?.sharpLightColorsDark && settings.sharpLightColorsDark.length > 0 ? settings.sharpLightColorsDark : colors)
+      : (settings?.sharpLightColorsLight && settings.sharpLightColorsLight.length > 0 ? settings.sharpLightColorsLight : colors);
+
     return {
       colors,
+      sharpColors,
       speed: settings?.ropeLightSpeed || 15,
       thickness: settings?.ropeLightThickness || 3,
+      sharpThickness: settings?.sharpLightThickness || settings?.ropeLightThickness || 3,
       glow: settings?.ropeLightGlowIntensity || 5,
     };
   }, [theme, settings]);
@@ -47,8 +53,22 @@ const EdgeRopeLight = () => {
     return `linear-gradient(to bottom, transparent, ${mainColors}, transparent)`;
   }, [config.colors]);
 
+  const sharpGradientString = useMemo(() => {
+    const mainColors = config.sharpColors.map(c => c).join(', ');
+    return `linear-gradient(to right, transparent, ${mainColors}, transparent)`;
+  }, [config.sharpColors]);
+
+  const verticalSharpGradientString = useMemo(() => {
+    const mainColors = config.sharpColors.map(c => c).join(', ');
+    return `linear-gradient(to bottom, transparent, ${mainColors}, transparent)`;
+  }, [config.sharpColors]);
+
   return (
-    <div className="fixed inset-0 w-full h-full z-[9999] pointer-events-none select-none overflow-hidden" aria-hidden="true">
+    <div 
+      className="fixed top-0 left-0 w-full h-[100vh] z-[9999] pointer-events-none select-none overflow-hidden" 
+      style={{ height: '100lvh' }}
+      aria-hidden="true"
+    >
       
       {/* ── BASE BLUR WASH ── */}
       <div 
@@ -67,44 +87,44 @@ const EdgeRopeLight = () => {
         <div 
           className="absolute top-0 left-0 w-full animate-ocean-h"
           style={{ 
-            height: `${config.thickness}px`, 
-            background: gradientString, 
+            height: `${config.sharpThickness}px`, 
+            background: sharpGradientString, 
             backgroundSize: '250% 100%',
             animationDuration: `${config.speed}s`,
-            boxShadow: `0 0 ${config.glow * 2}px ${config.colors[0]}`
+            boxShadow: `0 0 ${config.glow * 2}px ${config.sharpColors[0]}`
           }}
         />
         {/* Bottom */}
         <div 
           className="absolute bottom-0 left-0 w-full animate-ocean-h-rev"
           style={{ 
-            height: `${config.thickness}px`, 
-            background: gradientString, 
+            height: `${config.sharpThickness}px`, 
+            background: sharpGradientString, 
             backgroundSize: '250% 100%',
             animationDuration: `${config.speed * 1.1}s`,
-            boxShadow: `0 0 ${config.glow * 2}px ${config.colors[config.colors.length - 1]}`
+            boxShadow: `0 0 ${config.glow * 2}px ${config.sharpColors[config.sharpColors.length - 1]}`
           }}
         />
         {/* Left */}
         <div 
           className="absolute top-0 left-0 h-full animate-ocean-v-rev"
           style={{ 
-            width: `${config.thickness}px`, 
-            background: verticalGradientString, 
+            width: `${config.sharpThickness}px`, 
+            background: verticalSharpGradientString, 
             backgroundSize: '100% 250%',
             animationDuration: `${config.speed * 1.3}s`,
-            boxShadow: `0 0 ${config.glow * 2}px ${config.colors[0]}`
+            boxShadow: `0 0 ${config.glow * 2}px ${config.sharpColors[0]}`
           }}
         />
         {/* Right */}
         <div 
           className="absolute top-0 right-0 h-full animate-ocean-v"
           style={{ 
-            width: `${config.thickness}px`, 
-            background: verticalGradientString, 
+            width: `${config.sharpThickness}px`, 
+            background: verticalSharpGradientString, 
             backgroundSize: '100% 250%',
             animationDuration: `${config.speed * 1.2}s`,
-            boxShadow: `0 0 ${config.glow * 2}px ${config.colors[config.colors.length - 1]}`
+            boxShadow: `0 0 ${config.glow * 2}px ${config.sharpColors[config.sharpColors.length - 1]}`
           }}
         />
       </div>

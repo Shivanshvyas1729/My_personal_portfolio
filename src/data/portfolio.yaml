@@ -42,6 +42,36 @@ home:
 # 🌟 4. Soft Premium Gold (muted, classy)
 
 # Less neon, more “premium UI” look.
+# settings:
+  ropeLightColors:
+    - "#facc15" # warm gold
+    - "#f59e0b" # amber glow
+    - "#eab308" # rich yellow
+    - "#22d3ee" # cyan pop
+    - "#818cf8" # soft indigo
+    - "#c084fc" # violet accent
+
+  sharpLightColorsDark:
+  - "#fef9c3" # soft gold (main glow)
+  - "#fde047" # brighter highlight
+  - "#facc15" # controlled gold pop
+  - "#93c5fd" # soft blue (matches heading)
+  - "#67e8f9" # cyan glow
+  - "#ffffff" # clean highlight
+
+  sharpLightThickness: 2
+  ropeLightSpeed: 10
+  ropeLightThickness: 2
+  ropeLightGlowIntensity: 700
+
+  # Global Text Hover Interaction
+  textHoverColors: ["#22d3ee", "#fbbf24", "#6366f1", "#8b5cf6"]
+  textTransitionSpeed: "0.8s"
+  textAnimationSpeed: "4s"
+  textGlowIntensity: 1.3
+# endregion
+
+# Less neon, more “premium UI” look.
 settings:
   ropeLightColors: ["#eab308", "#67e8f9", "#6366f1", "#a855f7"]
   ropeLightSpeed: 10
@@ -57,7 +87,6 @@ settings:
   textAnimationSpeed: "4s"
   textGlowIntensity: 1.3
 # endregion
-
 # region PERSONAL
 personal:
   name: "Shivansh Vyas"

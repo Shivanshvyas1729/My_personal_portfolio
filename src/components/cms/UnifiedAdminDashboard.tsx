@@ -72,7 +72,7 @@ export const UnifiedAdminDashboard = () => {
   const panelRef = useRef<HTMLDivElement>(null);
   const geom = useRef({ x: 0, y: 0, w: dimensions.w, h: dimensions.h });
   const drag = useRef({ active: false, sx: 0, sy: 0, ox: 0, oy: 0 });
-  const resizeRef = useRef({ active: false, startW: 0, startH: 0, startX: 0, startY: 0 });
+  const resizeRef = useRef({ active: false, startW: 0, startH: 0, startX: 0, startY: 0, edge: 'corner' });
 
   const applyGeom = useCallback(() => {
     const el = panelRef.current;
@@ -121,7 +121,7 @@ export const UnifiedAdminDashboard = () => {
     setIsInteracting(false);
   };
 
-  const onResizeStart = (e: React.PointerEvent) => {
+  const startResize = (e: React.PointerEvent, edge: string) => {
     e.stopPropagation();
     e.currentTarget.setPointerCapture(e.pointerId);
     resizeRef.current = {
@@ -129,7 +129,8 @@ export const UnifiedAdminDashboard = () => {
       startW: geom.current.w,
       startH: geom.current.h,
       startX: e.clientX,
-      startY: e.clientY
+      startY: e.clientY,
+      edge
     };
     setIsInteracting(true);
   };
@@ -138,8 +139,13 @@ export const UnifiedAdminDashboard = () => {
     if (!resizeRef.current.active) return;
     const dx = e.clientX - resizeRef.current.startX;
     const dy = e.clientY - resizeRef.current.startY;
-    geom.current.w = Math.max(500, resizeRef.current.startW + dx);
-    geom.current.h = Math.max(400, resizeRef.current.startH + dy);
+    
+    if (resizeRef.current.edge === 'right' || resizeRef.current.edge === 'corner') {
+      geom.current.w = Math.max(500, resizeRef.current.startW + dx);
+    }
+    if (resizeRef.current.edge === 'bottom' || resizeRef.current.edge === 'corner') {
+      geom.current.h = Math.max(400, resizeRef.current.startH + dy);
+    }
     applyGeom();
   };
 
@@ -540,14 +546,36 @@ export const UnifiedAdminDashboard = () => {
       )}
 
       {!isMaximized && !isMinimized && (
-        <div 
-          onPointerDown={onResizeStart}
-          onPointerMove={onResizeMove}
-          onPointerUp={onResizeEnd}
-          className="absolute bottom-0 right-0 w-6 h-6 cursor-nwse-resize z-[100] flex items-end justify-end p-1 group"
-        >
-          <div className="w-1.5 h-1.5 bg-primary/40 rounded-full group-hover:bg-primary" />
-        </div>
+        <>
+          {/* Right Edge Resizer */}
+          <div 
+            onPointerDown={(e) => startResize(e, 'right')}
+            onPointerMove={onResizeMove}
+            onPointerUp={onResizeEnd}
+            className="absolute top-0 bottom-6 right-0 w-4 cursor-ew-resize z-[99]"
+          />
+          
+          {/* Bottom Edge Resizer */}
+          <div 
+            onPointerDown={(e) => startResize(e, 'bottom')}
+            onPointerMove={onResizeMove}
+            onPointerUp={onResizeEnd}
+            className="absolute bottom-0 left-0 right-6 h-4 cursor-ns-resize z-[99]"
+          />
+
+          {/* Corner Resizer (Much more visible) */}
+          <div 
+            onPointerDown={(e) => startResize(e, 'corner')}
+            onPointerMove={onResizeMove}
+            onPointerUp={onResizeEnd}
+            className="absolute bottom-0 right-0 w-10 h-10 cursor-nwse-resize z-[100] flex items-end justify-end p-2 group"
+          >
+             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary/50 group-hover:text-primary transition-colors">
+               <polyline points="21 15 21 21 15 21"></polyline>
+               <line x1="21" y1="21" x2="15" y2="15"></line>
+             </svg>
+          </div>
+        </>
       )}
     </div>
   );

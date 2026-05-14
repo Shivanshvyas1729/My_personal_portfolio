@@ -55,7 +55,8 @@ const CMS_MODE = process.env.CMS_MODE || "local";
  * Determine if we should use Local Filesystem or GitHub API.
  */
 const dataDirExists = fs.existsSync(BASE_DATA_DIR);
-const useLocalMode = (CMS_MODE === "local" && dataDirExists) || (IS_DEV && dataDirExists && CMS_MODE !== "github");
+const isDeployed = !!process.env.VERCEL || !!process.env.NETLIFY;
+const useLocalMode = !isDeployed && ((CMS_MODE === "local" && dataDirExists) || (IS_DEV && dataDirExists && CMS_MODE !== "github"));
 
 export function getOctokit() {
   const token = process.env.GITHUB_TOKEN;

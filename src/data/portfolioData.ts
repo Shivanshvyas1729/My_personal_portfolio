@@ -79,6 +79,10 @@ export interface Project {
 
 export interface Settings {
   ropeLightColors?: string[];
+  sharpLightColorsDark?: string[];
+  sharpLightColorsLight?: string[];
+  sharpLightThickness?: number;
+  sharpLightColors?: string[];
   ropeLightSpeed?: number;
   ropeLightThickness?: number;
   ropeLightGlowIntensity?: number;
