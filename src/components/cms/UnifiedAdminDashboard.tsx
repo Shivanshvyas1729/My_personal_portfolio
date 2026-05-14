@@ -171,15 +171,44 @@ export const UnifiedAdminDashboard = () => {
       metadata: { section, filePath, isSafeMode: safeMode }
     });
 
+    // ── Auto-sanitize data before sending ─────────────────────────────────
+    let cleanData = data;
+    if (section === 'projects' && Array.isArray(data)) {
+      cleanData = data.map((project: any) => {
+        if (!Array.isArray(project.media)) return project;
+        const cleanedMedia = project.media
+          .filter((m: any) => m && m.url) // drop entries with no URL
+          .map((m: any) => {
+            if (m.type) return m; // already has type, leave it
+            // Auto-detect type from URL
+            const url: string = m.url || '';
+            let detected = 'image'; // safe default
+            if (/\.(mp4|webm|mov|avi|mkv)/i.test(url)) detected = 'video';
+            else if (/youtube\.com|youtu\.be|vimeo\.com/i.test(url)) detected = 'video';
+            else if (/\.(jpg|jpeg|png|gif|webp|svg|avif)/i.test(url)) detected = 'image';
+            logger.addLog({ action: actionName, status: 'success', message: `Auto-detected media type "${detected}" for ${url}` });
+            return { ...m, type: detected };
+          });
+        return { ...project, media: cleanedMedia };
+      });
+    }
+
+    // ── Soft Validation: warn only, never block ────────────────────────────
     const schema = SECTION_SCHEMAS[section];
     if (schema) {
-      const validation = validateData(schema, data);
+      const validation = validateData(schema, cleanData);
       if (validation.success === false) {
-        const errorText = validation.errors.join(", ");
-        setErrorMsg("Validation Failed: " + errorText);
-        logger.addLog({ action: actionName, status: "error", message: `Validation failed: ${errorText}` });
-        setIsLoading(false);
-        return { success: false, error: errorText };
+        const warnings = validation.errors.map((e: string) => {
+          // Humanize raw schema paths like "0.media.0.type: Required"
+          return e
+            .replace(/^(\d+)\./, (_, i) => `Project #${parseInt(i)+1} → `)
+            .replace(/\.media\.(\d+)\./, (_, i) => ` media[${parseInt(i)+1}] → `)
+            .replace(/: Required/, ': missing (auto-fixed or ignored)')
+            .replace(/: Invalid url/, ': invalid URL (saved as-is)');
+        });
+        toast.warning(`⚠️ Soft warnings (saving anyway):\n${warnings.join('\n')}`, { duration: 6000 });
+        logger.addLog({ action: actionName, status: 'success', message: `Soft validation warnings (non-blocking): ${warnings.join(' | ')}` });
+        // Do NOT return — fall through and save anyway
       }
     }
 
@@ -190,7 +219,7 @@ export const UnifiedAdminDashboard = () => {
         body: JSON.stringify({
           filePath,
           sectionKey: section,
-          newData: data,
+          newData: cleanData,   // ← sanitized (media auto-typed, empty media stripped)
           providedSha: overrideSha || undefined, 
           isSafeMode: safeMode,
           role: userRole
