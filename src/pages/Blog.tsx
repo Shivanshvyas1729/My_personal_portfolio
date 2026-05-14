@@ -8,6 +8,7 @@ import { BlogCard } from "@/components/blog/BlogCard";
 import { BlogModal } from "@/components/blog/BlogModal";
 
 import { AdminPanel } from "@/components/blog/AdminPanel";
+// @ts-ignore
 import rawBlogData from "@/data/blog.yaml?raw";
 import yaml from "yaml";
 import { BookOpen, FileWarning, EyeOff } from "lucide-react";
