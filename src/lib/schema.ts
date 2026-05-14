@@ -127,9 +127,9 @@ export const ProjectSchema = z.object({
   featured: z.boolean().optional().default(false),
   impact: z.string().optional(),
   
-  // Media: fully optional, type and url both optional strings
+  // Media: type is a dropdown chooser, url and caption are optional
   media: z.array(z.object({
-    type: z.string().optional(),
+    type: z.enum(["image", "video"]).default("image"),
     url: z.string().optional(),
     caption: z.string().optional()
   })).optional(),

@@ -1,31 +1,44 @@
 import React from 'react';
 import { z } from 'zod';
-import { Plus, Trash2, Image as ImageIcon } from 'lucide-react';
+import { Plus, Trash2, Image as ImageIcon, Video } from 'lucide-react';
 
-// A minimal fallback error-boundary for image preview
-const ImagePreview = ({ url }: { url: string }) => {
+// ─── Enum Option Icons ────────────────────────────────────────────────────────
+const ENUM_ICONS: Record<string, string> = {
+  image: '🖼️',
+  video: '🎬',
+  iframe: '🌐',
+  pdf: '📄',
+};
+
+// ─── Media Preview ────────────────────────────────────────────────────────────
+const MediaPreview = ({ url, type }: { url: string; type?: string }) => {
+  if (!url) return null;
+  const isVideo = type === 'video' || /\.(mp4|webm|mov)/i.test(url) || /youtube|vimeo/i.test(url);
   return (
-    <div className="mt-2 w-full h-32 rounded-lg bg-muted/30 border border-border/50 flex flex-col items-center justify-center overflow-hidden relative">
-      {url ? (
-        <img 
-          src={url} 
-          alt="Preview" 
+    <div className="mt-2 w-full h-28 rounded-lg bg-muted/30 border border-border/50 overflow-hidden relative">
+      {isVideo ? (
+        <div className="flex flex-col items-center justify-center h-full text-muted-foreground/60 gap-1">
+          <Video size={28} />
+          <span className="text-[10px]">Video URL set</span>
+          <a href={url} target="_blank" rel="noreferrer" className="text-[10px] text-primary hover:underline truncate max-w-[90%]">{url}</a>
+        </div>
+      ) : (
+        <img
+          src={url}
+          alt="Preview"
           className="w-full h-full object-cover"
           onError={(e) => {
             e.currentTarget.style.display = 'none';
-            e.currentTarget.parentElement?.classList.add('broken-image');
+            (e.currentTarget.nextElementSibling as HTMLElement)?.style.setProperty('display', 'flex');
           }}
         />
-      ) : (
-        <div className="flex flex-col items-center text-muted-foreground/50">
-          <ImageIcon size={24} className="mb-1" />
-          <span className="text-xs">No image provided</span>
+      )}
+      {!isVideo && (
+        <div className="absolute inset-0 hidden flex-col items-center justify-center bg-muted text-muted-foreground/50">
+          <ImageIcon size={22} className="mb-1" />
+          <span className="text-[10px]">Image failed to load</span>
         </div>
       )}
-      <div className="broken-image-fallback absolute inset-0 hidden items-center justify-center bg-muted flex-col text-muted-foreground/50">
-        <ImageIcon size={24} className="mb-1" />
-        <span className="text-xs">Failed to load image</span>
-      </div>
     </div>
   );
 };
@@ -35,59 +48,64 @@ const formatLabel = (key: string) => {
   return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
 };
 
+// ─── Fully unwrap nested Zod types ───────────────────────────────────────────
+function unwrapSchema(schema: z.ZodTypeAny): z.ZodTypeAny {
+  let s = schema;
+  while (
+    s instanceof z.ZodOptional ||
+    s instanceof z.ZodDefault ||
+    s instanceof z.ZodNullable
+  ) {
+    s = s._def.innerType;
+  }
+  return s;
+}
+
 interface DynamicFormProps {
   schema: z.ZodTypeAny;
   data: any;
   onChange: (data: any) => void;
   path?: string[];
+  parentData?: any;  // parent object so media url can read sibling 'type'
 }
 
-export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, data, onChange, path = [] }) => {
-  const unwrappedSchema = schema instanceof z.ZodOptional || schema instanceof z.ZodDefault 
-    ? schema._def.innerType 
-    : schema;
+export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, data, onChange, path = [], parentData }) => {
+  const unwrapped = unwrapSchema(schema);
 
-  // Render Object
-  if (unwrappedSchema instanceof z.ZodObject) {
-    const shape = unwrappedSchema.shape;
+  // ── Object ──────────────────────────────────────────────────────────────────
+  if (unwrapped instanceof z.ZodObject) {
+    const shape = unwrapped.shape;
     const currentData = data || {};
-
     return (
       <div className={`space-y-4 ${path.length > 0 ? "pl-4 border-l-2 border-border/40 mt-2" : ""}`}>
-        {Object.keys(shape).map(key => {
-          return (
-            <div key={key} className="space-y-1.5">
-              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block opacity-70">
-                {formatLabel(key)}
-              </label>
-              <DynamicForm
-                schema={shape[key]}
-                data={currentData[key]}
-                path={[...path, key]}
-                onChange={(newVal) => onChange({ ...currentData, [key]: newVal })}
-              />
-            </div>
-          );
-        })}
+        {Object.keys(shape).map(key => (
+          <div key={key} className="space-y-1.5">
+            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block opacity-70">
+              {formatLabel(key)}
+            </label>
+            <DynamicForm
+              schema={shape[key]}
+              data={currentData[key]}
+              path={[...path, key]}
+              parentData={currentData}
+              onChange={(newVal) => onChange({ ...currentData, [key]: newVal })}
+            />
+          </div>
+        ))}
       </div>
     );
   }
 
-  // Render Array
-  if (unwrappedSchema instanceof z.ZodArray) {
-    const itemSchema = unwrappedSchema.element;
+  // ── Array ───────────────────────────────────────────────────────────────────
+  if (unwrapped instanceof z.ZodArray) {
+    const itemSchema = unwrapped.element;
     const currentArray = Array.isArray(data) ? data : [];
-
     return (
       <div className="space-y-3">
         {currentArray.map((item, index) => (
           <div key={index} className="relative p-4 rounded-xl border border-border/50 bg-muted/10 group">
-            <button 
-              onClick={() => {
-                const newArr = [...currentArray];
-                newArr.splice(index, 1);
-                onChange(newArr);
-              }}
+            <button
+              onClick={() => { const a = [...currentArray]; a.splice(index, 1); onChange(a); }}
               className="absolute top-2 right-2 text-muted-foreground hover:text-destructive p-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
               title="Remove Item"
             >
@@ -98,21 +116,19 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
               schema={itemSchema}
               data={item}
               path={[...path, String(index)]}
-              onChange={(newVal) => {
-                const newArr = [...currentArray];
-                newArr[index] = newVal;
-                onChange(newArr);
-              }}
+              onChange={(newVal) => { const a = [...currentArray]; a[index] = newVal; onChange(a); }}
             />
           </div>
         ))}
         <button
           onClick={() => {
-            let emptyVal: any = "";
-            if (itemSchema instanceof z.ZodObject) emptyVal = {};
-            if (itemSchema instanceof z.ZodNumber) emptyVal = 0;
-            if (itemSchema instanceof z.ZodBoolean) emptyVal = false;
-            onChange([...currentArray, emptyVal]);
+            let empty: any = "";
+            const inner = unwrapSchema(itemSchema);
+            if (inner instanceof z.ZodObject) empty = {};
+            if (inner instanceof z.ZodNumber) empty = 0;
+            if (inner instanceof z.ZodBoolean) empty = false;
+            if (inner instanceof z.ZodEnum) empty = inner.options[0];
+            onChange([...currentArray, empty]);
           }}
           className="flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors px-2 py-1.5 rounded-md hover:bg-primary/5"
         >
@@ -122,11 +138,36 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
     );
   }
 
-  // Render String
-  if (unwrappedSchema instanceof z.ZodString || unwrappedSchema instanceof z.ZodOptional && unwrappedSchema._def.innerType instanceof z.ZodString) {
-    const isUrl = unwrappedSchema.description?.includes("URL") || path[path.length-1]?.toLowerCase().includes("url") || path[path.length-1]?.toLowerCase().includes("link");
-    const isImage = path[path.length-1]?.toLowerCase().includes("image");
-    const isLargeText = path[path.length-1]?.includes("description") || path[path.length-1]?.includes("content");
+  // ── Enum → Styled Select Dropdown ───────────────────────────────────────────
+  if (unwrapped instanceof z.ZodEnum) {
+    const options: string[] = unwrapped.options;
+    const currentVal = data ?? options[0];
+    return (
+      <div className="relative w-full">
+        <select
+          value={currentVal}
+          onChange={e => onChange(e.target.value)}
+          className="w-full appearance-none bg-background border border-border/40 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/30 text-foreground pr-10 cursor-pointer transition-colors hover:border-border/70"
+        >
+          {options.map((opt: string) => (
+            <option key={opt} value={opt}>
+              {ENUM_ICONS[opt] || ''} {opt.charAt(0).toUpperCase() + opt.slice(1)}
+            </option>
+          ))}
+        </select>
+        {/* Custom dropdown arrow */}
+        <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">▼</div>
+      </div>
+    );
+  }
+
+  // ── String ──────────────────────────────────────────────────────────────────
+  if (unwrapped instanceof z.ZodString) {
+    const fieldKey = path[path.length - 1] || '';
+    const isUrl = fieldKey.toLowerCase().includes('url') || fieldKey.toLowerCase().includes('link') || fieldKey.toLowerCase().includes('github') || fieldKey.toLowerCase().includes('live');
+    const isImage = fieldKey.toLowerCase().includes('image') || fieldKey.toLowerCase().includes('architecture');
+    const isLargeText = ['description', 'content', 'impact', 'architecture', 'problem_statement', 'howItWorks', 'explainability', 'deployment', 'validation_strategy'].includes(fieldKey);
+    const isMediaUrl = fieldKey === 'url' && path.includes('media');
 
     return (
       <div className="w-full">
@@ -139,20 +180,28 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
           />
         ) : (
           <input
-            type={isUrl ? "url" : "text"}
+            type={isUrl || isMediaUrl ? "url" : "text"}
             value={data || ''}
             onChange={(e) => onChange(e.target.value)}
             className="w-full bg-background border border-border/30 rounded-lg p-2.5 text-sm focus:outline-none focus:border-primary/50 text-foreground"
-            placeholder={isUrl ? "https://" : "Value..."}
+            placeholder={isUrl || isMediaUrl ? "https://..." : "Value..."}
           />
         )}
-        {isImage && <ImagePreview url={data} />}
+        {/* Show media preview for media[].url field */}
+        {isMediaUrl && data && <MediaPreview url={data} type={parentData?.type} />}
+        {/* Show image preview for architectureImage and similar */}
+        {isImage && data && !isMediaUrl && (
+          <div className="mt-2 w-full h-28 rounded-lg bg-muted/30 border border-border/50 overflow-hidden">
+            <img src={data} alt="Preview" className="w-full h-full object-cover"
+              onError={(e) => { e.currentTarget.style.opacity = '0.3'; }} />
+          </div>
+        )}
       </div>
     );
   }
 
-  // Render Number
-  if (unwrappedSchema instanceof z.ZodNumber || unwrappedSchema instanceof z.ZodDefault && unwrappedSchema._def.innerType instanceof z.ZodNumber) {
+  // ── Number ──────────────────────────────────────────────────────────────────
+  if (unwrapped instanceof z.ZodNumber) {
     return (
       <input
         type="number"
@@ -163,49 +212,26 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
     );
   }
 
-  // Render Boolean
-  if (unwrappedSchema instanceof z.ZodBoolean || unwrappedSchema instanceof z.ZodDefault && unwrappedSchema._def.innerType instanceof z.ZodBoolean) {
+  // ── Boolean → Toggle ────────────────────────────────────────────────────────
+  if (unwrapped instanceof z.ZodBoolean) {
     return (
       <label className="flex items-center gap-2 cursor-pointer pt-1">
         <div className={`w-10 h-5 rounded-full p-0.5 transition-colors ${data ? 'bg-primary' : 'bg-border'}`}>
           <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${data ? 'translate-x-5' : 'translate-x-0'}`} />
         </div>
-        <span className="text-sm font-medium select-none">{data ? 'Enabled' : 'Disabled'}</span>
-        <input 
-          type="checkbox" 
-          checked={!!data} 
-          onChange={(e) => onChange(e.target.checked)}
-          className="hidden" 
-          aria-hidden="true" 
-        />
+        <span className="text-sm font-medium select-none">{data ? 'Yes' : 'No'}</span>
+        <input type="checkbox" checked={!!data} onChange={(e) => onChange(e.target.checked)} className="hidden" />
       </label>
     );
   }
 
-  // Render Enum 
-  if (unwrappedSchema instanceof z.ZodEnum) {
-    return (
-      <select 
-        value={data || unwrappedSchema.options[0]} 
-        onChange={e => onChange(e.target.value)}
-        className="w-full bg-background border border-border/30 rounded-lg p-2.5 text-sm focus:outline-none focus:border-primary/50 text-foreground"
-      >
-        {unwrappedSchema.options.map((opt: string) => (
-          <option key={opt} value={opt}>{opt}</option>
-        ))}
-      </select>
-    );
-  }
-
-  // Unsupported fallback
+  // ── Fallback: JSON editor ───────────────────────────────────────────────────
   return (
     <textarea
       value={typeof data === 'object' ? JSON.stringify(data, null, 2) : String(data || '')}
-      onChange={e => {
-        try { onChange(JSON.parse(e.target.value)); }
-        catch { onChange(e.target.value); }
-      }}
+      onChange={e => { try { onChange(JSON.parse(e.target.value)); } catch { onChange(e.target.value); } }}
       className="w-full bg-background border border-border/30 rounded-lg p-2.5 text-sm focus:outline-none focus:border-primary/50 font-mono text-[10px] text-foreground/80 h-20"
     />
   );
 });
+
