@@ -1,6 +1,4 @@
-// @ts-ignore
 import rawData from "./portfolio.yaml?raw";
-// @ts-ignore
 import rawProjects from "./projects.yaml?raw";
 import YAML from "yaml";
 

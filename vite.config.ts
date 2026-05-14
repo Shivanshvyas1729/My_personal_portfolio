@@ -61,13 +61,12 @@ const localApiProxy = () => ({
 
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
-  // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
   const env = loadEnv(mode, process.cwd(), '');
   process.env = { ...process.env, ...env };
 
   return {
     server: {
-      host: true, // ✅ fix
+      host: true,
       port: 8080,
       hmr: {
         overlay: false,
@@ -84,5 +83,39 @@ export default defineConfig(({ mode }) => {
       },
       dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
     },
+    build: {
+      // Raise the warning limit so small chunks don't warn
+      chunkSizeWarningLimit: 600,
+      rollupOptions: {
+        output: {
+          manualChunks: (id) => {
+            // Three.js & 3D — huge, must be its own chunk
+            if (id.includes('three') || id.includes('@react-three')) {
+              return 'vendor-three';
+            }
+            // Framer Motion
+            if (id.includes('framer-motion')) {
+              return 'vendor-framer';
+            }
+            // Radix UI components
+            if (id.includes('@radix-ui')) {
+              return 'vendor-radix';
+            }
+            // Tanstack / react-query
+            if (id.includes('@tanstack')) {
+              return 'vendor-query';
+            }
+            // CMS / Admin dashboard (only loaded when admin is open)
+            if (id.includes('UnifiedAdminDashboard') || id.includes('ProjectsAdmin') || id.includes('DynamicForm') || id.includes('AdminPanel') || id.includes('CMSContext')) {
+              return 'cms';
+            }
+            // All other node_modules together (including React)
+            if (id.includes('node_modules')) {
+              return 'vendor';
+            }
+          }
+        }
+      }
+    }
   };
-});
+});
