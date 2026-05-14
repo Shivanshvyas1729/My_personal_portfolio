@@ -150,10 +150,13 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
         </div>
       </div>
 
-      {/* Editor Modal */}
+      {/* Editor Modal — fills the CMS matrix panel exactly, never overflows */}
       {isModalOpen && (
-        <div className="absolute inset-0 z-50 bg-background/80 backdrop-blur-sm flex flex-col animate-in fade-in zoom-in-95 duration-200">
-          <div className="glass-card shadow-2xl border-l border-border/50 flex flex-col h-full absolute right-0 w-full sm:w-[500px]">
+        <div className="absolute inset-0 z-50 flex flex-col animate-in fade-in duration-150 overflow-hidden rounded-xl">
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-background/60 backdrop-blur-sm" onClick={closeModal} />
+          {/* Panel — slides in from right, capped to parent width */}
+          <div className="glass-card shadow-2xl border-l border-border/50 flex flex-col h-full absolute right-0 top-0 bottom-0 w-full max-w-full" style={{ maxWidth: '100%' }}>
              <div className="flex items-center justify-between p-4 border-b border-border/50 bg-muted/20">
                <h3 className="font-bold">{addingNew ? "New Project" : "Edit Project"}</h3>
                <button onClick={closeModal} className="p-1.5 rounded hover:bg-muted/60 text-muted-foreground transition-colors">

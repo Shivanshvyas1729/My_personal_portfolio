@@ -431,13 +431,15 @@ export const UnifiedAdminDashboard = () => {
             )}
 
             {activeTab === 'projects' && (
-               <ProjectsAdmin
-                 projects={(previewData as any).projects || []}
-                 onChange={(proj) => updatePreviewSection('projects', proj)}
-                 isLoading={isLoading}
-                 mode={(forceLocalMode || cmsMode === 'local') ? 'local' : 'github'}
-                 onSave={(data) => saveContent('projects', data || (previewData as any).projects || [])}
-               />
+               <div className="relative flex-1 overflow-hidden flex flex-col">
+                 <ProjectsAdmin
+                   projects={(previewData as any).projects || []}
+                   onChange={(proj) => updatePreviewSection('projects', proj)}
+                   isLoading={isLoading}
+                   mode={(forceLocalMode || cmsMode === 'local') ? 'local' : 'github'}
+                   onSave={(data) => saveContent('projects', data || (previewData as any).projects || [])}
+                 />
+               </div>
             )}
 
             {activeTab === 'blog' && (
