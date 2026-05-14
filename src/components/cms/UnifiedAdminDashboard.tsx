@@ -436,7 +436,7 @@ export const UnifiedAdminDashboard = () => {
                  onChange={(proj) => updatePreviewSection('projects', proj)}
                  isLoading={isLoading}
                  mode={(forceLocalMode || cmsMode === 'local') ? 'local' : 'github'}
-                 onSave={() => saveContent('projects', (previewData as any).projects || [])}
+                 onSave={(data) => saveContent('projects', data || (previewData as any).projects || [])}
                />
             )}
 

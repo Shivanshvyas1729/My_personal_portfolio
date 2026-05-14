@@ -8,7 +8,7 @@ import { useCMSState } from '@/context/CMSContext';
 interface ProjectsAdminProps {
   projects: Project[];
   onChange: (projects: Project[]) => void;
-  onSave: () => void;
+  onSave: (data?: Project[]) => void;
   isLoading: boolean;
   mode: "local" | "github" | "unknown";
 }
@@ -48,12 +48,15 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
       return;
     }
 
+    let updated: Project[];
     if (addingNew) {
-      onChange([tempProject as Project, ...projects]);
+      updated = [tempProject as Project, ...projects];
     } else {
-      onChange(projects.map(p => p.id === tempProject.id ? tempProject as Project : p));
+      updated = projects.map(p => p.id === tempProject.id ? tempProject as Project : p);
     }
+    onChange(updated);
     closeModal();
+    return updated;
   };
 
   const deleteProject = (id: number) => {
@@ -164,8 +167,8 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
                {mode === 'local' ? (
                  <button 
                    onClick={async () => {
-                     saveEdit();
-                     setTimeout(() => onSave(), 0);
+                     const updated = saveEdit();
+                     setTimeout(() => onSave(updated), 0);
                    }} 
                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg"
                  >
@@ -174,8 +177,8 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
                ) : (
                  <button 
                    onClick={async () => {
-                     saveEdit();
-                     setTimeout(() => onSave(), 0);
+                     const updated = saveEdit();
+                     setTimeout(() => onSave(updated), 0);
                    }} 
                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg"
                  >
