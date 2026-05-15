@@ -1,38 +1,4 @@
 blog:
-  - id: 2
-    title: Time
-    content: “Time doesn’t just pass… it teaches. Every second you lose either becomes a regret or a lesson.”
-    category: Thoughts
-    link: 'no'
-    date: '2026-04-10'
-  - id: 3
-    title: NLP NOTES
-    slug: nlp-notes
-    readingTime: 1
-    content: These are my NLP note for quick reference -hope it will help
-    category: Notes
-    type:
-      - Deep Learning
-      - NLP
-    link: ''
-    date: '2026-04-11'
-    featured: false
-    draft: false
-    resources:
-      - label: Git hub
-        url: https://github.com/Shivanshvyas1729/MY-Complete-NLP-NoteBook
-  - id: 4
-    title: MY LIFE
-    slug: my-life
-    readingTime: 1
-    content: I love my life
-    category: Thoughts
-    type:
-      - gernal
-    link: ''
-    date: '2026-04-11'
-    featured: true
-    draft: true
   - id: 5
     title: type of Cloud storage based on  By Architecture
     slug: type-of-cloud-storage-based-on-by-architecture
@@ -56,7 +22,41 @@ blog:
     category: Notes
     type:
       - cloud
-    link: ''
-    date: '2026-05-09'
+    link: ""
+    date: 2026-05-09
     featured: false
+    draft: false
+  - id: 4
+    title: MY LIFE
+    slug: my-life
+    readingTime: 1
+    content: I love my life
+    category: Thoughts
+    type:
+      - gernal
+    link: ""
+    date: 2026-04-11
+    featured: true
     draft: true
+  - id: 3
+    title: NLP NOTES
+    slug: nlp-notes
+    readingTime: 1
+    content: These are my NLP note for quick reference -hope it will help
+    category: Notes
+    type:
+      - Deep Learning
+      - NLP
+    link: ""
+    date: 2026-04-11
+    featured: false
+    draft: false
+    resources:
+      - label: Git hub
+        url: https://github.com/Shivanshvyas1729/MY-Complete-NLP-NoteBook
+  - id: 2
+    title: Time
+    content: “Time doesn’t just pass… it teaches. Every second you lose either becomes a regret or a lesson.”
+    category: Thoughts
+    link: no
+    date: 2026-04-10

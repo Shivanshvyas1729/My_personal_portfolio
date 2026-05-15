@@ -161,36 +161,38 @@ const ChatAssistant = () => {
               originX: "calc(100% - 24px)",
               originY: "bottom"
             }}
-            className="max-w-[calc(100vw-48px)] max-h-[calc(100vh-140px)] bg-background/95 backdrop-blur-3xl border border-border/60 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden pointer-events-auto select-none"
+            className="no-text-effect max-w-[calc(100vw-48px)] max-h-[calc(100vh-140px)] bg-background/95 backdrop-blur-3xl border border-border/60 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden pointer-events-auto select-none"
           >
             {/* Header - Drag Handle */}
             <div 
               onPointerDown={(e) => dragControls.start(e)}
-              className="flex items-center justify-between px-5 py-4 border-b border-border/40 bg-primary/5 cursor-grab active:cursor-grabbing hover:bg-primary/10 transition-colors shrink-0"
+              className="flex items-center justify-between px-5 py-4 border-b border-border/40 bg-primary/5 cursor-grab active:cursor-grabbing shrink-0 relative overflow-hidden group/header"
             >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-2xl bg-primary/20 flex items-center justify-center rotate-3 group-hover:rotate-0 transition-transform">
+              {/* hover bg layer — isolated so it doesn't affect text color */}
+              <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover/header:opacity-100 transition-opacity duration-200 pointer-events-none" />
+              <div className="flex items-center gap-3 relative z-10">
+                <div className="w-9 h-9 rounded-2xl bg-primary/20 flex items-center justify-center rotate-3 transition-transform">
                   <Bot size={18} className="text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-foreground tracking-tight">AI Assistant</p>
-                  <p className="text-[10px] text-green-500 font-medium flex items-center gap-1.5 uppercase tracking-widest">
+                  <p className="text-sm font-bold !text-foreground tracking-tight" style={{color: 'inherit'}} data-no-hover>AI Assistant</p>
+                  <p className="text-[10px] !text-green-500 font-medium flex items-center gap-1.5 uppercase tracking-widest" data-no-hover>
                     <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                     Live
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 relative z-10">
                 <button 
                   onClick={clearChat}
                   title="Clear Chat"
-                  className="text-muted-foreground hover:text-destructive transition-colors p-1.5 rounded-xl hover:bg-destructive/5"
+                  className="!text-muted-foreground hover:!text-destructive transition-colors p-1.5 rounded-xl hover:bg-destructive/5"
                 >
                   <Trash2 size={18} />
                 </button>
                 <button 
                   onClick={() => setIsOpen(false)} 
-                  className="text-muted-foreground hover:text-destructive transition-colors p-1.5 rounded-xl hover:bg-destructive/5"
+                  className="!text-muted-foreground hover:!text-destructive transition-colors p-1.5 rounded-xl hover:bg-destructive/5"
                 >
                   <X size={20} />
                 </button>
@@ -231,7 +233,7 @@ const ChatAssistant = () => {
                   <div className="mt-2 flex flex-wrap gap-2 animate-in fade-in slide-in-from-bottom-1">
                     {QUICK_BUTTONS.map(btn => (
                       <button key={btn} onClick={() => handleSend(btn)}
-                        className="text-[11px] px-3 py-1.5 rounded-xl border border-primary/20 text-primary bg-primary/5 hover:bg-primary/10 transition-all hover:scale-105 active:scale-95">
+                        className="text-[11px] px-3 py-2 rounded-xl border border-primary/40 text-primary bg-primary/10 hover:bg-primary/20 hover:border-primary/60 transition-all hover:scale-105 active:scale-95 shadow-sm font-medium">
                         {btn}
                       </button>
                     ))}
@@ -272,18 +274,29 @@ const ChatAssistant = () => {
         )}
       </AnimatePresence>
 
-      <motion.button
-        whileHover={{ scale: 1.1, rotate: 5 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-primary text-primary-foreground rounded-2xl shadow-[0_10px_30px_rgba(59,130,246,0.5)] flex items-center justify-center z-[110] transition-shadow hover:shadow-[0_15px_40px_rgba(59,130,246,0.6)]"
-      >
-        <AnimatePresence mode="wait">
-          <motion.div key={isOpen ? "o" : "c"} initial={{ opacity: 0, rotate: -45 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: 45 }} transition={{ duration: 0.2 }}>
-            {isOpen ? <X size={24} /> : <MessageSquare size={24} />}
-          </motion.div>
-        </AnimatePresence>
-      </motion.button>
+      {/* Floating Chat Button with Tooltip */}
+      <div className="fixed bottom-6 right-6 z-[110] flex items-center gap-3 group/fab">
+        {/* Tooltip label */}
+        <span
+          className="pointer-events-none whitespace-nowrap text-[13px] font-semibold text-foreground bg-background/95 border border-border/60 backdrop-blur-xl px-3 py-1.5 rounded-xl shadow-lg
+            opacity-0 translate-x-2 group-hover/fab:opacity-100 group-hover/fab:translate-x-0
+            transition-all duration-200 ease-out select-none"
+        >
+          {isOpen ? "Close Chat" : "Chat with AI"}
+        </span>
+        <motion.button
+          whileHover={{ scale: 1.1, rotate: 5 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-14 h-14 bg-primary text-primary-foreground rounded-2xl shadow-[0_10px_30px_rgba(59,130,246,0.5)] flex items-center justify-center transition-shadow hover:shadow-[0_15px_40px_rgba(59,130,246,0.6)]"
+        >
+          <AnimatePresence mode="wait">
+            <motion.div key={isOpen ? "o" : "c"} initial={{ opacity: 0, rotate: -45 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: 45 }} transition={{ duration: 0.2 }}>
+              {isOpen ? <X size={24} /> : <MessageSquare size={24} />}
+            </motion.div>
+          </AnimatePresence>
+        </motion.button>
+      </div>
     </>
   );
 };

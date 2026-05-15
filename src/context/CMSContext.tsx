@@ -72,12 +72,18 @@ export const CMSProvider = ({ children }: { children: ReactNode }) => {
       const projRes = await fetch("/api/cms-load?filePath=src/data/projects.yaml");
       const projJson = await projRes.json();
 
+      const blogRes = await fetch("/api/cms-load?filePath=src/data/blog.yaml");
+      const blogJson = await blogRes.json();
+
       let combinedData = { ...initialPortfolioData };
       if (portJson.success && portJson.data) {
         combinedData = { ...combinedData, ...portJson.data };
       }
       if (projJson.success && projJson.data?.projects) {
         combinedData = { ...combinedData, projects: projJson.data.projects };
+      }
+      if (blogJson.success && blogJson.data?.blog) {
+        combinedData = { ...combinedData, blog: blogJson.data.blog };
       }
 
       setLiveData(combinedData);

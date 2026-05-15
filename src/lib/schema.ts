@@ -159,6 +159,26 @@ export const ProjectSchema = z.object({
 
 export const ProjectsArraySchema = z.array(ProjectSchema);
 
+export const BlogSchema = z.object({
+  id: z.number().int().positive().optional(),
+  title: z.string().min(1, "Title is required"),
+  slug: z.string().optional(),
+  content: z.string().min(1, "Content is required"),
+  category: z.string().min(1, "Category is required"),
+  type: z.array(z.string()).optional().default([]),
+  date: z.string().optional(),
+  featured: z.boolean().optional().default(false),
+  draft: z.boolean().optional().default(true),
+  readingTime: z.number().optional(),
+  link: z.string().optional().default(""),
+  resources: z.array(z.object({
+    label: z.string().optional(),
+    url: z.string().optional()
+  })).optional().default([]),
+}).passthrough();
+
+export const BlogsArraySchema = z.array(BlogSchema);
+
 // ─── VALIDATOR ENGINE ───
 
 export function validateData<T>(schema: z.ZodSchema<T>, data: unknown): { success: true; data: T } | { success: false; errors: string[] } {
@@ -191,4 +211,5 @@ export const SECTION_SCHEMAS: Record<string, z.ZodSchema<any>> = {
   services: ServicesSchema,
   resume: ResumeSchema,
   projects: ProjectsArraySchema,
+  blog: BlogsArraySchema,
 };

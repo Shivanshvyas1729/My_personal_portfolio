@@ -70,7 +70,7 @@ const GlobalTextEffector = () => {
         will-change: color, text-shadow, filter;
       }
       
-      /* Global RESET - Only apply to elements NOT already marked as gradient-text */
+      /* Global RESET - Only apply to elements NOT already marked as gradient-text and NOT inside .no-text-effect */
       h1:not(.gradient-text), 
       h2:not(.gradient-text), 
       h3:not(.gradient-text), 
@@ -86,27 +86,27 @@ const GlobalTextEffector = () => {
         background-clip: border-box;
       }
       
-      /* Pure Text Hover Targets (Non-Gradient) */
-      h1:not(.gradient-text):hover,
-      h2:not(.gradient-text):hover,
-      h3:not(.gradient-text):hover,
-      h4:not(.gradient-text):hover,
-      h5:not(.gradient-text):hover,
-      h6:not(.gradient-text):hover,
-      p:not(.gradient-text):hover,
-      span:not(.gradient-text):hover,
-      li:not(.gradient-text):hover,
-      b:not(.gradient-text):hover,
-      i:not(.gradient-text):hover,
-      strong:not(.gradient-text):hover,
-      em:not(.gradient-text):hover {
+      /* Pure Text Hover Targets — HARD EXCLUSION of .no-text-effect descendants */
+      h1:not(.gradient-text):not(.no-text-effect *):hover,
+      h2:not(.gradient-text):not(.no-text-effect *):hover,
+      h3:not(.gradient-text):not(.no-text-effect *):hover,
+      h4:not(.gradient-text):not(.no-text-effect *):hover,
+      h5:not(.gradient-text):not(.no-text-effect *):hover,
+      h6:not(.gradient-text):not(.no-text-effect *):hover,
+      p:not(.gradient-text):not(.no-text-effect *):hover,
+      span:not(.gradient-text):not(.no-text-effect *):hover,
+      li:not(.gradient-text):not(.no-text-effect *):hover,
+      b:not(.gradient-text):not(.no-text-effect *):hover,
+      i:not(.gradient-text):not(.no-text-effect *):hover,
+      strong:not(.gradient-text):not(.no-text-effect *):hover,
+      em:not(.gradient-text):not(.no-text-effect *):hover {
         ${textHoverStyles}
         transform: translateZ(0);
       }
 
-      /* Link/Button Container Hover Targets (Non-Gradient) */
-      a:not(.gradient-text):hover, a:not(.gradient-text):active,
-      button:not(.gradient-text):hover, button:not(.gradient-text):active {
+      /* Link/Button Container Hover Targets (Non-Gradient) — HARD EXCLUSION */
+      a:not(.gradient-text):not(.no-text-effect *):hover, a:not(.gradient-text):not(.no-text-effect *):active,
+      button:not(.gradient-text):not(.no-text-effect *):hover, button:not(.gradient-text):not(.no-text-effect *):active {
         ${linkHoverStyles}
         transform: translateZ(0);
       }

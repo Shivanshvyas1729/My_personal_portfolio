@@ -4,8 +4,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { SECTION_SCHEMAS, validateData } from '@/lib/schema';
 import { DynamicForm } from './DynamicForm';
 import { ProjectsAdmin } from './ProjectsAdmin';
+import { BlogsAdmin } from './BlogsAdmin';
 import { AdminPanel as BlogAdminPanel } from '../blog/AdminPanel';
-import { Save, Minimize2, Maximize2, X, RefreshCw, AlertTriangle, ShieldCheck, ShieldAlert, ListRestart, ScrollText } from 'lucide-react';
+import { Save, Minimize2, Maximize2, ChevronDown, ChevronUp, RefreshCw, AlertTriangle, ShieldCheck, ShieldAlert, ListRestart, ScrollText } from 'lucide-react';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
 
@@ -32,9 +33,12 @@ export const UnifiedAdminDashboard = () => {
     clearLogs
   } = useCMSActions();
   
-  const { roles } = useAuth();
+  const { roles, isSuperAdmin } = useAuth();
   const isEditorOnly = roles.includes("editor") && !roles.includes("admin");
   const userRole = roles.includes("admin") ? "admin" : "editor";
+  const adminLabel = roles.includes("admin")
+    ? (isSuperAdmin ? "⚡ Master Shivansh" : "Masterji")
+    : null;
 
   // Position & Size State
   const [isMaximized, setIsMaximized] = useState(() => {
@@ -161,8 +165,9 @@ export const UnifiedAdminDashboard = () => {
     setErrorMsg("");
     
     const isProject = section === 'projects';
-    const filePath = isProject ? 'src/data/projects.yaml' : 'src/data/portfolio.yaml';
-    const actionName = isProject ? "SAVE_PROJECTS" : `SAVE_SECTION:${section}`;
+    const isBlog = section === 'blog';
+    const filePath = isBlog ? 'src/data/blog.yaml' : (isProject ? 'src/data/projects.yaml' : 'src/data/portfolio.yaml');
+    const actionName = isBlog ? "SAVE_BLOG" : (isProject ? "SAVE_PROJECTS" : `SAVE_SECTION:${section}`);
 
     logger.addLog({ 
       action: actionName, 
@@ -331,7 +336,7 @@ export const UnifiedAdminDashboard = () => {
     <div
       ref={panelRef}
       style={containerStyle}
-      className={`glass-card ${isMaximized ? 'rounded-none' : 'rounded-2xl shadow-2xl border border-primary/20'} flex flex-col overflow-hidden bg-background/95 backdrop-blur-3xl ${!isInteracting ? 'transition-[border-radius,width,height,transform] duration-300' : ''} ${isMinimized ? '!h-12 !w-80' : ''}`}
+      className={`no-text-effect glass-card ${isMaximized ? 'rounded-none' : 'rounded-2xl shadow-2xl border border-primary/20'} flex flex-col overflow-hidden bg-background/95 backdrop-blur-3xl ${!isInteracting ? 'transition-[border-radius,width,height,transform] duration-300' : ''} ${isMinimized ? '!h-12 !w-80' : ''}`}
     >
       {/* HEADER */}
       <div 
@@ -340,31 +345,50 @@ export const UnifiedAdminDashboard = () => {
         onPointerUp={onHeaderPointerUp}
         className="flex items-center justify-between px-4 py-3 border-b border-border/30 bg-primary/10 cursor-grab active:cursor-grabbing shrink-0"
       >
-        <div className="flex items-center gap-2 pointer-events-none">
-           <span className="text-sm font-bold truncate max-w-[100px] sm:max-w-none">CMS Matrix</span>
-           <div className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tighter flex items-center gap-1.5 ${syncStatus.color}`}>
-             <span>{syncStatus.icon}</span>
-             <span>{syncStatus.label}</span>
-           </div>
+        <div className="flex items-center gap-2 pointer-events-none min-w-0">
+           <span className="text-sm font-bold shrink-0">CMS Matrix</span>
+           {!isMinimized && adminLabel && (
+             <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tighter flex items-center gap-1 shrink-0 ${isSuperAdmin ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-blue-500/15 text-blue-400 border border-blue-500/20'}`}>
+               {adminLabel}
+             </span>
+           )}
+           {!isMinimized && (
+             <div className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tighter flex items-center gap-1.5 shrink-0 ${syncStatus.color}`}>
+               <span>{syncStatus.icon}</span>
+               <span>{syncStatus.label}</span>
+             </div>
+           )}
         </div>
-        <div data-no-drag className="flex items-center gap-2">
+        <div data-no-drag className="flex items-center gap-2 shrink-0">
+           {!isMinimized && (
+             <>
+               <button 
+                 onClick={() => setSafeMode(!safeMode)} 
+                 className={`hidden sm:flex px-2 py-1 items-center gap-1 text-[10px] font-bold rounded uppercase transition-colors ${safeMode ? 'bg-amber-500/20 text-amber-500' : 'bg-muted text-muted-foreground'}`}
+               >
+                 {safeMode ? <ShieldCheck size={12}/> : <ShieldAlert size={12}/>} 
+                 Safe Mode
+               </button>
+               <label className="flex items-center gap-1.5 cursor-pointer text-[10px] uppercase font-bold text-muted-foreground ml-2">
+                 Preview
+                 <input type="checkbox" checked={previewMode} onChange={e => setPreviewMode(e.target.checked)} className="accent-primary" />
+               </label>
+               <div className="w-px h-4 bg-border mx-1" />
+               <button onClick={() => setIsMaximized(!isMaximized)} className="p-1 hover:bg-muted rounded text-muted-foreground transition-colors">
+                 {isMaximized ? <Minimize2 size={14}/> : <Maximize2 size={14} />}
+               </button>
+             </>
+           )}
            <button 
-             onClick={() => setSafeMode(!safeMode)} 
-             className={`hidden sm:flex px-2 py-1 items-center gap-1 text-[10px] font-bold rounded uppercase transition-colors ${safeMode ? 'bg-amber-500/20 text-amber-500' : 'bg-muted text-muted-foreground'}`}
+             onClick={() => setIsMinimized(m => !m)} 
+             title={isMinimized ? 'Restore Panel' : 'Minimise Panel'}
+             className={`flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-bold transition-all ${
+               isMinimized 
+                 ? 'bg-primary/20 text-primary hover:bg-primary/30 border border-primary/30 animate-pulse' 
+                 : 'hover:bg-muted text-muted-foreground'
+             }`}
            >
-             {safeMode ? <ShieldCheck size={12}/> : <ShieldAlert size={12}/>} 
-             Safe Mode
-           </button>
-           <label className="flex items-center gap-1.5 cursor-pointer text-[10px] uppercase font-bold text-muted-foreground ml-2">
-             Preview
-             <input type="checkbox" checked={previewMode} onChange={e => setPreviewMode(e.target.checked)} className="accent-primary" />
-           </label>
-           <div className="w-px h-4 bg-border mx-1" />
-           <button onClick={() => setIsMaximized(!isMaximized)} className="p-1 hover:bg-muted rounded text-muted-foreground transition-colors">
-              {isMaximized ? <Minimize2 size={14}/> : <Maximize2 size={14} />}
-           </button>
-           <button onClick={() => setIsMinimized(m => !m)} className="p-1 hover:bg-muted rounded text-muted-foreground transition-colors">
-              <X size={14} />
+             {isMinimized ? <><ChevronUp size={13}/> Restore</> : <ChevronDown size={14}/>}
            </button>
         </div>
       </div>
@@ -472,9 +496,15 @@ export const UnifiedAdminDashboard = () => {
             )}
 
             {activeTab === 'blog' && (
-              <div className="flex-1 relative overflow-auto">
-                <BlogAdminPanel onSuccess={() => toast.success(`Blog deployed!`)} />
-              </div>
+               <div className="relative flex-1 overflow-hidden flex flex-col">
+                 <BlogsAdmin
+                   blogs={(previewData as any).blog || []}
+                   onChange={(blogPosts) => updatePreviewSection('blog', blogPosts)}
+                   isLoading={isLoading}
+                   mode={(forceLocalMode || cmsMode === 'local') ? 'local' : 'github'}
+                   onSave={(data) => saveContent('blog', data || (previewData as any).blog || [])}
+                 />
+               </div>
             )}
 
             {activeTab === 'history' && (

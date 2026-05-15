@@ -1,6 +1,6 @@
 import React from 'react';
 import { z } from 'zod';
-import { Plus, Trash2, Image as ImageIcon, Video } from 'lucide-react';
+import { Plus, Trash2, Image as ImageIcon, Video, ExternalLink } from 'lucide-react';
 
 // ─── Enum Option Icons ────────────────────────────────────────────────────────
 const ENUM_ICONS: Record<string, string> = {
@@ -164,8 +164,26 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
   // ── String ──────────────────────────────────────────────────────────────────
   if (unwrapped instanceof z.ZodString) {
     const fieldKey = path[path.length - 1] || '';
-    const isUrl = fieldKey.toLowerCase().includes('url') || fieldKey.toLowerCase().includes('link') || fieldKey.toLowerCase().includes('github') || fieldKey.toLowerCase().includes('live');
-    const isImage = fieldKey.toLowerCase().includes('image') || fieldKey.toLowerCase().includes('architecture');
+    const fieldKeyLower = fieldKey.toLowerCase();
+
+    // Detect URL fields by name
+    const isUrlField =
+      fieldKeyLower.includes('url') ||
+      fieldKeyLower.includes('link') ||
+      fieldKeyLower.includes('github') ||
+      fieldKeyLower.includes('live') ||
+      fieldKeyLower.includes('source') ||
+      fieldKeyLower.includes('dataset') ||
+      fieldKeyLower.includes('kaggle') ||
+      fieldKeyLower.includes('paper') ||
+      fieldKeyLower.includes('repo') ||
+      fieldKeyLower.includes('demo');
+
+    // Also detect by value — if it looks like a URL, treat it as clickable
+    const valueIsUrl = typeof data === 'string' && /^https?:\/\//i.test(data.trim());
+    const isClickable = (isUrlField || valueIsUrl) && valueIsUrl;
+
+    const isImage = fieldKeyLower.includes('image') || fieldKeyLower.includes('architecture');
     const isLargeText = ['description', 'content', 'impact', 'architecture', 'problem_statement', 'howItWorks', 'explainability', 'deployment', 'validation_strategy'].includes(fieldKey);
     const isMediaUrl = fieldKey === 'url' && path.includes('media');
 
@@ -179,13 +197,26 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
             placeholder="Type here..."
           />
         ) : (
-          <input
-            type={isUrl || isMediaUrl ? "url" : "text"}
-            value={data || ''}
-            onChange={(e) => onChange(e.target.value)}
-            className="w-full bg-background border border-border/30 rounded-lg p-2.5 text-sm focus:outline-none focus:border-primary/50 text-foreground"
-            placeholder={isUrl || isMediaUrl ? "https://..." : "Value..."}
-          />
+          <div className="flex items-center gap-1.5">
+            <input
+              type={isUrlField || isMediaUrl ? "url" : "text"}
+              value={data || ''}
+              onChange={(e) => onChange(e.target.value)}
+              className="flex-1 bg-background border border-border/30 rounded-lg p-2.5 text-sm focus:outline-none focus:border-primary/50 text-foreground min-w-0"
+              placeholder={isUrlField || isMediaUrl ? "https://..." : "Value..."}
+            />
+            {isClickable && (
+              <a
+                href={data.trim()}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Open link"
+                className="shrink-0 flex items-center justify-center w-9 h-9 rounded-lg border border-primary/30 bg-primary/5 text-primary hover:bg-primary/15 hover:border-primary/60 transition-all"
+              >
+                <ExternalLink size={15} />
+              </a>
+            )}
+          </div>
         )}
         {/* Show media preview for media[].url field */}
         {isMediaUrl && data && <MediaPreview url={data} type={parentData?.type} />}

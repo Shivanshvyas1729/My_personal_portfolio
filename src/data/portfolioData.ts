@@ -1,5 +1,6 @@
 import rawData from "./portfolio.yaml?raw";
 import rawProjects from "./projects.yaml?raw";
+import rawBlog from "./blog.yaml?raw";
 import YAML from "yaml";
 
 export interface ProfileImage {
@@ -139,6 +140,7 @@ export interface PortfolioData {
   };
   services: Service[];
   projects: Project[];
+  blog: any[];
   resume?: {
     url: string;
   };
@@ -146,6 +148,7 @@ export interface PortfolioData {
 
 let parsedData: Partial<PortfolioData> = {};
 let parsedProjects: { projects: Project[] } = { projects: [] };
+let parsedBlog: { blog: any[] } = { blog: [] };
 
 try {
   parsedData = YAML.parse(rawData);
@@ -160,6 +163,12 @@ try {
   console.error("Failed to parse projects.yaml. Ensure the YAML syntax is correct. Using safe fallback.", error);
   parsedProjects = { projects: [] };
 }
+try {
+  parsedBlog = YAML.parse(rawBlog);
+} catch (error) {
+  console.error("Failed to parse blog.yaml. Ensure the YAML syntax is correct. Using safe fallback.", error);
+  parsedBlog = { blog: [] };
+}
 
 // Fixed logic for sorting projects
 const projects = (parsedProjects?.projects || []).slice();
@@ -167,7 +176,8 @@ projects.sort((a, b) => (b.id || 0) - (a.id || 0));
 
 export const portfolioData: PortfolioData = {
   ...parsedData,
-  projects
+  projects,
+  blog: (parsedBlog?.blog || []).sort((a, b) => (b.id || 0) - (a.id || 0))
 } as PortfolioData;
 
 /**
@@ -180,22 +190,26 @@ export async function getLivePortfolioData(): Promise<PortfolioData> {
   
   try {
     const RAW_BASE = "https://raw.githubusercontent.com/Shivanshvyas1729/My_personal_portfolio/main/src/data";
-    const [pRes, sRes] = await Promise.all([
+    const [pRes, sRes, bRes] = await Promise.all([
       fetch(`${RAW_BASE}/portfolio.yaml?t=${Date.now()}`),
-      fetch(`${RAW_BASE}/projects.yaml?t=${Date.now()}`)
+      fetch(`${RAW_BASE}/projects.yaml?t=${Date.now()}`),
+      fetch(`${RAW_BASE}/blog.yaml?t=${Date.now()}`)
     ]);
     
-    if (!pRes.ok || !sRes.ok) throw new Error("GitHub fetch failed");
+    if (!pRes.ok || !sRes.ok || !bRes.ok) throw new Error("GitHub fetch failed");
     
     const pYaml = await pRes.text();
     const sYaml = await sRes.text();
+    const bYaml = await bRes.text();
     
     const pData = YAML.parse(pYaml);
     const sData = YAML.parse(sYaml);
+    const bData = YAML.parse(bYaml);
     
     return {
       ...pData,
-      projects: (sData?.projects || []).sort((a: any, b: any) => (b.id || 0) - (a.id || 0))
+      projects: (sData?.projects || []).sort((a: any, b: any) => (b.id || 0) - (a.id || 0)),
+      blog: (bData?.blog || []).sort((a: any, b: any) => (b.id || 0) - (a.id || 0))
     } as PortfolioData;
   } catch (e) {
     console.warn("CMS: Live refresh failed, using build-time bundle.", e);
