@@ -66,6 +66,9 @@ projects:
     live: https://thunderstromforcast.streamlit.app/
     featured: true
     impact: Real-time thunderstorm prediction with optimized ML model and interactive UI
+    resources:
+      - url: https://excalidraw.com/#json=9Nw6RepmXxt43Pa_0WrYS,pVW7PrOSRwuehccI2tgGmA
+        label: excaldraw.
   - id: 2
     title: 🥤 Drink Quality Prediction System
     category:
