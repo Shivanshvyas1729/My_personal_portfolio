@@ -22,6 +22,13 @@ projects:
     resources:
       - url: https://excalidraw.com/#json=ZBBfaXHadM-TQNDIhaRKw,69m8_fH4TKqm7AQq-mMfTw
         label: excalidraw
+      - label: whole drive link
+        url: https://drive.google.com/drive/folders/1Kp7T_7QMJO2OW4agrAtCmV5CsKz7uUjQ
+      - label: "research "
+        url: https://drive.google.com/drive/u/0/folders/1WeKzWkeb7GvV_xYDwJLzbdd-kXy29vov
+    open_resources:
+      - url: https://drive.google.com/drive/u/0/folders/1WeKzWkeb7GvV_xYDwJLzbdd-kXy29vov
+        label: "Research "
   - id: 4
     title: ☀️ Solar Panel Defect Detection System
     category:
