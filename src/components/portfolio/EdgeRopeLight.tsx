@@ -2,15 +2,6 @@ import React, { useMemo } from 'react';
 import { portfolioData } from '@/data/portfolioData';
 import { useTheme } from '@/hooks/useTheme';
 
-const hexToRgba = (hex: string, opacity: number) => {
-  if (!hex) return `rgba(255, 255, 255, ${opacity})`;
-  const cleanHex = hex.startsWith('#') ? hex.slice(1) : hex;
-  const r = parseInt(cleanHex.slice(0, 2), 16);
-  const g = parseInt(cleanHex.slice(2, 4), 16);
-  const b = parseInt(cleanHex.slice(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
 const EdgeRopeLight = () => {
   const { theme } = useTheme();
   const settings = portfolioData.settings;
@@ -20,7 +11,6 @@ const EdgeRopeLight = () => {
       ? (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
       : theme;
 
-    // Default colors based on current theme if multi-colors aren't provided
     const defaultColor = resolvedTheme === 'dark' 
       ? (settings?.ropeLightColorDark || "#7dd3fc")
       : (settings?.ropeLightColorLight || "#3b82f6");
@@ -43,86 +33,68 @@ const EdgeRopeLight = () => {
     };
   }, [theme, settings]);
 
-  const gradientString = useMemo(() => {
-    const mainColors = config.colors.map(c => c).join(', ');
-    return `linear-gradient(to right, transparent, ${mainColors}, transparent)`;
-  }, [config.colors]);
-
-  const verticalGradientString = useMemo(() => {
-    const mainColors = config.colors.map(c => c).join(', ');
-    return `linear-gradient(to bottom, transparent, ${mainColors}, transparent)`;
-  }, [config.colors]);
-
-  const sharpGradientString = useMemo(() => {
-    const mainColors = config.sharpColors.map(c => c).join(', ');
-    return `linear-gradient(to right, transparent, ${mainColors}, transparent)`;
+  const horizontalGradient = useMemo(() => {
+    const c = config.sharpColors.map(col => col).join(', ');
+    return `linear-gradient(to right, transparent, ${c}, transparent)`;
   }, [config.sharpColors]);
 
-  const verticalSharpGradientString = useMemo(() => {
-    const mainColors = config.sharpColors.map(c => c).join(', ');
-    return `linear-gradient(to bottom, transparent, ${mainColors}, transparent)`;
+  const verticalGradient = useMemo(() => {
+    const c = config.sharpColors.map(col => col).join(', ');
+    return `linear-gradient(to bottom, transparent, ${c}, transparent)`;
   }, [config.sharpColors]);
 
   return (
     <div 
-      className="fixed top-0 left-0 w-full h-[100vh] z-[9999] pointer-events-none select-none overflow-hidden" 
+      className="fixed inset-0 z-[9999] pointer-events-none select-none overflow-hidden" 
       style={{ height: '100lvh' }}
       aria-hidden="true"
     >
-      
-      {/* ── BASE BLUR WASH ── */}
-      <div 
-        className="absolute inset-0 opacity-20 blur-[30px] mix-blend-screen"
-        style={{ filter: `blur(${config.glow * 5}px)` }}
-      >
-        <div className="absolute top-0 w-full h-[60px] animate-ocean-h"
-          style={{ background: gradientString, backgroundSize: '300% 100%', animationDuration: `${config.speed}s` }} />
-        <div className="absolute bottom-0 w-full h-[60px] animate-ocean-h-rev"
-          style={{ background: gradientString, backgroundSize: '300% 100%', animationDuration: `${config.speed * 1.2}s` }} />
-      </div>
-
-      {/* ── CORE ROPE LIGHTS ── */}
-      <div className="absolute inset-0 z-10">
-        {/* Top */}
+      {/* Top Rope */}
+      <div className="absolute top-0 left-0 w-[200%] h-full pointer-events-none">
         <div 
-          className="absolute top-0 left-0 w-full animate-ocean-h"
+          className="absolute top-0 left-0 w-full animate-rope-h"
           style={{ 
             height: `${config.sharpThickness}px`, 
-            background: sharpGradientString, 
-            backgroundSize: '250% 100%',
+            background: horizontalGradient,
             animationDuration: `${config.speed}s`,
             boxShadow: `0 0 ${config.glow * 2}px ${config.sharpColors[0]}`
           }}
         />
-        {/* Bottom */}
+      </div>
+
+      {/* Bottom Rope */}
+      <div className="absolute bottom-0 left-0 w-[200%] h-full pointer-events-none">
         <div 
-          className="absolute bottom-0 left-0 w-full animate-ocean-h-rev"
+          className="absolute bottom-0 left-0 w-full animate-rope-h-rev"
           style={{ 
             height: `${config.sharpThickness}px`, 
-            background: sharpGradientString, 
-            backgroundSize: '250% 100%',
+            background: horizontalGradient,
             animationDuration: `${config.speed * 1.1}s`,
             boxShadow: `0 0 ${config.glow * 2}px ${config.sharpColors[config.sharpColors.length - 1]}`
           }}
         />
-        {/* Left */}
+      </div>
+
+      {/* Left Rope */}
+      <div className="absolute top-0 left-0 w-full h-[200%] pointer-events-none">
         <div 
-          className="absolute top-0 left-0 h-full animate-ocean-v-rev"
+          className="absolute top-0 left-0 h-full animate-rope-v-rev"
           style={{ 
             width: `${config.sharpThickness}px`, 
-            background: verticalSharpGradientString, 
-            backgroundSize: '100% 250%',
+            background: verticalGradient,
             animationDuration: `${config.speed * 1.3}s`,
             boxShadow: `0 0 ${config.glow * 2}px ${config.sharpColors[0]}`
           }}
         />
-        {/* Right */}
+      </div>
+
+      {/* Right Rope */}
+      <div className="absolute top-0 right-0 w-full h-[200%] pointer-events-none">
         <div 
-          className="absolute top-0 right-0 h-full animate-ocean-v"
+          className="absolute top-0 right-0 h-full animate-rope-v"
           style={{ 
             width: `${config.sharpThickness}px`, 
-            background: verticalSharpGradientString, 
-            backgroundSize: '100% 250%',
+            background: verticalGradient,
             animationDuration: `${config.speed * 1.2}s`,
             boxShadow: `0 0 ${config.glow * 2}px ${config.sharpColors[config.sharpColors.length - 1]}`
           }}
@@ -130,26 +102,26 @@ const EdgeRopeLight = () => {
       </div>
 
       <style>{`
-        @keyframes ocean-h {
-          0% { background-position: -250% 0; }
-          100% { background-position: 250% 0; }
+        @keyframes rope-h {
+          0% { transform: translate3d(-50%, 0, 0); }
+          100% { transform: translate3d(0%, 0, 0); }
         }
-        @keyframes ocean-h-rev {
-          0% { background-position: 250% 0; }
-          100% { background-position: -250% 0; }
+        @keyframes rope-h-rev {
+          0% { transform: translate3d(0%, 0, 0); }
+          100% { transform: translate3d(-50%, 0, 0); }
         }
-        @keyframes ocean-v {
-          0% { background-position: 0 -250%; }
-          100% { background-position: 0 250%; }
+        @keyframes rope-v {
+          0% { transform: translate3d(0, -50%, 0); }
+          100% { transform: translate3d(0, 0%, 0); }
         }
-        @keyframes ocean-v-rev {
-          0% { background-position: 0 250%; }
-          100% { background-position: 0 -250%; }
+        @keyframes rope-v-rev {
+          0% { transform: translate3d(0, 0%, 0); }
+          100% { transform: translate3d(0, -50%, 0); }
         }
-        .animate-ocean-h { animation: ocean-h linear infinite; }
-        .animate-ocean-h-rev { animation: ocean-h-rev linear infinite; }
-        .animate-ocean-v { animation: ocean-v linear infinite; }
-        .animate-ocean-v-rev { animation: ocean-v-rev linear infinite; }
+        .animate-rope-h { animation: rope-h linear infinite; }
+        .animate-rope-h-rev { animation: rope-h-rev linear infinite; }
+        .animate-rope-v { animation: rope-v linear infinite; }
+        .animate-rope-v-rev { animation: rope-v-rev linear infinite; }
       `}</style>
     </div>
   );

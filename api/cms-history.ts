@@ -8,7 +8,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(405).json({ message: "Method Not Allowed" });
     }
 
-    const { filePath } = req.query;
+    const { filePath } = req.query || {};
 
     if (!filePath || typeof filePath !== "string") {
       return res.status(400).json({ 
@@ -21,12 +21,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const result = await coreGetHistory(filePath);
     return res.status(result.success ? 200 : (result.code || 500)).json(result);
   } catch (err: any) {
-    console.error("CRITICAL ERROR in cms-history:", err);
+    console.error("CRITICAL ERROR in cms-history handler:", err);
     return res.status(500).json({ 
       success: false, 
-      error: "Critical server error inside cms-history", 
+      error: `Critical server error: ${err.message}`, 
       details: err.message,
-      stack: err.stack 
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined 
     });
   }
 }

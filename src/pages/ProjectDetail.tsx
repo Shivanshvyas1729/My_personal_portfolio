@@ -7,6 +7,7 @@ import { ArrowLeft, Github, ExternalLink, Play, Lock } from "lucide-react";
 import { useState } from "react";
 import { ResourcesModal } from "@/components/portfolio/ResourcesModal";
 import { useCMSData } from "@/context/CMSContext";
+import Magnetic from "@/components/ui/Magnetic";
 
 const ProjectDetail = () => {
   const { id } = useParams();
@@ -69,23 +70,29 @@ const ProjectDetail = () => {
 
               <div className="flex flex-wrap gap-3">
                 {project.github && (
-                  <a href={project.github} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl glass-card-hover text-sm font-medium">
-                    <Github size={16} /> GitHub
-                  </a>
+                  <Magnetic strength={0.15}>
+                    <a href={project.github} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl glass-card-hover text-sm font-medium">
+                      <Github size={16} /> GitHub
+                    </a>
+                  </Magnetic>
                 )}
                 {project.live && (
-                  <a href={project.live} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:shadow-[0_0_20px_-5px_hsl(var(--primary)/0.5)] transition-all">
-                    <ExternalLink size={16} /> Live Demo
-                  </a>
+                  <Magnetic strength={0.15}>
+                    <a href={project.live} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:shadow-[0_0_20px_-5px_hsl(var(--primary)/0.5)] transition-all">
+                      <ExternalLink size={16} /> Live Demo
+                    </a>
+                  </Magnetic>
                 )}
                 {(project.resources?.length ?? 0) > 0 && (
-                  <ResourcesModal project={project}>
-                    <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-secondary text-secondary-foreground text-sm font-medium hover:bg-secondary/80 transition-all border border-border">
-                      <Lock size={16} className="text-primary" /> View Resources
-                    </button>
-                  </ResourcesModal>
+                  <Magnetic strength={0.15}>
+                    <ResourcesModal project={project}>
+                      <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-secondary text-secondary-foreground text-sm font-medium hover:bg-secondary/80 transition-all border border-border">
+                        <Lock size={16} className="text-primary" /> View Resources
+                      </button>
+                    </ResourcesModal>
+                  </Magnetic>
                 )}
               </div>
             </div>

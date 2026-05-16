@@ -287,17 +287,34 @@ export const UnifiedAdminDashboard = () => {
   };
 
   const fetchHistory = async (file: string) => {
+    if (!file) return;
     setLoadingHistory(true);
     try {
-      const res = await fetch(`/api/cms-history?filePath=${file}`);
+      const res = await fetch(`/api/cms-history?filePath=${encodeURIComponent(file)}`);
+      if (!res.ok) {
+        const text = await res.text();
+        try {
+          const json = JSON.parse(text);
+          setErrorMsg(json.error || `Server Error (${res.status})`);
+        } catch {
+          setErrorMsg(`Network Error: ${res.statusText || res.status}`);
+        }
+        setLoadingHistory(false);
+        return;
+      }
       const result = await res.json();
       if (result.success) setHistoryLogs(result.data.commits || []);
       else setErrorMsg(result.error || "Failed to load history");
-    } catch {
-      setErrorMsg("Failed to load history");
+    } catch (e: any) {
+      setErrorMsg("Connection failure: " + e.message);
     }
     setLoadingHistory(false);
   };
+
+  // Clear error message when switching contexts
+  useEffect(() => {
+    setErrorMsg("");
+  }, [activeTab, localActiveSection]);
 
   useEffect(() => {
     if (activeTab === 'history') fetchHistory('src/data/portfolio.yaml');
@@ -307,6 +324,15 @@ export const UnifiedAdminDashboard = () => {
     return (previewData as any)[localActiveSection] || {};
   }, [previewData, localActiveSection]);
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const syncStatus = useMemo(() => {
     if (forceLocalMode) return { label: 'Local (Forced)', color: 'bg-amber-500/20 text-amber-500', icon: '🚧' };
     if (cmsMode === 'local') return { label: 'Local Mode', color: 'bg-green-500/20 text-green-500', icon: '🏠' };
@@ -314,14 +340,16 @@ export const UnifiedAdminDashboard = () => {
     return { label: 'Connecting...', color: 'bg-muted text-muted-foreground', icon: '⏳' };
   }, [cmsMode, forceLocalMode]);
 
-  const containerStyle: React.CSSProperties = isMaximized 
+  const containerStyle: React.CSSProperties = (isMaximized || isMobile)
     ? { 
         position: 'fixed', 
-        inset: 0, 
+        inset: isMobile ? '8px' : 0, 
         zIndex: 90,
-        width: '100% !important',
-        height: '100% !important',
-        transform: 'none !important'
+        width: isMobile ? 'calc(100% - 16px)' : '100% !important',
+        height: isMobile ? 'calc(100% - 16px)' : '100% !important',
+        transform: 'none !important',
+        willChange: 'transform, width, height',
+        backfaceVisibility: 'hidden'
       } 
     : { 
         position: "fixed", 
@@ -329,30 +357,31 @@ export const UnifiedAdminDashboard = () => {
         width: geom.current.w,
         height: geom.current.h,
         transform: `translate3d(${geom.current.x}px, ${geom.current.y}px, 0)`,
-        willChange: isInteracting ? 'transform, width, height' : 'auto'
+        willChange: 'transform, width, height',
+        backfaceVisibility: 'hidden'
       };
 
   return (
     <div
       ref={panelRef}
       style={containerStyle}
-      className={`no-text-effect glass-card ${isMaximized ? 'rounded-none' : 'rounded-2xl shadow-2xl border border-primary/20'} flex flex-col overflow-hidden bg-background/95 backdrop-blur-3xl ${!isInteracting ? 'transition-[border-radius,width,height,transform] duration-300' : ''} ${isMinimized ? '!h-12 !w-80' : ''}`}
+      className={`no-text-effect glass-card ${isMaximized || isMobile ? 'rounded-2xl' : 'rounded-2xl shadow-2xl border border-primary/20'} flex flex-col overflow-hidden bg-background/95 backdrop-blur-3xl ${!isInteracting ? 'transition-all duration-300' : ''} ${isMinimized ? '!h-12 !w-80' : ''}`}
     >
       {/* HEADER */}
       <div 
         onPointerDown={onHeaderPointerDown}
         onPointerMove={onHeaderPointerMove}
         onPointerUp={onHeaderPointerUp}
-        className="flex items-center justify-between px-4 py-3 border-b border-border/30 bg-primary/10 cursor-grab active:cursor-grabbing shrink-0"
+        className={`flex items-center justify-between px-4 py-3 border-b border-border/30 bg-primary/10 ${isMobile ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'} shrink-0`}
       >
         <div className="flex items-center gap-2 pointer-events-none min-w-0">
-           <span className="text-sm font-bold shrink-0">CMS Matrix</span>
+           <span className="text-sm font-bold shrink-0">CRM Matrix</span>
            {!isMinimized && adminLabel && (
              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tighter flex items-center gap-1 shrink-0 ${isSuperAdmin ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-blue-500/15 text-blue-400 border border-blue-500/20'}`}>
                {adminLabel}
              </span>
            )}
-           {!isMinimized && (
+           {!isMinimized && !isMobile && (
              <div className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tighter flex items-center gap-1.5 shrink-0 ${syncStatus.color}`}>
                <span>{syncStatus.icon}</span>
                <span>{syncStatus.label}</span>
@@ -373,8 +402,8 @@ export const UnifiedAdminDashboard = () => {
                  Preview
                  <input type="checkbox" checked={previewMode} onChange={e => setPreviewMode(e.target.checked)} className="accent-primary" />
                </label>
-               <div className="w-px h-4 bg-border mx-1" />
-               <button onClick={() => setIsMaximized(!isMaximized)} className="p-1 hover:bg-muted rounded text-muted-foreground transition-colors">
+               <div className="hidden sm:block w-px h-4 bg-border mx-1" />
+               <button onClick={() => setIsMaximized(!isMaximized)} className="hidden md:block p-1 hover:bg-muted rounded text-muted-foreground transition-colors">
                  {isMaximized ? <Minimize2 size={14}/> : <Maximize2 size={14} />}
                </button>
              </>
@@ -408,29 +437,31 @@ export const UnifiedAdminDashboard = () => {
       )}
 
       {!isMinimized && (
-        <div className={`flex flex-1 overflow-hidden relative ${isInteracting ? 'pointer-events-none' : ''}`}>
-          <div className="w-[180px] bg-muted/20 border-r border-border/40 flex flex-col p-3 gap-2 overflow-y-auto shrink-0">
-             <div className="text-[10px] font-bold text-muted-foreground uppercase opacity-70 tracking-wider mb-1 mt-2 px-2">Modules</div>
-               {['portfolio', 'projects', 'blog', 'history', 'settings', 'logs'].map(tab => (
-                 <button 
-                   key={tab} 
-                   onClick={() => setActiveTab(tab as any)}
-                   className={`text-sm font-medium px-3 py-2 rounded-lg text-left transition-colors capitalize ${activeTab === tab ? 'bg-primary/20 text-primary' : 'hover:bg-muted/50 text-muted-foreground'}`}
-                 >
-                   {tab === 'logs' ? (
-                     <span className="flex items-center gap-2">
-                       {tab}
-                       {auditLogs.some(l => l.status === 'error') && (
-                         <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
-                       )}
-                     </span>
-                   ) : tab}
-                 </button>
-               ))}
+        <div className={`flex flex-1 overflow-hidden relative ${isInteracting ? 'pointer-events-none' : ''} ${isMobile ? 'flex-col' : 'flex-row'}`}>
+          {/* SIDEBAR / MOBILE TAB BAR */}
+          <div className={`${isMobile ? 'w-full h-auto flex-row overflow-x-auto whitespace-nowrap scrollbar-hide py-1.5 border-b' : 'w-[180px] flex-col overflow-y-auto border-r'} bg-muted/20 border-border/40 flex p-2 gap-1 shrink-0`}>
+             {!isMobile && <div className="text-[10px] font-bold text-muted-foreground uppercase opacity-70 tracking-wider mb-1 mt-2 px-2">Modules</div>}
+                {['portfolio', 'projects', 'blog', 'history', 'settings', 'logs'].map(tab => (
+                  <button 
+                    key={tab} 
+                    onClick={() => setActiveTab(tab as any)}
+                    className={`text-sm font-medium transition-colors capitalize ${isMobile ? 'px-4 py-1.5 rounded-full' : 'px-3 py-2 rounded-lg text-left'} ${activeTab === tab ? 'bg-primary text-primary-foreground' : 'hover:bg-muted/50 text-muted-foreground'}`}
+                  >
+                    {tab === 'logs' ? (
+                      <span className="flex items-center gap-2">
+                        {tab}
+                        {auditLogs.some(l => l.status === 'error') && (
+                          <span className={`w-1.5 h-1.5 rounded-full bg-destructive animate-pulse ${activeTab === tab ? 'bg-white' : ''}`} />
+                        )}
+                      </span>
+                    ) : tab}
+                  </button>
+                ))}
 
              {activeTab === 'portfolio' && (
                <>
-                 <div className="text-[10px] font-bold text-muted-foreground uppercase opacity-70 tracking-wider mb-1 mt-4 px-2">Sections</div>
+                 {!isMobile && <div className="text-[10px] font-bold text-muted-foreground uppercase opacity-70 tracking-wider mb-1 mt-4 px-2">Sections</div>}
+                 {isMobile && <div className="w-px h-6 bg-border mx-2 self-center shrink-0" />}
                  {[
                    "home", "hero", "personal", "about", "projects-shortcut", "stats", "skills", "techStack", "services", "education", "experience", "resume"
                  ]
@@ -442,9 +473,9 @@ export const UnifiedAdminDashboard = () => {
                        if (sec === 'projects-shortcut') setActiveTab('projects');
                        else setLocalActiveSection(sec);
                      }}
-                     className={`text-[13px] font-medium px-3 py-1.5 rounded-lg text-left transition-colors capitalize ${
+                     className={`font-medium transition-colors capitalize shrink-0 ${isMobile ? 'px-4 py-1.5 rounded-full text-xs' : 'text-[13px] px-3 py-1.5 rounded-lg text-left'} ${
                        sec === 'projects-shortcut' ? 'text-primary/80 hover:bg-primary/5 italic' :
-                       localActiveSection === sec ? 'bg-muted border border-border/50 text-foreground shadow-sm' : 
+                       localActiveSection === sec ? (isMobile ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-muted border border-border/50 text-foreground shadow-sm') : 
                        'hover:bg-muted/30 text-muted-foreground border border-transparent'
                      }`}
                    >
@@ -471,6 +502,12 @@ export const UnifiedAdminDashboard = () => {
                   )}
                 </div>
                 <div className="p-4 border-t border-border/40 bg-muted/10 shrink-0 flex items-center justify-end gap-3">
+                  <button 
+                    onClick={() => setPreviewMode(!previewMode)}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors border ${previewMode ? 'bg-primary/20 text-primary border-primary/30' : 'bg-muted hover:bg-muted/80 text-muted-foreground border-border/50'}`}
+                  >
+                    {previewMode ? "Exit Preview" : "Preview Changes"}
+                  </button>
                   <button 
                     disabled={isLoading}
                     onClick={() => saveContent(localActiveSection, activeSectionData)}

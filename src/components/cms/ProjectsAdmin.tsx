@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Project } from '@/data/portfolioData';
-import { Plus, Edit3, Trash2, X, Github, ExternalLink, Star } from 'lucide-react';
+import { Plus, Edit3, Trash2, X, Github, ExternalLink, Star, RefreshCw } from 'lucide-react';
 import { DynamicForm } from './DynamicForm';
 import { ProjectSchema } from '@/lib/schema';
 import { useCMSState } from '@/context/CMSContext';
@@ -76,39 +76,39 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
 
   return (
     <div className="flex flex-col h-full bg-background relative">
-      <div className="flex items-center justify-between mb-4 px-4 pt-4 shrink-0">
+      <div className="flex flex-col xs:flex-row xs:items-center justify-between mb-4 px-4 pt-4 shrink-0 gap-3">
         <div className="flex items-center gap-3">
           <h3 className="text-lg font-bold text-foreground font-heading">Manage Projects</h3>
           {hasPendingChanges && (
-            <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 text-[10px] font-bold uppercase tracking-wider border border-amber-500/20">
-              Pending Changes
+            <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 text-[9px] font-bold uppercase tracking-wider border border-amber-500/20">
+              Pending
             </span>
           )}
         </div>
         <div className="flex gap-2">
           <button
             onClick={handleAddNew}
-            className="px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 transition-colors rounded-lg text-sm font-medium flex items-center gap-1.5"
+            className="flex-1 xs:flex-none px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 transition-colors rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
           >
-            <Plus size={14} /> New Project
+            <Plus size={14} /> New
           </button>
           <button
             onClick={async () => {
               setSaveError("");
               const result = await onSave();
               if (result && !result.success) {
-                setSaveError(result.error || "Save failed. Check the Logs tab for details.");
+                setSaveError(result.error || "Save failed.");
               }
             }}
             disabled={isLoading || !hasPendingChanges}
-            className="px-4 py-1.5 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-1.5"
+            className="flex-1 xs:flex-none px-4 py-1.5 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors rounded-lg text-xs font-medium disabled:opacity-50 flex items-center justify-center gap-1.5 whitespace-nowrap"
           >
-            {isLoading ? <><span className="animate-spin inline-block w-3 h-3 border border-white/30 border-t-white rounded-full" /> Saving...</> : (mode === 'local' ? "Save to Local" : "Save to GitHub")}
+            {isLoading ? <><RefreshCw size={12} className="animate-spin" /> ...</> : (mode === 'local' ? "Save Local" : "Sync Cloud")}
           </button>
         </div>
       </div>
       {saveError && (
-        <div className="mx-4 mb-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-xs font-medium">
+        <div className="mx-4 mb-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-[10px] font-medium leading-relaxed">
           ⚠️ {saveError}
         </div>
       )}
@@ -118,31 +118,31 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {projects.map(p => (
             <div key={p.id} className="group glass-card border border-border/50 rounded-xl p-4 flex flex-col hover:border-primary/40 transition-colors relative">
-              <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button onClick={() => handleEdit(p)} className="p-1.5 bg-muted hover:bg-primary/10 hover:text-primary rounded text-muted-foreground transition-colors">
-                  <Edit3 size={14} />
+              <div className="absolute top-2 right-2 flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                <button onClick={() => handleEdit(p)} className="p-2 bg-muted hover:bg-primary/10 hover:text-primary rounded text-muted-foreground transition-colors shadow-sm border border-border/50">
+                  <Edit3 size={12} />
                 </button>
-                <button onClick={() => deleteProject(p.id)} className="p-1.5 bg-muted hover:bg-destructive/10 hover:text-destructive rounded text-muted-foreground transition-colors">
-                  <Trash2 size={14} />
+                <button onClick={() => deleteProject(p.id)} className="p-2 bg-muted hover:bg-destructive/10 hover:text-destructive rounded text-muted-foreground transition-colors shadow-sm border border-border/50">
+                  <Trash2 size={12} />
                 </button>
               </div>
               
-              <div className="flex items-start gap-2 mb-2 pr-16">
-                {p.featured && <Star size={14} className="text-yellow-500 fill-yellow-500 mt-1 shrink-0" />}
-                <h4 className="font-bold text-foreground leading-tight">{p.title}</h4>
+              <div className="flex items-start gap-2 mb-1.5 pr-20 xs:pr-0 sm:pr-16">
+                {p.featured && <Star size={12} className="text-yellow-500 fill-yellow-500 mt-1 shrink-0" />}
+                <h4 className="font-bold text-[13px] text-foreground leading-tight">{p.title}</h4>
               </div>
-              <p className="text-xs text-muted-foreground line-clamp-3 mb-3">{p.description}</p>
+              <p className="text-[11px] text-muted-foreground line-clamp-2 mb-3">{p.description}</p>
               
-              <div className="mt-auto flex items-center gap-3">
-                <div className="flex gap-1 flex-wrap flex-1">
-                  {p.tech?.slice(0, 3).map(t => (
-                    <span key={t} className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/50">{t}</span>
+              <div className="mt-auto flex flex-wrap items-center gap-2">
+                <div className="flex gap-1 flex-wrap flex-1 min-w-0">
+                  {p.tech?.slice(0, 2).map(t => (
+                    <span key={t} className="text-[9px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/50">{t}</span>
                   ))}
-                  {p.tech && p.tech.length > 3 && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/50">+{p.tech.length - 3}</span>}
+                  {p.tech && p.tech.length > 2 && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/50">+{p.tech.length - 2}</span>}
                 </div>
-                <div className="flex gap-2 shrink-0">
-                  {p.github && <Github size={14} className="text-muted-foreground" />}
-                  {p.live && <ExternalLink size={14} className="text-muted-foreground" />}
+                <div className="flex gap-2 shrink-0 items-center">
+                  {p.github && <Github size={12} className="text-muted-foreground/60" />}
+                  {p.live && <ExternalLink size={12} className="text-muted-foreground/60" />}
                 </div>
               </div>
             </div>

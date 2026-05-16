@@ -77,7 +77,7 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
     const shape = unwrapped.shape;
     const currentData = data || {};
     return (
-      <div className={`space-y-4 ${path.length > 0 ? "pl-4 border-l-2 border-border/40 mt-2" : ""}`}>
+      <div className={`space-y-4 ${path.length > 0 ? "pl-2 md:pl-4 border-l-2 border-border/40 mt-2" : ""}`}>
         {Object.keys(shape).map(key => (
           <div key={key} className="space-y-1.5">
             <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block opacity-70">
@@ -187,22 +187,39 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
     const isLargeText = ['description', 'content', 'impact', 'architecture', 'problem_statement', 'howItWorks', 'explainability', 'deployment', 'validation_strategy'].includes(fieldKey);
     const isMediaUrl = fieldKey === 'url' && path.includes('media');
 
+    // Performance Optimization: Local state for inputs to prevent global re-renders on every keystroke
+    const [localValue, setLocalValue] = React.useState(data || '');
+    
+    // Sync local state with global data if global data changes from outside (e.g. undo/redo or sync)
+    React.useEffect(() => {
+      if (data !== localValue) setLocalValue(data || '');
+    }, [data]);
+
+    const handleBlur = () => {
+      if (localValue !== data) {
+        onChange(localValue);
+      }
+    };
+
     return (
       <div className="w-full">
         {isLargeText ? (
           <textarea
-            value={data || ''}
-            onChange={(e) => onChange(e.target.value)}
-            className="w-full bg-background border border-border/30 rounded-lg p-2.5 text-sm focus:outline-none focus:border-primary/50 text-foreground resize-y min-h-[80px]"
+            value={localValue}
+            onChange={(e) => setLocalValue(e.target.value)}
+            onBlur={handleBlur}
+            className="w-full bg-background border border-border/30 rounded-lg p-2.5 text-sm focus:outline-none focus:border-primary/50 text-foreground resize-y min-h-[80px] transition-colors"
             placeholder="Type here..."
           />
         ) : (
           <div className="flex items-center gap-1.5">
             <input
               type={isUrlField || isMediaUrl ? "url" : "text"}
-              value={data || ''}
-              onChange={(e) => onChange(e.target.value)}
-              className="flex-1 bg-background border border-border/30 rounded-lg p-2.5 text-sm focus:outline-none focus:border-primary/50 text-foreground min-w-0"
+              value={localValue}
+              onChange={(e) => setLocalValue(e.target.value)}
+              onBlur={handleBlur}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleBlur(); }}
+              className="flex-1 bg-background border border-border/30 rounded-lg p-2.5 text-sm focus:outline-none focus:border-primary/50 text-foreground min-w-0 transition-colors"
               placeholder={isUrlField || isMediaUrl ? "https://..." : "Value..."}
             />
             {isClickable && (

@@ -43,7 +43,7 @@ const Navbar = () => {
         }
       }
     };
-    window.addEventListener("scroll", onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
@@ -108,19 +108,27 @@ const Navbar = () => {
           {/* Theme Toggle Desktop */}
           <button
             onClick={() => setTheme(isDark ? "light" : "dark")}
-            className="p-2 ml-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            className="p-2 ml-2 rounded-full text-foreground/70 hover:text-foreground hover:bg-muted transition-all duration-300 no-text-effect flex items-center justify-center border border-transparent hover:border-border"
             title="Toggle Theme"
           >
-            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+            {isDark ? (
+              <Sun size={18} className="text-yellow-500 fill-yellow-500/10" />
+            ) : (
+              <Moon size={18} className="text-slate-700 fill-slate-700/10" />
+            )}
           </button>
         </div>
 
         <div className="md:hidden flex items-center gap-4">
           <button
             onClick={() => setTheme(isDark ? "light" : "dark")}
-            className="p-2 rounded-full text-foreground hover:bg-muted transition-colors"
+            className="p-2 rounded-full text-foreground/70 hover:text-foreground hover:bg-muted transition-all no-text-effect flex items-center justify-center border border-border/50"
           >
-            {isDark ? <Sun size={20} /> : <Moon size={20} />}
+            {isDark ? (
+              <Sun size={20} className="text-yellow-500" />
+            ) : (
+              <Moon size={20} className="text-slate-700" />
+            )}
           </button>
           <button
             className="text-foreground"

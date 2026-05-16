@@ -41,6 +41,9 @@
     --glass-border: 214 31% 91% / 0.5;
     --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(260 60% 55%));
     --gradient-text: linear-gradient(135deg, hsl(217 91% 60%), hsl(260 60% 65%));
+    --particle-opacity: 0.05;
+    --particle-opacity-subtle: 0.03;
+    --particle-opacity-minimal: 0.02;
   }
   
   .dark {
@@ -74,6 +77,9 @@
 
     --glass-bg: 222 47% 8% / 0.6;
     --glass-border: 222 30% 20% / 0.3;
+    --particle-opacity: 0.08;
+    --particle-opacity-subtle: 0.06;
+    --particle-opacity-minimal: 0.04;
   }
 }
 
@@ -91,28 +97,62 @@
 
 @layer components {
   .glass-card {
-    @apply bg-card/60 backdrop-blur-xl border border-border/30 rounded-xl;
+    @apply bg-card/60 backdrop-blur-xl border border-border/50 rounded-xl shadow-[0_8px_32px_-4px_rgba(0,0,0,0.05)];
   }
   .glass-card-hover {
-    @apply glass-card transition-all duration-500 hover:border-primary/40 hover:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)];
+    @apply glass-card glass-sheen transition-all duration-500 hover:border-primary/40 hover:shadow-[0_20px_40px_-15px_hsl(var(--primary)/0.2)];
   }
   .gradient-text {
     @apply bg-clip-text text-transparent;
     background-image: var(--gradient-primary);
   }
   .glow-border {
-    @apply border border-primary/30 shadow-[0_0_20px_-5px_hsl(var(--primary)/0.4)];
+    @apply border border-primary/30 shadow-[0_0_20px_-5px_hsl(var(--primary)/0.3)];
   }
   .section-padding {
-    @apply py-20 md:py-28 px-4 md:px-8;
+    @apply py-12 md:py-28 px-4 md:px-8;
+  }
+  
+  @media (max-width: 768px) {
+    h1 { @apply text-4xl leading-[1.1]; }
+    h2 { @apply text-3xl leading-tight; }
+    h3 { @apply text-2xl leading-tight; }
+    .container { @apply px-5; }
+  }
+  .glass-sheen {
+    position: relative;
+    overflow: hidden;
+  }
+  .glass-sheen::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      45deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0) 40%,
+      rgba(255, 255, 255, 0.1) 50%,
+      rgba(255, 255, 255, 0) 60%,
+      transparent 100%
+    );
+    transform: rotate(25deg);
+    transition: transform 0.8s ease-in-out;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .glass-sheen:hover::after {
+    transform: rotate(25deg) translate(20%, 20%);
   }
   .marquee {
     animation: marquee 25s linear infinite;
   }
   .particle-bg {
-    background-image: radial-gradient(circle at 20% 50%, hsl(var(--primary) / 0.08) 0%, transparent 50%),
-                       radial-gradient(circle at 80% 20%, hsl(var(--accent) / 0.06) 0%, transparent 50%),
-                       radial-gradient(circle at 50% 80%, hsl(var(--primary) / 0.04) 0%, transparent 50%);
+    background-image: radial-gradient(circle at 20% 50%, hsl(var(--primary) / var(--particle-opacity, 0.08)) 0%, transparent 50%),
+                       radial-gradient(circle at 80% 20%, hsl(var(--accent) / var(--particle-opacity-subtle, 0.06)) 0%, transparent 50%),
+                       radial-gradient(circle at 50% 80%, hsl(var(--primary) / var(--particle-opacity-minimal, 0.04)) 0%, transparent 50%);
   }
   .dynamic-hover-text {
     color: var(--hover-base-color, currentColor);

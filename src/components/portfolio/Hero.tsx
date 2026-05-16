@@ -3,6 +3,7 @@ import { portfolioData as initialData } from "@/data/portfolioData";
 import { useCMSData } from "@/context/CMSContext";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import defaultProfileImg from "@/assets/profile-placeholder.jpg";
+import Magnetic from "@/components/ui/Magnetic";
 
 const Hero = () => {
   const hero = useCMSData(d => d.hero) || initialData.hero;
@@ -10,8 +11,8 @@ const Hero = () => {
   const stats = useCMSData(d => d.stats) || initialData.stats;
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center particle-bg overflow-hidden">
-      <div className="container mx-auto px-4 pt-24 pb-12 relative z-10">
+    <section id="home" className="relative min-h-[90vh] md:min-h-screen flex items-center particle-bg overflow-hidden py-16 md:py-0">
+      <div className="container mx-auto px-4 relative z-10">
         <div className="grid md:grid-cols-[1fr,auto] gap-12 items-center">
         <div className="max-w-3xl">
           <motion.div
@@ -30,7 +31,7 @@ const Hero = () => {
                 initial={{ opacity: 0, x: -40 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 + i * 0.12, duration: 0.6 }}
-                className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-heading font-bold leading-[1.1] ${
+                className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-heading font-bold leading-[1.1] no-reveal ${
                   i === 1 ? "gradient-text" : ""
                 }`}
               >
@@ -43,7 +44,7 @@ const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
-            className="text-muted-foreground text-lg md:text-xl max-w-2xl mb-8 leading-relaxed"
+            className="text-muted-foreground text-lg md:text-xl max-w-2xl mb-8 leading-relaxed no-reveal"
           >
             {hero?.description || initialData.hero.description}
           </motion.p>
@@ -55,18 +56,19 @@ const Hero = () => {
             className="flex flex-wrap gap-4 mb-12"
           >
             {(hero?.ctas || initialData.hero.ctas).map((cta, i) => (
-              <a
-                key={cta.label}
-                href={cta.link}
-                className={`group inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 ${
-                  i === 0
-                    ? "bg-primary text-primary-foreground hover:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.5)] hover:scale-105"
-                    : "glass-card text-foreground hover:border-primary/40"
-                }`}
-              >
-                {cta.label}
-                {i === 0 && <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />}
-              </a>
+              <Magnetic key={cta.label} strength={0.15}>
+                <a
+                  href={cta.link}
+                  className={`group inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 ${
+                    i === 0
+                      ? "bg-primary text-primary-foreground hover:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.5)] hover:scale-105"
+                      : "glass-card text-foreground hover:border-primary/40"
+                  }`}
+                >
+                  {cta.label}
+                  {i === 0 && <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />}
+                </a>
+              </Magnetic>
             ))}
           </motion.div>
 
@@ -95,7 +97,7 @@ const Hero = () => {
           transition={{ delay: 0.5, duration: 0.8 }}
           className={`hidden md:block ${(personal?.profileImage?.position || 'right') === 'left' ? 'order-first' : 'order-last'}`}
         >
-          <div className="relative w-72 h-72 lg:w-80 lg:h-80">
+          <div className="relative w-64 h-64 lg:w-80 lg:h-80">
             <div className="absolute inset-0 rounded-full bg-primary/20 blur-3xl animate-glow-pulse" />
             <img
               src={

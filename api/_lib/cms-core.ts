@@ -268,11 +268,11 @@ export async function coreGetHistory(filePath: string): Promise<CmsApiResult> {
       success: true,
       mode: "github",
       data: {
-        commits: commits.data.map(c => ({
-          sha: c.sha,
-          message: c.commit.message,
-          date: c.commit.committer?.date,
-          author: c.commit.author?.name
+        commits: (commits.data || []).map((c: any) => ({
+          sha: c.sha || 'unknown',
+          message: c.commit?.message || 'No message',
+          date: c.commit?.committer?.date || c.commit?.author?.date || new Date().toISOString(),
+          author: c.commit?.author?.name || 'Unknown Author'
         }))
       }
     };

@@ -1,4 +1,5 @@
-import { useRef, useMemo, Suspense, useState } from "react";
+import { useRef, useMemo, Suspense, useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Text, Float, OrbitControls, Billboard } from "@react-three/drei";
 import { portfolioData as initialData } from "@/data/portfolioData";
@@ -6,6 +7,7 @@ import { useCMSData } from "@/context/CMSContext";
 import * as THREE from "three";
 import AnimatedSection from "./AnimatedSection";
 import { Code2, Cpu, Database, Cloud, Layers, Terminal } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 
 interface TechLabelProps {
   text: string;
@@ -15,6 +17,8 @@ interface TechLabelProps {
 }
 
 const TechLabel = ({ text, position, index, total }: TechLabelProps) => {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const ref = useRef<THREE.Group>(null);
 
   useFrame(({ clock }) => {
@@ -32,11 +36,11 @@ const TechLabel = ({ text, position, index, total }: TechLabelProps) => {
     <Billboard ref={ref} position={position} follow={true} lockX={false} lockY={false} lockZ={false}>
       <Text
         fontSize={0.22}
-        color="#93c5fd"
+        color={isDark ? "#93c5fd" : "#2563eb"}
         anchorX="center"
         anchorY="middle"
         outlineWidth={0.005}
-        outlineColor="#1e3a8a"
+        outlineColor={isDark ? "#1e3a8a" : "#dbeafe"}
       >
         {text}
       </Text>
@@ -45,6 +49,8 @@ const TechLabel = ({ text, position, index, total }: TechLabelProps) => {
 };
 
 const SynapseLines = ({ positions }: { positions: [number, number, number][] }) => {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const ref = useRef<THREE.LineSegments>(null);
   
   const lineGeometry = useMemo(() => {
@@ -78,12 +84,14 @@ const SynapseLines = ({ positions }: { positions: [number, number, number][] }) 
 
   return (
     <lineSegments ref={ref} geometry={lineGeometry}>
-      <lineBasicMaterial color="#3b82f6" transparent opacity={0.12} />
+      <lineBasicMaterial color={isDark ? "#3b82f6" : "#2563eb"} transparent opacity={0.12} />
     </lineSegments>
   );
 };
 
 const DataField = () => {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const ref = useRef<THREE.Points>(null);
   
   const [positions] = useState(() => {
@@ -116,7 +124,7 @@ const DataField = () => {
         />
       </bufferGeometry>
       <pointsMaterial
-        color="#60a5fa"
+        color={isDark ? "#60a5fa" : "#3b82f6"}
         size={0.015}
         sizeAttenuation={true}
         transparent
@@ -128,6 +136,8 @@ const DataField = () => {
 };
 
 const SphereShell = () => {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const ref = useRef<THREE.Mesh>(null);
   useFrame(({ clock }) => {
     if (ref.current) {
@@ -138,12 +148,14 @@ const SphereShell = () => {
   return (
     <mesh ref={ref}>
       <sphereGeometry args={[3.6, 24, 24]} />
-      <meshBasicMaterial color="#3b82f6" wireframe opacity={0.03} transparent />
+      <meshBasicMaterial color={isDark ? "#3b82f6" : "#2563eb"} wireframe opacity={0.03} transparent />
     </mesh>
   );
 };
 
 const RobotAvatar = () => {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const groupRef = useRef<THREE.Group>(null);
   const haloRef = useRef<THREE.Mesh>(null);
   
@@ -161,38 +173,40 @@ const RobotAvatar = () => {
     <group ref={groupRef}>
       <mesh ref={haloRef} rotation={[Math.PI / 2.5, 0, 0]} position={[0, 0.1, 0]}>
         <torusGeometry args={[1.2, 0.01, 16, 100]} />
-        <meshBasicMaterial color="#3b82f6" transparent opacity={0.2} />
+        <meshBasicMaterial color={isDark ? "#3b82f6" : "#2563eb"} transparent opacity={0.2} />
       </mesh>
       <mesh>
         <boxGeometry args={[0.9, 0.9, 0.9]} />
-        <meshStandardMaterial color="#0f172a" metalness={1} roughness={0.2} />
+        <meshStandardMaterial color={isDark ? "#0f172a" : "#f1f5f9"} metalness={1} roughness={0.2} />
       </mesh>
       <mesh position={[0, 0, 0.46]}>
         <planeGeometry args={[0.7, 0.7]} />
-        <meshBasicMaterial color="#1e293b" />
+        <meshBasicMaterial color={isDark ? "#1e293b" : "#e2e8f0"} />
       </mesh>
       <mesh position={[-0.2, 0.1, 0.47]}>
         <planeGeometry args={[0.18, 0.04]} />
-        <meshBasicMaterial color="#60a5fa" />
+        <meshBasicMaterial color={isDark ? "#60a5fa" : "#3b82f6"} />
       </mesh>
       <mesh position={[0.2, 0.1, 0.47]}>
         <planeGeometry args={[0.18, 0.04]} />
-        <meshBasicMaterial color="#60a5fa" />
+        <meshBasicMaterial color={isDark ? "#60a5fa" : "#3b82f6"} />
       </mesh>
-      <pointLight color="#3b82f6" intensity={2} distance={2} />
+      <pointLight color={isDark ? "#3b82f6" : "#2563eb"} intensity={isDark ? 2 : 1} distance={2} />
       <mesh position={[0, 0.7, 0]}>
         <sphereGeometry args={[0.05]} />
-        <meshBasicMaterial color="#60a5fa" />
+        <meshBasicMaterial color={isDark ? "#60a5fa" : "#3b82f6"} />
       </mesh>
       <mesh position={[0, 0.55, 0]}>
         <cylinderGeometry args={[0.01, 0.01, 0.3]} />
-        <meshBasicMaterial color="#334155" />
+        <meshBasicMaterial color={isDark ? "#334155" : "#94a3b8"} />
       </mesh>
     </group>
   );
 };
 
 const Scene = () => {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const techStack = useCMSData(d => d.techStack) || initialData.techStack;
   const tools = techStack?.featured || initialData.techStack.featured;
   const groupRef = useRef<THREE.Group>(null);
@@ -247,10 +261,12 @@ const getTechIcon = (tech: string) => {
 const TechSphere = () => {
   const techStack = useCMSData(d => d.techStack) || initialData.techStack;
   const allTools = techStack?.all || initialData.techStack.all;
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const gridClass = "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6";
 
   return (
-    <section className="section-padding relative overflow-hidden bg-[#020617]">
+    <section className="section-padding relative overflow-hidden bg-background">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[160px] -z-10 pointer-events-none" />
       
       <div className="container mx-auto relative z-10">
@@ -269,8 +285,8 @@ const TechSphere = () => {
         </AnimatedSection>
 
         <AnimatedSection>
-          <div className="relative w-full h-[500px] md:h-[600px] mb-20 group">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.08)_0%,transparent_70%)] pointer-events-none" />
+          <div className="relative w-full h-[350px] md:h-[600px] mb-12 md:mb-20 group">
+            <div className={`absolute inset-0 ${isDark ? "bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.08)_0%,transparent_70%)]" : "bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.12)_0%,transparent_70%)]"} pointer-events-none`} />
             
             <div className="relative z-10 w-full h-full cursor-grab active:cursor-grabbing">
               <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
@@ -297,44 +313,88 @@ const TechSphere = () => {
         </AnimatedSection>
 
         <AnimatedSection>
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex flex-col md:flex-row items-end justify-between mb-12 gap-6">
-              <div className="max-w-lg">
-                <h4 className="text-3xl font-heading font-bold text-white mb-3">
-                  Technical Arsenal
-                </h4>
-                <p className="text-muted-foreground">
-                  A comprehensive breakdown of my full stack capabilities and domain expertise.
-                </p>
-              </div>
-              <div className="flex flex-col items-end">
-                <div className="text-4xl font-black text-primary/40 leading-none">01</div>
-                <div className="h-px w-24 bg-gradient-to-r from-transparent to-primary mt-2" />
-              </div>
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-end justify-between mb-12 gap-6">
+            <div className="max-w-lg">
+              <h4 className="text-3xl font-heading font-bold text-foreground mb-3">
+                Technical Arsenal
+              </h4>
+              <p className="text-muted-foreground">
+                A comprehensive breakdown of my full stack capabilities and domain expertise.
+              </p>
             </div>
-            
-            <div className={`grid gap-4 sm:gap-6 ${gridClass}`}>
-              {allTools.map((tech, index) => (
-                <div 
-                  key={tech}
-                  className="group relative h-28 bg-white/[0.03] backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex flex-col items-center justify-center gap-3 hover:bg-primary/10 hover:border-primary/50 transition-all duration-500 hover:-translate-y-1.5 overflow-hidden"
-                  style={{ transitionDelay: `${(index % 12) * 30}ms` }}
-                >
-                  <div className="absolute top-0 right-0 w-12 h-12 bg-primary/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                  
-                  <div className="relative z-10 w-10 h-10 rounded-xl bg-slate-900 border border-white/5 flex items-center justify-center text-primary group-hover:scale-110 group-hover:text-white group-hover:bg-primary transition-all duration-300">
-                    {getTechIcon(tech)}
-                  </div>
-                  
-                  <span className="relative z-10 text-xs sm:text-sm font-semibold text-slate-300 group-hover:text-white tracking-wide text-center">
-                    {tech}
-                  </span>
-                  
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-primary group-hover:w-full transition-all duration-500" />
-                </div>
-              ))}
+            <div className="flex flex-col items-end hidden md:flex">
+              <div className="text-4xl font-black text-primary/40 leading-none">01</div>
+              <div className="h-px w-24 bg-gradient-to-r from-transparent to-primary mt-2" />
             </div>
           </div>
+
+          {/* Categorized Tabs from CRM */}
+          {(() => {
+            const skills = useCMSData(d => d.skills) || initialData.skills;
+            const categories = skills?.categories || [];
+            
+            const [activeCategory, setActiveCategory] = useState(categories[0]?.title || "");
+
+            // Auto-fallback if active category disappears
+            useEffect(() => {
+              if (categories.length > 0 && !categories.find(c => c.title === activeCategory)) {
+                setActiveCategory(categories[0].title);
+              }
+            }, [categories, activeCategory]);
+
+            const activeCatData = categories.find(c => c.title === activeCategory);
+            const tools = activeCatData?.items || [];
+
+            return (
+              <div className="space-y-8">
+                {/* Tab List */}
+                <div className="flex overflow-x-auto pb-4 scrollbar-hide gap-2 -mx-4 px-4 md:mx-0 md:px-0 justify-start lg:justify-center">
+                  {categories.map(cat => (
+                    <button
+                      key={cat.title}
+                      onClick={() => setActiveCategory(cat.title)}
+                      className={`px-5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${
+                        activeCategory === cat.title 
+                          ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20 scale-105" 
+                          : "bg-muted/50 text-muted-foreground border-border/50 hover:border-primary/30 hover:text-primary"
+                      }`}
+                    >
+                      {cat.title}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Tools Grid */}
+                <motion.div 
+                  key={activeCategory}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`grid gap-4 sm:gap-6 ${gridClass}`}
+                >
+                  {tools.length > 0 ? tools.map((tech) => (
+                    <div 
+                      key={tech}
+                      className="group relative h-24 sm:h-28 bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-primary/10 hover:border-primary/50 transition-all duration-500 hover:-translate-y-1.5 overflow-hidden shadow-sm"
+                    >
+                      <div className="absolute top-0 right-0 w-12 h-12 bg-primary/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="relative z-10 w-9 h-9 rounded-xl bg-slate-900 border border-white/5 flex items-center justify-center text-primary group-hover:scale-110 group-hover:text-white group-hover:bg-primary transition-all duration-300">
+                        {getTechIcon(tech)}
+                      </div>
+                      <span className="relative z-10 text-[11px] sm:text-xs font-semibold text-muted-foreground group-hover:text-foreground tracking-wide text-center transition-colors">
+                        {tech}
+                      </span>
+                    </div>
+                  )) : (
+                    <div className="col-span-full py-12 text-center text-muted-foreground italic text-sm">
+                      {categories.length === 0 ? "No skills defined in CRM" : "Select a category to view technologies"}
+                    </div>
+                  )}
+                </motion.div>
+              </div>
+            );
+          })()}
+        </div>
         </AnimatedSection>
       </div>
     </section>

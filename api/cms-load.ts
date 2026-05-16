@@ -8,7 +8,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(405).json({ message: "Method Not Allowed" });
     }
 
-    const { filePath } = req.query;
+    const { filePath } = req.query || {};
 
     if (!filePath || typeof filePath !== "string") {
       return res.status(400).json({ 

@@ -4,16 +4,53 @@ A production-grade, fully autonomous **React + Vite portfolio** backed by a **Un
 
 ---
 
+> [!IMPORTANT]
+> ### 🌌 Powered by Antigravity AI
+> This repository is optimized for **Antigravity**, your powerful agentic AI coding assistant. Antigravity isn't just a helper—it's a core part of the development lifecycle of this portfolio.
+>
+> **What Antigravity can do for you:**
+> - 🛠 **Automated Debugging**: Simply describe an error, and Antigravity will trace, diagnose, and patch it across the stack.
+> - ⚡ **Command Orchestration**: Need to run a build, sync data, or setup a new environment? Antigravity handles the terminal for you.
+> - 🎨 **UI/UX Refinement**: Ask Antigravity to "make it look premium," and it will implement modern aesthetics, smooth animations, and responsive layouts.
+> - 📖 **Architectural Guidance**: Understand complex CMS logic or 3D rendering pipelines by asking Antigravity for a walkthrough.
+
+---
+
+
+---
+
+## 🛠 Technology Stack
+
+| Layer | Technologies | Purpose |
+| :--- | :--- | :--- |
+| **Frontend** | React 18, Vite, TypeScript | Core UI framework and build tool |
+| **Styling** | Tailwind CSS, Framer Motion | Design system and micro-animations |
+| **3D Engine** | Three.js, React Three Fiber | Tech Ecosystem & Synapse Hub visualizations |
+| **CMS** | Unified Matrix (Custom) | Platform-agnostic content management |
+| **Backend** | Vercel/Netlify Functions | Serverless API routes for Git sync & Auth |
+| **Database** | YAML (Local FS / GitHub) | Version-controlled, human-readable data |
+| **Forms** | React Hook Form, Zod | Validation and dynamic schema management |
+
+---
+
 ## 🚀 Project Setup & Developer Onboarding
+
 
 Welcome to the project! This guide will help any developer set up their local environment, run the app, and understand the workflow.
 
-### 1️⃣ Prerequisites
+### 1️⃣ System Requirements & Prerequisites
 
-Before you begin, ensure you have the following installed on your machine:
-- **Node.js**: `v18.0.0` or higher (we recommend using [nvm](https://github.com/nvm-sh/nvm))
-- **Git**: Installed and configured
-- **Package Manager**: `npm` (v9+ recommended)
+Below are the core requirements needed to run and maintain the Shivansh Portfolio project:
+
+| Requirement | Specification | Description |
+| :--- | :--- | :--- |
+| **Node.js** | `v18.0.0`+ | Core runtime environment (LTS recommended) |
+| **npm / Bun** | `v9.0.0`+ / `v1.0`+ | Package managers for dependency handling |
+| **GitHub PAT** | Classic Token | Required for production CMS Git sync (Repo scopes) |
+| **EmailJS** | Service Config | Authentication keys for contact form logic |
+| **Modern Browser** | Chrome/Edge/Safari | Support for Three.js 3D Ecosystem & CSS Gradients |
+| **Git** | Latest Version | Version control and repository management |
+
 
 **Installation Commands:**
 
@@ -95,6 +132,9 @@ npm run preview
 
 ### 5️⃣ Common Issues & Troubleshooting
 
+> [!TIP]
+> **Pro-Tip**: If you encounter any of the issues below, don't waste time manual debugging. Simply copy the error message and ask **Antigravity** to "Fix this error" or "Debug my environment"—it will handle the rest!
+
 - **Node version mismatch:** If you encounter `npm install` errors, ensure you are using Node 18+. Run `node -v` to verify.
 - **Port already in use:** Vite uses port `5173` by default. If taken, it will automatically use the next available port (e.g., `5174`).
 - **Missing environment variables:** If CMS features or contact forms fail, double-check that your `.env` contains all keys from `.env.example`.
@@ -104,6 +144,7 @@ npm run preview
   npm cache clean --force
   npm install
   ```
+
 
 ### 6️⃣ Git Workflow
 

@@ -2,7 +2,8 @@ import { portfolioData as initialData } from "@/data/portfolioData";
 import { useCMSData } from "@/context/CMSContext";
 import AnimatedSection from "./AnimatedSection";
 import { Mail, Phone, Linkedin, Github, Send, Loader2, CheckCircle } from "lucide-react";
-import { useState, FormEvent, useRef, useMemo } from "react";
+import { useState, FormEvent, useRef, useMemo, useEffect } from "react";
+import { motion } from "framer-motion";
 
 const Contact = () => {
   const personal = useCMSData(d => d.personal) || initialData.personal;
@@ -49,8 +50,17 @@ const Contact = () => {
     ].filter(Boolean) as { icon: typeof Mail; label: string; href: string }[];
   }, [personal]);
 
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Auto-expand on desktop (lg breakpoint +)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+      setIsExpanded(true);
+    }
+  }, []);
+
   return (
-    <section id="contact" className="section-padding">
+    <section id="contact" className="pt-12 md:pt-28 pb-4 md:pb-8">
       <div className="container mx-auto">
         <AnimatedSection>
           <h2 className="text-sm font-medium text-primary tracking-widest uppercase mb-2">Contact</h2>
@@ -61,8 +71,8 @@ const Contact = () => {
             Let's build something impactful together.
           </p>
         </AnimatedSection>
-
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12">
+ 
+        <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-start">
           <AnimatedSection>
             <div className="space-y-3 md:space-y-4">
               {links.map(({ icon: Icon, label, href }) => (
@@ -81,42 +91,77 @@ const Contact = () => {
               ))}
             </div>
           </AnimatedSection>
-
+ 
           <AnimatedSection delay={0.1}>
-            <form ref={formRef} onSubmit={handleSubmit} className="glass-card p-4 md:p-6 space-y-4">
-              {(["name", "email"] as const).map((field) => (
-                <div key={field}>
-                  <label className="text-sm text-muted-foreground capitalize mb-1 block">{field}</label>
-                  <input
-                    type={field === "email" ? "email" : "text"}
-                    required
-                    value={form[field]}
-                    onChange={(e) => setForm({ ...form, [field]: e.target.value })}
-                    className="w-full bg-muted/50 border border-border rounded-lg px-4 py-2.5 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
-                  />
-                </div>
-              ))}
-              <div>
-                <label className="text-sm text-muted-foreground mb-1 block">Message</label>
-                <textarea
-                  required
-                  rows={4}
-                  value={form.message}
-                  onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  className="w-full bg-muted/50 border border-border rounded-lg px-4 py-2.5 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all resize-none"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={status === "sending"}
-                className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.5)] hover:scale-[1.02] transition-all duration-300 disabled:opacity-70 disabled:hover:scale-100"
-              >
-                {status === "sending" && <><Loader2 size={16} className="animate-spin" /> Sending...</>}
-                {status === "sent" && <><CheckCircle size={16} /> Sent Successfully!</>}
-                {status === "error" && <>Failed to send. Try again.</>}
-                {status === "idle" && <>Send Message <Send size={16} /></>}
-              </button>
-            </form>
+            <div className="flex flex-col gap-4">
+              {!isExpanded && (
+                <button
+                  onClick={() => setIsExpanded(true)}
+                  className="lg:hidden w-full p-6 rounded-2xl border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-all group flex items-center justify-between"
+                >
+                  <div className="flex flex-col items-start gap-1">
+                    <span className="text-sm font-bold text-primary uppercase tracking-widest">Send a Message</span>
+                    <span className="text-[11px] text-muted-foreground/60">I'll get back to you soon</span>
+                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Send size={18} />
+                  </div>
+                </button>
+              )}
+
+              {isExpanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  className="overflow-hidden"
+                >
+                  <form ref={formRef} onSubmit={handleSubmit} className="glass-card p-4 md:p-6 space-y-4 relative">
+                    <button 
+                      onClick={() => { if (window.innerWidth < 1024) setIsExpanded(false); }}
+                      className="lg:hidden absolute top-4 right-4 p-1.5 rounded-lg hover:bg-muted text-muted-foreground transition-colors"
+                      type="button"
+                    >
+                      <CheckCircle size={16} className="opacity-0" /> {/* Spacer */}
+                      <span className="text-[10px] font-bold uppercase tracking-tighter">Hide</span>
+                    </button>
+
+                    {(["name", "email"] as const).map((field) => (
+                      <div key={field}>
+                        <label className="text-sm text-muted-foreground capitalize mb-1 block">{field}</label>
+                        <input
+                          type={field === "email" ? "email" : "text"}
+                          required
+                          value={form[field]}
+                          onChange={(e) => setForm({ ...form, [field]: e.target.value })}
+                          className="w-full bg-muted/50 border border-border rounded-lg px-4 py-2.5 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
+                        />
+                      </div>
+                    ))}
+                    <div>
+                      <label className="text-sm text-muted-foreground mb-1 block">Message</label>
+                      <textarea
+                        required
+                        rows={4}
+                        value={form.message}
+                        onChange={(e) => setForm({ ...form, message: e.target.value })}
+                        className="w-full bg-muted/50 border border-border rounded-lg px-4 py-2.5 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all resize-none"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={status === "sending"}
+                      className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.5)] hover:scale-[1.02] transition-all duration-300 disabled:opacity-70 disabled:hover:scale-100"
+                    >
+                      {status === "sending" && <><Loader2 size={16} className="animate-spin" /> Sending...</>}
+                      {status === "sent" && <><CheckCircle size={16} /> Sent Successfully!</>}
+                      {status === "error" && <>Failed to send. Try again.</>}
+                      {status === "idle" && <>Send Message <Send size={16} /></>}
+                    </button>
+                  </form>
+                </motion.div>
+              )}
+            </div>
           </AnimatedSection>
         </div>
       </div>
