@@ -22,8 +22,8 @@ blog:
     category: Notes
     type:
       - cloud
-    link: ""
-    date: 2026-05-09
+    link: ''
+    date: 2026-05-09T00:00:00.000Z
     featured: false
     draft: false
   - id: 4
@@ -34,8 +34,8 @@ blog:
     category: Thoughts
     type:
       - gernal
-    link: ""
-    date: 2026-04-11
+    link: ''
+    date: 2026-04-11T00:00:00.000Z
     featured: true
     draft: true
   - id: 3
@@ -47,8 +47,8 @@ blog:
     type:
       - Deep Learning
       - NLP
-    link: ""
-    date: 2026-04-11
+    link: ''
+    date: 2026-04-11T00:00:00.000Z
     featured: false
     draft: false
     resources:
@@ -58,5 +58,24 @@ blog:
     title: Time
     content: “Time doesn’t just pass… it teaches. Every second you lose either becomes a regret or a lesson.”
     category: Thoughts
-    link: no
-    date: 2026-04-10
+    link: 'no'
+    date: 2026-04-10T00:00:00.000Z
+  - id: 6
+    title: Research agents and platform
+    slug: research-agents-and-platform
+    readingTime: 1
+    content: Some agents for research help .
+    category: Links
+    type:
+      - GERNAL
+    link: ''
+    date: '2026-05-17'
+    featured: true
+    draft: false
+    resources:
+      - label: 'scispace '
+        url: https://scispace.com/
+      - label: 'bohrium '
+        url: https://www.bohrium.com/en
+      - label: 'openbio '
+        url: https://openbio.tech/
