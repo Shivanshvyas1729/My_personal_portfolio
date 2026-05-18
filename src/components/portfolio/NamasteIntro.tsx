@@ -38,10 +38,10 @@ export default function NamasteIntro({ onComplete }: NamasteIntroProps) {
         osc2.frequency.setValueAtTime(792, ctx.currentTime);
 
         gainNode.gain.setValueAtTime(0, ctx.currentTime);
-        // Soft bell attack syncing with the light flash
-        gainNode.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.1);
-        // Long, atmospheric reverb decay
-        gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.8);
+        // Snappy bell attack syncing with the rapid light flash
+        gainNode.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.08);
+        // Atmospheric reverb decay
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
 
         osc1.connect(gainNode);
         osc2.connect(gainNode);
@@ -50,18 +50,18 @@ export default function NamasteIntro({ onComplete }: NamasteIntroProps) {
         osc1.start();
         osc2.start();
 
-        osc1.stop(ctx.currentTime + 1.9);
-        osc2.stop(ctx.currentTime + 1.9);
+        osc1.stop(ctx.currentTime + 1.3);
+        osc2.stop(ctx.currentTime + 1.3);
       } catch (e) {
         console.warn("Web Audio API Chime skipped due to user interaction state:", e);
       }
     };
 
-    // Play chime at the peak of the S-shape light animation (approx 350ms in)
-    const audioTimer = setTimeout(playChime, 350);
+    // Play chime rapidly at the peak of the fast S-shape light animation (approx 150ms in)
+    const audioTimer = setTimeout(playChime, 150);
 
-    // Auto complete the intro after 1.8 seconds (duration of full sweep + sign glow)
-    const exitTimer = setTimeout(onComplete, 1850);
+    // Auto complete the intro after 950ms (ultra-fast, highly responsive)
+    const exitTimer = setTimeout(onComplete, 950);
 
     return () => {
       clearTimeout(audioTimer);
@@ -76,17 +76,17 @@ export default function NamasteIntro({ onComplete }: NamasteIntroProps) {
     <motion.div
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.6, ease: "easeInOut" }}
+      transition={{ duration: 0.4, ease: "easeInOut" }}
       className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-black overflow-hidden select-none"
     >
       {/* 🌌 Atmospheric Backdrop Glow */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
+        initial={{ opacity: 0, scale: 0.85 }}
         animate={{ 
           opacity: [0.15, 0.4, 0.15], 
-          scale: [1, 1.15, 1] 
+          scale: [1, 1.1, 1] 
         }}
-        transition={{ duration: 1.8, ease: "easeInOut" }}
+        transition={{ duration: 0.9, ease: "easeInOut" }}
         className="absolute w-[450px] h-[450px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none z-0"
       />
 
@@ -125,7 +125,7 @@ export default function NamasteIntro({ onComplete }: NamasteIntroProps) {
           strokeLinecap="round"
         />
 
-        {/* 2. Beautiful Fading Luminous Trail */}
+        {/* 2. Beautiful Fading Luminous Trail (Rapid Trace) */}
         <motion.path
           d={sCurvePath}
           stroke="url(#neon-laser)"
@@ -135,15 +135,15 @@ export default function NamasteIntro({ onComplete }: NamasteIntroProps) {
           initial={{ pathLength: 0, opacity: 0 }}
           animate={{ 
             pathLength: [0, 1, 1], 
-            opacity: [0, 0.9, 0.2] 
+            opacity: [0, 0.9, 0.15] 
           }}
           transition={{ 
-            duration: 1.6, 
+            duration: 0.8, 
             ease: [0.25, 1, 0.5, 1] 
           }}
         />
 
-        {/* 3. The Traveling Laser Beam Head (Creates the sliding light effect) */}
+        {/* 3. The Traveling Laser Beam Head (Rapid slide effect) */}
         <motion.path
           d={sCurvePath}
           stroke="url(#neon-laser)"
@@ -155,12 +155,12 @@ export default function NamasteIntro({ onComplete }: NamasteIntroProps) {
             pathOffset: [-0.15, 1.05] 
           }}
           transition={{ 
-            duration: 1.5, 
+            duration: 0.75, 
             ease: [0.25, 1, 0.5, 1] 
           }}
         />
 
-        {/* 4. The Final Brilliant "Sign" Flash (Glows once it covers the whole screen) */}
+        {/* 4. The Final Brilliant "Sign" Flash */}
         <motion.path
           d={sCurvePath}
           stroke="#ffffff"
@@ -172,8 +172,8 @@ export default function NamasteIntro({ onComplete }: NamasteIntroProps) {
             opacity: [0, 0, 1, 0] 
           }}
           transition={{ 
-            times: [0, 0.7, 0.85, 1],
-            duration: 1.8,
+            times: [0, 0.5, 0.75, 1],
+            duration: 0.9,
             ease: "easeInOut"
           }}
         />
@@ -183,22 +183,22 @@ export default function NamasteIntro({ onComplete }: NamasteIntroProps) {
       <div className="relative flex flex-col items-center z-20 text-center">
         {/* Glow behind the signature text */}
         <motion.div
-          initial={{ scale: 0.6, opacity: 0 }}
-          animate={{ scale: [0.8, 1.2, 1], opacity: [0, 0.7, 0] }}
-          transition={{ duration: 1.8, ease: "easeInOut" }}
+          initial={{ scale: 0.75, opacity: 0 }}
+          animate={{ scale: [0.85, 1.1, 1], opacity: [0, 0.7, 0] }}
+          transition={{ duration: 0.9, ease: "easeInOut" }}
           className="absolute inset-0 bg-primary/20 rounded-full blur-3xl"
         />
 
         <motion.div
-          initial={{ opacity: 0, y: 30, scale: 0.9 }}
+          initial={{ opacity: 0, y: 20, scale: 0.95 }}
           animate={{ 
             opacity: [0, 0.9, 0.9, 0],
-            y: [30, 0, 0, -10],
-            scale: [0.9, 1, 1, 0.95]
+            y: [20, 0, 0, -8],
+            scale: [0.95, 1, 1, 0.97]
           }}
           transition={{ 
-            times: [0, 0.25, 0.8, 1],
-            duration: 1.8, 
+            times: [0, 0.2, 0.75, 1],
+            duration: 0.9, 
             ease: "easeInOut" 
           }}
           className="flex flex-col items-center gap-2"
