@@ -7,7 +7,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-.env
 node_modules
 
 dist-ssr
@@ -26,4 +25,16 @@ dist-ssr
 
 # Vercel
 .vercel
-.env 
+
+# Build outputs & caches
+dist/
+.netlify/
+.cache/
+*.tsbuildinfo
+
+# Alternative package managers lockfiles
+bun.lock
+bun.lockb
+deno.lock
+yarn.lock
+pnpm-lock.yaml

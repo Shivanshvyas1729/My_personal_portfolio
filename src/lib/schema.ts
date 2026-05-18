@@ -71,6 +71,7 @@ export const SkillsSchema = z.object({
 export const TechStackSchema = z.object({
   featured: z.array(z.string()),
   all: z.array(z.string()),
+  connections: z.array(z.array(z.string())).optional(),
 });
 
 export const ServicesSchema = z.array(z.object({
@@ -79,8 +80,15 @@ export const ServicesSchema = z.array(z.object({
   icon: z.string().optional(),
 }));
 
-export const ResumeSchema = z.object({
+export const ResumeCategorySchema = z.object({
+  name: z.string().min(1, "Name is required"),
   url: z.string().url("Must be a valid URL"),
+  visible: z.boolean().default(true),
+});
+
+export const ResumeSchema = z.object({
+  url: z.string().url("Must be a valid URL").optional(),
+  categories: z.array(ResumeCategorySchema).default([]),
 });
 
 export const GlobalSettingsSchema = z.object({
@@ -88,16 +96,38 @@ export const GlobalSettingsSchema = z.object({
   ropeLightSpeed: z.number().min(0.1).optional(),
   ropeLightThickness: z.number().min(0.5).optional(),
   ropeLightGlowIntensity: z.number().min(0).optional(),
+  
+  // Independent dark and light mode wash settings
+  ropeLightColorsLight: z.array(z.string()).optional(),
+  ropeLightColorsDark: z.array(z.string()).optional(),
+  ropeLightSpeedLight: z.number().min(0.1).optional(),
+  ropeLightSpeedDark: z.number().min(0.1).optional(),
+  ropeLightThicknessLight: z.number().min(0.5).optional(),
+  ropeLightThicknessDark: z.number().min(0.5).optional(),
+  ropeLightGlowIntensityLight: z.number().min(0).optional(),
+  ropeLightGlowIntensityDark: z.number().min(0).optional(),
+  
   ropeLightColorLight: z.string().optional(),
   ropeLightColorDark: z.string().optional(),
   ropeLightAccentLight: z.string().optional(),
   ropeLightAccentDark: z.string().optional(),
+  
+  // Sharp line edge light controls for dark and light mode
+  sharpLightColorsLight: z.array(z.string()).optional(),
+  sharpLightColorsDark: z.array(z.string()).optional(),
+  sharpLightThicknessLight: z.number().min(0.5).optional(),
+  sharpLightThicknessDark: z.number().min(0.5).optional(),
+  
   textHoverColors: z.array(z.string()).optional(),
   textTransitionSpeed: z.string().optional(),
   textLeaveSpeed: z.string().optional(),
   textAnimationSpeed: z.string().optional(),
   textBaseOpacity: z.number().min(0).max(1).optional(),
   textGlowIntensity: z.number().optional(),
+  themePrimaryColor: z.string().optional(),
+  themeBackgroundColor: z.string().optional(),
+  themeAccentColor: z.string().optional(),
+  themeFontFamily: z.string().optional(),
 });
 
 // Used if storing entire portfolio.yaml 

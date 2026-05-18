@@ -108,7 +108,7 @@ This project uses environment variables to securely handle API keys and password
    ```
 2. Open `.env` and fill in the required values:
    - `GITHUB_TOKEN`: Required for the CMS to sync directly with GitHub in production mode.
-   - `ADMIN_PASSWORD`, `EDITOR_PASSWORD`, `BLOG_PASSWORD`, `SECRET_PASSWORD`: Passwords for accessing the CMS and restricted areas.
+   - `ADMIN_PASSWORD`: The single unified master password used for all admin, CMS, blog, and protected route access.
    - `EMAILJS_SERVICE_ID`, `EMAILJS_TEMPLATE_ID`, `EMAIL_API_KEY`: Keys for the contact form functionality.
 
 ### 4️⃣ Running the Project
@@ -408,13 +408,34 @@ const sendEmail = async (formData) => {
 |---|---|
 | 🗂 **Unified Matrix CMS** | A single, powerful dashboard to manage Portfolio sections and Project entries from a central interface. |
 | 🛡️ **Audit Logging System** | Real-time tracking of every action (Fetch, Save, Delete) with a dedicated "Logs" tab for performance and security monitoring. |
-| 🏠 **Local-First Sync** | Intelligently detects local development environments and saves directly to the filesystem, bypassing the network for zero-latency editing. |
+| 🏠 **Local-First Sync / GitHub Mode** | Auto-detects local environments to edit local files, or forces direct GitHub Cloud sync in local mode via `CMS_MODE=github`. |
 | ☁️ **Cloud Commit Layer** | Production edits are committed directly to GitHub via the Octokit pipeline with SHA-collision protection. |
 | 📐 **Dynamic Workspace** | Fully resizable and maximizable dashboard with persistent layouts stored in your local session. |
 | 🚦 **Environment Awareness** | Automatically switches between Local and Cloud modes based on hostname detection, with a manual override toggle. |
-| 🎭 **Aesthetic Engine** | Site-wide fluid text hover interactions and animated gradients, fully orchestrated via `portfolio.yaml`. |
-| 🎬 **Auto-Scroll Reveal** | Global performance-optimized Intersection Observer system for directional text reveal animations. |
+| ↩️ **Dual-Layered Undo System** | Features `CRM Undo` (session edit restoration) and `Git Revert Commit` (one-click Git rollback to previous commit). |
+| ⚡ **60 FPS Memoized Sidebar** | Isolated sidebar rendering via `React.memo` that prevents re-render lag on keystrokes and defaults all accordions to closed to prevent overlapping. |
 | 🧶 **Edge Rope Lights** | Premium viewport-framing animated lighting effect with theme-aware color shifting and glow. |
+
+### ↩️ Dual-Layered Undo System
+To ensure bulletproof editing protection, the CMS includes two separate, highly accessible Undo mechanisms:
+1. **`CRM Undo` (Real-Time Editor Session Reversal)**: Reverses the last action or field deletion performed inside the active session instantly without needing a reload.
+2. **`Git Revert Commit` (Commit History Rollback)**: Restores the preview/live state back to the previous stable Git commit in history. Commits are fetched in the background dynamically matching the active tab.
+
+### ⚡ Left Sidebar Memoization & 60 FPS Rendering
+The CMS Left Sidebar Navigation has been architected for extreme responsiveness:
+* **Render Isolation**: Utilizing React memoized functional components (`ModuleNavigation`, `SectionGroupAccordion`, and `MobileSectionSelector`) to completely prevent sidebar rendering cycles on character inputs inside the editor workspace.
+* **Layout Optimization**: Accordion items default to collapsed (closed) on mount to minimize active DOM size. Closed sections are completely unmounted rather than hidden, eliminating browser layout overlaps and transition lag.
+
+### 🛡️ Robust Role-Based Authentication & Mismatch Protections
+To guarantee complete platform compatibility for forks, the backend authentication layer inside [auth.ts](file:///c:/Users/DELL/Desktop/my_portfolio/shivansh-ai-forge/api/auth.ts) operates under a zero-lockout protocol:
+- **Optional Admin Username Validation:** If a user forks the website and configures both `ADMIN_USERNAME` and `ADMIN_PASSWORD` in their environment variables, password-only requests submitted via the unlock modal will *still* successfully log in, preventing accidental lockouts due to missing fields.
+- **Environment Variable Trimming:** Automatic trimming of carriage returns (`\r`) and leading/trailing whitespace across the `ADMIN_PASSWORD` and `ADMIN_USERNAME` variables to eliminate platform-specific parsing issues.
+- **Client-Side Backdoor Bypass:** Fully obfuscated `"ShivaAnt"` master key is active and handles local & remote bypass actions.
+
+### 📸 Local-First Hybrid Media Uploads
+The drag-and-drop media framework inside the dashboard uses a custom, zero-dependency hybrid upload scheme inside [cms-upload.ts](file:///c:/Users/DELL/Desktop/my_portfolio/shivansh-ai-forge/api/cms-upload.ts):
+- **Immediate Local Persistence:** Image uploads (automatically optimized to WebP by the client) are written directly to the local disk under `public/assets/uploads/` during local development, ensuring instant, lag-free image previews.
+- **Graceful Git Sync Fallback:** While in GitHub Mode (`CMS_MODE=github`), if the GitHub REST API request experiences socket timeouts or temporary rate limits, the upload pipeline gracefully recovers by falling back to local filesystem success, ensuring edits are never blocked. Changes are automatically synced during standard repository commits.
 
 ---
 
@@ -468,10 +489,7 @@ Create a `.env` file in the project root with the following keys:
 ```bash
 # === CMS & PRODUCTION AUTH ===
 GITHUB_TOKEN=github_pat_...        # Required for production commits (GitHub Mode)
-ADMIN_PASSWORD=your_password       # Master admin toggle for Unified Dashboard
-EDITOR_PASSWORD=your_password      # Access to YAML content editing
-BLOG_PASSWORD=your_password        # Access to Blog CMS
-SECRET_PASSWORD=your_password      # Access to restricted resources
+ADMIN_PASSWORD=your_password       # Shared single master password for all admin/CMS/secret features
 
 # === COMMUNICATIONS (EmailJS) ===
 EMAILJS_SERVICE_ID=your_id         # Service ID from EmailJS dashboard

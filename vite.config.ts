@@ -18,6 +18,10 @@ const localApiProxy = () => ({
           
           const module = await server.ssrLoadModule(modulePath);
           
+          // Parse query parameters to mimic Vercel serverless request shape
+          const parsedUrl = new URL(url, 'http://localhost');
+          req.query = Object.fromEntries(parsedUrl.searchParams.entries());
+          
           let body = '';
           req.on('data', (chunk: any) => { body += chunk.toString(); });
           req.on('end', async () => {
@@ -71,6 +75,15 @@ export default defineConfig(({ mode }) => {
       hmr: {
         overlay: false,
       },
+      watch: {
+        ignored: [
+          "**/node_modules/**",
+          "**/dist/**",
+          "**/.netlify/**",
+          "**/.vercel/**",
+          "**/.cache/**"
+        ]
+      }
     },
     plugins: [
       react(), 

@@ -12,6 +12,7 @@ interface CacheEntry {
 }
 
 const MEMORY_CACHE = new Map<string, CacheEntry>();
+const IN_FLIGHT_REQUESTS = new Map<string, Promise<any>>();
 const CACHE_EXPIRY = 3600000; // 1 hour in ms
 const MAX_RETRIES = 2;
 
@@ -70,12 +71,14 @@ const setCache = (repoPath: string, data: GithubStats) => {
   }
 };
 
-export const useGithubStats = (githubUrl?: string) => {
+export const useGithubStats = (githubUrl?: string, enabled = true) => {
   const [stats, setStats] = useState<GithubStats | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
 
   useEffect(() => {
+    if (!enabled) return;
+
     const repoPath = extractRepoPath(githubUrl);
     
     if (!repoPath) {
@@ -91,24 +94,40 @@ export const useGithubStats = (githubUrl?: string) => {
         return;
       }
 
-      try {
-        const response = await fetch(`https://api.github.com/repos/${repoPath}`);
-        if (!response.ok) {
-          throw new Error(`API returned ${response.status}`);
-        }
-        
-        const data = await response.json();
-        const extracted: GithubStats = {
-          stars: data.stargazers_count || 0,
-          forks: data.forks_count || 0,
-          lastUpdated: data.updated_at || new Date().toISOString()
-        };
+      // Check if there is already an in-flight request for this repo
+      let promise = IN_FLIGHT_REQUESTS.get(repoPath);
+      if (!promise) {
+        promise = (async () => {
+          const response = await fetch(`https://api.github.com/repos/${repoPath}`);
+          if (!response.ok) {
+            throw new Error(`API returned ${response.status}`);
+          }
+          
+          const data = await response.json();
+          const extracted: GithubStats = {
+            stars: data.stargazers_count || 0,
+            forks: data.forks_count || 0,
+            lastUpdated: data.updated_at || new Date().toISOString()
+          };
 
-        setCache(repoPath, extracted);
-        setStats(extracted);
-        setLoading(false);
+          setCache(repoPath, extracted);
+          return extracted;
+        })();
         
+        IN_FLIGHT_REQUESTS.set(repoPath, promise);
+      }
+
+      try {
+        const result = await promise;
+        // Clean up in-flight tracker upon success
+        IN_FLIGHT_REQUESTS.delete(repoPath);
+        
+        setStats(result);
+        setLoading(false);
       } catch (err) {
+        // Clean up in-flight tracker upon failure so retries can run
+        IN_FLIGHT_REQUESTS.delete(repoPath);
+        
         if (attempt < MAX_RETRIES) {
           setTimeout(() => loadData(attempt + 1), 1000 * attempt);
         } else {
@@ -120,7 +139,7 @@ export const useGithubStats = (githubUrl?: string) => {
     };
 
     loadData();
-  }, [githubUrl]);
+  }, [githubUrl, enabled]);
 
   return { stats, loading, error };
 };

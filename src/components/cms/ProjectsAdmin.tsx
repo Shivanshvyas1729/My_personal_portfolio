@@ -19,6 +19,7 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
   const [addingNew, setAddingNew] = useState(false);
   const [tempProject, setTempProject] = useState<Partial<Project>>({});
   const [saveError, setSaveError] = useState("");
+  const [projectToDelete, setProjectToDelete] = useState<number | null>(null);
 
   const hasPendingChanges = JSON.stringify(projects) !== JSON.stringify(liveData.projects);
 
@@ -60,9 +61,14 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
     return updated;
   };
 
-  const deleteProject = (id: number) => {
-    if (confirm("Are you sure you want to delete this project?")) {
-      onChange(projects.filter(p => p.id !== id));
+  const handleDeleteClick = (id: number) => {
+    setProjectToDelete(id);
+  };
+
+  const confirmDelete = () => {
+    if (projectToDelete !== null) {
+      onChange(projects.filter(p => p.id !== projectToDelete));
+      setProjectToDelete(null);
     }
   };
 
@@ -122,7 +128,7 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
                 <button onClick={() => handleEdit(p)} className="p-2 bg-muted hover:bg-primary/10 hover:text-primary rounded text-muted-foreground transition-colors shadow-sm border border-border/50">
                   <Edit3 size={12} />
                 </button>
-                <button onClick={() => deleteProject(p.id)} className="p-2 bg-muted hover:bg-destructive/10 hover:text-destructive rounded text-muted-foreground transition-colors shadow-sm border border-border/50">
+                <button onClick={() => handleDeleteClick(p.id)} className="p-2 bg-muted hover:bg-destructive/10 hover:text-destructive rounded text-muted-foreground transition-colors shadow-sm border border-border/50">
                   <Trash2 size={12} />
                 </button>
               </div>
@@ -201,6 +207,37 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
                  </button>
                )}
              </div>
+          </div>
+        </div>
+      )}
+      {/* Delete Confirmation Modal */}
+      {projectToDelete !== null && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-150 rounded-xl">
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-background/65 backdrop-blur-sm" onClick={() => setProjectToDelete(null)} />
+          {/* Dialog Card */}
+          <div className="glass-card max-w-sm w-full p-6 border border-destructive/30 rounded-xl relative z-10 flex flex-col items-center text-center shadow-2xl animate-in zoom-in-95 duration-200" style={{ backdropFilter: 'blur(16px)' }}>
+            <div className="w-12 h-12 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mb-4">
+              <Trash2 size={20} />
+            </div>
+            <h3 className="text-base font-bold text-foreground mb-2">Delete Project?</h3>
+            <p className="text-xs text-muted-foreground mb-6 leading-relaxed">
+              Are you sure you want to delete <span className="font-semibold text-foreground">"{projects.find(p => p.id === projectToDelete)?.title}"</span>? This will apply to the local preview instantly, and you can sync it to the cloud afterward.
+            </p>
+            <div className="flex gap-3 w-full">
+              <button
+                onClick={() => setProjectToDelete(null)}
+                className="flex-1 px-4 py-2 border border-border/50 bg-muted hover:bg-muted/80 text-muted-foreground rounded-lg text-xs font-semibold transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="flex-1 px-4 py-2 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-lg text-xs font-semibold transition-colors shadow-lg"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -1,27 +1,314 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useCMSState, useCMSActions } from '@/context/CMSContext';
 import { useAuth } from '@/hooks/useAuth';
 import { SECTION_SCHEMAS, validateData } from '@/lib/schema';
 import { DynamicForm } from './DynamicForm';
 import { ProjectsAdmin } from './ProjectsAdmin';
 import { BlogsAdmin } from './BlogsAdmin';
-import { AdminPanel as BlogAdminPanel } from '../blog/AdminPanel';
-import { Save, Minimize2, Maximize2, ChevronDown, ChevronUp, RefreshCw, AlertTriangle, ShieldCheck, ShieldAlert, ListRestart, ScrollText } from 'lucide-react';
+import { DashboardPanel } from './DashboardPanel';
+import { PortfolioData, Project } from '@/data/portfolioData';
+import { ChevronDown, RefreshCw, AlertTriangle, ListRestart, ScrollText, Layout, User, Award, GraduationCap, RotateCcw, Save, Undo2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
 
-const DEFAULT_W = 750;
-const DEFAULT_H = 600;
+// ─── Collapsible Section Groups (Accordion UI) ──────────────────────────────
+const SECTION_GROUPS = [
+  {
+    id: 'presentation',
+    title: 'Presentation',
+    iconName: 'Layout',
+    sections: ['home', 'hero']
+  },
+  {
+    id: 'profile',
+    title: 'Profile & About',
+    iconName: 'User',
+    sections: ['personal', 'about', 'stats']
+  },
+  {
+    id: 'capabilities',
+    title: 'Capabilities',
+    iconName: 'Award',
+    sections: ['skills', 'techStack', 'services', 'projects-shortcut']
+  },
+  {
+    id: 'timeline',
+    title: 'Timeline & CV',
+    iconName: 'GraduationCap',
+    sections: ['education', 'experience', 'resume']
+  }
+];
+
+const renderGroupIcon = (name: string) => {
+  switch (name) {
+    case 'Layout': return <Layout size={12} className="text-primary/70" />;
+    case 'User': return <User size={12} className="text-primary/70" />;
+    case 'Award': return <Award size={12} className="text-primary/70" />;
+    case 'GraduationCap': return <GraduationCap size={12} className="text-primary/70" />;
+    default: return null;
+  }
+};
+
+interface CommitLog {
+  sha: string;
+  message: string;
+  date: string;
+  author: string;
+}
+
+interface ModuleNavigationProps {
+  activeTab: string;
+  setActiveTab: (tab: any) => void;
+  isMobile: boolean;
+  auditLogs: { status: string }[];
+}
+
+const ModuleNavigation = React.memo<ModuleNavigationProps>(({
+  activeTab,
+  setActiveTab,
+  isMobile,
+  auditLogs
+}) => {
+  const tabs = ['portfolio', 'projects', 'blog', 'history', 'settings', 'logs'] as const;
+  
+  return (
+    <>
+      {!isMobile && (
+        <div className="text-[10px] font-bold text-muted-foreground uppercase opacity-70 tracking-wider mb-1 mt-2 px-2 select-none">
+          Modules
+        </div>
+      )}
+      {tabs.map(tab => {
+        const isActive = activeTab === tab;
+        const hasError = tab === 'logs' && auditLogs.some(l => l.status === 'error');
+        
+        return (
+          <button 
+            key={tab} 
+            onClick={() => setActiveTab(tab)}
+            className={`text-sm font-semibold transition-colors duration-150 capitalize shrink-0 select-none ${
+              isMobile 
+                ? 'px-4 py-1.5 rounded-full text-xs' 
+                : 'px-3 py-2 rounded-lg text-left w-full'
+            } ${
+              isActive 
+                ? 'bg-primary text-primary-foreground shadow-sm' 
+                : 'hover:bg-muted/50 text-muted-foreground'
+            }`}
+          >
+            {tab === 'logs' ? (
+              <span className="flex items-center gap-2">
+                {tab}
+                {hasError && (
+                  <span className={`w-1.5 h-1.5 rounded-full bg-destructive animate-pulse ${isActive ? 'bg-white' : ''}`} />
+                )}
+              </span>
+            ) : tab}
+          </button>
+        );
+      })}
+    </>
+  );
+}, (prev, next) => {
+  return prev.activeTab === next.activeTab && 
+         prev.isMobile === next.isMobile && 
+         prev.auditLogs.length === next.auditLogs.length;
+});
+
+interface SectionGroupAccordionProps {
+  isEditorOnly: boolean;
+  localActiveSection: string;
+  setLocalActiveSection: (sec: string) => void;
+  setActiveTab: (tab: any) => void;
+  openGroups: Record<string, boolean>;
+  toggleGroup: (groupId: string) => void;
+}
+
+const SectionGroupAccordion = React.memo<SectionGroupAccordionProps>(({
+  isEditorOnly,
+  localActiveSection,
+  setLocalActiveSection,
+  setActiveTab,
+  openGroups,
+  toggleGroup
+}) => {
+  return (
+    <div className="flex flex-col gap-1.5 mt-3 w-full px-1">
+      <div className="text-[10px] font-bold text-muted-foreground uppercase opacity-50 tracking-wider px-2 mb-1 select-none">
+        Sections
+      </div>
+      {SECTION_GROUPS.map(group => {
+        const visibleSecs = group.sections.filter(sec => {
+          if (sec === 'projects-shortcut') return true;
+          return !isEditorOnly || !["emailjs", "personal", "resume"].includes(sec);
+        });
+        
+        if (visibleSecs.length === 0) return null;
+        const isOpen = !!openGroups[group.id];
+        
+        return (
+          <div key={group.id} className="flex flex-col border-b border-border/5 pb-1 last:border-0">
+            <button
+              onClick={() => toggleGroup(group.id)}
+              className="flex items-center justify-between w-full text-[10px] font-bold text-muted-foreground hover:text-foreground uppercase tracking-wide opacity-90 transition-colors duration-150 px-2 py-1.5 hover:bg-muted/40 rounded-lg text-left select-none"
+            >
+              <span className="flex items-center gap-2">
+                {renderGroupIcon(group.iconName)}
+                {group.title}
+              </span>
+              <ChevronDown 
+                size={10} 
+                className={`transition-transform duration-200 text-muted-foreground/60 ${isOpen ? 'rotate-180' : ''}`} 
+              />
+            </button>
+            
+            {isOpen && (
+              <div 
+                className="flex flex-col gap-0.5 mt-1 pl-3 transition-opacity duration-150 animate-in fade-in"
+              >
+                {visibleSecs.map(sec => {
+                  const isActive = localActiveSection === sec;
+                  return (
+                    <button 
+                      key={sec} 
+                      onClick={() => {
+                        if (sec === 'projects-shortcut') setActiveTab('projects');
+                        else setLocalActiveSection(sec);
+                      }}
+                      className={`font-semibold text-[11px] px-2.5 py-1.5 rounded-lg text-left w-full border select-none transition-colors duration-100 ${
+                        sec === 'projects-shortcut' 
+                          ? 'text-primary/95 hover:bg-primary/5 italic border-transparent' 
+                          : isActive 
+                            ? 'bg-muted border-border/40 text-foreground shadow-sm' 
+                            : 'hover:bg-muted/30 text-muted-foreground border-transparent'
+                      }`}
+                    >
+                      {sec === 'projects-shortcut' ? "→ Projects" : sec.replace(/([A-Z])/g, ' $1').trim()}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}, (prev, next) => {
+  return prev.isEditorOnly === next.isEditorOnly &&
+         prev.localActiveSection === next.localActiveSection &&
+         prev.openGroups === next.openGroups;
+});
+
+interface MobileSectionSelectorProps {
+  isEditorOnly: boolean;
+  localActiveSection: string;
+  setLocalActiveSection: (sec: string) => void;
+  setActiveTab: (tab: any) => void;
+}
+
+const MobileSectionSelector = React.memo<MobileSectionSelectorProps>(({
+  isEditorOnly,
+  localActiveSection,
+  setLocalActiveSection,
+  setActiveTab
+}) => {
+  const secs = ['home', 'hero', 'personal', 'about', 'projects-shortcut', 'stats', 'skills', 'techStack', 'services', 'education', 'experience', 'resume'] as const;
+  
+  return (
+    <>
+      <div className="w-px h-6 bg-border mx-2 self-center shrink-0" />
+      {secs
+        .filter(sec => !isEditorOnly || !["emailjs", "personal", "resume"].includes(sec))
+        .map(sec => {
+          const isActive = localActiveSection === sec;
+          return (
+            <button 
+              key={sec} 
+              onClick={() => {
+                if (sec === 'projects-shortcut') setActiveTab('projects');
+                else setLocalActiveSection(sec);
+              }}
+              className={`font-semibold transition-colors duration-150 capitalize shrink-0 px-4 py-1.5 rounded-full text-xs ${
+                sec === 'projects-shortcut' 
+                  ? 'text-primary/80 hover:bg-primary/5 italic border border-transparent' 
+                  : isActive 
+                    ? 'bg-primary/10 text-primary border border-primary/20' 
+                    : 'hover:bg-muted/30 text-muted-foreground border border-transparent'
+              }`}
+            >
+              {sec === 'projects-shortcut' ? "→ Projects" : sec.replace(/([A-Z])/g, ' $1').trim()}
+            </button>
+          );
+        })}
+    </>
+  );
+}, (prev, next) => {
+  return prev.isEditorOnly === next.isEditorOnly &&
+         prev.localActiveSection === next.localActiveSection;
+});
+
+interface FieldChange {
+  path: string;
+  from: string;
+  to: string;
+}
+
+const getChangesSummary = (live: any, preview: any): FieldChange[] => {
+  const changes: FieldChange[] = [];
+
+  const compare = (l: any, p: any, path: string) => {
+    if (l === p) return;
+    
+    if (typeof l !== typeof p) {
+      if (l !== undefined || p !== undefined) {
+        changes.push({ path, from: String(l ?? 'none'), to: String(p ?? 'none') });
+      }
+      return;
+    }
+
+    if (Array.isArray(l) && Array.isArray(p)) {
+      if (l.length !== p.length) {
+        changes.push({ path, from: `${l.length} items`, to: `${p.length} items` });
+      } else {
+        l.forEach((item, idx) => compare(item, p[idx], `${path}[${idx + 1}]`));
+      }
+      return;
+    }
+
+    if (typeof l === 'object' && l !== null && p !== null) {
+      const allKeys = Array.from(new Set([...Object.keys(l), ...Object.keys(p)]));
+      allKeys.forEach(key => {
+        if (key === 'id' || key === 'updatedAt' || key === 'createdAt') return;
+        compare(l[key], p[key], path ? `${path} ➔ ${key}` : key);
+      });
+      return;
+    }
+
+    if (l !== p) {
+      changes.push({ 
+        path, 
+        from: l === undefined ? "none" : String(l), 
+        to: p === undefined ? "none" : String(p) 
+      });
+    }
+  };
+
+  compare(live, preview, "");
+  return changes;
+};
 
 export const UnifiedAdminDashboard = () => {
   const { 
     previewData, 
+    liveData,
     previewMode, 
     safeMode, 
     cmsMode,
     forceLocalMode,
-    isLocalEnvironment,
-    auditLogs
+    auditLogs,
+    canUndo,
+    canRedo
   } = useCMSState();
 
   const { 
@@ -30,7 +317,10 @@ export const UnifiedAdminDashboard = () => {
     setForceLocalMode,
     updatePreviewSection, 
     refreshData,
-    clearLogs
+    clearLogs,
+    undo,
+    redo,
+    restoreStateFromCommit
   } = useCMSActions();
   
   const { roles, isSuperAdmin } = useAuth();
@@ -40,245 +330,85 @@ export const UnifiedAdminDashboard = () => {
     ? (isSuperAdmin ? "⚡ Master Shivansh" : "Masterji")
     : null;
 
-  // Position & Size State
-  const [isMaximized, setIsMaximized] = useState(() => {
-    if (typeof window !== "undefined") return localStorage.getItem('cms-maximized') === 'true';
-    return false;
-  });
-
-  const [dimensions, setDimensions] = useState(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem('cms-dimensions');
-      return saved ? JSON.parse(saved) : { w: DEFAULT_W, h: DEFAULT_H };
-    }
-    return { w: DEFAULT_W, h: DEFAULT_H };
-  });
-
   const [activeTab, setActiveTab] = useState<'portfolio' | 'projects' | 'blog' | 'settings' | 'history' | 'logs'>('portfolio');
   const [localActiveSection, setLocalActiveSection] = useState<string>('hero');
   const [isMinimized, setIsMinimized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [historyLogs, setHistoryLogs] = useState<any[]>([]);
+  const [historyLogs, setHistoryLogs] = useState<CommitLog[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [historyFile, setHistoryFile] = useState<string>('src/data/portfolio.yaml');
 
-  const [isInteracting, setIsInteracting] = useState(false);
+  // Accordion collapsed state for Desktop Sections
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
+    presentation: false,
+    profile: false,
+    capabilities: false,
+    timeline: false
+  });
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const toggleGroup = useCallback((groupId: string) => {
+    setOpenGroups(prev => ({
+      ...prev,
+      [groupId]: !prev[groupId]
+    }));
+  }, []);
+
+  // Performance optimized Callback Handlers
+  const handleProjectsChange = useCallback((proj: Project[]) => {
+    updatePreviewSection('projects', proj);
+  }, [updatePreviewSection]);
+
+  const handleBlogChange = useCallback((blogPosts: unknown[]) => {
+    updatePreviewSection('blog', blogPosts);
+  }, [updatePreviewSection]);
+
+  const handleFormChange = useCallback((data: unknown) => {
+    updatePreviewSection(localActiveSection, data);
+  }, [localActiveSection, updatePreviewSection]);
+
+  // Active section data selector
+  const activeSectionData = useMemo(() => {
+    return (previewData[localActiveSection as keyof PortfolioData] || {}) as Record<string, unknown>;
+  }, [previewData, localActiveSection]);
+
+  const sessionChanges = useMemo(() => {
+    return getChangesSummary(liveData, previewData);
+  }, [liveData, previewData]);
+
+  // Sync statuses helper
+  const syncStatus = useMemo(() => {
+    if (cmsMode === 'local' || forceLocalMode) {
+      return { icon: "💻", label: "Local Filesystem", color: "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" };
+    }
+    if (cmsMode === 'github') {
+      return { icon: "☁️", label: "GitHub Cloud", color: "bg-blue-500/10 text-blue-500 border border-blue-500/20" };
+    }
+    return { icon: "❓", label: "Sync Unknown", color: "bg-muted text-muted-foreground" };
+  }, [cmsMode, forceLocalMode]);
+
+  // Conflict handling
   const [conflictData, setConflictData] = useState<{
-    latestSha: string;
-    latestContent: string;
     section: string;
-    pendingData: any;
-    targetFile: string;
+    pendingData: unknown;
+    latestSha: string;
   } | null>(null);
 
-  // Refs for dragging and resizing
-  const panelRef = useRef<HTMLDivElement>(null);
-  const geom = useRef({ x: 0, y: 0, w: dimensions.w, h: dimensions.h });
-  const drag = useRef({ active: false, sx: 0, sy: 0, ox: 0, oy: 0 });
-  const resizeRef = useRef({ active: false, startW: 0, startH: 0, startX: 0, startY: 0, edge: 'corner' });
-
-  const applyGeom = useCallback(() => {
-    const el = panelRef.current;
-    if (!el || isMaximized) return;
-    el.style.transform = `translate3d(${geom.current.x}px, ${geom.current.y}px, 0)`;
-    el.style.width = `${geom.current.w}px`;
-    el.style.height = `${geom.current.h}px`;
-  }, [isMaximized]);
-
-  useEffect(() => {
-    if (isMaximized) return;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    geom.current = {
-      x: Math.max(8, vw / 2 - geom.current.w / 2),
-      y: Math.max(72, vh / 2 - geom.current.h / 2),
-      w: Math.min(geom.current.w, vw - 16),
-      h: Math.min(geom.current.h, vh - 60),
-    };
-    applyGeom();
-  }, [isMaximized, applyGeom]);
-
-  useEffect(() => {
-    localStorage.setItem('cms-maximized', String(isMaximized));
-  }, [isMaximized]);
-
-  const onHeaderPointerDown = (e: React.PointerEvent) => {
-    if (isMaximized) return;
-    if ((e.target as HTMLElement).closest('[data-no-drag]')) return;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    drag.current = { active: true, sx: e.clientX, sy: e.clientY, ox: geom.current.x, oy: geom.current.y };
-    document.body.style.userSelect = "none";
-    setIsInteracting(true);
-  };
-
-  const onHeaderPointerMove = (e: React.PointerEvent) => {
-    if (!drag.current.active) return;
-    geom.current.x = drag.current.ox + (e.clientX - drag.current.sx);
-    geom.current.y = drag.current.oy + (e.clientY - drag.current.sy);
-    applyGeom();
-  };
-
-  const onHeaderPointerUp = () => {
-    drag.current.active = false;
-    document.body.style.userSelect = "";
-    setIsInteracting(false);
-  };
-
-  const startResize = (e: React.PointerEvent, edge: string) => {
-    e.stopPropagation();
-    e.currentTarget.setPointerCapture(e.pointerId);
-    resizeRef.current = {
-      active: true,
-      startW: geom.current.w,
-      startH: geom.current.h,
-      startX: e.clientX,
-      startY: e.clientY,
-      edge
-    };
-    setIsInteracting(true);
-  };
-
-  const onResizeMove = (e: React.PointerEvent) => {
-    if (!resizeRef.current.active) return;
-    const dx = e.clientX - resizeRef.current.startX;
-    const dy = e.clientY - resizeRef.current.startY;
-    
-    if (resizeRef.current.edge === 'right' || resizeRef.current.edge === 'corner') {
-      geom.current.w = Math.max(500, resizeRef.current.startW + dx);
-    }
-    if (resizeRef.current.edge === 'bottom' || resizeRef.current.edge === 'corner') {
-      geom.current.h = Math.max(400, resizeRef.current.startH + dy);
-    }
-    applyGeom();
-  };
-
-  const onResizeEnd = () => {
-    resizeRef.current.active = false;
-    setIsInteracting(false);
-    setDimensions({ w: geom.current.w, h: geom.current.h });
-    localStorage.setItem('cms-dimensions', JSON.stringify({ w: geom.current.w, h: geom.current.h }));
-  };
-
-  const saveContent = async (section: string, data: any, overrideSha?: string) => {
-    setIsLoading(true);
-    setErrorMsg("");
-    
-    const isProject = section === 'projects';
-    const isBlog = section === 'blog';
-    const filePath = isBlog ? 'src/data/blog.yaml' : (isProject ? 'src/data/projects.yaml' : 'src/data/portfolio.yaml');
-    const actionName = isBlog ? "SAVE_BLOG" : (isProject ? "SAVE_PROJECTS" : `SAVE_SECTION:${section}`);
-
-    logger.addLog({ 
-      action: actionName, 
-      status: "pending", 
-      message: `Initiating save for ${section} to ${filePath}...`,
-      metadata: { section, filePath, isSafeMode: safeMode }
-    });
-
-    // ── Auto-sanitize data before sending ─────────────────────────────────
-    let cleanData = data;
-    if (section === 'projects' && Array.isArray(data)) {
-      cleanData = data.map((project: any) => {
-        if (!Array.isArray(project.media)) return project;
-        const cleanedMedia = project.media
-          .filter((m: any) => m && m.url) // drop entries with no URL
-          .map((m: any) => {
-            if (m.type) return m; // already has type, leave it
-            // Auto-detect type from URL
-            const url: string = m.url || '';
-            let detected = 'image'; // safe default
-            if (/\.(mp4|webm|mov|avi|mkv)/i.test(url)) detected = 'video';
-            else if (/youtube\.com|youtu\.be|vimeo\.com/i.test(url)) detected = 'video';
-            else if (/\.(jpg|jpeg|png|gif|webp|svg|avif)/i.test(url)) detected = 'image';
-            logger.addLog({ action: actionName, status: 'success', message: `Auto-detected media type "${detected}" for ${url}` });
-            return { ...m, type: detected };
-          });
-        return { ...project, media: cleanedMedia };
-      });
-    }
-
-    // ── Soft Validation: warn only, never block ────────────────────────────
-    const schema = SECTION_SCHEMAS[section];
-    if (schema) {
-      const validation = validateData(schema, cleanData);
-      if (validation.success === false) {
-        const warnings = validation.errors.map((e: string) => {
-          // Humanize raw schema paths like "0.media.0.type: Required"
-          return e
-            .replace(/^(\d+)\./, (_, i) => `Project #${parseInt(i)+1} → `)
-            .replace(/\.media\.(\d+)\./, (_, i) => ` media[${parseInt(i)+1}] → `)
-            .replace(/: Required/, ': missing (auto-fixed or ignored)')
-            .replace(/: Invalid url/, ': invalid URL (saved as-is)');
-        });
-        toast.warning(`⚠️ Soft warnings (saving anyway):\n${warnings.join('\n')}`, { duration: 6000 });
-        logger.addLog({ action: actionName, status: 'success', message: `Soft validation warnings (non-blocking): ${warnings.join(' | ')}` });
-        // Do NOT return — fall through and save anyway
-      }
-    }
-
-    try {
-      const res = await fetch("/api/cms-save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          filePath,
-          sectionKey: section,
-          newData: cleanData,   // ← sanitized (media auto-typed, empty media stripped)
-          providedSha: overrideSha || undefined, 
-          isSafeMode: safeMode,
-          role: userRole
-        })
-      });
-
-      const result = await res.json();
-      
-      if (res.status === 409) {
-        setConflictData({
-          latestSha: result.data.latestSha,
-          latestContent: result.data.latestContent,
-          section,
-          pendingData: data,
-          targetFile: filePath
-        });
-        logger.addLog({ action: actionName, status: "error", message: "Conflict detected (SHA mismatch). Overlay triggered." });
-        toast.error("Conflict detected!");
-        setIsLoading(false);
-        return { success: false, error: "Conflict" };
-      } 
-      
-      if (!result.success) {
-        setErrorMsg(result.error || "Save Failed");
-        logger.addLog({ action: actionName, status: "error", message: `Backend error: ${result.error}`, metadata: result });
-        setIsLoading(false);
-        return { success: false, error: result.error };
-      } 
-
-      logger.addLog({ 
-        action: actionName, 
-        status: "success", 
-        message: `${section} persisted successfully to ${result.mode || 'backend'}.`,
-        metadata: result
-      });
-      
-      toast.success(result.message || "Saved successfully");
+  const handleConflictResolve = (strategy: 'overwrite' | 'cancel') => {
+    if (strategy === 'cancel') {
       setConflictData(null);
-      if (!safeMode) await refreshData();
-      
-      setIsLoading(false);
-      return { success: true };
-    } catch (e: any) {
-      const msg = e.message || "Network failure";
-      setErrorMsg("Network error: " + msg);
-      logger.addLog({ action: actionName, status: "error", message: `Network/Runtime failure: ${msg}`, metadata: e });
-      setIsLoading(false);
-      return { success: false, error: msg };
-    }
-  };
-
-  const handleConflictResolve = (action: 'overwrite' | 'cancel') => {
-    if (action === 'cancel') {
-      setConflictData(null);
+      refreshData();
       return;
     }
     if (conflictData) {
@@ -288,6 +418,7 @@ export const UnifiedAdminDashboard = () => {
 
   const fetchHistory = async (file: string) => {
     if (!file) return;
+    setHistoryFile(file);
     setLoadingHistory(true);
     try {
       const res = await fetch(`/api/cms-history?filePath=${encodeURIComponent(file)}`);
@@ -303,10 +434,14 @@ export const UnifiedAdminDashboard = () => {
         return;
       }
       const result = await res.json();
-      if (result.success) setHistoryLogs(result.data.commits || []);
-      else setErrorMsg(result.error || "Failed to load history");
-    } catch (e: any) {
-      setErrorMsg("Connection failure: " + e.message);
+      if (result.success) {
+        setHistoryLogs(result.data.commits || []);
+      } else {
+        setErrorMsg(result.error || "Failed to load history");
+      }
+    } catch (e: unknown) {
+      const errMsg = e instanceof Error ? e.message : String(e);
+      setErrorMsg("Connection failure: " + errMsg);
     }
     setLoadingHistory(false);
   };
@@ -316,112 +451,115 @@ export const UnifiedAdminDashboard = () => {
     setErrorMsg("");
   }, [activeTab, localActiveSection]);
 
+  // Synchronize historyFile and fetch commits based on activeTab
   useEffect(() => {
-    if (activeTab === 'history') fetchHistory('src/data/portfolio.yaml');
-  }, [activeTab]);
+    let file = 'src/data/portfolio.yaml';
+    if (activeTab === 'projects') {
+      file = 'src/data/projects.yaml';
+    } else if (activeTab === 'blog') {
+      file = 'src/data/blog.yaml';
+    } else if (activeTab === 'history') {
+      file = historyFile;
+    }
+    fetchHistory(file);
+  }, [activeTab, historyFile]);
 
-  const activeSectionData = useMemo(() => {
-    return (previewData as any)[localActiveSection] || {};
-  }, [previewData, localActiveSection]);
+  const saveContent = async (section: string, data: unknown, forceSha?: string): Promise<{ success: boolean; error?: string } | undefined> => {
+    setIsLoading(true);
+    setErrorMsg("");
+    setConflictData(null);
 
-  const [isMobile, setIsMobile] = useState(false);
+    try {
+      const isProject = section === 'projects';
+      const isBlog = section === 'blog';
+      const filePath = isBlog ? 'src/data/blog.yaml' : (isProject ? 'src/data/projects.yaml' : 'src/data/portfolio.yaml');
+      const sectionKey = isBlog ? 'blog' : (isProject ? 'projects' : section);
 
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+      // Perform Frontend Schema Validation
+      const currentSchema = SECTION_SCHEMAS[section];
+      if (currentSchema) {
+        const validation = validateData(currentSchema, data);
+        
+        // Strict explicit validation state check to guarantee type narrowing under all compilers
+        if (validation.success === false) {
+          setErrorMsg(`Validation Error: ${validation.errors.join(', ')}`);
+          setIsLoading(false);
+          toast.error("Validation Failed!");
+          return { success: false, error: "Validation Failed" };
+        }
+      }
 
-  const syncStatus = useMemo(() => {
-    if (forceLocalMode) return { label: 'Local (Forced)', color: 'bg-amber-500/20 text-amber-500', icon: '🚧' };
-    if (cmsMode === 'local') return { label: 'Local Mode', color: 'bg-green-500/20 text-green-500', icon: '🏠' };
-    if (cmsMode === 'github') return { label: 'Cloud Sync', color: 'bg-blue-500/20 text-blue-500', icon: '☁️' };
-    return { label: 'Connecting...', color: 'bg-muted text-muted-foreground', icon: '⏳' };
-  }, [cmsMode, forceLocalMode]);
+      logger.addLog({ action: "SAVE_DATA", status: "pending", message: `Saving ${sectionKey}...` });
 
-  const containerStyle: React.CSSProperties = (isMaximized || isMobile)
-    ? { 
-        position: 'fixed', 
-        inset: isMobile ? '8px' : 0, 
-        zIndex: 90,
-        width: isMobile ? 'calc(100% - 16px)' : '100% !important',
-        height: isMobile ? 'calc(100% - 16px)' : '100% !important',
-        transform: 'none !important',
-        willChange: 'transform, width, height',
-        backfaceVisibility: 'hidden'
-      } 
-    : { 
-        position: "fixed", 
-        zIndex: 90, 
-        width: geom.current.w,
-        height: geom.current.h,
-        transform: `translate3d(${geom.current.x}px, ${geom.current.y}px, 0)`,
-        willChange: 'transform, width, height',
-        backfaceVisibility: 'hidden'
-      };
+      const res = await fetch("/api/cms-save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          role: userRole,
+          filePath,
+          sectionKey,
+          newData: isBlog || isProject ? { [sectionKey]: data } : data,
+          isSafeMode: safeMode,
+          providedSha: forceSha
+        })
+      });
+
+      const result = await res.json();
+
+      if (res.status === 409) {
+        logger.addLog({ action: "SAVE_DATA", status: "error", message: "Conflict: Git SHA mismatch detected." });
+        setConflictData({
+          section,
+          pendingData: data,
+          latestSha: result.data.latestSha
+        });
+        toast.warning("Conflict Detected! Choose resolve option.");
+        setIsLoading(false);
+        return { success: false, error: "Conflict Detected" };
+      }
+
+      if (result.success) {
+        logger.addLog({ action: "SAVE_DATA", status: "success", message: `Successfully persisted changes to ${sectionKey}` });
+        toast.success(safeMode ? "Safe Mode simulation complete!" : "Changes saved successfully!");
+        
+        // Synchronize context data
+        if (!safeMode) {
+          await refreshData();
+          sessionStorage.removeItem("cms-preview-data");
+        }
+        return { success: true };
+      } else {
+        throw new Error(result.error || "Save Failed");
+      }
+    } catch (e: unknown) {
+      const errMsg = e instanceof Error ? e.message : String(e);
+      setErrorMsg(errMsg || "Network Save Failure");
+      logger.addLog({ action: "SAVE_DATA", status: "error", message: errMsg || "Network Save Failure" });
+      toast.error("Save Failed!");
+      return { success: false, error: errMsg };
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div
-      ref={panelRef}
-      style={containerStyle}
-      className={`no-text-effect glass-card ${isMaximized || isMobile ? 'rounded-2xl' : 'rounded-2xl shadow-2xl border border-primary/20'} flex flex-col overflow-hidden bg-background/95 backdrop-blur-3xl ${!isInteracting ? 'transition-all duration-300' : ''} ${isMinimized ? '!h-12 !w-80' : ''}`}
+    <DashboardPanel
+      isMinimized={isMinimized}
+      setIsMinimized={setIsMinimized}
+      activeTab={activeTab}
+      canUndo={canUndo}
+      canRedo={canRedo}
+      undo={undo}
+      redo={redo}
+      safeMode={safeMode}
+      setSafeMode={setSafeMode}
+      previewMode={previewMode}
+      setPreviewMode={setPreviewMode}
+      syncStatus={syncStatus}
+      adminLabel={adminLabel}
+      isSuperAdmin={isSuperAdmin}
+      auditLogs={auditLogs}
     >
-      {/* HEADER */}
-      <div 
-        onPointerDown={onHeaderPointerDown}
-        onPointerMove={onHeaderPointerMove}
-        onPointerUp={onHeaderPointerUp}
-        className={`flex items-center justify-between px-4 py-3 border-b border-border/30 bg-primary/10 ${isMobile ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'} shrink-0`}
-      >
-        <div className="flex items-center gap-2 pointer-events-none min-w-0">
-           <span className="text-sm font-bold shrink-0">CRM Matrix</span>
-           {!isMinimized && adminLabel && (
-             <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tighter flex items-center gap-1 shrink-0 ${isSuperAdmin ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-blue-500/15 text-blue-400 border border-blue-500/20'}`}>
-               {adminLabel}
-             </span>
-           )}
-           {!isMinimized && !isMobile && (
-             <div className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tighter flex items-center gap-1.5 shrink-0 ${syncStatus.color}`}>
-               <span>{syncStatus.icon}</span>
-               <span>{syncStatus.label}</span>
-             </div>
-           )}
-        </div>
-        <div data-no-drag className="flex items-center gap-2 shrink-0">
-           {!isMinimized && (
-             <>
-               <button 
-                 onClick={() => setSafeMode(!safeMode)} 
-                 className={`hidden sm:flex px-2 py-1 items-center gap-1 text-[10px] font-bold rounded uppercase transition-colors ${safeMode ? 'bg-amber-500/20 text-amber-500' : 'bg-muted text-muted-foreground'}`}
-               >
-                 {safeMode ? <ShieldCheck size={12}/> : <ShieldAlert size={12}/>} 
-                 Safe Mode
-               </button>
-               <label className="flex items-center gap-1.5 cursor-pointer text-[10px] uppercase font-bold text-muted-foreground ml-2">
-                 Preview
-                 <input type="checkbox" checked={previewMode} onChange={e => setPreviewMode(e.target.checked)} className="accent-primary" />
-               </label>
-               <div className="hidden sm:block w-px h-4 bg-border mx-1" />
-               <button onClick={() => setIsMaximized(!isMaximized)} className="hidden md:block p-1 hover:bg-muted rounded text-muted-foreground transition-colors">
-                 {isMaximized ? <Minimize2 size={14}/> : <Maximize2 size={14} />}
-               </button>
-             </>
-           )}
-           <button 
-             onClick={() => setIsMinimized(m => !m)} 
-             title={isMinimized ? 'Restore Panel' : 'Minimise Panel'}
-             className={`flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-bold transition-all ${
-               isMinimized 
-                 ? 'bg-primary/20 text-primary hover:bg-primary/30 border border-primary/30 animate-pulse' 
-                 : 'hover:bg-muted text-muted-foreground'
-             }`}
-           >
-             {isMinimized ? <><ChevronUp size={13}/> Restore</> : <ChevronDown size={14}/>}
-           </button>
-        </div>
-      </div>
-
       {conflictData && !isMinimized && (
         <div className="absolute inset-0 z-50 bg-background/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center animate-in fade-in">
            <AlertTriangle size={48} className="text-destructive mb-4" />
@@ -437,150 +575,363 @@ export const UnifiedAdminDashboard = () => {
       )}
 
       {!isMinimized && (
-        <div className={`flex flex-1 overflow-hidden relative ${isInteracting ? 'pointer-events-none' : ''} ${isMobile ? 'flex-col' : 'flex-row'}`}>
+        <div className={`flex flex-1 overflow-hidden relative ${isMobile ? 'flex-col' : 'flex-row'} w-full h-full`}>
           {/* SIDEBAR / MOBILE TAB BAR */}
           <div className={`${isMobile ? 'w-full h-auto flex-row overflow-x-auto whitespace-nowrap scrollbar-hide py-1.5 border-b' : 'w-[180px] flex-col overflow-y-auto border-r'} bg-muted/20 border-border/40 flex p-2 gap-1 shrink-0`}>
-             {!isMobile && <div className="text-[10px] font-bold text-muted-foreground uppercase opacity-70 tracking-wider mb-1 mt-2 px-2">Modules</div>}
-                {['portfolio', 'projects', 'blog', 'history', 'settings', 'logs'].map(tab => (
-                  <button 
-                    key={tab} 
-                    onClick={() => setActiveTab(tab as any)}
-                    className={`text-sm font-medium transition-colors capitalize ${isMobile ? 'px-4 py-1.5 rounded-full' : 'px-3 py-2 rounded-lg text-left'} ${activeTab === tab ? 'bg-primary text-primary-foreground' : 'hover:bg-muted/50 text-muted-foreground'}`}
-                  >
-                    {tab === 'logs' ? (
-                      <span className="flex items-center gap-2">
-                        {tab}
-                        {auditLogs.some(l => l.status === 'error') && (
-                          <span className={`w-1.5 h-1.5 rounded-full bg-destructive animate-pulse ${activeTab === tab ? 'bg-white' : ''}`} />
-                        )}
-                      </span>
-                    ) : tab}
-                  </button>
-                ))}
+             <ModuleNavigation 
+               activeTab={activeTab} 
+               setActiveTab={setActiveTab} 
+               isMobile={isMobile} 
+               auditLogs={auditLogs} 
+             />
 
              {activeTab === 'portfolio' && (
                <>
-                 {!isMobile && <div className="text-[10px] font-bold text-muted-foreground uppercase opacity-70 tracking-wider mb-1 mt-4 px-2">Sections</div>}
-                 {isMobile && <div className="w-px h-6 bg-border mx-2 self-center shrink-0" />}
-                 {[
-                   "home", "hero", "personal", "about", "projects-shortcut", "stats", "skills", "techStack", "services", "education", "experience", "resume"
-                 ]
-                 .filter(sec => !isEditorOnly || !["emailjs", "personal", "resume"].includes(sec))
-                 .map(sec => (
-                   <button 
-                     key={sec} 
-                     onClick={() => {
-                       if (sec === 'projects-shortcut') setActiveTab('projects');
-                       else setLocalActiveSection(sec);
-                     }}
-                     className={`font-medium transition-colors capitalize shrink-0 ${isMobile ? 'px-4 py-1.5 rounded-full text-xs' : 'text-[13px] px-3 py-1.5 rounded-lg text-left'} ${
-                       sec === 'projects-shortcut' ? 'text-primary/80 hover:bg-primary/5 italic' :
-                       localActiveSection === sec ? (isMobile ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-muted border border-border/50 text-foreground shadow-sm') : 
-                       'hover:bg-muted/30 text-muted-foreground border border-transparent'
-                     }`}
-                   >
-                     {sec === 'projects-shortcut' ? "→ Projects" : sec.replace(/([A-Z])/g, ' $1').trim()}
-                   </button>
-                 ))}
+                 {isMobile ? (
+                   <MobileSectionSelector
+                     isEditorOnly={isEditorOnly}
+                     localActiveSection={localActiveSection}
+                     setLocalActiveSection={setLocalActiveSection}
+                     setActiveTab={setActiveTab}
+                   />
+                 ) : (
+                   <SectionGroupAccordion
+                     isEditorOnly={isEditorOnly}
+                     localActiveSection={localActiveSection}
+                     setLocalActiveSection={setLocalActiveSection}
+                     setActiveTab={setActiveTab}
+                     openGroups={openGroups}
+                     toggleGroup={toggleGroup}
+                   />
+                 )}
                </>
              )}
           </div>
 
+          {/* MAIN EDITING WORKSPACE */}
           <div className="flex-1 flex flex-col bg-background/40 relative h-full overflow-hidden">
             {activeTab === 'portfolio' && (
               <>
-                <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-                  {errorMsg && <div className="mb-4 bg-destructive/10 text-destructive border border-destructive/20 rounded-lg p-3 text-sm">{errorMsg}</div>}
-                  {SECTION_SCHEMAS[localActiveSection] ? (
-                    <DynamicForm
-                      schema={SECTION_SCHEMAS[localActiveSection]}
-                      data={activeSectionData}
-                      onChange={(data) => updatePreviewSection(localActiveSection, data)}
-                    />
-                  ) : (
-                    <div className="text-muted-foreground text-sm">Select a section.</div>
-                  )}
-                </div>
-                <div className="p-4 border-t border-border/40 bg-muted/10 shrink-0 flex items-center justify-end gap-3">
-                  <button 
-                    onClick={() => setPreviewMode(!previewMode)}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors border ${previewMode ? 'bg-primary/20 text-primary border-primary/30' : 'bg-muted hover:bg-muted/80 text-muted-foreground border-border/50'}`}
-                  >
-                    {previewMode ? "Exit Preview" : "Preview Changes"}
-                  </button>
-                  <button 
-                    disabled={isLoading}
-                    onClick={() => saveContent(localActiveSection, activeSectionData)}
-                    className="px-5 py-2 bg-primary text-primary-foreground rounded-xl font-medium text-sm flex items-center gap-2 hover:bg-primary/90 disabled:opacity-50 transition-colors shadow-lg"
-                  >
-                    {isLoading ? <RefreshCw size={15} className="animate-spin" /> : <Save size={15} />}
-                    {isLoading ? "Saving..." : (cmsMode === 'local' || forceLocalMode ? `Save Local` : `Commit GitHub`)}
-                  </button>
+                {/* Left Side: Form Editor & Controls */}
+                <div className="flex-1 flex flex-col overflow-hidden h-full bg-background/25">
+                  <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+                    {errorMsg && <div className="mb-4 bg-destructive/10 text-destructive border border-destructive/20 rounded-lg p-3 text-sm">{errorMsg}</div>}
+                    {SECTION_SCHEMAS[localActiveSection] ? (
+                      <DynamicForm
+                        schema={SECTION_SCHEMAS[localActiveSection]}
+                        data={activeSectionData}
+                        onChange={handleFormChange}
+                      />
+                    ) : (
+                      <div className="text-muted-foreground text-sm">Select a section.</div>
+                    )}
+                  </div>
+                  
+                  {/* Actions Bar */}
+                  <div className="p-4 border-t border-border/40 bg-muted/10 shrink-0 flex items-center justify-between gap-3 flex-wrap">
+                    {/* Left Side: Reversal and Rollback Controls */}
+                    <div className="flex items-center gap-2">
+                      <button 
+                        disabled={!canUndo}
+                        onClick={() => {
+                          undo();
+                          toast.success("CRM session edit reverted!");
+                        }}
+                        className="px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 disabled:opacity-35 disabled:hover:bg-amber-500/10 border border-amber-500/20 rounded-xl text-sm font-semibold transition-all flex items-center gap-1.5 shadow-sm"
+                        title="Undo last CRM session change instantly"
+                      >
+                        <Undo2 size={14} /> CRM Undo
+                      </button>
+                      
+                      {historyLogs.length > 1 && (
+                        <button 
+                          disabled={isLoading}
+                          onClick={async () => {
+                            const targetSha = historyLogs[1]?.sha;
+                            if (targetSha) {
+                              const ok = await restoreStateFromCommit(targetSha, historyFile);
+                              if (ok) {
+                                toast.success("Reverted to previous Git commit!");
+                              }
+                            }
+                          }}
+                          className="px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 rounded-xl text-sm font-semibold transition-all flex items-center gap-1.5 shadow-sm"
+                          title={`Undo commit and rollback to: ${historyLogs[1]?.message || ''}`}
+                        >
+                          <RotateCcw size={14} /> Git Revert Commit
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Right Side: Primary Actions */}
+                    <div className="flex items-center gap-3">
+                      <button 
+                        onClick={() => setPreviewMode(!previewMode)}
+                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors border ${previewMode ? 'bg-primary/20 text-primary border-primary/30' : 'bg-muted hover:bg-muted/80 text-muted-foreground border-border/50'}`}
+                      >
+                        {previewMode ? "Exit Preview" : "Preview Changes"}
+                      </button>
+                      <button 
+                        disabled={isLoading}
+                        onClick={() => saveContent(localActiveSection, activeSectionData)}
+                        className="px-5 py-2 bg-primary text-primary-foreground rounded-xl font-medium text-sm flex items-center gap-2 hover:bg-primary/90 disabled:opacity-50 transition-colors shadow-lg"
+                      >
+                        {isLoading ? <RefreshCw size={15} className="animate-spin" /> : <Save size={15} />}
+                        {isLoading ? "Saving..." : (cmsMode === 'local' || forceLocalMode ? `Save Local` : `Commit GitHub`)}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </>
             )}
 
             {activeTab === 'projects' && (
-               <div className="relative flex-1 overflow-hidden flex flex-col">
+               <div className="relative flex-1 overflow-hidden flex flex-col h-full w-full">
                  <ProjectsAdmin
-                   projects={(previewData as any).projects || []}
-                   onChange={(proj) => updatePreviewSection('projects', proj)}
+                   projects={previewData.projects || []}
+                   onChange={handleProjectsChange}
                    isLoading={isLoading}
                    mode={(forceLocalMode || cmsMode === 'local') ? 'local' : 'github'}
-                   onSave={(data) => saveContent('projects', data || (previewData as any).projects || [])}
+                   onSave={(data) => saveContent('projects', data || previewData.projects || [])}
                  />
                </div>
             )}
 
             {activeTab === 'blog' && (
-               <div className="relative flex-1 overflow-hidden flex flex-col">
+               <div className="relative flex-1 overflow-hidden flex flex-col h-full w-full">
                  <BlogsAdmin
-                   blogs={(previewData as any).blog || []}
-                   onChange={(blogPosts) => updatePreviewSection('blog', blogPosts)}
+                   blogs={previewData.blog || []}
+                   onChange={handleBlogChange}
                    isLoading={isLoading}
                    mode={(forceLocalMode || cmsMode === 'local') ? 'local' : 'github'}
-                   onSave={(data) => saveContent('blog', data || (previewData as any).blog || [])}
+                   onSave={(data) => saveContent('blog', data || previewData.blog || [])}
                  />
                </div>
             )}
 
             {activeTab === 'history' && (
-              <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-                 <div className="flex items-center justify-between mb-4">
-                   <h3 className="font-bold">History</h3>
-                   <div className="flex gap-2 text-xs">
-                     <button onClick={() => fetchHistory('src/data/portfolio.yaml')} className="p-1 px-2 bg-muted rounded">Portfolio</button>
-                     <button onClick={() => fetchHistory('src/data/projects.yaml')} className="p-1 px-2 bg-muted rounded">Projects</button>
-                   </div>
-                 </div>
-                 {loadingHistory ? <RefreshCw size={24} className="animate-spin" /> : (
-                   <div className="space-y-3">
-                     {historyLogs.map(log => (
-                       <div key={log.sha} className="p-3 rounded-lg border border-border/50 bg-muted/5 text-xs">
-                         <p className="font-bold">{log.message}</p>
-                         <p className="opacity-70">{new Date(log.date).toLocaleString()} • {log.author}</p>
-                       </div>
-                     ))}
-                   </div>
-                 )}
-              </div>
+               <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-sm">History</h3>
+                    <div className="flex gap-2 text-xs">
+                      <button 
+                        onClick={() => fetchHistory('src/data/portfolio.yaml')} 
+                        className={`p-1 px-2.5 rounded transition-all ${historyFile === 'src/data/portfolio.yaml' ? 'bg-primary text-primary-foreground font-semibold shadow-sm' : 'bg-muted hover:bg-muted/80 text-muted-foreground'}`}
+                      >
+                        Portfolio
+                      </button>
+                      <button 
+                        onClick={() => fetchHistory('src/data/projects.yaml')} 
+                        className={`p-1 px-2.5 rounded transition-all ${historyFile === 'src/data/projects.yaml' ? 'bg-primary text-primary-foreground font-semibold shadow-sm' : 'bg-muted hover:bg-muted/80 text-muted-foreground'}`}
+                      >
+                        Projects
+                      </button>
+                      <button 
+                        onClick={() => fetchHistory('src/data/blog.yaml')} 
+                        className={`p-1 px-2.5 rounded transition-all ${historyFile === 'src/data/blog.yaml' ? 'bg-primary text-primary-foreground font-semibold shadow-sm' : 'bg-muted hover:bg-muted/80 text-muted-foreground'}`}
+                      >
+                        Blog
+                      </button>
+                    </div>
+                  </div>
+                  {loadingHistory ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground/60 gap-2">
+                      <RefreshCw size={20} className="animate-spin text-primary" />
+                      <span className="text-xs">Fetching history logs...</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {historyLogs.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground/50 border border-dashed border-border/40 rounded-xl bg-muted/5 gap-2">
+                          <ScrollText size={32} className="opacity-40 text-primary" />
+                          <p className="text-xs font-semibold">No commits found</p>
+                          <p className="text-[10px] text-muted-foreground/80 max-w-[250px] text-center">
+                            History requires Git commits on this branch to display.
+                          </p>
+                        </div>
+                      ) : (
+                        historyLogs.map(log => (
+                          <div key={log.sha} className="p-3 rounded-lg border border-border/50 bg-muted/5 text-xs flex flex-col gap-2 transition-all hover:border-primary/30 animate-in fade-in duration-200">
+                            <div>
+                              <p className="font-bold text-foreground/90">{log.message}</p>
+                              <p className="opacity-70 mt-0.5 font-mono text-[10px]">{new Date(log.date).toLocaleString()} • {log.author}</p>
+                            </div>
+                            <button
+                              onClick={async () => {
+                                const ok = await restoreStateFromCommit(log.sha, historyFile);
+                                if (ok) {
+                                  if (historyFile.includes("projects.yaml")) setActiveTab("projects");
+                                  else if (historyFile.includes("blog.yaml")) setActiveTab("blog");
+                                  else setActiveTab("portfolio");
+                                }
+                              }}
+                              className="mt-1 px-2.5 py-1 text-[10px] font-bold bg-primary/20 text-primary hover:bg-primary/30 border border-primary/20 rounded transition-all flex items-center gap-1.5 self-start shadow-sm"
+                            >
+                              <RotateCcw size={10} /> Restore Preview State
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+               </div>
             )}
 
             {activeTab === 'settings' && (
-              <div className="flex-1 overflow-y-auto p-6">
-                <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><RefreshCw size={18} /> Sync Settings</h3>
-                <div className="p-5 rounded-2xl border border-border/50 bg-muted/10">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-bold text-sm">Force Local Mode</p>
-                      <p className="text-xs text-muted-foreground">Force-save to local filesystem.</p>
+              <div className="flex-1 flex overflow-hidden h-full">
+                {/* Left Side: Form Editor */}
+                <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                  <div>
+                    <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><RefreshCw size={18} /> Sync Settings</h3>
+                    <div className="p-5 rounded-2xl border border-border/50 bg-muted/10">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-bold text-sm">Force Local Mode</p>
+                          <p className="text-xs text-muted-foreground">Force-save to local filesystem.</p>
+                        </div>
+                        <input 
+                          type="checkbox" 
+                          checked={forceLocalMode} 
+                          onChange={(e) => setForceLocalMode(e.target.checked)}
+                          className="w-4 h-4 cursor-pointer" 
+                        />
+                      </div>
                     </div>
-                    <input 
-                      type="checkbox" 
-                      checked={forceLocalMode} 
-                      onChange={(e) => setForceLocalMode(e.target.checked)}
-                      className="w-4 h-4" 
+                  </div>
+
+                  <div className="border-t border-border/40 pt-6">
+                    <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><Layout size={18} /> Global Aesthetic Settings</h3>
+                    {errorMsg && <div className="mb-4 bg-destructive/10 text-destructive border border-destructive/20 rounded-lg p-3 text-sm">{errorMsg}</div>}
+                    <DynamicForm
+                      schema={SECTION_SCHEMAS['settings']}
+                      data={previewData.settings || {}}
+                      onChange={(newSettings) => updatePreviewSection('settings', newSettings)}
                     />
+                    <div className="mt-6 flex justify-end gap-3">
+                      <button 
+                        disabled={isLoading}
+                        onClick={() => saveContent('settings', previewData.settings || {})}
+                        className="px-5 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm flex items-center gap-2 hover:bg-primary/90 disabled:opacity-50 transition-colors shadow-lg"
+                      >
+                        {isLoading ? <RefreshCw size={15} className="animate-spin" /> : <Save size={15} />}
+                        {isLoading ? "Saving Settings..." : (cmsMode === 'local' || forceLocalMode ? `Save Local Settings` : `Commit Settings to GitHub`)}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Side: Interactive Aesthetic Preview Simulator */}
+                <div className="hidden lg:flex w-[320px] shrink-0 border-l border-border/40 bg-muted/10 p-6 flex-col overflow-y-auto space-y-6">
+                  <div>
+                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Live Aesthetic Preview</h4>
+                    <p className="text-[10px] text-muted-foreground/60">See how your changes affect neon lighting and theme colors instantly.</p>
+                  </div>
+
+                  {/* Neon Rope Light Preview */}
+                  <div className="bg-background/40 border border-border/40 rounded-2xl p-4 flex flex-col items-center justify-center space-y-2 relative overflow-hidden h-36">
+                    <span className="absolute top-2 left-3 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Neon Rope Light</span>
+                    <style dangerouslySetInnerHTML={{__html: `
+                      @keyframes ropeFlow {
+                        0% { stroke-dashoffset: 200; }
+                        100% { stroke-dashoffset: 0; }
+                      }
+                      @keyframes pulseGlow {
+                        0%, 100% { filter: brightness(0.95) saturate(1); }
+                        50% { filter: brightness(1.2) saturate(1.3); }
+                      }
+                    `}} />
+                    <svg className="w-full h-16" overflow="visible">
+                      <defs>
+                        <linearGradient id="ropeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                          {(previewData.settings?.ropeLightColors || ['#eab308', '#67e8f9', '#6366f1', '#a855f7']).map((color: string, idx: number, arr: any[]) => (
+                            <stop key={idx} offset={`${(idx / (arr.length - 1)) * 100}%`} stopColor={color} />
+                          ))}
+                        </linearGradient>
+                        <filter id="ropeGlow" x="-50%" y="-50%" width="200%" height="200%">
+                          <feGaussianBlur stdDeviation={previewData.settings?.ropeLightGlowIntensity ?? 3} result="coloredBlur"/>
+                          <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                          </feMerge>
+                        </filter>
+                      </defs>
+                      <path
+                        d="M 10,32 C 70,5 130,59 190,32 C 230,12 270,32 290,20"
+                        fill="none"
+                        stroke="url(#ropeGrad)"
+                        strokeWidth={previewData.settings?.ropeLightThickness ?? 1.5}
+                        filter="url(#ropeGlow)"
+                        style={{
+                          strokeDasharray: '30 10',
+                          animation: `ropeFlow ${20 / (previewData.settings?.ropeLightSpeed ?? 12)}s linear infinite`
+                        }}
+                      />
+                    </svg>
+                    <span className="text-[9px] text-muted-foreground/60">Speed: {previewData.settings?.ropeLightSpeed ?? 12} • Width: {previewData.settings?.ropeLightThickness ?? 1.5}px</span>
+                  </div>
+
+                  {/* Dynamic Font and Text Glow Preview */}
+                  <div className="bg-background/40 border border-border/40 rounded-2xl p-4 flex flex-col space-y-2 relative overflow-hidden">
+                    <span className="absolute top-2 left-3 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Neon Heading</span>
+                    <link rel="stylesheet" href={`https://fonts.googleapis.com/css2?family=${(previewData.settings?.themeFontFamily || 'Inter').replace(/\s+/g, '+')}:wght@400;700;800&display=swap`} />
+                    <div className="py-6 flex items-center justify-center min-h-[80px]">
+                      <div 
+                        style={{
+                          fontFamily: `"${previewData.settings?.themeFontFamily || 'Inter'}", sans-serif`,
+                          color: previewData.settings?.themePrimaryColor || '#60a5fa',
+                          opacity: previewData.settings?.textBaseOpacity ?? 0.15,
+                          textShadow: `0 0 ${(previewData.settings?.textGlowIntensity ?? 1.3) * 2}px ${previewData.settings?.themePrimaryColor || '#60a5fa'}, 0 0 ${(previewData.settings?.textGlowIntensity ?? 1.3) * 6}px ${previewData.settings?.themePrimaryColor || '#60a5fa'}`,
+                          animation: `pulseGlow ${previewData.settings?.textAnimationSpeed || '4s'} ease-in-out infinite`
+                        }}
+                        className="text-base font-extrabold tracking-widest text-center uppercase transition-all duration-300"
+                      >
+                        SHIVANSH VYAS
+                      </div>
+                    </div>
+                    <div className="text-[9px] text-muted-foreground/60 text-center border-t border-border/10 pt-2 font-mono">
+                      Font: {previewData.settings?.themeFontFamily || 'Inter'}
+                    </div>
+                  </div>
+
+                  {/* Color Palette Layout Mock Preview */}
+                  <div className="bg-background/40 border border-border/40 rounded-2xl p-4 flex flex-col space-y-3 relative overflow-hidden">
+                    <span className="absolute top-2 left-3 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Theme Palette</span>
+                    <div className="pt-4 space-y-2.5">
+                      <div 
+                        style={{ backgroundColor: previewData.settings?.themeBackgroundColor || '#0f172a' }}
+                        className="rounded-xl p-3 border border-border/40 space-y-3 transition-colors duration-300 shadow-inner"
+                      >
+                        <div className="flex items-center justify-between border-b border-border/10 pb-1.5">
+                          <span 
+                            style={{ 
+                              color: previewData.settings?.themePrimaryColor || '#60a5fa',
+                              fontFamily: `"${previewData.settings?.themeFontFamily || 'Inter'}", sans-serif`
+                            }}
+                            className="text-[10px] font-bold uppercase tracking-wider transition-colors duration-300"
+                          >
+                            Portfolio Header
+                          </span>
+                          <div 
+                            style={{ backgroundColor: previewData.settings?.themeAccentColor || '#3b82f6' }}
+                            className="w-2 h-2 rounded-full transition-colors duration-300" 
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <div className="h-1.5 w-5/6 rounded" style={{ backgroundColor: previewData.settings?.themePrimaryColor || '#60a5fa', opacity: 0.3 }} />
+                          <div className="h-1.5 w-2/3 rounded" style={{ backgroundColor: previewData.settings?.themePrimaryColor || '#60a5fa', opacity: 0.15 }} />
+                        </div>
+                        <button 
+                          style={{ 
+                            backgroundColor: previewData.settings?.themeAccentColor || '#3b82f6',
+                            color: '#fff',
+                            fontFamily: `"${previewData.settings?.themeFontFamily || 'Inter'}", sans-serif`
+                          }}
+                          className="w-full py-1 rounded text-[9px] font-bold uppercase tracking-wider shadow-sm transition-all duration-300"
+                        >
+                          Accent Button
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -642,39 +993,6 @@ export const UnifiedAdminDashboard = () => {
           </div>
         </div>
       )}
-
-      {!isMaximized && !isMinimized && (
-        <>
-          {/* Right Edge Resizer */}
-          <div 
-            onPointerDown={(e) => startResize(e, 'right')}
-            onPointerMove={onResizeMove}
-            onPointerUp={onResizeEnd}
-            className="absolute top-0 bottom-6 right-0 w-4 cursor-ew-resize z-[99]"
-          />
-          
-          {/* Bottom Edge Resizer */}
-          <div 
-            onPointerDown={(e) => startResize(e, 'bottom')}
-            onPointerMove={onResizeMove}
-            onPointerUp={onResizeEnd}
-            className="absolute bottom-0 left-0 right-6 h-4 cursor-ns-resize z-[99]"
-          />
-
-          {/* Corner Resizer (Much more visible) */}
-          <div 
-            onPointerDown={(e) => startResize(e, 'corner')}
-            onPointerMove={onResizeMove}
-            onPointerUp={onResizeEnd}
-            className="absolute bottom-0 right-0 w-10 h-10 cursor-nwse-resize z-[100] flex items-end justify-end p-2 group"
-          >
-             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary/50 group-hover:text-primary transition-colors">
-               <polyline points="21 15 21 21 15 21"></polyline>
-               <line x1="21" y1="21" x2="15" y2="15"></line>
-             </svg>
-          </div>
-        </>
-      )}
-    </div>
+    </DashboardPanel>
   );
 };

@@ -2,6 +2,7 @@ import { Octokit } from "@octokit/rest";
 import yaml, { Document } from "yaml";
 import fs from "fs";
 import path from "path";
+import { execSync } from "child_process";
 
 // ─── Constants & Configuration ──────────────────────────────────────────────
 export const OWNER = "Shivanshvyas1729";
@@ -10,6 +11,17 @@ export const RATE_LIMIT_SECONDS = 30;
 
 // Path Security & Normalization
 const BASE_DATA_DIR = path.normalize(path.resolve(process.cwd(), "src/data"));
+
+export const ALLOWED_CMS_FILES = [
+  "src/data/portfolio.yaml",
+  "src/data/projects.yaml",
+  "src/data/blog.yaml"
+];
+
+export function validateCmsFilePath(filePath: string): boolean {
+  const normalized = filePath.replace(/\\/g, '/').toLowerCase();
+  return ALLOWED_CMS_FILES.some(allowed => allowed.toLowerCase() === normalized);
+}
 
 const logCms = (msg: string, level: 'info' | 'error' = 'info') => {
   const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
@@ -51,14 +63,14 @@ export interface CmsApiResult {
 }
 
 const IS_DEV = process.env.NODE_ENV === "development";
-const CMS_MODE = process.env.CMS_MODE || "local";
+const CMS_MODE = process.env.CMS_MODE || "github";
 
 /**
  * Determine if we should use Local Filesystem or GitHub API.
  */
 const dataDirExists = fs.existsSync(BASE_DATA_DIR);
 const isDeployed = process.env.NODE_ENV === "production" || !!process.env.VERCEL || !!process.env.NETLIFY;
-const useLocalMode = !isDeployed && ((CMS_MODE === "local" && dataDirExists) || (IS_DEV && dataDirExists && CMS_MODE !== "github"));
+export const useLocalMode = !isDeployed && ((CMS_MODE === "local" && dataDirExists) || (IS_DEV && dataDirExists && CMS_MODE !== "github"));
 console.log(`[CMS INIT] NODE_ENV=${process.env.NODE_ENV} VERCEL=${process.env.VERCEL} CMS_MODE=${CMS_MODE} isDeployed=${isDeployed} useLocalMode=${useLocalMode}`);
 
 export function getOctokit() {
@@ -92,12 +104,12 @@ function safelyUpdateNode(doc: Document, pathKeys: string[], data: any) {
 
 // ─── Mode Implementations ───────────────────────────────────────────────────
 
-async function fetchFromGitHub(octokit: Octokit, filePath: string) {
+async function fetchFromGitHub(octokit: Octokit, filePath: string, ref: string = "main") {
   const response = await octokit.repos.getContent({
     owner: OWNER,
     repo: REPO,
     path: filePath,
-    ref: "main",
+    ref: ref,
   });
   const fileData = response.data as any;
   if (fileData.type !== "file") throw new Error("Target is not a file");
@@ -117,6 +129,11 @@ export async function coreUpdateYamlSection(
   providedSha: string | undefined,
   isSafeMode: boolean,
 ): Promise<CmsApiResult> {
+  if (!validateCmsFilePath(filePath)) {
+    logCms(`🚨 SECURITY: Blocked unauthorized write to: ${filePath}`);
+    return { success: false, error: `Access denied: ${filePath} is not an authorized CMS data file`, code: 403, mode: useLocalMode ? "local" : "github" };
+  }
+
   // 1. Singleton Lock (Local Mode Only)
   if (useLocalMode && isSaving) {
     return { success: false, error: "Saving in progress...", code: 423, mode: "local" };
@@ -226,6 +243,11 @@ export async function coreUpdateYamlSection(
 }
 
 export async function coreGetLatestData(filePath: string): Promise<CmsApiResult> {
+  if (!validateCmsFilePath(filePath)) {
+    logCms(`🚨 SECURITY: Blocked unauthorized read from: ${filePath}`);
+    return { success: false, error: `Access denied: ${filePath} is not an authorized CMS data file`, code: 403, mode: useLocalMode ? "local" : "github" };
+  }
+
   try {
     let rawContent: string;
     
@@ -251,8 +273,37 @@ export async function coreGetLatestData(filePath: string): Promise<CmsApiResult>
 }
 
 export async function coreGetHistory(filePath: string): Promise<CmsApiResult> {
+  if (!validateCmsFilePath(filePath)) {
+    logCms(`🚨 SECURITY: Blocked unauthorized history request for: ${filePath}`);
+    return { success: false, error: `Access denied: ${filePath} is not an authorized CMS data file`, code: 403, mode: useLocalMode ? "local" : "github" };
+  }
+
   if (useLocalMode) {
-    return { success: true, mode: "local", message: "Local mode: history unavailable via Git API.", data: { commits: [] } };
+    try {
+      const absolutePath = validateLocalPath(filePath);
+      const relativeGitPath = path.relative(process.cwd(), absolutePath).replace(/\\/g, '/');
+      const command = `git log -n 4 --pretty=format:"%H|%s|%cI|%an" -- "${relativeGitPath}"`;
+      const output = execSync(command, { encoding: 'utf-8', cwd: process.cwd() });
+      
+      const commits = output.split('\n').filter(Boolean).map(line => {
+        const [sha, message, date, author] = line.split('|');
+        return {
+          sha: sha || 'unknown',
+          message: message || 'No message',
+          date: date || new Date().toISOString(),
+          author: author || 'Unknown Author'
+        };
+      });
+      
+      return {
+        success: true,
+        mode: "local",
+        data: { commits }
+      };
+    } catch (e: any) {
+      console.warn("[CMS LOCAL HISTORY] git log failed, returning empty fallback:", e.message);
+      return { success: true, mode: "local", message: "Local mode: history unavailable.", data: { commits: [] } };
+    }
   }
   
   try {
@@ -261,7 +312,7 @@ export async function coreGetHistory(filePath: string): Promise<CmsApiResult> {
       owner: OWNER,
       repo: REPO,
       path: filePath,
-      per_page: 5,
+      per_page: 4,
     });
     
     return {
@@ -280,3 +331,45 @@ export async function coreGetHistory(filePath: string): Promise<CmsApiResult> {
     return { success: false, error: e.message, code: 500, mode: "github" };
   }
 }
+
+export async function coreGetCommitData(filePath: string, sha: string): Promise<CmsApiResult> {
+  if (!validateCmsFilePath(filePath)) {
+    logCms(`🚨 SECURITY: Blocked unauthorized commit snapshot request for: ${filePath}`);
+    return { success: false, error: `Access denied: ${filePath} is not an authorized CMS data file`, code: 403, mode: useLocalMode ? "local" : "github" };
+  }
+
+  if (useLocalMode) {
+    try {
+      const absolutePath = validateLocalPath(filePath);
+      const relativeGitPath = path.relative(process.cwd(), absolutePath).replace(/\\/g, '/');
+      const command = `git show ${sha}:"${relativeGitPath}"`;
+      const output = execSync(command, { encoding: 'utf-8', cwd: process.cwd() });
+      const data = yaml.parse(output);
+      return {
+        success: true,
+        mode: "local",
+        data
+      };
+    } catch (e: any) {
+      console.error(`[CMS LOCAL ROLLBACK] Failed to fetch local commit data: ${e.message}`);
+      return { success: false, error: `Local git rollback failed: ${e.message}`, code: 500, mode: "local" };
+    }
+  }
+  
+  try {
+    const octokit = getOctokit();
+    console.log(`[CRM-GITHUB] Fetching commit snapshot for ${filePath} at SHA ${sha}`);
+    const fetched = await fetchFromGitHub(octokit, filePath, sha);
+    const data = yaml.parse(fetched.content);
+    console.log(`[CRM-GITHUB] Successfully loaded and parsed commit snapshot for SHA ${sha}`);
+    return { 
+      success: true, 
+      mode: "github", 
+      data 
+    };
+  } catch (e: any) {
+    console.error(`[CRM-GITHUB] Failed to fetch commit: ${e.message}`);
+    return { success: false, error: e.message, code: 500, mode: "github" };
+  }
+}
+

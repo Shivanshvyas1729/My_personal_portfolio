@@ -80,23 +80,43 @@ export interface Project {
 
 export interface Settings {
   ropeLightColors?: string[];
-  sharpLightColorsDark?: string[];
-  sharpLightColorsLight?: string[];
-  sharpLightThickness?: number;
-  sharpLightColors?: string[];
   ropeLightSpeed?: number;
   ropeLightThickness?: number;
   ropeLightGlowIntensity?: number;
+  
+  // Independent dark and light mode wash settings
+  ropeLightColorsLight?: string[];
+  ropeLightColorsDark?: string[];
+  ropeLightSpeedLight?: number;
+  ropeLightSpeedDark?: number;
+  ropeLightThicknessLight?: number;
+  ropeLightThicknessDark?: number;
+  ropeLightGlowIntensityLight?: number;
+  ropeLightGlowIntensityDark?: number;
+
   ropeLightColorLight?: string;
   ropeLightColorDark?: string;
   ropeLightAccentLight?: string;
   ropeLightAccentDark?: string;
+
+  // Sharp line edge light controls for dark and light mode
+  sharpLightColorsLight?: string[];
+  sharpLightColorsDark?: string[];
+  sharpLightThicknessLight?: number;
+  sharpLightThicknessDark?: number;
+  sharpLightThickness?: number;
+  sharpLightColors?: string[];
+
   textHoverColors?: string[];
   textTransitionSpeed?: string;
   textLeaveSpeed?: string;
   textAnimationSpeed?: string;
   textBaseOpacity?: number;
   textGlowIntensity?: number;
+  themePrimaryColor?: string;
+  themeBackgroundColor?: string;
+  themeAccentColor?: string;
+  themeFontFamily?: string;
 }
 
 export interface PortfolioData {
@@ -137,12 +157,18 @@ export interface PortfolioData {
   techStack: {
     featured: string[];
     all: string[];
+    connections?: string[][];
   };
   services: Service[];
   projects: Project[];
   blog: any[];
   resume?: {
-    url: string;
+    url?: string;
+    categories?: {
+      name: string;
+      url: string;
+      visible: boolean;
+    }[];
   };
 }
 

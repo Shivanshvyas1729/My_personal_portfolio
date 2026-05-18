@@ -32,9 +32,37 @@ const PageLoader = () => (
   </div>
 );
 
+import { useCMSData } from "./context/CMSContext";
+import { useEffect } from "react";
+
+
+
 // Global wrapper that provides the auth lock button available on every page
 function AppShell() {
   const [isAdmin, setIsAdmin] = useState(false);
+  const settings = useCMSData(d => d.settings);
+
+  useEffect(() => {
+    if (!settings) return;
+
+    try {
+      if (settings.themeFontFamily) {
+        const fontName = settings.themeFontFamily.trim();
+        const linkId = 'dynamic-theme-font';
+        let linkElement = document.getElementById(linkId) as HTMLLinkElement;
+        if (!linkElement) {
+          linkElement = document.createElement('link');
+          linkElement.id = linkId;
+          linkElement.rel = 'stylesheet';
+          document.head.appendChild(linkElement);
+        }
+        linkElement.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName)}:wght@300;400;500;600;700&display=swap`;
+        document.body.style.fontFamily = `"${fontName}", sans-serif`;
+      }
+    } catch (e) {
+      console.warn("Dynamic Theme Engine failed to load or apply styles:", e);
+    }
+  }, [settings]);
 
   return (
     <BrowserRouter>

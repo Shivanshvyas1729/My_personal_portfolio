@@ -48,7 +48,13 @@ const TechLabel = ({ text, position, index, total }: TechLabelProps) => {
   );
 };
 
-const SynapseLines = ({ positions }: { positions: [number, number, number][] }) => {
+interface SynapseLinesProps {
+  positions: [number, number, number][];
+  tools: string[];
+  connections?: string[][];
+}
+
+const SynapseLines = ({ positions, tools, connections }: SynapseLinesProps) => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const ref = useRef<THREE.LineSegments>(null);
@@ -57,23 +63,40 @@ const SynapseLines = ({ positions }: { positions: [number, number, number][] }) 
     const geometry = new THREE.BufferGeometry();
     const points: number[] = [];
     
-    for (let i = 0; i < positions.length; i++) {
-      const p1 = new THREE.Vector3(...positions[i]);
-      const distances = positions
-        .map((p, idx) => ({ idx, dist: p1.distanceTo(new THREE.Vector3(...p)) }))
-        .filter(d => d.idx !== i)
-        .sort((a, b) => a.dist - b.dist)
-        .slice(0, 2);
+    const toolToIndexMap = new Map<string, number>();
+    tools.forEach((t, i) => toolToIndexMap.set(t.toLowerCase(), i));
+
+    if (connections && connections.length > 0) {
+      connections.forEach(([t1, t2]) => {
+        const idx1 = toolToIndexMap.get(t1.toLowerCase());
+        const idx2 = toolToIndexMap.get(t2.toLowerCase());
         
-      distances.forEach(d => {
-        points.push(...positions[i]);
-        points.push(...positions[d.idx]);
+        if (idx1 !== undefined && idx2 !== undefined) {
+          points.push(...positions[idx1]);
+          points.push(...positions[idx2]);
+        }
       });
+    }
+
+    if (points.length === 0) {
+      for (let i = 0; i < positions.length; i++) {
+        const p1 = new THREE.Vector3(...positions[i]);
+        const distances = positions
+          .map((p, idx) => ({ idx, dist: p1.distanceTo(new THREE.Vector3(...p)) }))
+          .filter(d => d.idx !== i)
+          .sort((a, b) => a.dist - b.dist)
+          .slice(0, 2);
+          
+        distances.forEach(d => {
+          points.push(...positions[i]);
+          points.push(...positions[d.idx]);
+        });
+      }
     }
     
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
     return geometry;
-  }, [positions]);
+  }, [positions, tools, connections]);
 
   useFrame(({ clock }) => {
     if (ref.current) {
@@ -237,7 +260,7 @@ const Scene = () => {
       <pointLight position={[5, 5, 5]} intensity={1.5} color="#60a5fa" />
       <DataField />
       <SphereShell />
-      <SynapseLines positions={positions} />
+      <SynapseLines positions={positions} tools={tools} connections={techStack?.connections} />
       <Float speed={2} rotationIntensity={0.2} floatIntensity={1}>
         <RobotAvatar />
       </Float>

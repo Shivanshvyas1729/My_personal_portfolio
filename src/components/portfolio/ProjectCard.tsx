@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { ExternalLink, Github, Star, GitFork, Image as ImageIcon } from "lucide-react";
 import type { Project } from "@/data/portfolioData";
@@ -12,12 +12,38 @@ interface Props {
 }
 
 const ProjectCard = ({ project, index }: Props) => {
-  const { stats, loading } = useGithubStats(project.github);
+  const [isInView, setIsInView] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!project.github) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "100px" } // Load stats when card is within 100px of entering the viewport
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [project.github]);
+
+  const { stats, loading } = useGithubStats(project.github, isInView);
   const [imageLoaded, setImageLoaded] = useState(false);
   const mediaUrl = project.media?.[0]?.url;
 
   return (
     <motion.div
+      ref={cardRef}
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}

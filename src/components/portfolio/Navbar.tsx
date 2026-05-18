@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, FileText, Sun, Moon } from "lucide-react";
+import { Menu, X, FileText, Sun, Moon, ChevronDown, ExternalLink } from "lucide-react";
 import { portfolioData as initialData } from "@/data/portfolioData";
 import { useCMSData } from "@/context/CMSContext";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -20,6 +20,8 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
+  const [resumeDropdownOpen, setResumeDropdownOpen] = useState(false);
+  const [mobileResumeOpen, setMobileResumeOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, setTheme } = useTheme();
@@ -29,6 +31,7 @@ const Navbar = () => {
   const resume = useCMSData(d => d.resume) || initialData.resume;
   
   const resumeUrl = resume?.url || "";
+  const visibleCategories = (resume?.categories || []).filter((c: any) => c.visible);
   const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   useEffect(() => {
@@ -46,6 +49,18 @@ const Navbar = () => {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    if (!resumeDropdownOpen) return;
+    const handleClose = () => setResumeDropdownOpen(false);
+    window.addEventListener("click", handleClose);
+    return () => window.removeEventListener("click", handleClose);
+  }, [resumeDropdownOpen]);
+
+  const toggleResumeDropdown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setResumeDropdownOpen(!resumeDropdownOpen);
+  };
 
   const handleClick = (href: string) => {
     setMobileOpen(false);
@@ -94,15 +109,55 @@ const Navbar = () => {
             </button>
           ))}
           {resumeUrl && (
-            <a
-              href={resumeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-1.5 rounded-lg border border-primary/40 text-primary hover:bg-primary/10 hover:border-primary transition-all duration-200"
-            >
-              <FileText size={14} />
-              Resume
-            </a>
+            <div className="relative">
+              {visibleCategories.length > 0 ? (
+                <>
+                  <button
+                    onClick={toggleResumeDropdown}
+                    className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-1.5 rounded-lg border border-primary/40 text-primary hover:bg-primary/10 hover:border-primary transition-all duration-200"
+                  >
+                    <FileText size={14} />
+                    Resume
+                    <ChevronDown size={13} className={`transition-transform duration-200 ${resumeDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  <AnimatePresence>
+                    {resumeDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="absolute right-0 mt-2 w-52 glass-card rounded-xl border border-primary/20 shadow-2xl p-2 bg-background/95 backdrop-blur-3xl z-[999] flex flex-col gap-1"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {visibleCategories.map((cat: any) => (
+                          <a
+                            key={cat.name}
+                            href={cat.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => setResumeDropdownOpen(false)}
+                            className="flex items-center justify-between text-xs px-3 py-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-200 font-medium"
+                          >
+                            <span>{cat.name}</span>
+                            <ExternalLink size={11} className="opacity-60" />
+                          </a>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </>
+              ) : (
+                <a
+                  href={resumeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-1.5 rounded-lg border border-primary/40 text-primary hover:bg-primary/10 hover:border-primary transition-all duration-200"
+                >
+                  <FileText size={14} />
+                  Resume
+                </a>
+              )}
+            </div>
           )}
           
           {/* Theme Toggle Desktop */}
@@ -162,16 +217,57 @@ const Navbar = () => {
                 </button>
               ))}
               {resumeUrl && (
-                <a
-                  href={resumeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 py-2 px-3 rounded-lg text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
-                >
-                  <FileText size={14} />
-                  Resume
-                </a>
+                <div className="w-full">
+                  {visibleCategories.length > 0 ? (
+                    <>
+                      <button
+                        onClick={() => setMobileResumeOpen(!mobileResumeOpen)}
+                        className="w-full flex items-center justify-between py-2 px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                      >
+                        <span className="flex items-center gap-2">
+                          <FileText size={14} />
+                          Resume
+                        </span>
+                        <ChevronDown size={14} className={`transition-transform duration-200 ${mobileResumeOpen ? 'rotate-180' : ''}`} />
+                      </button>
+                      <AnimatePresence>
+                        {mobileResumeOpen && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="overflow-hidden pl-4 pr-2 flex flex-col gap-1 border-l border-primary/20 ml-5 my-1"
+                          >
+                            {visibleCategories.map((cat: any) => (
+                              <a
+                                key={cat.name}
+                                href={cat.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => setMobileOpen(false)}
+                                className="flex items-center justify-between text-xs py-2 px-3 rounded-lg text-muted-foreground hover:text-primary transition-all font-medium"
+                              >
+                                <span>{cat.name}</span>
+                                <ExternalLink size={12} className="opacity-60" />
+                              </a>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </>
+                  ) : (
+                    <a
+                      href={resumeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-2 py-2 px-3 rounded-lg text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
+                    >
+                      <FileText size={14} />
+                      Resume
+                    </a>
+                  )}
+                </div>
               )}
             </div>
           </motion.div>

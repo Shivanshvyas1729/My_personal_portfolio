@@ -11,28 +11,21 @@ export default async function handler(req: any, res: any) {
   // Type can be 'blog', 'secret', or 'admin'
   let role = null;
 
-  if (type === 'admin') {
-    if (process.env.ADMIN_USERNAME) {
-      if (username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD) {
-        role = 'admin';
-      }
-    } else {
-      if (password === process.env.ADMIN_PASSWORD) {
-        role = 'admin';
-      }
-    }
-  } else if (type === 'blog') {
-    if (password === process.env.BLOG_PASSWORD || password === process.env.ADMIN_PASSWORD) {
-      role = 'blog';
-    }
-  } else if (type === 'editor') {
-    if (password === process.env.EDITOR_PASSWORD || password === process.env.ADMIN_PASSWORD) {
-      role = 'editor';
-    }
-  } else if (type === 'secret') {
-    if (password === process.env.SECRET_PASSWORD || password === process.env.ADMIN_PASSWORD) {
-      role = 'secret';
-    }
+  const adminPassword = process.env.ADMIN_PASSWORD?.trim();
+  const adminUsername = process.env.ADMIN_USERNAME?.trim();
+
+  // Validate credentials strictly against the single unified ADMIN_PASSWORD
+  let isAuthenticated = false;
+
+  if (adminPassword && password === adminPassword) {
+    isAuthenticated = true;
+  } else if (adminUsername && adminPassword && username === adminUsername && password === adminPassword) {
+    isAuthenticated = true;
+  }
+
+  if (isAuthenticated) {
+    // Preserve requested role/type to maintain frontend RBAC and UI features
+    role = type;
   }
 
   if (role) {
