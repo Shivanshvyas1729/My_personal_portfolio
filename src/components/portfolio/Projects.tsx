@@ -4,6 +4,7 @@ import AnimatedSection from "./AnimatedSection";
 import ProjectCard from "./ProjectCard";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
 
 const Projects = () => {
   const currentData = useCMSData(d => d) || initialData;
@@ -34,8 +35,13 @@ const Projects = () => {
     );
   }
 
+  // Calculate dynamic drag constraints based on list length
+  const cardWidth = 380; // approximate card width in px
+  const totalWidth = featured.length * cardWidth;
+  const dragLeftConstraint = -totalWidth;
+
   return (
-    <section id="projects" className="section-padding">
+    <section id="projects" className="section-padding overflow-hidden">
       <div className="container mx-auto">
         <AnimatedSection>
           <h2 className="text-sm font-medium text-primary tracking-widest uppercase mb-2">Projects</h2>
@@ -44,18 +50,39 @@ const Projects = () => {
           </h3>
         </AnimatedSection>
 
-        <div
-          className="grid gap-6 mb-8"
-          style={{
-            gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${featured.length <= 3 ? "340px" : "300px"}), 1fr))`,
-          }}
-        >
-          {featured.map((p, i) => (
-            <ProjectCard key={p.id} project={p} index={i} />
-          ))}
+        <div className="relative -mx-6 px-6 overflow-hidden group mb-8">
+          {/* Subtle Fade Edges */}
+          <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-background to-transparent z-20 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-background to-transparent z-20 pointer-events-none" />
+
+          <motion.div
+            className="flex gap-6 w-max cursor-grab active:cursor-grabbing py-4"
+            drag="x"
+            dragConstraints={{ left: dragLeftConstraint, right: 0 }}
+            animate={{ x: ["0%", "-50%"] }}
+            transition={{
+              duration: Math.max(30, featured.length * 8), // Dynamic duration based on count
+              ease: "linear",
+              repeat: Infinity,
+            }}
+            whileHover={{ transition: { duration: 150 } }} // Slow down significantly on hover to allow inspection
+            whileTap={{ cursor: "grabbing" }}
+          >
+            {/* Double the featured list for seamless infinite looping */}
+            {[...featured, ...featured].map((p, i) => (
+              <div 
+                key={`${p.id}-${i}`} 
+                className="w-[300px] sm:w-[350px] md:w-[380px] flex-shrink-0 select-none"
+              >
+                <div className="pointer-events-auto h-full">
+                  <ProjectCard project={p} index={i} />
+                </div>
+              </div>
+            ))}
+          </motion.div>
         </div>
 
-        <AnimatedSection className="text-center">
+        <AnimatedSection className="text-center mt-6">
           <Link
             to="/projects"
             className="group inline-flex items-center gap-2 text-primary hover:underline font-medium"
