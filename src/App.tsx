@@ -12,9 +12,11 @@ import GlobalTextEffector from "./components/portfolio/GlobalTextEffector";
 import GlobalScrollReveal from "./components/portfolio/GlobalScrollReveal";
 import CursorGlow from "./components/ui/CursorGlow";
 
-// Eager — homepage and welcome intro load instantly
+// Eager — homepage, welcome intro, chatbot, and admin auth load instantly
 import Index from "./pages/Index.tsx";
 import NamasteIntro from "./components/portfolio/NamasteIntro";
+import ChatAssistant from "./components/portfolio/ChatAssistant";
+import { AdminAuth } from "./components/blog/AdminAuth";
 import { AnimatePresence, motion } from "framer-motion";
 
 // Lazy — only load when navigated to (reduces initial bundle ~40%)
@@ -22,8 +24,6 @@ const AllProjects  = lazy(() => import("./pages/AllProjects.tsx"));
 const ProjectDetail = lazy(() => import("./pages/ProjectDetail.tsx"));
 const Blog          = lazy(() => import("./pages/Blog.tsx"));
 const NotFound      = lazy(() => import("./pages/NotFound.tsx"));
-const ChatAssistant = lazy(() => import("./components/portfolio/ChatAssistant.tsx"));
-const AdminAuth     = lazy(() => import("./components/blog/AdminAuth.tsx").then(m => ({ default: m.AdminAuth })));
 
 const queryClient = new QueryClient();
 
@@ -94,9 +94,7 @@ function AppShell() {
           <EdgeRopeLight />
 
           {/* Global floating lock — visible on every page */}
-          <Suspense fallback={null}>
-            <AdminAuth isAdmin={isAdmin} setIsAdmin={setIsAdmin} />
-          </Suspense>
+          <AdminAuth isAdmin={isAdmin} setIsAdmin={setIsAdmin} />
 
           <Suspense fallback={<PageLoader />}>
             <Routes>
@@ -108,9 +106,7 @@ function AppShell() {
             </Routes>
           </Suspense>
 
-          <Suspense fallback={null}>
-            <ChatAssistant />
-          </Suspense>
+          <ChatAssistant />
         </motion.div>
       )}
     </BrowserRouter>
