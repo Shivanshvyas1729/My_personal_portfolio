@@ -7,7 +7,7 @@
 
 # region HOME 
 home:
-  featuredProjectsCount: 3
+  featuredProjectsCount: 4
 # endregion
 
 # region GLOBAL SETTINGS
@@ -46,7 +46,7 @@ personal:
   location: "Bhilwara, Rajasthan, India"
   profileImage:
     type: "url"
-    value: "https://i.ibb.co/rKBnjv95/shivansh.jpg"
+    value: "/assets/uploads/image__7__1779092707842.webp"
     position: "right"
 # endregion
 
@@ -56,7 +56,7 @@ hero:
     - Building Scalable
     - AI Systems
     - That Create
-    - Real Impact.....
+    - Real Impact....
   description: "I specialize in designing and deploying intelligent systems..."
   ctas:
     - label: View Projects
