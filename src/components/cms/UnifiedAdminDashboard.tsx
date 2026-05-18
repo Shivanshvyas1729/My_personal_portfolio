@@ -498,7 +498,7 @@ export const UnifiedAdminDashboard = () => {
           role: userRole,
           filePath,
           sectionKey,
-          newData: isBlog || isProject ? { [sectionKey]: data } : data,
+          newData: data,
           isSafeMode: safeMode,
           providedSha: forceSha
         })

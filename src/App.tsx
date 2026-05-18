@@ -15,7 +15,7 @@ import CursorGlow from "./components/ui/CursorGlow";
 // Eager — homepage and welcome intro load instantly
 import Index from "./pages/Index.tsx";
 import NamasteIntro from "./components/portfolio/NamasteIntro";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 // Lazy — only load when navigated to (reduces initial bundle ~40%)
 const AllProjects  = lazy(() => import("./pages/AllProjects.tsx"));
@@ -74,36 +74,45 @@ function AppShell() {
         {showIntro && <NamasteIntro onComplete={() => setShowIntro(false)} />}
       </AnimatePresence>
 
-      {/* Global Cursor Ambient Glow */}
-      <CursorGlow />
+      {!showIntro && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="w-full min-h-screen"
+        >
+          {/* Global Cursor Ambient Glow */}
+          <CursorGlow />
 
-      {/* Global Dynamic Text Interaction */}
-      <GlobalTextEffector />
+          {/* Global Dynamic Text Interaction */}
+          <GlobalTextEffector />
 
-      {/* Global Scroll Reveal Animation */}
-      <GlobalScrollReveal />
+          {/* Global Scroll Reveal Animation */}
+          <GlobalScrollReveal />
 
-      {/* Global Seamless Rope Light Layer */}
-      <EdgeRopeLight />
+          {/* Global Seamless Rope Light Layer */}
+          <EdgeRopeLight />
 
-      {/* Global floating lock — visible on every page */}
-      <Suspense fallback={null}>
-        <AdminAuth isAdmin={isAdmin} setIsAdmin={setIsAdmin} />
-      </Suspense>
+          {/* Global floating lock — visible on every page */}
+          <Suspense fallback={null}>
+            <AdminAuth isAdmin={isAdmin} setIsAdmin={setIsAdmin} />
+          </Suspense>
 
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
-          <Route path="/"           element={<Index />} />
-          <Route path="/projects"   element={<AllProjects />} />
-          <Route path="/project/:id" element={<ProjectDetail />} />
-          <Route path="/blog"       element={<Blog />} />
-          <Route path="*"           element={<NotFound />} />
-        </Routes>
-      </Suspense>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/"           element={<Index />} />
+              <Route path="/projects"   element={<AllProjects />} />
+              <Route path="/project/:id" element={<ProjectDetail />} />
+              <Route path="/blog"       element={<Blog />} />
+              <Route path="*"           element={<NotFound />} />
+            </Routes>
+          </Suspense>
 
-      <Suspense fallback={null}>
-        <ChatAssistant />
-      </Suspense>
+          <Suspense fallback={null}>
+            <ChatAssistant />
+          </Suspense>
+        </motion.div>
+      )}
     </BrowserRouter>
   );
 }

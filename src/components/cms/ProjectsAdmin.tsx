@@ -21,6 +21,26 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
   const [saveError, setSaveError] = useState("");
   const [projectToDelete, setProjectToDelete] = useState<number | null>(null);
 
+  // Code editor states
+  const [editorMode, setEditorMode] = useState<'form' | 'code'>('form');
+  const [codeValue, setCodeValue] = useState("");
+  const [codeError, setCodeError] = useState("");
+
+  const handleCodeChange = (val: string) => {
+    setCodeValue(val);
+    try {
+      const parsed = JSON.parse(val);
+      if (!parsed.title || !parsed.description) {
+        setCodeError("Title and Description are required in your project code.");
+        return;
+      }
+      setTempProject(parsed);
+      setCodeError("");
+    } catch (e: any) {
+      setCodeError(`JSON Syntax Error: ${e.message}`);
+    }
+  };
+
   const hasPendingChanges = JSON.stringify(projects) !== JSON.stringify(liveData.projects);
 
   const handleEdit = (project: Project) => {
@@ -45,6 +65,11 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
   };
 
   const saveEdit = () => {
+    if (editorMode === 'code' && codeError) {
+      alert("Please fix all JSON syntax errors before saving: " + codeError);
+      return;
+    }
+
     if (!tempProject.title || !tempProject.description) {
       alert("Title and Description are required.");
       return;
@@ -67,8 +92,10 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
 
   const confirmDelete = () => {
     if (projectToDelete !== null) {
-      onChange(projects.filter(p => p.id !== projectToDelete));
+      const updated = projects.filter(p => p.id !== projectToDelete);
+      onChange(updated);
       setProjectToDelete(null);
+      setTimeout(() => onSave(updated), 0);
     }
   };
 
@@ -76,6 +103,9 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
     setEditingId(null);
     setAddingNew(false);
     setTempProject({});
+    setEditorMode('form');
+    setCodeValue("");
+    setCodeError("");
   };
 
   const isModalOpen = editingId !== null || addingNew;
@@ -169,13 +199,64 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
                  <X size={16} />
                </button>
              </div>
+
+             <div className="flex border-b border-border/50 bg-muted/10 shrink-0">
+               <button 
+                 type="button"
+                 onClick={() => setEditorMode('form')}
+                 className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider transition-colors
+                   ${editorMode === 'form' 
+                     ? 'border-b-2 border-primary text-primary bg-primary/5' 
+                     : 'text-muted-foreground hover:bg-muted/30'}`}
+               >
+                 Standard Form
+               </button>
+               <button 
+                 type="button"
+                 onClick={() => {
+                   setEditorMode('code');
+                   setCodeValue(JSON.stringify(tempProject, null, 2));
+                   setCodeError("");
+                 }}
+                 className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider transition-colors
+                   ${editorMode === 'code' 
+                     ? 'border-b-2 border-primary text-primary bg-primary/5' 
+                     : 'text-muted-foreground hover:bg-muted/30'}`}
+               >
+                 Add Using Code
+               </button>
+             </div>
              
              <div className="flex-1 overflow-y-auto p-5">
-                <DynamicForm 
-                  schema={ProjectSchema} 
-                  data={tempProject} 
-                  onChange={setTempProject} 
-                />
+                {editorMode === 'form' ? (
+                  <DynamicForm 
+                    schema={ProjectSchema} 
+                    data={tempProject} 
+                    onChange={setTempProject} 
+                  />
+                ) : (
+                  <div className="flex flex-col h-full min-h-[300px]">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                        JSON Code Syntax
+                      </span>
+                      <span className="text-[9px] text-primary/70 font-semibold">
+                        Edit raw project attributes below
+                      </span>
+                    </div>
+                    <textarea
+                      value={codeValue}
+                      onChange={(e) => handleCodeChange(e.target.value)}
+                      className="flex-1 w-full min-h-[320px] font-mono text-[11px] p-4 bg-muted/30 border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all text-foreground resize-none leading-relaxed"
+                      placeholder="Paste or edit project JSON code here..."
+                    />
+                    {codeError && (
+                      <div className="mt-2 p-2.5 bg-destructive/10 border border-destructive/25 text-destructive rounded-lg font-medium text-[10px] leading-relaxed">
+                        ⚠️ {codeError}
+                      </div>
+                    )}
+                  </div>
+                )}
              </div>
 
              <div className="p-4 border-t border-border/50 bg-muted/10 flex justify-end gap-2">

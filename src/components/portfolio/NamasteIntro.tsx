@@ -12,34 +12,42 @@ const LeftHand = () => (
     viewBox="0 0 100 200" 
     fill="none" 
     xmlns="http://www.w3.org/2000/svg" 
-    className="text-primary/90 filter drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]"
+    className="text-primary filter drop-shadow-[0_0_8px_rgba(59,130,246,0.4)]"
   >
-    {/* Symmetrical palm and index finger curve */}
+    {/* Symmetrical palm and middle finger curve (palm side sits exactly at x=100) */}
     <path 
-      d="M20,180 C20,130 35,90 65,40 C67,37 70,39 70,42 C65,75 55,100 55,180" 
+      d="M 35,190 C 20,130 20,70 94,10 C 96.5,7 100,9 100,12 C 100,60 94,120 94,190" 
       stroke="currentColor" 
       strokeWidth="2.5" 
       strokeLinecap="round" 
       strokeLinejoin="round"
     />
-    {/* Inner middle finger curve */}
+    {/* Inner index finger curve */}
     <path 
-      d="M25,180 C25,140 38,105 60,60 C61.5,57 64,58 64,61 C58,88 50,110 50,180" 
+      d="M 42,190 C 32,145 35,95 88,35 C 90,32 93,33 93,36 C 93,75 88,125 88,190" 
+      stroke="currentColor" 
+      strokeWidth="1.8" 
+      strokeLinecap="round"
+      opacity="0.85"
+    />
+    {/* Inner ring finger curve */}
+    <path 
+      d="M 48,190 C 42,160 45,115 82,60 C 83.5,57 86,58 86,61 C 86,90 82,130 82,190" 
       stroke="currentColor" 
       strokeWidth="1.5" 
       strokeLinecap="round"
-      opacity="0.8"
+      opacity="0.7"
     />
     {/* Symmetrical thumb */}
     <path 
-      d="M32,130 C32,110 42,95 50,85 C52,83 54,85 53,87 C45,105 45,115 45,130" 
+      d="M 48,135 C 48,115 58,100 70,90 C 72,88 74,90 73,92 C 63,110 60,122 60,135" 
       stroke="currentColor" 
       strokeWidth="2" 
       strokeLinecap="round"
     />
     {/* Elegant inner palm creases */}
     <path 
-      d="M44,145 C44,135 48,128 51,124" 
+      d="M 68,145 C 68,135 72,128 75,124" 
       stroke="currentColor" 
       strokeWidth="1" 
       strokeLinecap="round"
@@ -117,7 +125,7 @@ export default function NamasteIntro({ onComplete }: NamasteIntroProps) {
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5, ease: "easeInOut" }}
-      className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-[#030712] overflow-hidden select-none"
+      className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-background text-foreground overflow-hidden select-none"
     >
       {/* Glow particle behind the hands */}
       <motion.div
@@ -128,12 +136,12 @@ export default function NamasteIntro({ onComplete }: NamasteIntroProps) {
       />
 
       <div className="relative flex flex-col items-center z-10">
-        {/* Hands Container */}
-        <div className="relative flex items-center justify-center h-48 mb-10">
+        {/* Hands Container - flex gap-0 ensures precise contact of bounding boxes */}
+        <div className="relative flex items-center justify-center gap-0 h-48 mb-10">
           {/* Left Hand */}
           <motion.div
             initial={{ x: -120, y: 15, rotate: -35, opacity: 0 }}
-            animate={{ x: -3, y: 0, rotate: 0, opacity: 1 }}
+            animate={{ x: 0, y: 0, rotate: 0, opacity: 1 }}
             transition={{ duration: 0.85, ease: [0.25, 1, 0.5, 1] }}
           >
             <LeftHand />
@@ -142,7 +150,7 @@ export default function NamasteIntro({ onComplete }: NamasteIntroProps) {
           {/* Right Hand (Perfect Symmetrical Mirror) */}
           <motion.div
             initial={{ x: 120, y: 15, rotate: 35, opacity: 0 }}
-            animate={{ x: 3, y: 0, rotate: 0, opacity: 1 }}
+            animate={{ x: 0, y: 0, rotate: 0, opacity: 1 }}
             transition={{ duration: 0.85, ease: [0.25, 1, 0.5, 1] }}
             style={{ scaleX: -1 }}
           >
