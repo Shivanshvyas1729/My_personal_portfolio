@@ -1,9 +1,135 @@
 import React, { useState } from 'react';
 import { Project } from '@/data/portfolioData';
-import { Plus, Edit3, Trash2, X, Github, ExternalLink, Star, RefreshCw } from 'lucide-react';
+import { Plus, Edit3, Trash2, X, Github, ExternalLink, Star, RefreshCw, BookOpen, Copy } from 'lucide-react';
 import { DynamicForm } from './DynamicForm';
 import { ProjectSchema } from '@/lib/schema';
 import { useCMSState } from '@/context/CMSContext';
+
+// Example project JSON template pre-filled with descriptive comments
+const SCHEMA_EXAMPLE_JSON = `{
+  "id": 6,
+  "// id": "Unique positive integer identifier (automatically incremented for new projects)",
+
+  "title": "Solar Panel Defect Detection System",
+  "// title": "A clear, impact-oriented title for the portfolio grid",
+
+  "category": ["Deep Learning", "Computer Vision"],
+  "// category": "High-level tags for filtering projects on the site",
+
+  "description": "An AI-powered solar panel defect detection system using transfer learning.",
+  "// description": "A compelling 1-2 sentence summary of what the project does",
+
+  "tech": ["Python", "PyTorch", "Streamlit"],
+  "// tech": "List of core frameworks, tools, and languages utilized",
+
+  "github": "https://github.com/...",
+  "// github": "Link to open-source repository (optional)",
+
+  "live": "https://...",
+  "// live": "Link to live running web application or demo (optional)",
+
+  "featured": true,
+  "// featured": "Set to true to feature this project on your home page's main grid",
+
+  "problem_statement": "Manual inspection of solar panels is slow and expensive. There exists a need for an automated defect classification system.",
+  "// problem_statement": "Detailed description of the business problem or core challenge",
+
+  "learning_outcomes": [
+    "Implemented high-accuracy Computer Vision models",
+    "Constructed interactive Streamlit web application"
+  ],
+  "// learning_outcomes": "List of key engineering, design, or mathematical skills developed",
+
+  "architecture": "A user visits the Streamlit frontend to upload panel images. The Streamlit layer routes data to a PyTorch inference backend and returns Grad-CAM explainability heatmaps.",
+  "// architecture": "A description of the systems topology, pipelines, or framework components",
+
+  "architectureImage": "https://...",
+  "// architectureImage": "URL to a system design spec diagram or architectural flow visual (optional)",
+
+  "resources": [
+    {
+      "label": "Architecture Spec PDF",
+      "url": "https://drive.google.com/..."
+    }
+  ],
+  "// resources": "List of internal assets (documents, slides, sheets) shared in the project view",
+
+  "howItWorks": "1. User uploads panel image. 2. Preprocessing resizes and normalizes image. 3. EfficientNet-B0 runs inference. 4. Grad-CAM visualizes decision features.",
+  "// howItWorks": "Step-by-step description of the operational or algorithmic execution pipeline",
+
+  "objectives": [
+    "Deploy transfer learning classification backend",
+    "Ensure low latency predictions under 100ms"
+  ],
+  "// objectives": "Quantifiable engineering goals for the sprint or development cycle",
+
+  "success_criteria": [
+    "F1-Score exceeds 0.94",
+    "Seamless real-time inference on edge streams"
+  ],
+  "// success_criteria": "Qualifying metrics or conditions to consider the project fully successful",
+
+  "data_sources": [
+    "https://www.kaggle.com/datasets/..."
+  ],
+  "// data_sources": "List of target dataset repositories, sheets, or database sources",
+
+  "target_variable": "Defect Label (Dust, Crack, Physical Damage, Clean)",
+  "// target_variable": "The predictive label, target variable, or class label name",
+
+  "features": [
+    "Segmented image pixel grids",
+    "Gabor filter texture vectors"
+  ],
+  "// features": "List of critical engineered features, dimensions, or columns fed to model",
+
+  "preprocessing": [
+    "Image resizing to 224x224 pixels",
+    "Z-score normalization with custom channel means"
+  ],
+  "// preprocessing": "List of clean-up, scaling, tokenization, or formatting operations applied to data",
+
+  "modeling": [
+    "Pretrained EfficientNet-B0 backbone with linear transfer head",
+    "Cross-entropy loss function optimized with Adam optimizer"
+  ],
+  "// modeling": "List of ML/DL models, hyperparameter configurations, or algorithms designed",
+
+  "evaluation_metrics": [
+    "Weighted F1-score for skewed labels",
+    "Mean Inference Latency"
+  ],
+  "// evaluation_metrics": "List of offline/online testing metrics measured to gauge accuracy",
+
+  "validation_strategy": "5-Fold stratified cross-validation split",
+  "// validation_strategy": "Methodology used to separate training/testing data to avoid overfitting",
+
+  "explainability": "Grad-CAM saliency heatmaps highlight specific pixels that triggered predictions",
+  "// explainability": "Methodology or framework used to explain predictions (Grad-CAM, SHAP, LIME, etc.)",
+
+  "deployment": "Containerized with Docker and deployed as a Streamlit Web App on Streamlit Community Cloud",
+  "// deployment": "Details on production hosting, containerization, or edge compiler setup",
+
+  "risks": [
+    "Degraded performance in low-lighting or rainy weather conditions",
+    "Highly reflective metallic frame false classifications"
+  ],
+  "// risks": "List of potential failure modes, operational risks, or algorithmic constraints",
+
+  "ethics": [
+    "Data scraped exclusively from authorized open datasets",
+    "Fully open and transparent processing with no hidden diagnostic biases"
+  ],
+  "// ethics": "Bias mitigation, safety guardrails, or compliance standards",
+
+  "open_resources": [
+    {
+      "label": "PyTorch Grad-CAM Docs",
+      "url": "https://pytorch.org/docs"
+    }
+  ],
+  "// open_resources": "Array of publicly accessible tutorials, papers, or packages linked in the preview"
+}`;
 
 interface ProjectsAdminProps {
   projects: Project[];
@@ -18,13 +144,14 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
   const [editingId, setEditingId] = useState<number | null>(null);
   const [addingNew, setAddingNew] = useState(false);
   const [tempProject, setTempProject] = useState<Partial<Project>>({});
-  const [saveError, setSaveError] = useState("");
-  const [projectToDelete, setProjectToDelete] = useState<number | null>(null);
-
-  // Code editor states
   const [editorMode, setEditorMode] = useState<'form' | 'code'>('form');
   const [codeValue, setCodeValue] = useState("");
   const [codeError, setCodeError] = useState("");
+  const [hasPendingChanges, setHasPendingChanges] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<number | null>(null);
+  const [saveError, setSaveError] = useState("");
+  const [showExampleModal, setShowExampleModal] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   const handleCodeChange = (val: string) => {
     setCodeValue(val);
@@ -41,7 +168,7 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
     }
   };
 
-  const hasPendingChanges = JSON.stringify(projects) !== JSON.stringify(liveData.projects);
+  const hasPendingChanges = JSON.stringify(projects) !== JSON.stringify(liveData?.projects || []);
 
   const handleEdit = (project: Project) => {
     setTempProject({ ...project });
@@ -302,9 +429,18 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
                 ) : (
                   <div className="flex flex-col h-full min-h-[300px]">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
-                        JSON Code Syntax
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                          JSON Code Syntax
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setShowExampleModal(true)}
+                          className="px-2 py-0.5 text-[9px] font-bold text-primary bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-all rounded-md flex items-center gap-1 uppercase tracking-wider"
+                        >
+                          <BookOpen size={10} /> Show Example
+                        </button>
+                      </div>
                       <span className="text-[9px] text-primary/70 font-semibold">
                         Edit raw project attributes below
                       </span>
@@ -382,6 +518,63 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
                 className="flex-1 px-4 py-2 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-lg text-xs font-semibold transition-colors shadow-lg"
               >
                 Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Commented Schema Example Modal */}
+      {showExampleModal && (
+        <div className="absolute inset-0 z-[60] flex flex-col p-4 animate-in fade-in duration-150 rounded-xl overflow-hidden">
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-background/85 backdrop-blur-md" onClick={() => setShowExampleModal(false)} />
+          
+          {/* Dialog Container */}
+          <div className="glass-card shadow-2xl border border-primary/20 rounded-xl flex flex-col h-full absolute inset-4 z-10 overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-border/50 bg-primary/5">
+              <div className="flex items-center gap-2">
+                <BookOpen size={16} className="text-primary" />
+                <h4 className="font-bold text-sm text-foreground">Project Schema Field Reference</h4>
+              </div>
+              <button 
+                onClick={() => setShowExampleModal(false)} 
+                className="p-1.5 rounded hover:bg-muted/80 text-muted-foreground transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            
+            {/* Scrollable content */}
+            <div className="flex-1 overflow-y-auto p-5 font-mono text-[10.5px] leading-relaxed bg-muted/20">
+              <div className="flex justify-between items-center mb-3 pb-2 border-b border-border/30">
+                <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">
+                  Fully Commented JSON Template (Valid Syntax)
+                </span>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(SCHEMA_EXAMPLE_JSON);
+                    setCopySuccess(true);
+                    setTimeout(() => setCopySuccess(false), 2000);
+                  }}
+                  className="px-2.5 py-1 bg-primary text-primary-foreground hover:bg-primary/95 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all active:scale-95 shadow-sm"
+                >
+                  <Copy size={11} /> {copySuccess ? "Copied!" : "Copy Code"}
+                </button>
+              </div>
+              <pre className="text-foreground bg-muted/40 p-4 rounded-lg border border-border/30 overflow-x-auto select-text whitespace-pre">
+                {SCHEMA_EXAMPLE_JSON}
+              </pre>
+            </div>
+            
+            {/* Footer */}
+            <div className="p-4 border-t border-border/50 bg-muted/10 flex justify-end">
+              <button 
+                onClick={() => setShowExampleModal(false)} 
+                className="px-4 py-1.5 bg-primary/10 text-primary hover:bg-primary/25 rounded-lg text-xs font-semibold transition-colors"
+              >
+                Close Reference
               </button>
             </div>
           </div>

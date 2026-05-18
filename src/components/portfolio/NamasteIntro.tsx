@@ -7,75 +7,158 @@ interface NamasteIntroProps {
 
 const LeftHand = () => (
   <svg 
-    width="120" 
-    height="200" 
-    viewBox="0 0 120 200" 
+    width="130" 
+    height="220" 
+    viewBox="0 0 130 220" 
     fill="none" 
     xmlns="http://www.w3.org/2000/svg" 
-    className="text-primary filter drop-shadow-[0_0_12px_rgba(59,130,246,0.45)]"
+    className="filter drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] text-foreground"
   >
-    {/* Outer contour: Middle finger tip at x=116, y=8. Palm side sits flush at x=120 */}
+    <defs>
+      {/* 3D brushed-metal plate gradient */}
+      <linearGradient id="robo-plate" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#64748b" />
+        <stop offset="30%" stopColor="#94a3b8" />
+        <stop offset="70%" stopColor="#334155" />
+        <stop offset="100%" stopColor="#1e293b" />
+      </linearGradient>
+      {/* Carbon fiber grid pattern fill */}
+      <pattern id="carbon-pattern" width="6" height="6" patternUnits="userSpaceOnUse">
+        <path d="M0 3 L6 3 M3 0 L3 6" stroke="#475569" strokeWidth="0.8" opacity="0.35"/>
+        <rect width="3" height="3" fill="#1e293b" opacity="0.4"/>
+      </pattern>
+      {/* Neon cyber cyan glow gradient */}
+      <linearGradient id="cyber-glow" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stopColor="#06b6d4" />
+        <stop offset="50%" stopColor="#3b82f6" />
+        <stop offset="100%" stopColor="#6366f1" />
+      </linearGradient>
+      {/* Deep inner cavity shadow */}
+      <linearGradient id="dark-metal" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stopColor="#0f172a" />
+        <stop offset="100%" stopColor="#1e293b" />
+      </linearGradient>
+    </defs>
+
+    {/* ─── 1. BASE MECHANICAL CHASSIS (Inner dark frame) ─── */}
     <path 
-      d="M 30,195 C 20,130 15,65 116,8 C 119,6 120,9 120,12 C 120,65 116,130 115,195" 
-      stroke="currentColor" 
+      d="M32,215 C22,145 18,90 123,10 L125,12 C125,75 120,135 120,215 Z" 
+      fill="url(#dark-metal)" 
+      stroke="#334155"
+      strokeWidth="1.5"
+    />
+
+    {/* ─── 2. FOREARM CHASSIS & HYDRAULIC CYLINDERS ─── */}
+    {/* Base plate with rivets */}
+    <path 
+      d="M25,215 L125,215 L120,190 L30,190 Z" 
+      fill="url(#robo-plate)" 
+      stroke="#1e293b" 
+      strokeWidth="1.5"
+    />
+    <circle cx="35" cy="202" r="2.5" fill="#475569" />
+    <circle cx="115" cy="202" r="2.5" fill="#475569" />
+    
+    {/* Hydraulic pistons */}
+    <rect x="42" y="172" width="6" height="18" rx="2" fill="#94a3b8" stroke="#1e293b" />
+    <line x1="45" y1="190" x2="45" y2="165" stroke="#e2e8f0" strokeWidth="2.5" />
+    
+    <rect x="102" y="172" width="6" height="18" rx="2" fill="#94a3b8" stroke="#1e293b" />
+    <line x1="105" y1="190" x2="105" y2="165" stroke="#e2e8f0" strokeWidth="2.5" />
+
+    {/* ─── 3. PALM CORE & ARMOR PLATES (Segmented 3D layers) ─── */}
+    {/* Large main carbon-fiber back-plate */}
+    <path 
+      d="M32,170 C22,120 20,95 85,95 L118,95 L120,170 Z" 
+      fill="url(#carbon-pattern)" 
+      stroke="#475569" 
+      strokeWidth="1.5"
+    />
+    {/* Segmented steel armor shell overlays */}
+    <path 
+      d="M32,170 C26,140 28,115 55,115 L62,168 Z" 
+      fill="url(#robo-plate)" 
+      stroke="#1e293b" 
+      strokeWidth="1.2"
+    />
+    <path 
+      d="M68,168 L60,115 L95,115 L93,168 Z" 
+      fill="url(#robo-plate)" 
+      stroke="#1e293b" 
+      strokeWidth="1.2"
+    />
+    <path 
+      d="M98,168 L100,115 L118,115 L120,168 Z" 
+      fill="url(#robo-plate)" 
+      stroke="#1e293b" 
+      strokeWidth="1.2"
+    />
+
+    {/* Glowing circuit track tracing across the palm */}
+    <path 
+      d="M50,160 L50,135 L85,135 L85,108" 
+      stroke="url(#cyber-glow)" 
       strokeWidth="2.5" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    />
-    {/* Index finger curve: tip at x=108, y=28 */}
-    <path 
-      d="M 38,195 C 32,145 36,95 106,26 C 108.5,23 111,25 111,28 C 111,85 107,135 107,195" 
-      stroke="currentColor" 
-      strokeWidth="1.8" 
       strokeLinecap="round"
-      opacity="0.85"
+      opacity="0.9"
     />
-    {/* Ring finger curve: tip at x=98, y=48 */}
-    <path 
-      d="M 46,195 C 42,160 45,115 97,44 C 99,41 102,43 102,46 C 102,95 98,140 98,195" 
-      stroke="currentColor" 
-      strokeWidth="1.5" 
-      strokeLinecap="round"
-      opacity="0.75"
-    />
-    {/* Pinky finger curve: tip at x=88, y=68 */}
-    <path 
-      d="M 54,195 C 50,170 52,130 87,64 C 89,61 92,63 92,66 C 92,105 88,150 88,195" 
-      stroke="currentColor" 
-      strokeWidth="1.2" 
-      strokeLinecap="round"
-      opacity="0.6"
-    />
-    {/* Thumb curve folding elegantly inside at the base */}
-    <path 
-      d="M 30,195 C 28,170 38,150 72,118 C 74.5,115 77.5,117.5 76.5,120 C 65,148 60,165 60,195" 
-      stroke="currentColor" 
-      strokeWidth="2.0" 
-      strokeLinecap="round"
-    />
-    {/* Elegant inner palm crease details */}
-    <path 
-      d="M 68,145 C 68,135 72,128 75,124" 
-      stroke="currentColor" 
-      strokeWidth="1" 
-      strokeLinecap="round"
-      opacity="0.4"
-    />
-    {/* Wrist bracelets / Elegant Kada lines */}
-    <path 
-      d="M 28,190 C 50,187 85,187 117,190" 
-      stroke="currentColor" 
-      strokeWidth="1.5" 
-      strokeLinecap="round"
-      opacity="0.8"
-    />
-    <path 
-      d="M 26,196 C 50,193 85,193 115,196" 
-      stroke="currentColor" 
-      strokeWidth="1" 
-      strokeLinecap="round"
-      opacity="0.5"
-    />
+    <circle cx="85" cy="108" r="3.5" fill="#22d3ee" />
+
+    {/* ─── 4. SEGMENTED ROBOTIC FINGERS (With pivot joints) ─── */}
+
+    {/* 🖐️ MIDDLE FINGER (Flush at x=130 for perfect gapless contact) */}
+    {/* Knuckle Joint */}
+    <circle cx="118" cy="95" r="5" fill="url(#robo-plate)" stroke="#1e293b" />
+    <circle cx="118" cy="95" r="2" fill="#06b6d4" />
+    {/* Proximal segment */}
+    <path d="M 115,95 L 121,95 L 123,65 L 117,65 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
+    <line x1="119" y1="92" x2="121" y2="68" stroke="url(#cyber-glow)" strokeWidth="1" />
+    {/* Middle Joint */}
+    <circle cx="120" cy="65" r="4.5" fill="url(#robo-plate)" stroke="#1e293b" />
+    <circle cx="120" cy="65" r="1.8" fill="#06b6d4" />
+    {/* Intermediate segment */}
+    <path d="M 117,65 L 123,65 L 125,35 L 119,35 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
+    {/* Distal Joint */}
+    <circle cx="122" cy="35" r="4" fill="url(#robo-plate)" stroke="#1e293b" />
+    <circle cx="122" cy="35" r="1.5" fill="#06b6d4" />
+    {/* Distal Segment (reaches x=130 tip boundary) */}
+    <path d="M 120,35 L 124,35 L 130,8 C 130,5 128,5 125,8 L 118,35 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
+
+    {/* 🖐️ INDEX FINGER (Tip at x=119, y=25) */}
+    <circle cx="104" cy="98" r="5" fill="url(#robo-plate)" stroke="#1e293b" />
+    <circle cx="104" cy="98" r="2" fill="#06b6d4" />
+    <path d="M 101,98 L 107,98 L 111,70 L 105,70 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
+    <circle cx="108" cy="70" r="4.5" fill="url(#robo-plate)" stroke="#1e293b" />
+    <path d="M 105,70 L 111,70 L 115,42 L 109,42 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
+    <circle cx="112" cy="42" r="4" fill="url(#robo-plate)" stroke="#1e293b" />
+    <path d="M 109,42 L 115,42 L 119,25 C 119,22 117,22 114,25 L 107,42 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
+
+    {/* 🖐️ RING FINGER (Tip at x=108, y=38) */}
+    <circle cx="90" cy="108" r="5" fill="url(#robo-plate)" stroke="#1e293b" />
+    <circle cx="90" cy="108" r="2" fill="#06b6d4" />
+    <path d="M 87,108 L 93,108 L 97,80 L 91,80 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
+    <circle cx="94" cy="80" r="4.5" fill="url(#robo-plate)" stroke="#1e293b" />
+    <path d="M 91,80 L 97,80 L 101,54 L 95,54 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
+    <circle cx="98" cy="54" r="4" fill="url(#robo-plate)" stroke="#1e293b" />
+    <path d="M 95,54 L 101,54 L 108,38 C 108,35 106,35 103,38 L 92,54 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
+
+    {/* 🖐️ PINKY FINGER (Tip at x=96, y=56) */}
+    <circle cx="76" cy="120" r="5" fill="url(#robo-plate)" stroke="#1e293b" />
+    <circle cx="76" cy="120" r="2" fill="#06b6d4" />
+    <path d="M 73,120 L 79,120 L 83,94 L 77,94 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
+    <circle cx="80" cy="94" r="4.5" fill="url(#robo-plate)" stroke="#1e293b" />
+    <path d="M 77,94 L 83,94 L 87,70 L 81,70 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
+    <circle cx="84" cy="70" r="4" fill="url(#robo-plate)" stroke="#1e293b" />
+    <path d="M 81,70 L 87,70 L 96,56 C 96,53 94,53 91,56 L 81,70 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
+
+    {/* 🖐️ ROBOTIC THUMB (Folding elegantly on the left, tip at x=78, y=118) */}
+    <circle cx="34" cy="158" r="6" fill="url(#robo-plate)" stroke="#1e293b" />
+    <circle cx="34" cy="158" r="2.5" fill="#06b6d4" />
+    <path d="M 31,158 L 37,158 L 52,138 L 46,138 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.5" />
+    <circle cx="49" cy="138" r="5" fill="url(#robo-plate)" stroke="#1e293b" />
+    <path d="M 46,138 L 52,138 L 68,124 L 62,124 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
+    <circle cx="65" cy="124" r="4" fill="url(#robo-plate)" stroke="#1e293b" />
+    <path d="M 62,124 L 68,124 L 78,118 C 80,116 79,114 76,116 L 59,124 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
   </svg>
 );
 
@@ -160,7 +243,7 @@ export default function NamasteIntro({ onComplete }: NamasteIntroProps) {
 
       <div className="relative flex flex-col items-center z-10">
         {/* Hands Container - flex gap-0 ensures precise contact of bounding boxes */}
-        <div className="relative flex items-center justify-center gap-0 h-48 mb-10">
+        <div className="relative flex items-center justify-center gap-0 h-56 mb-10">
           {/* Left Hand */}
           <motion.div
             initial={{ x: -120, y: 15, rotate: -35, opacity: 0 }}
