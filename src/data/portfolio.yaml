@@ -188,20 +188,8 @@ services:
 resume:
   url: "https://shorturl.at/rlKAY"
   categories:
-    - name: "Data Science"
-      url: "https://shorturl.at/rlKAY"
-      visible: true
-    - name: "Data Analysis"
-      url: "https://shorturl.at/rlKAY"
-      visible: true
-    - name: "Computer Vision"
-      url: "https://shorturl.at/rlKAY"
-      visible: true
-    - name: "NLP"
-      url: "https://shorturl.at/rlKAY"
-      visible: true
-    - name: "RAG Development"
-      url: "https://shorturl.at/rlKAY"
+    - name: Data Science
+      url: https://shorturl.at/rlKAY
       visible: true
 
 # endregion
