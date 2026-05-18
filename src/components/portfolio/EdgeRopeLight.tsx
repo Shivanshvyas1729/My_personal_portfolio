@@ -84,108 +84,116 @@ const EdgeRopeLight = () => {
       style={{ height: '100lvh' }}
       aria-hidden="true"
     >
-      {/* ==================== FOG ROPE LIGHTS (Blurry Backdrop Ambient Glow) ==================== */}
+      {/* ==================== FOG ROPE LIGHTS (High-Performance Masked Ambient Glow) ==================== */}
       {/* Top Fog */}
-      <div className="absolute top-0 left-0 w-[200%] h-full pointer-events-none opacity-45 mix-blend-screen">
-        <div 
-          className="absolute top-0 left-0 w-full animate-rope-h"
-          style={{ 
-            height: `${config.thickness * 7}px`, 
-            background: horizontalBlurGradient,
-            animationDuration: `${config.speed * 0.9}s`,
-            filter: `blur(${config.glow * 3.5}px)`,
-          }}
-        />
-      </div>
+      <div 
+        className="absolute top-0 left-0 w-full animate-rope-breathe-1"
+        style={{ 
+          height: `${config.thickness * 18}px`, 
+          background: horizontalBlurGradient,
+          opacity: 0.35,
+          maskImage: 'linear-gradient(to bottom, black 15%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black 15%, transparent 100%)',
+          willChange: 'opacity',
+          contain: 'layout paint style',
+        }}
+      />
 
       {/* Bottom Fog */}
-      <div className="absolute bottom-0 left-0 w-[200%] h-full pointer-events-none opacity-45 mix-blend-screen">
-        <div 
-          className="absolute bottom-0 left-0 w-full animate-rope-h-rev"
-          style={{ 
-            height: `${config.thickness * 7}px`, 
-            background: horizontalBlurGradient,
-            animationDuration: `${config.speed * 1.0}s`,
-            filter: `blur(${config.glow * 3.5}px)`,
-          }}
-        />
-      </div>
+      <div 
+        className="absolute bottom-0 left-0 w-full animate-rope-breathe-2"
+        style={{ 
+          height: `${config.thickness * 18}px`, 
+          background: horizontalBlurGradient,
+          opacity: 0.35,
+          maskImage: 'linear-gradient(to top, black 15%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to top, black 15%, transparent 100%)',
+          willChange: 'opacity',
+          contain: 'layout paint style',
+        }}
+      />
 
       {/* Left Fog */}
-      <div className="absolute top-0 left-0 w-full h-[200%] pointer-events-none opacity-45 mix-blend-screen">
-        <div 
-          className="absolute top-0 left-0 h-full animate-rope-v-rev"
-          style={{ 
-            width: `${config.thickness * 7}px`, 
-            background: verticalBlurGradient,
-            animationDuration: `${config.speed * 1.2}s`,
-            filter: `blur(${config.glow * 3.5}px)`,
-          }}
-        />
-      </div>
+      <div 
+        className="absolute top-0 left-0 h-full animate-rope-breathe-3"
+        style={{ 
+          width: `${config.thickness * 18}px`, 
+          background: verticalBlurGradient,
+          opacity: 0.35,
+          maskImage: 'linear-gradient(to right, black 15%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to right, black 15%, transparent 100%)',
+          willChange: 'opacity',
+          contain: 'layout paint style',
+        }}
+      />
 
       {/* Right Fog */}
-      <div className="absolute top-0 right-0 w-full h-[200%] pointer-events-none opacity-45 mix-blend-screen">
-        <div 
-          className="absolute top-0 right-0 h-full animate-rope-v"
-          style={{ 
-            width: `${config.thickness * 7}px`, 
-            background: verticalBlurGradient,
-            animationDuration: `${config.speed * 1.1}s`,
-            filter: `blur(${config.glow * 3.5}px)`,
-          }}
-        />
-      </div>
+      <div 
+        className="absolute top-0 right-0 h-full animate-rope-breathe-4"
+        style={{ 
+          width: `${config.thickness * 18}px`, 
+          background: verticalBlurGradient,
+          opacity: 0.35,
+          maskImage: 'linear-gradient(to left, black 15%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to left, black 15%, transparent 100%)',
+          willChange: 'opacity',
+          contain: 'layout paint style',
+        }}
+      />
 
       {/* ==================== SHARP ROPE LIGHTS (Crisp Inner Neon Outline) ==================== */}
       {/* Top Sharp */}
-      <div className="absolute top-0 left-0 w-[200%] h-full pointer-events-none">
+      <div className="absolute top-0 left-0 w-[200%] h-full overflow-hidden">
         <div 
           className="absolute top-0 left-0 w-full animate-rope-h"
           style={{ 
             height: `${config.sharpThickness}px`, 
             background: horizontalGradient,
             animationDuration: `${config.speed}s`,
-            boxShadow: `0 0 ${config.glow * 2}px ${config.sharpColors[0] || 'transparent'}`
+            willChange: 'transform',
+            contain: 'layout paint style',
           }}
         />
       </div>
 
       {/* Bottom Sharp */}
-      <div className="absolute bottom-0 left-0 w-[200%] h-full pointer-events-none">
+      <div className="absolute bottom-0 left-0 w-[200%] h-full overflow-hidden">
         <div 
           className="absolute bottom-0 left-0 w-full animate-rope-h-rev"
           style={{ 
             height: `${config.sharpThickness}px`, 
             background: horizontalGradient,
             animationDuration: `${config.speed * 1.1}s`,
-            boxShadow: `0 0 ${config.glow * 2}px ${config.sharpColors[config.sharpColors.length - 1] || 'transparent'}`
+            willChange: 'transform',
+            contain: 'layout paint style',
           }}
         />
       </div>
 
       {/* Left Sharp */}
-      <div className="absolute top-0 left-0 w-full h-[200%] pointer-events-none">
+      <div className="absolute top-0 left-0 w-full h-[200%] overflow-hidden">
         <div 
           className="absolute top-0 left-0 h-full animate-rope-v-rev"
           style={{ 
             width: `${config.sharpThickness}px`, 
             background: verticalGradient,
             animationDuration: `${config.speed * 1.3}s`,
-            boxShadow: `0 0 ${config.glow * 2}px ${config.sharpColors[0] || 'transparent'}`
+            willChange: 'transform',
+            contain: 'layout paint style',
           }}
         />
       </div>
 
       {/* Right Sharp */}
-      <div className="absolute top-0 right-0 w-full h-[200%] pointer-events-none">
+      <div className="absolute top-0 right-0 w-full h-[200%] overflow-hidden">
         <div 
           className="absolute top-0 right-0 h-full animate-rope-v"
           style={{ 
             width: `${config.sharpThickness}px`, 
             background: verticalGradient,
             animationDuration: `${config.speed * 1.2}s`,
-            boxShadow: `0 0 ${config.glow * 2}px ${config.sharpColors[config.sharpColors.length - 1] || 'transparent'}`
+            willChange: 'transform',
+            contain: 'layout paint style',
           }}
         />
       </div>
@@ -207,10 +215,31 @@ const EdgeRopeLight = () => {
           0% { transform: translate3d(0, 0%, 0); }
           100% { transform: translate3d(0, -50%, 0); }
         }
+        @keyframes rope-breathe-1 {
+          0%, 100% { opacity: 0.20; transform: translate3d(0, 0, 0); }
+          50% { opacity: 0.40; transform: translate3d(0, 0, 0); }
+        }
+        @keyframes rope-breathe-2 {
+          0%, 100% { opacity: 0.40; transform: translate3d(0, 0, 0); }
+          50% { opacity: 0.20; transform: translate3d(0, 0, 0); }
+        }
+        @keyframes rope-breathe-3 {
+          0%, 100% { opacity: 0.25; transform: translate3d(0, 0, 0); }
+          50% { opacity: 0.45; transform: translate3d(0, 0, 0); }
+        }
+        @keyframes rope-breathe-4 {
+          0%, 100% { opacity: 0.45; transform: translate3d(0, 0, 0); }
+          50% { opacity: 0.25; transform: translate3d(0, 0, 0); }
+        }
         .animate-rope-h { animation: rope-h linear infinite; }
         .animate-rope-h-rev { animation: rope-h-rev linear infinite; }
         .animate-rope-v { animation: rope-v linear infinite; }
         .animate-rope-v-rev { animation: rope-v-rev linear infinite; }
+        
+        .animate-rope-breathe-1 { animation: rope-breathe-1 7s ease-in-out infinite; }
+        .animate-rope-breathe-2 { animation: rope-breathe-2 7s ease-in-out infinite; }
+        .animate-rope-breathe-3 { animation: rope-breathe-3 8s ease-in-out infinite; }
+        .animate-rope-breathe-4 { animation: rope-breathe-4 8s ease-in-out infinite; }
       `}</style>
     </div>
   );

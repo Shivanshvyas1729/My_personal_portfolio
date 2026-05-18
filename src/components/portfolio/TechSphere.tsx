@@ -12,28 +12,14 @@ import { useTheme } from "@/hooks/useTheme";
 interface TechLabelProps {
   text: string;
   position: [number, number, number];
-  index: number;
-  total: number;
 }
 
-const TechLabel = ({ text, position, index, total }: TechLabelProps) => {
+const TechLabel = ({ text, position }: TechLabelProps) => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const ref = useRef<THREE.Group>(null);
-
-  useFrame(({ clock }) => {
-    if (!ref.current) return;
-    const t = clock.getElapsedTime() * 0.15 + (index / total) * Math.PI * 2;
-    const r = 0.1;
-    
-    // Floating movement within its position
-    ref.current.position.x = position[0] + Math.sin(t) * r;
-    ref.current.position.y = position[1] + Math.cos(t * 1.2) * r;
-    ref.current.position.z = position[2] + Math.sin(t * 0.8) * r;
-  });
 
   return (
-    <Billboard ref={ref} position={position} follow={true} lockX={false} lockY={false} lockZ={false}>
+    <Billboard position={position} follow={true}>
       <Text
         fontSize={0.22}
         color={isDark ? "#93c5fd" : "#2563eb"}
@@ -233,6 +219,7 @@ const Scene = () => {
   const techStack = useCMSData(d => d.techStack) || initialData.techStack;
   const tools = techStack?.featured || initialData.techStack.featured;
   const groupRef = useRef<THREE.Group>(null);
+  const labelsGroupRef = useRef<THREE.Group>(null);
 
   const positions = useMemo(() => {
     const count = tools.length;
@@ -248,9 +235,15 @@ const Scene = () => {
     });
   }, [tools]);
 
-  useFrame(() => {
+  useFrame(({ clock }) => {
+    const time = clock.getElapsedTime();
     if (groupRef.current) {
-      groupRef.current.rotation.y += 0.0015;
+      groupRef.current.rotation.y = time * 0.08;
+    }
+    if (labelsGroupRef.current) {
+      // Float all labels organically in a single unified compositor operation
+      labelsGroupRef.current.position.y = Math.sin(time * 0.4) * 0.15;
+      labelsGroupRef.current.position.x = Math.cos(time * 0.3) * 0.1;
     }
   });
 
@@ -264,9 +257,11 @@ const Scene = () => {
       <Float speed={2} rotationIntensity={0.2} floatIntensity={1}>
         <RobotAvatar />
       </Float>
-      {tools.map((tech, i) => (
-        <TechLabel key={tech} text={tech} position={positions[i]} index={i} total={tools.length} />
-      ))}
+      <group ref={labelsGroupRef}>
+        {tools.map((tech, i) => (
+          <TechLabel key={tech} text={tech} position={positions[i]} />
+        ))}
+      </group>
     </group>
   );
 };
@@ -312,7 +307,11 @@ const TechSphere = () => {
             <div className={`absolute inset-0 ${isDark ? "bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.08)_0%,transparent_70%)]" : "bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.12)_0%,transparent_70%)]"} pointer-events-none`} />
             
             <div className="relative z-10 w-full h-full cursor-grab active:cursor-grabbing">
-              <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
+              <Canvas 
+                camera={{ position: [0, 0, 8], fov: 45 }}
+                dpr={[1, 1.5]}
+                gl={{ antialias: true, powerPreference: "high-performance" }}
+              >
                 <Suspense fallback={null}>
                   <Scene />
                   <OrbitControls 

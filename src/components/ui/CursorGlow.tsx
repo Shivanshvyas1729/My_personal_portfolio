@@ -43,10 +43,10 @@ const CursorGlow = () => {
     };
   }, []);
 
-  // Theme-aware colors
+  // Theme-aware pre-softened gradients (completely avoids expensive offscreen blur filters)
   const glowColor = isDark 
-    ? 'radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, rgba(139, 92, 246, 0.03) 50%, transparent 80%)'
-    : 'radial-gradient(circle, rgba(59, 130, 246, 0.04) 0%, rgba(139, 92, 246, 0.01) 50%, transparent 80%)';
+    ? 'radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.05) 30%, rgba(139, 92, 246, 0.01) 60%, transparent 80%)'
+    : 'radial-gradient(circle, rgba(59, 130, 246, 0.06) 0%, rgba(139, 92, 246, 0.02) 40%, transparent 80%)';
 
   return (
     <div
@@ -56,14 +56,14 @@ const CursorGlow = () => {
         position: 'fixed',
         left: 0,
         top: 0,
-        width: '800px',
-        height: '800px',
+        width: '450px',
+        height: '450px',
         pointerEvents: 'none',
         zIndex: -1,
         borderRadius: '100%',
         background: glowColor,
-        filter: 'blur(100px)',
         willChange: 'transform',
+        contain: 'layout paint style',
       }}
     />
   );
