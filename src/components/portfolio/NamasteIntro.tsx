@@ -7,47 +7,70 @@ interface NamasteIntroProps {
 
 const LeftHand = () => (
   <svg 
-    width="100" 
-    height="180" 
-    viewBox="0 0 100 200" 
+    width="120" 
+    height="200" 
+    viewBox="0 0 120 200" 
     fill="none" 
     xmlns="http://www.w3.org/2000/svg" 
-    className="text-primary filter drop-shadow-[0_0_8px_rgba(59,130,246,0.4)]"
+    className="text-primary filter drop-shadow-[0_0_12px_rgba(59,130,246,0.45)]"
   >
-    {/* Symmetrical palm and middle finger curve (palm side sits exactly at x=100) */}
+    {/* Outer contour: Middle finger tip at x=116, y=8. Palm side sits flush at x=120 */}
     <path 
-      d="M 35,190 C 20,130 20,70 94,10 C 96.5,7 100,9 100,12 C 100,60 94,120 94,190" 
+      d="M 30,195 C 20,130 15,65 116,8 C 119,6 120,9 120,12 C 120,65 116,130 115,195" 
       stroke="currentColor" 
       strokeWidth="2.5" 
       strokeLinecap="round" 
       strokeLinejoin="round"
     />
-    {/* Inner index finger curve */}
+    {/* Index finger curve: tip at x=108, y=28 */}
     <path 
-      d="M 42,190 C 32,145 35,95 88,35 C 90,32 93,33 93,36 C 93,75 88,125 88,190" 
+      d="M 38,195 C 32,145 36,95 106,26 C 108.5,23 111,25 111,28 C 111,85 107,135 107,195" 
       stroke="currentColor" 
       strokeWidth="1.8" 
       strokeLinecap="round"
       opacity="0.85"
     />
-    {/* Inner ring finger curve */}
+    {/* Ring finger curve: tip at x=98, y=48 */}
     <path 
-      d="M 48,190 C 42,160 45,115 82,60 C 83.5,57 86,58 86,61 C 86,90 82,130 82,190" 
+      d="M 46,195 C 42,160 45,115 97,44 C 99,41 102,43 102,46 C 102,95 98,140 98,195" 
       stroke="currentColor" 
       strokeWidth="1.5" 
       strokeLinecap="round"
-      opacity="0.7"
+      opacity="0.75"
     />
-    {/* Symmetrical thumb */}
+    {/* Pinky finger curve: tip at x=88, y=68 */}
     <path 
-      d="M 48,135 C 48,115 58,100 70,90 C 72,88 74,90 73,92 C 63,110 60,122 60,135" 
+      d="M 54,195 C 50,170 52,130 87,64 C 89,61 92,63 92,66 C 92,105 88,150 88,195" 
       stroke="currentColor" 
-      strokeWidth="2" 
+      strokeWidth="1.2" 
+      strokeLinecap="round"
+      opacity="0.6"
+    />
+    {/* Thumb curve folding elegantly inside at the base */}
+    <path 
+      d="M 30,195 C 28,170 38,150 72,118 C 74.5,115 77.5,117.5 76.5,120 C 65,148 60,165 60,195" 
+      stroke="currentColor" 
+      strokeWidth="2.0" 
       strokeLinecap="round"
     />
-    {/* Elegant inner palm creases */}
+    {/* Elegant inner palm crease details */}
     <path 
       d="M 68,145 C 68,135 72,128 75,124" 
+      stroke="currentColor" 
+      strokeWidth="1" 
+      strokeLinecap="round"
+      opacity="0.4"
+    />
+    {/* Wrist bracelets / Elegant Kada lines */}
+    <path 
+      d="M 28,190 C 50,187 85,187 117,190" 
+      stroke="currentColor" 
+      strokeWidth="1.5" 
+      strokeLinecap="round"
+      opacity="0.8"
+    />
+    <path 
+      d="M 26,196 C 50,193 85,193 115,196" 
       stroke="currentColor" 
       strokeWidth="1" 
       strokeLinecap="round"
