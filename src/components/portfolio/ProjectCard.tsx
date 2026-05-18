@@ -9,9 +9,10 @@ import { ResourcesModal } from "./ResourcesModal";
 interface Props {
   project: Project;
   index: number;
+  disableInViewAnimation?: boolean;
 }
 
-const ProjectCard = ({ project, index }: Props) => {
+const ProjectCard = ({ project, index, disableInViewAnimation = false }: Props) => {
   const [isInView, setIsInView] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -44,10 +45,10 @@ const ProjectCard = ({ project, index }: Props) => {
   return (
     <motion.div
       ref={cardRef}
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={disableInViewAnimation ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+      whileInView={disableInViewAnimation ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ delay: index * 0.1, duration: 0.5 }}
+      transition={disableInViewAnimation ? { duration: 0.2 } : { delay: index * 0.1, duration: 0.5 }}
       whileHover={{ y: -6 }}
       className="glass-card-hover flex flex-col h-full group overflow-hidden"
     >

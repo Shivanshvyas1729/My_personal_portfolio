@@ -1,3 +1,4 @@
+import { useRef, useState, useEffect } from "react";
 import { getFeaturedProjects, portfolioData as initialData } from "@/data/portfolioData";
 import { useCMSData } from "@/context/CMSContext";
 import AnimatedSection from "./AnimatedSection";
@@ -9,6 +10,33 @@ import { motion } from "framer-motion";
 const Projects = () => {
   const currentData = useCMSData(d => d) || initialData;
   const featured = getFeaturedProjects(currentData);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const constraintsRef = useRef<HTMLDivElement>(null);
+  const [dragConstraints, setDragConstraints] = useState({ left: 0, right: 0 });
+
+  useEffect(() => {
+    const updateConstraints = () => {
+      if (containerRef.current && constraintsRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        const scrollWidth = constraintsRef.current.scrollWidth;
+        // The left constraint is the difference (negative) between the scroll width and container width
+        const left = Math.min(0, containerWidth - scrollWidth - 48); // includes margins
+        setDragConstraints({ left, right: 0 });
+      }
+    };
+
+    updateConstraints();
+    window.addEventListener("resize", updateConstraints);
+    // Double-check layouts after brief render tick
+    const timer1 = setTimeout(updateConstraints, 100);
+    const timer2 = setTimeout(updateConstraints, 500);
+
+    return () => {
+      window.removeEventListener("resize", updateConstraints);
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, [featured]);
 
   if (!featured || featured.length === 0) {
     return (
@@ -35,14 +63,9 @@ const Projects = () => {
     );
   }
 
-  // Calculate dynamic drag constraints based on list length
-  const cardWidth = 380; // approximate card width in px
-  const totalWidth = featured.length * cardWidth;
-  const dragLeftConstraint = -totalWidth;
-
   return (
     <section id="projects" className="section-padding overflow-hidden">
-      <div className="container mx-auto">
+      <div className="container mx-auto" ref={containerRef}>
         <AnimatedSection>
           <h2 className="text-sm font-medium text-primary tracking-widest uppercase mb-2">Projects</h2>
           <h3 className="text-3xl md:text-4xl font-heading font-bold mb-12">
@@ -55,27 +78,30 @@ const Projects = () => {
           <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-background to-transparent z-20 pointer-events-none" />
           <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-background to-transparent z-20 pointer-events-none" />
 
+          {/* Draggable Track Container */}
           <motion.div
+            ref={constraintsRef}
             className="flex gap-6 w-max cursor-grab active:cursor-grabbing py-4"
             drag="x"
-            dragConstraints={{ left: dragLeftConstraint, right: 0 }}
-            animate={{ x: ["0%", "-50%"] }}
-            transition={{
-              duration: Math.max(30, featured.length * 8), // Dynamic duration based on count
-              ease: "linear",
-              repeat: Infinity,
-            }}
-            whileHover={{ transition: { duration: 150 } }} // Slow down significantly on hover to allow inspection
+            dragConstraints={dragConstraints}
+            dragElastic={0.15}
             whileTap={{ cursor: "grabbing" }}
+            style={{ 
+              willChange: 'transform',
+              contain: 'layout paint style'
+            }}
           >
-            {/* Double the featured list for seamless infinite looping */}
-            {[...featured, ...featured].map((p, i) => (
+            {featured.map((p, i) => (
               <div 
-                key={`${p.id}-${i}`} 
-                className="w-[300px] sm:w-[350px] md:w-[380px] flex-shrink-0 select-none"
+                key={p.id} 
+                className="w-[300px] sm:w-[350px] md:w-[380px] flex-shrink-0 select-none h-full"
               >
                 <div className="pointer-events-auto h-full">
-                  <ProjectCard project={p} index={i} />
+                  <ProjectCard 
+                    project={p} 
+                    index={i} 
+                    disableInViewAnimation={true} // Bypasses expensive intersection transitions for butter-smooth dragging
+                  />
                 </div>
               </div>
             ))}
