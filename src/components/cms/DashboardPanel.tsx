@@ -148,6 +148,77 @@ export const DashboardPanel: React.FC<DashboardPanelProps> = ({
     localStorage.setItem('cms-dimensions', JSON.stringify(dimensions));
   }, [dimensions]);
 
+  // Two-Finger Touch (Touchscreen/Tablet) & Two-Finger Swipe (Trackpad) translation listener
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+
+    const touchStartPos = { active: false, x: 0, y: 0, panelX: 0, panelY: 0 };
+
+    const handleTouchStartRaw = (e: TouchEvent) => {
+      if (isMaximized || isMobile) return;
+      if (e.touches.length === 2) {
+        touchStartPos.active = true;
+        touchStartPos.x = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        touchStartPos.y = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        touchStartPos.panelX = geom.current.x;
+        touchStartPos.panelY = geom.current.y;
+        e.preventDefault(); // prevent zoom/scroll gesture triggering on page
+      }
+    };
+
+    const handleTouchMoveRaw = (e: TouchEvent) => {
+      if (!touchStartPos.active || e.touches.length !== 2) return;
+      const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      
+      const deltaX = midX - touchStartPos.x;
+      const deltaY = midY - touchStartPos.y;
+
+      geom.current.x = touchStartPos.panelX + deltaX;
+      geom.current.y = touchStartPos.panelY + deltaY;
+
+      updatePanelDOM();
+      e.preventDefault();
+    };
+
+    const handleTouchEndRaw = () => {
+      touchStartPos.active = false;
+    };
+
+    // Trackpad swipe handler on header
+    const header = panel.querySelector('.cursor-grab');
+    const handleWheelRaw = (e: WheelEvent) => {
+      if (isMaximized || isMobile) return;
+      
+      // Prevent default page scroll
+      e.preventDefault();
+      
+      // Accumulate position changes with damping ease
+      geom.current.x += e.deltaX * 0.85;
+      geom.current.y += e.deltaY * 0.85;
+      
+      updatePanelDOM();
+    };
+
+    panel.addEventListener('touchstart', handleTouchStartRaw, { passive: false });
+    panel.addEventListener('touchmove', handleTouchMoveRaw, { passive: false });
+    panel.addEventListener('touchend', handleTouchEndRaw);
+    
+    if (header) {
+      header.addEventListener('wheel', handleWheelRaw, { passive: false });
+    }
+
+    return () => {
+      panel.removeEventListener('touchstart', handleTouchStartRaw);
+      panel.removeEventListener('touchmove', handleTouchMoveRaw);
+      panel.removeEventListener('touchend', handleTouchEndRaw);
+      if (header) {
+        header.removeEventListener('wheel', handleWheelRaw);
+      }
+    };
+  }, [isMaximized, isMobile, updatePanelDOM]);
+
   // Combined Pointer drag & resize capture handler
   const startDragOrResize = (e: React.PointerEvent<HTMLDivElement>, mode: 'drag' | 'right' | 'bottom' | 'corner') => {
     if (isMaximized || isMobile) return;

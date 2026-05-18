@@ -12,8 +12,10 @@ import GlobalTextEffector from "./components/portfolio/GlobalTextEffector";
 import GlobalScrollReveal from "./components/portfolio/GlobalScrollReveal";
 import CursorGlow from "./components/ui/CursorGlow";
 
-// Eager — homepage loads instantly
+// Eager — homepage and welcome intro load instantly
 import Index from "./pages/Index.tsx";
+import NamasteIntro from "./components/portfolio/NamasteIntro";
+import { AnimatePresence } from "framer-motion";
 
 // Lazy — only load when navigated to (reduces initial bundle ~40%)
 const AllProjects  = lazy(() => import("./pages/AllProjects.tsx"));
@@ -40,6 +42,7 @@ import { useEffect } from "react";
 // Global wrapper that provides the auth lock button available on every page
 function AppShell() {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
   const settings = useCMSData(d => d.settings);
 
   useEffect(() => {
@@ -66,6 +69,11 @@ function AppShell() {
 
   return (
     <BrowserRouter>
+      {/* Welcome Greeting Intro */}
+      <AnimatePresence>
+        {showIntro && <NamasteIntro onComplete={() => setShowIntro(false)} />}
+      </AnimatePresence>
+
       {/* Global Cursor Ambient Glow */}
       <CursorGlow />
 

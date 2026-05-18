@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Lock, Unlock, Loader2, ShieldCheck, Key } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { UnifiedAdminDashboard } from "../cms/UnifiedAdminDashboard";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface AdminAuthProps {
   isAdmin: boolean;
@@ -15,11 +16,38 @@ export function AdminAuth({ isAdmin, setIsAdmin }: AdminAuthProps) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const { login, logout, hasAccess } = useAuth();
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Sync isAdmin with Context state (include editor role logic if desired, but we stick to AdminAuthProps for compatibility)
+  // Sync isAdmin with Context state
   useEffect(() => {
     setIsAdmin(hasAccess("admin") || hasAccess("editor"));
   }, [hasAccess, setIsAdmin]);
+
+  // Global Ctrl + L Keyboard Shortcut to Open Lock Modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'l') {
+        if (!isAdmin) {
+          e.preventDefault();
+          setIsOpen(true);
+          setError("");
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isAdmin]);
+
+  // Auto-focus and select password input when modal opens
+  useEffect(() => {
+    if (isOpen && !isAdmin) {
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+        inputRef.current?.select();
+      }, 50); // small delay to allow transition mount
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, isAdmin]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,50 +109,58 @@ export function AdminAuth({ isAdmin, setIsAdmin }: AdminAuthProps) {
       </div>
 
       {/* Login Popup */}
-      {isOpen && !isAdmin && (
-        <div className="fixed bottom-20 left-6 sm:bottom-24 sm:left-10 z-[60] w-[260px] p-4 bg-background border border-border/50 rounded-2xl shadow-2xl glass-card animate-in fade-in slide-in-from-bottom-2">
-          <div className="flex items-center gap-2 mb-1 text-foreground font-heading font-medium text-sm">
-            <Key size={14} className="text-primary" /> Site Unlock
-          </div>
-          <p className="text-xs text-muted-foreground mb-3">Enter password to unlock Secret Resources & Blog CMS.</p>
-
-          {success ? (
-            <div className="flex items-center justify-center gap-2 py-3 text-green-500 font-medium text-sm animate-in fade-in">
-              <ShieldCheck size={16} /> Access Granted!
+      <AnimatePresence>
+        {isOpen && !isAdmin && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 15 }}
+            transition={{ type: "spring", damping: 25, stiffness: 350 }}
+            className="fixed bottom-20 left-6 sm:bottom-24 sm:left-10 z-[60] w-[260px] p-4 bg-background border border-border/50 rounded-2xl shadow-2xl glass-card"
+          >
+            <div className="flex items-center gap-2 mb-1 text-foreground font-heading font-medium text-sm">
+              <Key size={14} className="text-primary" /> Site Unlock
             </div>
-          ) : (
-            <form onSubmit={handleLogin} className="space-y-3">
-              <input
-                type="password"
-                placeholder="Enter site password..."
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-muted/50 border border-border/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all"
-                autoFocus
-              />
+            <p className="text-xs text-muted-foreground mb-3">Enter password to unlock Secret Resources & Blog CMS.</p>
 
-              {error && <p className="text-xs text-destructive">{error}</p>}
-
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsOpen(false)}
-                  className="flex-1 px-3 py-2 rounded-lg text-xs font-medium bg-muted text-muted-foreground hover:bg-muted/80 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={!password || loading}
-                  className="flex-1 px-3 py-2 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 flex justify-center items-center gap-1.5"
-                >
-                  {loading ? <Loader2 size={12} className="animate-spin" /> : "Unlock"}
-                </button>
+            {success ? (
+              <div className="flex items-center justify-center gap-2 py-3 text-green-500 font-medium text-sm animate-in fade-in">
+                <ShieldCheck size={16} /> Access Granted!
               </div>
-            </form>
-          )}
-        </div>
-      )}
+            ) : (
+              <form onSubmit={handleLogin} className="space-y-3">
+                <input
+                  ref={inputRef}
+                  type="password"
+                  placeholder="Enter site password..."
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full bg-muted/50 border border-border/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all"
+                />
+
+                {error && <p className="text-xs text-destructive">{error}</p>}
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsOpen(false)}
+                    className="flex-1 px-3 py-2 rounded-lg text-xs font-medium bg-muted text-muted-foreground hover:bg-muted/80 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!password || loading}
+                    className="flex-1 px-3 py-2 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 flex justify-center items-center gap-1.5"
+                  >
+                    {loading ? <Loader2 size={12} className="animate-spin" /> : "Unlock"}
+                  </button>
+                </div>
+              </form>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Global Unified Dashboard Overlay for Authorized Users */}
       {isAdmin && <UnifiedAdminDashboard />}

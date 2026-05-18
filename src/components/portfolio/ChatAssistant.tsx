@@ -76,6 +76,8 @@ const ChatAssistant = () => {
   
   const scrollRef = useRef<HTMLDivElement>(null);
   const constraintsRef = useRef<HTMLDivElement>(null);
+  const chatRef = useRef<HTMLDivElement>(null);
+  const chatGeom = useRef({ x: 0, y: 0 });
   const resizeRef = useRef({ active: false, startW: 0, startH: 0, startX: 0, startY: 0 });
   const dragControls = useDragControls();
 
@@ -84,6 +86,73 @@ const ChatAssistant = () => {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, isTyping]);
+
+  // Two-Finger Touch (Touchscreen/Tablet) & Two-Finger Swipe (Trackpad) translation listener
+  useEffect(() => {
+    const panel = chatRef.current;
+    if (!panel) return;
+
+    let touchStart = { active: false, x: 0, y: 0, startX: 0, startY: 0 };
+
+    const handleTouchStartRaw = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        touchStart = {
+          active: true,
+          x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+          y: (e.touches[0].clientY + e.touches[1].clientY) / 2,
+          startX: chatGeom.current.x,
+          startY: chatGeom.current.y,
+        };
+        e.preventDefault();
+      }
+    };
+
+    const handleTouchMoveRaw = (e: TouchEvent) => {
+      if (!touchStart.active || e.touches.length !== 2) return;
+      const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      
+      const deltaX = midX - touchStart.x;
+      const deltaY = midY - touchStart.y;
+
+      chatGeom.current.x = touchStart.startX + deltaX;
+      chatGeom.current.y = touchStart.startY + deltaY;
+
+      panel.style.transform = `translate3d(${chatGeom.current.x}px, ${chatGeom.current.y}px, 0)`;
+      e.preventDefault();
+    };
+
+    const handleTouchEndRaw = () => {
+      touchStart.active = false;
+    };
+
+    const header = panel.querySelector('.cursor-grab');
+    const handleWheelRaw = (e: WheelEvent) => {
+      e.preventDefault();
+      
+      chatGeom.current.x += e.deltaX * 0.85;
+      chatGeom.current.y += e.deltaY * 0.85;
+      
+      panel.style.transform = `translate3d(${chatGeom.current.x}px, ${chatGeom.current.y}px, 0)`;
+    };
+
+    panel.addEventListener('touchstart', handleTouchStartRaw, { passive: false });
+    panel.addEventListener('touchmove', handleTouchMoveRaw, { passive: false });
+    panel.addEventListener('touchend', handleTouchEndRaw);
+    
+    if (header) {
+      header.addEventListener('wheel', handleWheelRaw, { passive: false });
+    }
+
+    return () => {
+      panel.removeEventListener('touchstart', handleTouchStartRaw);
+      panel.removeEventListener('touchmove', handleTouchMoveRaw);
+      panel.removeEventListener('touchend', handleTouchEndRaw);
+      if (header) {
+        header.removeEventListener('wheel', handleWheelRaw);
+      }
+    };
+  }, [isOpen]);
 
   const onResizeStart = (e: React.PointerEvent) => {
     e.preventDefault();
@@ -143,6 +212,7 @@ const ChatAssistant = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            ref={chatRef}
             drag
             dragControls={dragControls}
             dragListener={false}
