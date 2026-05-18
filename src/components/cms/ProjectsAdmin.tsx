@@ -147,7 +147,6 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
   const [editorMode, setEditorMode] = useState<'form' | 'code'>('form');
   const [codeValue, setCodeValue] = useState("");
   const [codeError, setCodeError] = useState("");
-  const [hasPendingChanges, setHasPendingChanges] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<number | null>(null);
   const [saveError, setSaveError] = useState("");
   const [showExampleModal, setShowExampleModal] = useState(false);

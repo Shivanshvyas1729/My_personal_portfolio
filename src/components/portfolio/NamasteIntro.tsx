@@ -5,160 +5,265 @@ interface NamasteIntroProps {
   onComplete: () => void;
 }
 
-const LeftHand = () => (
+// 🦾 LEFT CYBORG HAND: Rich Copper-Bronze & Ornate Gold Filigree
+const LeftCyborgHand = () => (
   <svg 
-    width="130" 
-    height="220" 
-    viewBox="0 0 130 220" 
+    width="150" 
+    height="250" 
+    viewBox="0 0 150 250" 
     fill="none" 
     xmlns="http://www.w3.org/2000/svg" 
-    className="filter drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] text-foreground"
+    className="filter drop-shadow-[0_0_20px_rgba(217,119,6,0.45)] text-foreground"
   >
     <defs>
-      {/* 3D brushed-metal plate gradient */}
-      <linearGradient id="robo-plate" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#64748b" />
-        <stop offset="30%" stopColor="#94a3b8" />
-        <stop offset="70%" stopColor="#334155" />
-        <stop offset="100%" stopColor="#1e293b" />
+      {/* Copper/Gold organic-metallic gradient */}
+      <linearGradient id="copper-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#78350f" />
+        <stop offset="25%" stopColor="#d97706" />
+        <stop offset="50%" stopColor="#f59e0b" />
+        <stop offset="75%" stopColor="#fbbf24" />
+        <stop offset="100%" stopColor="#451a03" />
       </linearGradient>
-      {/* Carbon fiber grid pattern fill */}
-      <pattern id="carbon-pattern" width="6" height="6" patternUnits="userSpaceOnUse">
-        <path d="M0 3 L6 3 M3 0 L3 6" stroke="#475569" strokeWidth="0.8" opacity="0.35"/>
-        <rect width="3" height="3" fill="#1e293b" opacity="0.4"/>
-      </pattern>
-      {/* Neon cyber cyan glow gradient */}
-      <linearGradient id="cyber-glow" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stopColor="#06b6d4" />
-        <stop offset="50%" stopColor="#3b82f6" />
-        <stop offset="100%" stopColor="#6366f1" />
-      </linearGradient>
-      {/* Deep inner cavity shadow */}
-      <linearGradient id="dark-metal" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" stopColor="#0f172a" />
-        <stop offset="100%" stopColor="#1e293b" />
+      
+      {/* Detailed circuit overlay glow */}
+      <linearGradient id="circuit-glow" x1="0%" y1="100%" x2="100%" y2="0%">
+        <stop offset="0%" stopColor="#ea580c" />
+        <stop offset="100%" stopColor="#facc15" />
       </linearGradient>
     </defs>
 
-    {/* ─── 1. BASE MECHANICAL CHASSIS (Inner dark frame) ─── */}
+    {/* 1. Forearm Mechanical Slot Channel (Dark Underlayer) */}
     <path 
-      d="M32,215 C22,145 18,90 123,10 L125,12 C125,75 120,135 120,215 Z" 
-      fill="url(#dark-metal)" 
-      stroke="#334155"
-      strokeWidth="1.5"
+      d="M10,240 L70,175 L82,185 L22,250 Z" 
+      fill="#291305" 
+      stroke="#78350f" 
+      strokeWidth="1.5" 
+    />
+    {/* Ornate wire/filigree lines inside the channel */}
+    <path 
+      d="M15,242 Q30,220 45,210 T75,180" 
+      stroke="url(#circuit-glow)" 
+      strokeWidth="1.8" 
+      strokeLinecap="round" 
     />
 
-    {/* ─── 2. FOREARM CHASSIS & HYDRAULIC CYLINDERS ─── */}
-    {/* Base plate with rivets */}
+    {/* 2. Hanging loop handle under the wrist (Matches image perfectly) */}
     <path 
-      d="M25,215 L125,215 L120,190 L30,190 Z" 
-      fill="url(#robo-plate)" 
+      d="M48,225 C48,255 78,255 78,225" 
+      stroke="url(#copper-gold)" 
+      strokeWidth="3" 
+      strokeLinecap="round" 
+      fill="none" 
+    />
+
+    {/* 3. Main Bronze Armor Forearm shell (Segmented layers) */}
+    <path 
+      d="M5,230 C20,200 40,165 75,160 L85,178 C55,183 30,220 18,245 Z" 
+      fill="url(#copper-gold)" 
+      stroke="#451a03" 
+      strokeWidth="1.2" 
+    />
+    <path 
+      d="M25,235 C38,205 58,180 85,178 L95,195 C70,198 48,220 38,248 Z" 
+      fill="url(#copper-gold)" 
+      stroke="#451a03" 
+      strokeWidth="1" 
+      opacity="0.85"
+    />
+
+    {/* 4. Ornate forearm mechanical carvings (Filigree/circuit patterns) */}
+    <path 
+      d="M30,225 Q45,210 50,195 T75,180" 
+      stroke="#fef08a" 
+      strokeWidth="1" 
+      strokeLinecap="round" 
+      opacity="0.6" 
+    />
+
+    {/* 5. Cyborg Palm base */}
+    <path 
+      d="M75,160 C70,140 75,115 110,110 L125,125 C95,135 85,155 85,178 Z" 
+      fill="url(#copper-gold)" 
+      stroke="#451a03" 
+      strokeWidth="1.5" 
+    />
+
+    {/* 6. Long, sleek robotic fingers (Segmented, arching outward, tip meets at x=150) */}
+    {/* Middle Finger (tips at x=148, y=10) */}
+    <circle cx="112" cy="110" r="4.5" fill="url(#copper-gold)" stroke="#451a03" />
+    <path d="M110,110 L115,110 L125,75 L120,75 Z" fill="url(#copper-gold)" stroke="#451a03" strokeWidth="1" />
+    <circle cx="123" cy="75" r="3.5" fill="url(#copper-gold)" />
+    <path d="M121,75 L126,75 L138,40 L133,40 Z" fill="url(#copper-gold)" stroke="#451a03" strokeWidth="1" />
+    <circle cx="136" cy="40" r="3" fill="url(#copper-gold)" />
+    {/* Distal tip sweeps exactly flush to x=150 boundary for Namaste connection */}
+    <path d="M134,40 L138,40 C140,30 150,22 150,10 C150,7 148,7 145,10 L133,40 Z" fill="url(#copper-gold)" stroke="#451a03" strokeWidth="1" />
+
+    {/* Index Finger (tip at x=138, y=28) */}
+    <circle cx="102" cy="115" r="4.5" fill="url(#copper-gold)" stroke="#451a03" />
+    <path d="M100,115 L105,115 L113,82 L108,82 Z" fill="url(#copper-gold)" stroke="#451a03" strokeWidth="1" />
+    <circle cx="111" cy="82" r="3.5" fill="url(#copper-gold)" />
+    <path d="M109,82 L114,82 L124,50 L119,50 Z" fill="url(#copper-gold)" stroke="#451a03" strokeWidth="1" />
+    <circle cx="122" cy="50" r="3" fill="url(#copper-gold)" />
+    <path d="M120,50 L124,50 L138,28 C138,25 136,25 133,28 L119,50 Z" fill="url(#copper-gold)" stroke="#451a03" strokeWidth="1" />
+
+    {/* Ring Finger (tip at x=126, y=46) */}
+    <circle cx="92" cy="125" r="4" fill="url(#copper-gold)" stroke="#451a03" />
+    <path d="M90,125 L95,125 L101,92 L96,92 Z" fill="url(#copper-gold)" stroke="#451a03" strokeWidth="1" />
+    <circle cx="99" cy="92" r="3.5" fill="url(#copper-gold)" />
+    <path d="M97,92 L102,92 L112,62 L107,62 Z" fill="url(#copper-gold)" stroke="#451a03" strokeWidth="1" />
+    <circle cx="110" cy="62" r="3" fill="url(#copper-gold)" />
+    <path d="M108,62 L112,62 L126,46 C126,43 124,43 121,46 L107,62 Z" fill="url(#copper-gold)" stroke="#451a03" strokeWidth="1" />
+
+    {/* Pinky Finger (tip at x=112, y=66) */}
+    <circle cx="82" cy="135" r="4" fill="url(#copper-gold)" stroke="#451a03" />
+    <path d="M80,135 L85,135 L90,105 L85,105 Z" fill="url(#copper-gold)" stroke="#451a03" strokeWidth="1" />
+    <circle cx="88" cy="105" r="3.5" fill="url(#copper-gold)" />
+    <path d="M86,105 L91,105 L99,78 L94,78 Z" fill="url(#copper-gold)" stroke="#451a03" strokeWidth="1" />
+    <circle cx="97" cy="78" r="3" fill="url(#copper-gold)" />
+    <path d="M95,78 L99,78 L112,66 C112,63 110,63 107,66 L94,78 Z" fill="url(#copper-gold)" stroke="#451a03" strokeWidth="1" />
+
+    {/* Detailed copper filigree etched lines on the fingers */}
+    <path d="M115,108 Q125,75 130,55" stroke="#fcd34d" strokeWidth="0.8" opacity="0.5" />
+    <path d="M103,113 Q113,82 118,60" stroke="#fcd34d" strokeWidth="0.8" opacity="0.5" />
+
+    {/* Thumb folding elegantly inside */}
+    <circle cx="48" cy="170" r="5" fill="url(#copper-gold)" stroke="#451a03" />
+    <path d="M46,170 L51,170 L72,148 L67,148 Z" fill="url(#copper-gold)" stroke="#451a03" strokeWidth="1" />
+    <circle cx="70" cy="148" r="4" fill="url(#copper-gold)" />
+    <path d="M68,148 L73,148 L88,132 L83,132 Z" fill="url(#copper-gold)" stroke="#451a03" strokeWidth="1" />
+    <circle cx="86" cy="132" r="3" fill="url(#copper-gold)" />
+    <path d="M84,132 L88,132 L98,124 C100,122 98,120 95,122 L83,132 Z" fill="url(#copper-gold)" stroke="#451a03" strokeWidth="1" />
+  </svg>
+);
+
+// 🦾 RIGHT CYBORG HAND: High-Gloss Silver-White Ceramic/Steel
+const RightCyborgHand = () => (
+  <svg 
+    width="150" 
+    height="250" 
+    viewBox="0 0 150 250" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg" 
+    className="filter drop-shadow-[0_0_20px_rgba(6,182,212,0.45)] text-foreground"
+  >
+    <defs>
+      {/* Silver/White Ceramic metallic gradient */}
+      <linearGradient id="silver-ceramic" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#475569" />
+        <stop offset="25%" stopColor="#94a3b8" />
+        <stop offset="50%" stopColor="#cbd5e1" />
+        <stop offset="75%" stopColor="#e2e8f0" />
+        <stop offset="100%" stopColor="#f8fafc" />
+      </linearGradient>
+      
+      {/* Cyber cyan glow gradient */}
+      <linearGradient id="cyber-cyan-glow" x1="0%" y1="100%" x2="100%" y2="0%">
+        <stop offset="0%" stopColor="#0891b2" />
+        <stop offset="100%" stopColor="#22d3ee" />
+      </linearGradient>
+    </defs>
+
+    {/* 1. Forearm Mechanical Slot Channel (Dark Underlayer) */}
+    <path 
+      d="M10,240 L70,175 L82,185 L22,250 Z" 
+      fill="#0f172a" 
+      stroke="#334155" 
+      strokeWidth="1.5" 
+    />
+    {/* Ornate wire/filigree lines inside the channel */}
+    <path 
+      d="M15,242 Q30,220 45,210 T75,180" 
+      stroke="url(#cyber-cyan-glow)" 
+      strokeWidth="1.8" 
+      strokeLinecap="round" 
+    />
+
+    {/* 2. Hanging loop handle under the wrist (Matches image perfectly) */}
+    <path 
+      d="M48,225 C48,255 78,255 78,225" 
+      stroke="url(#silver-ceramic)" 
+      strokeWidth="3" 
+      strokeLinecap="round" 
+      fill="none" 
+    />
+
+    {/* 3. Main Silver Armor Forearm shell (Segmented layers) */}
+    <path 
+      d="M5,230 C20,200 40,165 75,160 L85,178 C55,183 30,220 18,245 Z" 
+      fill="url(#silver-ceramic)" 
       stroke="#1e293b" 
-      strokeWidth="1.5"
+      strokeWidth="1.2" 
     />
-    <circle cx="35" cy="202" r="2.5" fill="#475569" />
-    <circle cx="115" cy="202" r="2.5" fill="#475569" />
-    
-    {/* Hydraulic pistons */}
-    <rect x="42" y="172" width="6" height="18" rx="2" fill="#94a3b8" stroke="#1e293b" />
-    <line x1="45" y1="190" x2="45" y2="165" stroke="#e2e8f0" strokeWidth="2.5" />
-    
-    <rect x="102" y="172" width="6" height="18" rx="2" fill="#94a3b8" stroke="#1e293b" />
-    <line x1="105" y1="190" x2="105" y2="165" stroke="#e2e8f0" strokeWidth="2.5" />
-
-    {/* ─── 3. PALM CORE & ARMOR PLATES (Segmented 3D layers) ─── */}
-    {/* Large main carbon-fiber back-plate */}
     <path 
-      d="M32,170 C22,120 20,95 85,95 L118,95 L120,170 Z" 
-      fill="url(#carbon-pattern)" 
-      stroke="#475569" 
-      strokeWidth="1.5"
-    />
-    {/* Segmented steel armor shell overlays */}
-    <path 
-      d="M32,170 C26,140 28,115 55,115 L62,168 Z" 
-      fill="url(#robo-plate)" 
+      d="M25,235 C38,205 58,180 85,178 L95,195 C70,198 48,220 38,248 Z" 
+      fill="url(#silver-ceramic)" 
       stroke="#1e293b" 
-      strokeWidth="1.2"
+      strokeWidth="1" 
+      opacity="0.85"
     />
+
+    {/* 4. Ornate forearm mechanical carvings (Filigree/circuit patterns) */}
     <path 
-      d="M68,168 L60,115 L95,115 L93,168 Z" 
-      fill="url(#robo-plate)" 
+      d="M30,225 Q45,210 50,195 T75,180" 
+      stroke="#94a3b8" 
+      strokeWidth="1" 
+      strokeLinecap="round" 
+      opacity="0.6" 
+    />
+
+    {/* 5. Cyborg Palm base */}
+    <path 
+      d="M75,160 C70,140 75,115 110,110 L125,125 C95,135 85,155 85,178 Z" 
+      fill="url(#silver-ceramic)" 
       stroke="#1e293b" 
-      strokeWidth="1.2"
-    />
-    <path 
-      d="M98,168 L100,115 L118,115 L120,168 Z" 
-      fill="url(#robo-plate)" 
-      stroke="#1e293b" 
-      strokeWidth="1.2"
+      strokeWidth="1.5" 
     />
 
-    {/* Glowing circuit track tracing across the palm */}
-    <path 
-      d="M50,160 L50,135 L85,135 L85,108" 
-      stroke="url(#cyber-glow)" 
-      strokeWidth="2.5" 
-      strokeLinecap="round"
-      opacity="0.9"
-    />
-    <circle cx="85" cy="108" r="3.5" fill="#22d3ee" />
+    {/* 6. Long, sleek robotic fingers (Segmented, arching outward, tip meets at x=150) */}
+    {/* Middle Finger (tips at x=148, y=10) */}
+    <circle cx="112" cy="110" r="4.5" fill="url(#silver-ceramic)" stroke="#1e293b" />
+    <path d="M110,110 L115,110 L125,75 L120,75 Z" fill="url(#silver-ceramic)" stroke="#1e293b" strokeWidth="1" />
+    <circle cx="123" cy="75" r="3.5" fill="url(#silver-ceramic)" />
+    <path d="M121,75 L126,75 L138,40 L133,40 Z" fill="url(#silver-ceramic)" stroke="#1e293b" strokeWidth="1" />
+    <circle cx="136" cy="40" r="3" fill="url(#silver-ceramic)" />
+    {/* Distal tip sweeps exactly flush to x=150 boundary for Namaste connection */}
+    <path d="M134,40 L138,40 C140,30 150,22 150,10 C150,7 148,7 145,10 L133,40 Z" fill="url(#silver-ceramic)" stroke="#1e293b" strokeWidth="1" />
 
-    {/* ─── 4. SEGMENTED ROBOTIC FINGERS (With pivot joints) ─── */}
+    {/* Index Finger (tip at x=138, y=28) */}
+    <circle cx="102" cy="115" r="4.5" fill="url(#silver-ceramic)" stroke="#1e293b" />
+    <path d="M100,115 L105,115 L113,82 L108,82 Z" fill="url(#silver-ceramic)" stroke="#1e293b" strokeWidth="1" />
+    <circle cx="111" cy="82" r="3.5" fill="url(#silver-ceramic)" />
+    <path d="M109,82 L114,82 L124,50 L119,50 Z" fill="url(#silver-ceramic)" stroke="#1e293b" strokeWidth="1" />
+    <circle cx="122" cy="50" r="3" fill="url(#silver-ceramic)" />
+    <path d="M120,50 L124,50 L138,28 C138,25 136,25 133,28 L119,50 Z" fill="url(#silver-ceramic)" stroke="#1e293b" strokeWidth="1" />
 
-    {/* 🖐️ MIDDLE FINGER (Flush at x=130 for perfect gapless contact) */}
-    {/* Knuckle Joint */}
-    <circle cx="118" cy="95" r="5" fill="url(#robo-plate)" stroke="#1e293b" />
-    <circle cx="118" cy="95" r="2" fill="#06b6d4" />
-    {/* Proximal segment */}
-    <path d="M 115,95 L 121,95 L 123,65 L 117,65 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
-    <line x1="119" y1="92" x2="121" y2="68" stroke="url(#cyber-glow)" strokeWidth="1" />
-    {/* Middle Joint */}
-    <circle cx="120" cy="65" r="4.5" fill="url(#robo-plate)" stroke="#1e293b" />
-    <circle cx="120" cy="65" r="1.8" fill="#06b6d4" />
-    {/* Intermediate segment */}
-    <path d="M 117,65 L 123,65 L 125,35 L 119,35 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
-    {/* Distal Joint */}
-    <circle cx="122" cy="35" r="4" fill="url(#robo-plate)" stroke="#1e293b" />
-    <circle cx="122" cy="35" r="1.5" fill="#06b6d4" />
-    {/* Distal Segment (reaches x=130 tip boundary) */}
-    <path d="M 120,35 L 124,35 L 130,8 C 130,5 128,5 125,8 L 118,35 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
+    {/* Ring Finger (tip at x=126, y=46) */}
+    <circle cx="92" cy="125" r="4" fill="url(#silver-ceramic)" stroke="#1e293b" />
+    <path d="M90,125 L95,125 L101,92 L96,92 Z" fill="url(#silver-ceramic)" stroke="#1e293b" strokeWidth="1" />
+    <circle cx="99" cy="92" r="3.5" fill="url(#silver-ceramic)" />
+    <path d="M97,92 L102,92 L112,62 L107,62 Z" fill="url(#silver-ceramic)" stroke="#1e293b" strokeWidth="1" />
+    <circle cx="110" cy="62" r="3" fill="url(#silver-ceramic)" />
+    <path d="M108,62 L112,62 L126,46 C126,43 124,43 121,46 L107,62 Z" fill="url(#silver-ceramic)" stroke="#1e293b" strokeWidth="1" />
 
-    {/* 🖐️ INDEX FINGER (Tip at x=119, y=25) */}
-    <circle cx="104" cy="98" r="5" fill="url(#robo-plate)" stroke="#1e293b" />
-    <circle cx="104" cy="98" r="2" fill="#06b6d4" />
-    <path d="M 101,98 L 107,98 L 111,70 L 105,70 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
-    <circle cx="108" cy="70" r="4.5" fill="url(#robo-plate)" stroke="#1e293b" />
-    <path d="M 105,70 L 111,70 L 115,42 L 109,42 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
-    <circle cx="112" cy="42" r="4" fill="url(#robo-plate)" stroke="#1e293b" />
-    <path d="M 109,42 L 115,42 L 119,25 C 119,22 117,22 114,25 L 107,42 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
+    {/* Pinky Finger (tip at x=112, y=66) */}
+    <circle cx="82" cy="135" r="4" fill="url(#silver-ceramic)" stroke="#1e293b" />
+    <path d="M80,135 L85,135 L90,105 L85,105 Z" fill="url(#silver-ceramic)" stroke="#1e293b" strokeWidth="1" />
+    <circle cx="88" cy="105" r="3.5" fill="url(#silver-ceramic)" />
+    <path d="M86,105 L91,105 L99,78 L94,78 Z" fill="url(#silver-ceramic)" stroke="#1e293b" strokeWidth="1" />
+    <circle cx="97" cy="78" r="3" fill="url(#silver-ceramic)" />
+    <path d="M95,78 L99,78 L112,66 C112,63 110,63 107,66 L94,78 Z" fill="url(#silver-ceramic)" stroke="#1e293b" strokeWidth="1" />
 
-    {/* 🖐️ RING FINGER (Tip at x=108, y=38) */}
-    <circle cx="90" cy="108" r="5" fill="url(#robo-plate)" stroke="#1e293b" />
-    <circle cx="90" cy="108" r="2" fill="#06b6d4" />
-    <path d="M 87,108 L 93,108 L 97,80 L 91,80 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
-    <circle cx="94" cy="80" r="4.5" fill="url(#robo-plate)" stroke="#1e293b" />
-    <path d="M 91,80 L 97,80 L 101,54 L 95,54 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
-    <circle cx="98" cy="54" r="4" fill="url(#robo-plate)" stroke="#1e293b" />
-    <path d="M 95,54 L 101,54 L 108,38 C 108,35 106,35 103,38 L 92,54 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
+    {/* Detailed filigree etched lines on the fingers */}
+    <path d="M115,108 Q125,75 130,55" stroke="#94a3b8" strokeWidth="0.8" opacity="0.5" />
+    <path d="M103,113 Q113,82 118,60" stroke="#94a3b8" strokeWidth="0.8" opacity="0.5" />
 
-    {/* 🖐️ PINKY FINGER (Tip at x=96, y=56) */}
-    <circle cx="76" cy="120" r="5" fill="url(#robo-plate)" stroke="#1e293b" />
-    <circle cx="76" cy="120" r="2" fill="#06b6d4" />
-    <path d="M 73,120 L 79,120 L 83,94 L 77,94 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
-    <circle cx="80" cy="94" r="4.5" fill="url(#robo-plate)" stroke="#1e293b" />
-    <path d="M 77,94 L 83,94 L 87,70 L 81,70 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
-    <circle cx="84" cy="70" r="4" fill="url(#robo-plate)" stroke="#1e293b" />
-    <path d="M 81,70 L 87,70 L 96,56 C 96,53 94,53 91,56 L 81,70 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
-
-    {/* 🖐️ ROBOTIC THUMB (Folding elegantly on the left, tip at x=78, y=118) */}
-    <circle cx="34" cy="158" r="6" fill="url(#robo-plate)" stroke="#1e293b" />
-    <circle cx="34" cy="158" r="2.5" fill="#06b6d4" />
-    <path d="M 31,158 L 37,158 L 52,138 L 46,138 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.5" />
-    <circle cx="49" cy="138" r="5" fill="url(#robo-plate)" stroke="#1e293b" />
-    <path d="M 46,138 L 52,138 L 68,124 L 62,124 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
-    <circle cx="65" cy="124" r="4" fill="url(#robo-plate)" stroke="#1e293b" />
-    <path d="M 62,124 L 68,124 L 78,118 C 80,116 79,114 76,116 L 59,124 Z" fill="url(#robo-plate)" stroke="#1e293b" strokeWidth="1.2" />
+    {/* Thumb folding elegantly inside */}
+    <circle cx="48" cy="170" r="5" fill="url(#silver-ceramic)" stroke="#1e293b" />
+    <path d="M46,170 L51,170 L72,148 L67,148 Z" fill="url(#silver-ceramic)" stroke="#1e293b" strokeWidth="1" />
+    <circle cx="70" cy="148" r="4" fill="url(#silver-ceramic)" />
+    <path d="M68,148 L73,148 L88,132 L83,132 Z" fill="url(#silver-ceramic)" stroke="#1e293b" strokeWidth="1" />
+    <circle cx="86" cy="132" r="3" fill="url(#silver-ceramic)" />
+    <path d="M84,132 L88,132 L98,124 C100,122 98,120 95,122 L83,132 Z" fill="url(#silver-ceramic)" stroke="#1e293b" strokeWidth="1" />
   </svg>
 );
 
@@ -233,34 +338,104 @@ export default function NamasteIntro({ onComplete }: NamasteIntroProps) {
       transition={{ duration: 0.5, ease: "easeInOut" }}
       className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-background text-foreground overflow-hidden select-none"
     >
-      {/* Glow particle behind the hands */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.7 }}
-        animate={{ opacity: [0.3, 0.6, 0.4], scale: [1, 1.2, 1.1] }}
-        transition={{ duration: 1.5, ease: "easeInOut", repeat: 0 }}
-        className="absolute w-[350px] h-[350px] bg-primary/10 rounded-full blur-[100px] pointer-events-none"
-      />
+      {/* 🌌 High-Tech Cyber-Spiritual Halo / Mandala (Matching image perfectly) */}
+      <div className="absolute flex items-center justify-center pointer-events-none z-0 scale-75 sm:scale-100">
+        {/* Glowing Central Cyan Ring */}
+        <motion.div 
+          animate={{ scale: [1, 1.06, 1], opacity: [0.7, 0.95, 0.7] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute w-44 h-44 rounded-full border-4 border-cyan-400 bg-cyan-500/10 shadow-[0_0_60px_rgba(6,182,212,0.5)] flex items-center justify-center"
+        >
+          <div className="w-32 h-32 rounded-full border border-cyan-300/40 shadow-[inner_0_0_20px_rgba(6,182,212,0.3)]" />
+        </motion.div>
+
+        {/* Concentric Rotating Turbine Ridges */}
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+          className="absolute w-[240px] h-[240px] rounded-full border-[10px] border-double border-slate-700/50 border-t-cyan-500/40 border-b-indigo-500/40"
+        />
+        <motion.div
+          animate={{ rotate: -360 }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          className="absolute w-[280px] h-[280px] rounded-full border border-dashed border-slate-600/30"
+        />
+
+        {/* Outer Circular Halo of Glowing Golden LEDs */}
+        <div className="absolute w-[340px] h-[340px] flex items-center justify-center">
+          {[...Array(16)].map((_, i) => {
+            const angle = (i * 360) / 16;
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0.3 }}
+                animate={{ 
+                  opacity: [0.3, 0.95, 0.3],
+                  scale: [1, 1.25, 1] 
+                }}
+                transition={{ 
+                  duration: 2.2, 
+                  repeat: Infinity, 
+                  delay: i * 0.125,
+                  ease: "easeInOut" 
+                }}
+                className="absolute w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.85)]"
+                style={{
+                  transform: `rotate(${angle}deg) translate(170px)`,
+                }}
+              />
+            );
+          })}
+        </div>
+
+        {/* Inner Circular Halo of Glowing Golden LEDs */}
+        <div className="absolute w-[200px] h-[200px] flex items-center justify-center">
+          {[...Array(12)].map((_, i) => {
+            const angle = (i * 360) / 12;
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0.4 }}
+                animate={{ 
+                  opacity: [0.4, 0.95, 0.4],
+                  scale: [1, 1.2, 1]
+                }}
+                transition={{ 
+                  duration: 1.8, 
+                  repeat: Infinity, 
+                  delay: i * 0.15,
+                  ease: "easeInOut" 
+                }}
+                className="absolute w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.85)]"
+                style={{
+                  transform: `rotate(${angle}deg) translate(100px)`,
+                }}
+              />
+            );
+          })}
+        </div>
+      </div>
 
       <div className="relative flex flex-col items-center z-10">
         {/* Hands Container - flex gap-0 ensures precise contact of bounding boxes */}
-        <div className="relative flex items-center justify-center gap-0 h-56 mb-10">
-          {/* Left Hand */}
+        <div className="relative flex items-center justify-center gap-0 h-64 mb-10">
+          {/* Left Hand (Bronze/Copper metallic cyborg hand) */}
           <motion.div
-            initial={{ x: -120, y: 15, rotate: -35, opacity: 0 }}
+            initial={{ x: -140, y: 20, rotate: -25, opacity: 0 }}
             animate={{ x: 0, y: 0, rotate: 0, opacity: 1 }}
-            transition={{ duration: 0.85, ease: [0.25, 1, 0.5, 1] }}
+            transition={{ duration: 0.9, ease: [0.25, 1, 0.5, 1] }}
           >
-            <LeftHand />
+            <LeftCyborgHand />
           </motion.div>
 
-          {/* Right Hand (Perfect Symmetrical Mirror) */}
+          {/* Right Hand (Symmetrical Silver Ceramic Mirror hand pointing Left) */}
           <motion.div
-            initial={{ x: 120, y: 15, rotate: 35, opacity: 0 }}
+            initial={{ x: 140, y: 20, rotate: 25, opacity: 0 }}
             animate={{ x: 0, y: 0, rotate: 0, opacity: 1 }}
-            transition={{ duration: 0.85, ease: [0.25, 1, 0.5, 1] }}
+            transition={{ duration: 0.9, ease: [0.25, 1, 0.5, 1] }}
             style={{ scaleX: -1 }}
           >
-            <LeftHand />
+            <RightCyborgHand />
           </motion.div>
         </div>
 
@@ -268,7 +443,7 @@ export default function NamasteIntro({ onComplete }: NamasteIntroProps) {
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.6, ease: [0.25, 1, 0.5, 1] }}
+          transition={{ delay: 0.65, duration: 0.65, ease: [0.25, 1, 0.5, 1] }}
           className="flex flex-col items-center gap-1.5 text-center"
         >
           <span className="text-3xl sm:text-4xl font-heading font-light tracking-[0.3em] text-foreground/90">
