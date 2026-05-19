@@ -102,15 +102,3 @@ blog:
         url: https://www.bohrium.com/en
       - label: 'openbio '
         url: https://openbio.tech/
-  - id: 8
-    title: mansi
-    slug: mansi
-    readingTime: 1
-    content: she is my sister
-    category: Thoughts
-    type:
-      - s
-    link: ''
-    date: '2026-05-19'
-    featured: false
-    draft: true
