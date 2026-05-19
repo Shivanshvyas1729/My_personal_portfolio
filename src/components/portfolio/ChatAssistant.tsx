@@ -346,27 +346,29 @@ const ChatAssistant = () => {
       </AnimatePresence>
 
       {/* Floating Chat Button with Tooltip */}
-      <div className="fixed bottom-6 right-6 z-[110] flex items-center gap-3 group/fab">
-        {/* Tooltip label */}
-        <span
-          className="pointer-events-none whitespace-nowrap text-[13px] font-semibold text-foreground bg-background/95 border border-border/60 backdrop-blur-xl px-3 py-1.5 rounded-xl shadow-lg
-            opacity-0 translate-x-2 group-hover/fab:opacity-100 group-hover/fab:translate-x-0
-            transition-all duration-200 ease-out select-none"
-        >
-          {isOpen ? "Close Chat" : "Chat with AI"}
-        </span>
-        <motion.button
-          whileHover={{ scale: 1.1, rotate: 5 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setIsOpen(!isOpen)}
-          className="w-14 h-14 bg-primary text-primary-foreground rounded-2xl shadow-[0_10px_30px_rgba(59,130,246,0.5)] flex items-center justify-center transition-shadow hover:shadow-[0_15px_40px_rgba(59,130,246,0.6)]"
-        >
-          <AnimatePresence mode="wait">
-            <motion.div key={isOpen ? "o" : "c"} initial={{ opacity: 0, rotate: -45 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: 45 }} transition={{ duration: 0.2 }}>
-              {isOpen ? <X size={24} /> : <MessageSquare size={24} />}
-            </motion.div>
-          </AnimatePresence>
-        </motion.button>
+      <div className="fixed bottom-6 right-6 z-[110] flex items-center justify-end pointer-events-none">
+        <div className="relative flex items-center justify-end group/fab pointer-events-auto">
+          {/* Tooltip label */}
+          <span
+            className="absolute right-[calc(100%+12px)] pointer-events-none whitespace-nowrap text-[13px] font-semibold text-foreground bg-background/95 border border-border/60 backdrop-blur-xl px-3 py-1.5 rounded-xl shadow-lg
+              opacity-0 translate-x-2 group-hover/fab:opacity-100 group-hover/fab:translate-x-0
+              transition-all duration-200 ease-out select-none"
+          >
+            {isOpen ? "Close Chat" : "Chat with AI"}
+          </span>
+          <motion.button
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setIsOpen(!isOpen)}
+            className="w-14 h-14 bg-primary text-primary-foreground rounded-2xl shadow-[0_10px_30px_rgba(59,130,246,0.5)] flex items-center justify-center transition-shadow hover:shadow-[0_15px_40px_rgba(59,130,246,0.6)]"
+          >
+            <AnimatePresence mode="wait">
+              <motion.div key={isOpen ? "o" : "c"} initial={{ opacity: 0, rotate: -45 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: 45 }} transition={{ duration: 0.2 }}>
+                {isOpen ? <X size={24} /> : <MessageSquare size={24} />}
+              </motion.div>
+            </AnimatePresence>
+          </motion.button>
+        </div>
       </div>
     </>
   );

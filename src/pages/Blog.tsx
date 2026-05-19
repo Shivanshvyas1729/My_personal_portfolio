@@ -12,6 +12,7 @@ import rawBlogData from "@/data/blog.yaml?raw";
 import yaml from "yaml";
 import { BookOpen, FileWarning, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useCMSData } from "@/context/CMSContext";
 
 export interface BlogPost {
   id: number;
@@ -32,7 +33,18 @@ const CATEGORIES = ["All", "Thoughts", "Notes", "Books", "Links"];
 const POSTS_PER_PAGE = 6;
 
 export default function Blog() {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const cmsBlogs = useCMSData(d => d.blog);
+  const [posts, setPosts] = useState<BlogPost[]>(() => {
+    try {
+      const parsed = yaml.parse(rawBlogData);
+      if (parsed && Array.isArray(parsed.blog)) {
+        return parsed.blog;
+      }
+    } catch (e) {
+      console.error("Failed to parse static blog yaml fallback", e);
+    }
+    return [];
+  });
   const { hasAccess } = useAuth();
   const isAdmin = hasAccess("admin");
 
@@ -47,17 +59,12 @@ export default function Blog() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
 
-  // Load Data
+  // Sync with CMS dynamic data (preview or live database updates)
   useEffect(() => {
-    try {
-      const parsed = yaml.parse(rawBlogData);
-      if (parsed && Array.isArray(parsed.blog)) {
-        setPosts(parsed.blog);
-      }
-    } catch (e) {
-      console.error("Failed to parse local blog yaml", e);
+    if (cmsBlogs) {
+      setPosts(cmsBlogs);
     }
-  }, []);
+  }, [cmsBlogs]);
 
   // Compute Tags globally relative to visible items
   const availableTags = useMemo(() => {

@@ -1,10 +1,139 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, FileText, Sun, Moon, ChevronDown, ExternalLink } from "lucide-react";
+import { Menu, X, FileText, Sun, Moon, ChevronDown, ExternalLink, Palette } from "lucide-react";
 import { portfolioData as initialData } from "@/data/portfolioData";
-import { useCMSData } from "@/context/CMSContext";
+import { useCMSData, useCMSActions } from "@/context/CMSContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "@/hooks/useTheme";
+
+const THEMES = [
+  {
+    id: "cyberpunk",
+    name: "Cyberpunk Neon 🌌",
+    isDark: true,
+    primary: "#d946ef",
+    accent: "#3b82f6",
+    background: "#030712",
+    font: "Space Grotesk"
+  },
+  {
+    id: "aurora",
+    name: "Midnight Aurora 🧪",
+    isDark: true,
+    primary: "#10b981",
+    accent: "#06b6d4",
+    background: "#020617",
+    font: "Outfit"
+  },
+  {
+    id: "sunset",
+    name: "Sunset Mist 🌅",
+    isDark: true,
+    primary: "#f97316",
+    accent: "#f43f5e",
+    background: "#0f172a",
+    font: "Poppins"
+  },
+  {
+    id: "emerald",
+    name: "Forest Emerald 🌲",
+    isDark: true,
+    primary: "#34d399",
+    accent: "#059669",
+    background: "#062f22",
+    font: "Outfit"
+  },
+  {
+    id: "luxury",
+    name: "Royal Gold 👑",
+    isDark: true,
+    primary: "#f59e0b",
+    accent: "#d97706",
+    background: "#080705",
+    font: "Space Grotesk"
+  },
+  {
+    id: "dracula",
+    name: "Dracula Vampire 🧛",
+    isDark: true,
+    primary: "#ff79c6",
+    accent: "#bd93f9",
+    background: "#282a36",
+    font: "Space Mono"
+  },
+  {
+    id: "nordic",
+    name: "Nordic Frost ❄️",
+    isDark: true,
+    primary: "#88c0d0",
+    accent: "#8fbcbb",
+    background: "#2e3440",
+    font: "Inter"
+  },
+  {
+    id: "ocean",
+    name: "Ocean Breeze 🌊",
+    isDark: true,
+    primary: "#38bdf8",
+    accent: "#0284c7",
+    background: "#0f172a",
+    font: "Poppins"
+  },
+  {
+    id: "terminal",
+    name: "Retro Terminal 📟",
+    isDark: true,
+    primary: "#f59e0b",
+    accent: "#10b981",
+    background: "#0c0a09",
+    font: "Space Mono"
+  },
+  {
+    id: "minimalist",
+    name: "Minimalist Light 💎",
+    isDark: false,
+    primary: "#2563eb",
+    accent: "#4f46e5",
+    background: "#f8fafc",
+    font: "Inter"
+  },
+  {
+    id: "cherry",
+    name: "Cherry Blossom 🌸",
+    isDark: false,
+    primary: "#ec4899",
+    accent: "#f43f5e",
+    background: "#fff5f7",
+    font: "Outfit"
+  },
+  {
+    id: "lavender",
+    name: "Lavender Breeze 🪻",
+    isDark: false,
+    primary: "#8b5cf6",
+    accent: "#a78bfa",
+    background: "#f5f3ff",
+    font: "Outfit"
+  },
+  {
+    id: "rosegold",
+    name: "Rose Gold Champagne 🥂",
+    isDark: false,
+    primary: "#db2777",
+    accent: "#fb7185",
+    background: "#fff1f2",
+    font: "Outfit"
+  },
+  {
+    id: "espresso",
+    name: "Espresso Latte ☕",
+    isDark: false,
+    primary: "#b45309",
+    accent: "#d97706",
+    background: "#fdf8f6",
+    font: "Poppins"
+  }
+];
 
 const navLinks = [
   { label: "Home", href: "#home" },
@@ -25,6 +154,17 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, setTheme } = useTheme();
+
+  const { updatePreviewSection } = useCMSActions();
+  const settings = useCMSData(d => d.settings);
+  const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    if (!themeDropdownOpen) return;
+    const handleClose = () => setThemeDropdownOpen(false);
+    window.addEventListener("click", handleClose);
+    return () => window.removeEventListener("click", handleClose);
+  }, [themeDropdownOpen]);
 
   // Selector-based data consumption
   const personal = useCMSData(d => d.personal) || initialData.personal;
@@ -159,7 +299,7 @@ const Navbar = () => {
               )}
             </div>
           )}
-          
+
           {/* Theme Toggle Desktop */}
           <button
             onClick={() => setTheme(isDark ? "light" : "dark")}
@@ -174,15 +314,15 @@ const Navbar = () => {
           </button>
         </div>
 
-        <div className="md:hidden flex items-center gap-4">
+        <div className="md:hidden flex items-center gap-2">
           <button
             onClick={() => setTheme(isDark ? "light" : "dark")}
             className="p-2 rounded-full text-foreground/70 hover:text-foreground hover:bg-muted transition-all no-text-effect flex items-center justify-center border border-border/50"
           >
             {isDark ? (
-              <Sun size={20} className="text-yellow-500" />
+              <Sun size={18} className="text-yellow-500" />
             ) : (
-              <Moon size={20} className="text-slate-700" />
+              <Moon size={18} className="text-slate-700" />
             )}
           </button>
           <button

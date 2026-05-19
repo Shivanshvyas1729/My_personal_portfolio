@@ -67,7 +67,7 @@ const ProjectCard = ({ project, index, disableInViewAnimation = false, onClick }
       onClick={handleCardClick}
       className={
         disableInViewAnimation
-          ? "flex flex-col h-full group overflow-hidden cursor-grab active:cursor-grabbing bg-card border border-border/50 rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] transition-colors duration-300 hover:border-primary/40"
+          ? "glass-card-hover flex flex-col h-full group overflow-hidden cursor-grab active:cursor-grabbing"
           : "glass-card-hover flex flex-col h-full group overflow-hidden cursor-pointer"
       }
     >

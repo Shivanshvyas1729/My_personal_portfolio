@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { BookOpen, Edit3, Trash2, X, Star, EyeOff, Save, Plus } from 'lucide-react';
+import { BookOpen, Edit3, Trash2, X, Star, EyeOff, Save, Plus, Calendar, Clock, Link as LinkIcon, Eye } from 'lucide-react';
 import { DynamicForm } from './DynamicForm';
 import { BlogSchema } from '@/lib/schema';
 import { useCMSState } from '@/context/CMSContext';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface BlogsAdminProps {
   blogs: any[];
@@ -18,6 +20,7 @@ export const BlogsAdmin: React.FC<BlogsAdminProps> = ({ blogs, onChange, onSave,
   const [addingNew, setAddingNew] = useState(false);
   const [tempBlog, setTempBlog] = useState<any>({});
   const [saveError, setSaveError] = useState("");
+  const [previewTab, setPreviewTab] = useState<'card' | 'detailed'>('card');
 
   const hasPendingChanges = JSON.stringify(blogs) !== JSON.stringify(liveData.blog);
 
@@ -167,22 +170,226 @@ export const BlogsAdmin: React.FC<BlogsAdminProps> = ({ blogs, onChange, onSave,
         <div className={`glass-card shadow-2xl border-l border-border/50 flex flex-col h-full absolute right-0 top-0 bottom-0 w-full max-w-full transition-all duration-500 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] ${
           isModalOpen ? 'translate-y-0 scale-100' : 'translate-y-8 scale-[0.96]'
         }`}>
-           <div className="flex items-center justify-between p-4 border-b border-border/50 bg-muted/20">
+           <div className="flex items-center justify-between p-4 border-b border-border/50 bg-muted/20 shrink-0">
              <h3 className="font-bold">{addingNew ? "New Post" : "Edit Post"}</h3>
              <button onClick={closeModal} className="p-1.5 rounded hover:bg-muted/60 text-muted-foreground transition-colors">
                <X size={16} />
              </button>
            </div>
            
-           <div className="flex-1 overflow-y-auto p-5">
-              <DynamicForm 
-                schema={BlogSchema} 
-                data={tempBlog} 
-                onChange={setTempBlog} 
-              />
+           {/* Side-by-Side Editor & Live Preview Workspace */}
+           <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
+             {/* Left Column: Form Editor */}
+             <div className="w-full md:w-1/2 border-r border-border/50 overflow-y-auto p-5 scrollbar-thin">
+                <DynamicForm 
+                  schema={BlogSchema} 
+                  data={tempBlog} 
+                  onChange={setTempBlog} 
+                />
+             </div>
+             
+             {/* Right Column: Interactive Live Preview Pane */}
+             <div className="w-full md:w-1/2 bg-muted/10 overflow-y-auto p-6 flex flex-col gap-6 scrollbar-thin">
+               <div className="flex items-center justify-between border-b border-border/40 pb-3 shrink-0">
+                 <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 select-none">
+                   <Eye size={14} className="text-primary animate-pulse" /> Live Preview
+                 </h4>
+                 <div className="flex bg-muted/50 p-0.5 rounded-lg border border-border/40 text-[10px] select-none">
+                   <button 
+                     onClick={() => setPreviewTab('card')}
+                     className={`px-2.5 py-1 rounded-md font-medium transition-all ${previewTab === 'card' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                   >
+                     Card View
+                   </button>
+                   <button 
+                     onClick={() => setPreviewTab('detailed')}
+                     className={`px-2.5 py-1 rounded-md font-medium transition-all ${previewTab === 'detailed' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                   >
+                     Detailed View
+                   </button>
+                 </div>
+               </div>
+               
+               <div className="flex-1 min-h-0 flex items-center justify-center">
+                 {previewTab === 'card' ? (
+                   <div className="w-full max-w-md mx-auto p-2">
+                     {/* Replica of BlogCard for Visual Preview */}
+                     <article className={`glass-card p-6 md:p-8 rounded-2xl border border-border/60 hover:border-primary/45 transition-all duration-300 relative flex flex-col bg-background/50 h-full ${tempBlog.draft ? 'border-dashed border-destructive/50 opacity-80' : ''}`}>
+                       <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+                         <div className="flex flex-wrap items-center gap-2">
+                           <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-primary/10 text-primary border border-primary/20">
+                             {tempBlog.category || "Thoughts"}
+                           </span>
+                           {tempBlog.featured && (
+                             <span className="text-xs font-medium px-2 py-1 rounded-md bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 flex items-center gap-1">
+                               Featured
+                             </span>
+                           )}
+                           {tempBlog.draft && (
+                             <span className="text-xs font-medium px-2 py-1 rounded-md bg-destructive/10 text-destructive border border-destructive/20 flex items-center gap-1">
+                               Draft
+                             </span>
+                           )}
+                         </div>
+                         <div className="flex items-center gap-3 text-xs text-muted-foreground whitespace-nowrap">
+                           <span className="flex items-center gap-1"><Calendar size={12} /> {tempBlog.date || new Date().toISOString().split('T')[0]}</span>
+                           <span className="flex items-center gap-1">
+                             <Clock size={12} /> 
+                             {tempBlog.readingTime || Math.max(1, Math.ceil((tempBlog.content || "").trim().split(/\s+/).filter(Boolean).length / 200))} min read
+                           </span>
+                         </div>
+                       </div>
+                       
+                       <h2 className="text-xl md:text-2xl font-bold font-heading mb-3 text-foreground line-clamp-2">
+                         {tempBlog.title || "Untitled Post Title"}
+                       </h2>
+                       
+                       <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3 mb-5">
+                         {tempBlog.content ? (tempBlog.content.split("\n")[0].substring(0, 150) + "...") : "Type content in the editor to see it here..."}
+                       </p>
+                       
+                       {tempBlog.type && tempBlog.type.length > 0 && (
+                         <div className="flex flex-wrap gap-1.5 mt-auto pt-4 border-t border-border/30">
+                           {tempBlog.type.map((tag: string, idx: number) => (
+                             <span key={idx} className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/50 uppercase tracking-widest">
+                               {tag}
+                             </span>
+                           ))}
+                         </div>
+                       )}
+                     </article>
+                   </div>
+                 ) : (
+                   /* Replica of BlogModal for detailed rich content markdown preview */
+                   <div className="w-full h-full flex flex-col bg-background/40 backdrop-blur-md border border-border/50 shadow-xl rounded-2xl overflow-hidden min-h-[350px]">
+                      <div className="p-6 border-b border-border/40 bg-muted/20 pb-5 pr-6">
+                        <div className="flex flex-wrap items-center gap-3 mb-3">
+                          <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-primary/10 text-primary border border-primary/20">
+                            {tempBlog.category || "Thoughts"}
+                          </span>
+                          {tempBlog.featured && (
+                            <span className="text-xs font-medium px-2 py-1 rounded-md bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 flex items-center gap-1">
+                              Featured
+                            </span>
+                          )}
+                          {tempBlog.draft && (
+                            <span className="text-xs font-medium px-2 py-1 rounded-md bg-destructive/10 text-destructive border border-destructive/20 flex items-center gap-1">
+                              Draft
+                            </span>
+                          )}
+                        </div>
+                        
+                        <h2 className="text-xl md:text-2xl font-heading font-bold text-foreground leading-tight text-left">
+                          {tempBlog.title || "Untitled Post Title"}
+                        </h2>
+                        
+                        <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground mt-3">
+                          <div className="flex items-center gap-1.5">
+                            <Calendar size={14} className="text-primary" />
+                            {tempBlog.date || new Date().toISOString().split('T')[0]}
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Clock size={14} className="text-primary" />
+                            {tempBlog.readingTime || Math.max(1, Math.ceil((tempBlog.content || "").trim().split(/\s+/).filter(Boolean).length / 200))} min read
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex-1 overflow-y-auto p-6 leading-relaxed scrollbar-thin">
+                        <div className="prose prose-invert prose-sm max-w-none 
+                                        prose-headings:font-heading prose-headings:font-bold prose-headings:text-foreground
+                                        prose-strong:text-foreground prose-strong:font-bold
+                                        prose-code:text-primary prose-code:bg-primary/5 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md
+                                        prose-blockquote:border-l-primary prose-blockquote:bg-muted/30 prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:rounded-r-lg prose-blockquote:not-italic
+                                        leading-relaxed text-muted-foreground text-left">
+                          {tempBlog.content ? (
+                            <ReactMarkdown 
+                              remarkPlugins={[remarkGfm]}
+                              components={{
+                                img: ({ node, ...props }) => (
+                                  <div className="my-8 flex flex-col items-center gap-2 group/img">
+                                    <img 
+                                      {...props} 
+                                      className="rounded-2xl border border-border/60 max-h-[350px] w-auto max-w-full object-contain shadow-2xl hover:border-primary/40 hover:scale-[1.01] transition-all duration-300" 
+                                      loading="lazy" 
+                                    />
+                                    {props.alt && (
+                                      <span className="text-[10px] text-muted-foreground/75 italic select-none">
+                                        {props.alt}
+                                      </span>
+                                    )}
+                                  </div>
+                                ),
+                                table: ({ node, ...props }) => (
+                                  <div className="overflow-x-auto my-4 border border-border/40 rounded-xl shadow-md bg-card/25">
+                                    <table {...props} className="min-w-full divide-y divide-border/30 text-xs" />
+                                  </div>
+                                ),
+                                th: ({ node, ...props }) => (
+                                  <th {...props} className="px-3 py-2 bg-muted/40 font-bold text-foreground text-left" />
+                                ),
+                                td: ({ node, ...props }) => (
+                                  <td {...props} className="px-3 py-2 border-t border-border/20 text-muted-foreground" />
+                                ),
+                                a: ({ node, ...props }) => (
+                                  <a 
+                                    {...props} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="text-primary font-medium hover:underline inline-flex items-center gap-0.5"
+                                  />
+                                ),
+                                blockquote: ({ node, ...props }) => (
+                                  <blockquote 
+                                    {...props} 
+                                    className="border-l-4 border-primary bg-primary/5 py-2 px-4 rounded-r-xl my-4 not-italic font-medium text-foreground/90 shadow-sm"
+                                  />
+                                )
+                              }}
+                            >
+                              {tempBlog.content}
+                            </ReactMarkdown>
+                          ) : (
+                            <p className="text-muted-foreground italic">Add markdown content in the editor to see it rendered here...</p>
+                          )}
+                        </div>
+                        
+                        {tempBlog.resources && tempBlog.resources.length > 0 && (
+                          <div className="mt-8 border-t border-border/40 pt-6">
+                            <h3 className="text-xs font-heading font-semibold flex items-center gap-2 mb-3">
+                              <BookOpen size={14} className="text-primary" /> Attached Resources
+                            </h3>
+                            <div className="grid grid-cols-1 gap-2">
+                              {tempBlog.resources.map((res: any, idx: number) => (
+                                <div key={idx} className="flex justify-between items-center p-3 rounded-xl border border-border/50 bg-muted/20">
+                                  <span className="flex items-center gap-2 font-medium text-xs">
+                                    <LinkIcon size={12} className="text-primary" />
+                                    {res.label}
+                                  </span>
+                                  <span className="text-[10px] text-muted-foreground break-all">{res.url}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {tempBlog.type && tempBlog.type.length > 0 && (
+                          <div className="mt-6 flex flex-wrap gap-1.5">
+                            {tempBlog.type.map((tag: string, idx: number) => (
+                              <span key={idx} className="text-[10px] px-2 py-0.5 rounded-full bg-primary/5 text-primary border border-primary/20 uppercase tracking-widest font-semibold">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                   </div>
+                 )}
+               </div>
+             </div>
            </div>
 
-           <div className="p-4 border-t border-border/50 bg-muted/10 flex justify-end gap-2">
+           <div className="p-4 border-t border-border/50 bg-muted/10 flex justify-end gap-2 shrink-0">
              <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium hover:bg-muted text-muted-foreground transition-colors">
                Cancel
              </button>

@@ -138,7 +138,50 @@ export function BlogModal({ post, isOpen, onClose, isAdmin }: BlogModalProps) {
                               prose-code:text-primary prose-code:bg-primary/5 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md
                               prose-blockquote:border-l-primary prose-blockquote:bg-muted/30 prose-blockquote:py-1 prose-blockquote:px-5 prose-blockquote:rounded-r-lg prose-blockquote:not-italic
                               leading-relaxed text-muted-foreground">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                <ReactMarkdown 
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    img: ({ node, ...props }) => (
+                      <div className="my-8 flex flex-col items-center gap-2 group/img">
+                        <img 
+                          {...props} 
+                          className="rounded-2xl border border-border/60 max-h-[500px] w-auto max-w-full object-contain shadow-2xl hover:border-primary/40 hover:scale-[1.01] transition-all duration-300" 
+                          loading="lazy" 
+                        />
+                        {props.alt && (
+                          <span className="text-xs text-muted-foreground/75 italic select-none">
+                            {props.alt}
+                          </span>
+                        )}
+                      </div>
+                    ),
+                    table: ({ node, ...props }) => (
+                      <div className="overflow-x-auto my-6 border border-border/40 rounded-xl shadow-lg bg-card/25">
+                        <table {...props} className="min-w-full divide-y divide-border/30 text-sm" />
+                      </div>
+                    ),
+                    th: ({ node, ...props }) => (
+                      <th {...props} className="px-4 py-3 bg-muted/40 font-bold text-foreground text-left" />
+                    ),
+                    td: ({ node, ...props }) => (
+                      <td {...props} className="px-4 py-3 border-t border-border/20 text-muted-foreground" />
+                    ),
+                    a: ({ node, ...props }) => (
+                      <a 
+                        {...props} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-primary font-medium hover:underline inline-flex items-center gap-0.5"
+                      />
+                    ),
+                    blockquote: ({ node, ...props }) => (
+                      <blockquote 
+                        {...props} 
+                        className="border-l-4 border-primary bg-primary/5 py-3 px-5 rounded-r-xl my-6 not-italic font-medium text-foreground/90 shadow-sm"
+                      />
+                    )
+                  }}
+                >
                   {activePost.content}
                 </ReactMarkdown>
               </div>

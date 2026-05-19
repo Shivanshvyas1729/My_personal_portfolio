@@ -1,306 +1,21 @@
 import React from 'react';
 import { z } from 'zod';
-import { Plus, Trash2, Image as ImageIcon, Video, ExternalLink, ArrowUp, ArrowDown, Upload } from 'lucide-react';
+import { Plus, Trash2, Image as ImageIcon, Video, ExternalLink, Upload, FileText, X, Eye, Save, RotateCcw, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCMSState } from '@/context/CMSContext';
-
-// ─── Enum Option Icons ────────────────────────────────────────────────────────
-const ENUM_ICONS: Record<string, string> = {
-  image: '🖼️',
-  video: '🎬',
-  iframe: '🌐',
-  pdf: '📄',
-};
-
-// ─── Media Preview ────────────────────────────────────────────────────────────
-const MediaPreview = ({ url, type }: { url: string; type?: string }) => {
-  if (!url) return null;
-  const isVideo = type === 'video' || /\.(mp4|webm|mov)/i.test(url) || /youtube|vimeo/i.test(url);
-  return (
-    <div className="mt-2 w-full h-28 rounded-lg bg-muted/30 border border-border/50 overflow-hidden relative">
-      {isVideo ? (
-        <div className="flex flex-col items-center justify-center h-full text-muted-foreground/60 gap-1">
-          <Video size={28} />
-          <span className="text-[10px]">Video URL set</span>
-          <a href={url} target="_blank" rel="noreferrer" className="text-[10px] text-primary hover:underline truncate max-w-[90%]">{url}</a>
-        </div>
-      ) : (
-        <img
-          src={url}
-          alt="Preview"
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            e.currentTarget.style.display = 'none';
-            (e.currentTarget.nextElementSibling as HTMLElement)?.style.setProperty('display', 'flex');
-          }}
-        />
-      )}
-      {!isVideo && (
-        <div className="absolute inset-0 hidden flex-col items-center justify-center bg-muted text-muted-foreground/50">
-          <ImageIcon size={22} className="mb-1" />
-          <span className="text-[10px]">Image failed to load</span>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Convert camelCase to Title Case
-const formatLabel = (key: string) => {
-  return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-};
-
-// Helper to convert GitHub blob URLs and relative upload paths to raw.githubusercontent.com direct image URLs
-const convertToRawGitHubUrl = (url: string): string => {
-  if (!url) return url;
-  
-  const trimmed = url.trim();
-
-  // Handle relative upload paths by resolving them to GitHub Raw CDN
-  if (trimmed.startsWith('/assets/uploads/')) {
-    const filename = trimmed.substring('/assets/uploads/'.length);
-    return `https://raw.githubusercontent.com/Shivanshvyas1729/My_personal_portfolio/refs/heads/main/public/assets/uploads/${filename}`;
-  }
-  if (trimmed.startsWith('assets/uploads/')) {
-    const filename = trimmed.substring('assets/uploads/'.length);
-    return `https://raw.githubusercontent.com/Shivanshvyas1729/My_personal_portfolio/refs/heads/main/public/assets/uploads/${filename}`;
-  }
-
-  // Match: https://github.com/owner/repo/blob/branch/path
-  const githubBlobRegex = /^https?:\/\/(?:www\.)?github\.com\/([^/]+)\/([^/]+)\/blob\/([^/]+)\/(.+)$/i;
-  const match = trimmed.match(githubBlobRegex);
-  if (match) {
-    const [, owner, repo, branch, path] = match;
-    return `https://raw.githubusercontent.com/${owner}/${repo}/refs/heads/${branch}/${path}`;
-  }
-  return url;
-};
-
-// ─── Fully unwrap nested Zod types ───────────────────────────────────────────
-function unwrapSchema(schema: z.ZodTypeAny): z.ZodTypeAny {
-  let s = schema;
-  while (
-    s instanceof z.ZodOptional ||
-    s instanceof z.ZodDefault ||
-    s instanceof z.ZodNullable ||
-    s instanceof z.ZodUnion
-  ) {
-    if (s instanceof z.ZodUnion) {
-      const options = s._def.options;
-      const objectOption = options.find((opt: any) => unwrapSchema(opt) instanceof z.ZodObject);
-      s = objectOption || options[0];
-    } else {
-      s = s._def.innerType;
-    }
-  }
-  return s;
-}
-
-const getItemPreview = (item: any): string => {
-  if (!item) return "";
-  if (typeof item === 'string') return item;
-  if (typeof item === 'number' || typeof item === 'boolean') return String(item);
-  if (typeof item === 'object') {
-    const candidates = ['title', 'name', 'label', 'text', 'heading', 'role', 'school', 'company', 'url'];
-    for (const cand of candidates) {
-      if (item[cand] && typeof item[cand] === 'string') return item[cand];
-    }
-    for (const val of Object.values(item)) {
-      if (typeof val === 'string' && val.trim().length > 0) return val;
-    }
-  }
-  return "";
-};
-
-const getSuggestionsForField = (path: string[], previewData: any, isArray: boolean): string[] => {
-  const fieldName = path[path.length - 1];
-  if (!fieldName) return [];
-
-  const suggestions = new Set<string>();
-
-  // 1. PROJECT OR BLOG CATEGORIES (COMPLETELY SEPARATED)
-  if (fieldName === 'category') {
-    if (isArray) {
-      // PROJECT CATEGORIES ONLY (Project category is an array)
-      const projects = previewData?.projects || [];
-      for (const p of projects) {
-        if (Array.isArray(p.category)) {
-          p.category.forEach((c: any) => c && suggestions.add(String(c).trim()));
-        }
-      }
-      if (suggestions.size === 0) {
-        ['Computer Vision', 'Deep Learning', 'Machine Learning', 'Generative AI', 'NLP', 'MLOps', 'Cloud Infrastructure', 'DevOps'].forEach(s => suggestions.add(s));
-      }
-    } else {
-      // BLOG CATEGORIES ONLY (Blog category is a simple string)
-      const blogs = previewData?.blog || [];
-      for (const b of blogs) {
-        if (typeof b.category === 'string' && b.category) {
-          suggestions.add(b.category.trim());
-        }
-      }
-      if (suggestions.size === 0) {
-        ['Thoughts', 'Notes', 'Books', 'Links', 'General'].forEach(s => suggestions.add(s));
-      }
-    }
-  }
-
-  // 2. TECH STACK (for 'tech' inside project, 'featured' or 'all' inside techStack, etc.)
-  if (fieldName === 'tech' || fieldName === 'techStack' || fieldName === 'featured' || fieldName === 'all' || fieldName === 'items') {
-    // Collect from all existing projects' tech
-    const projects = previewData?.projects || [];
-    for (const p of projects) {
-      if (Array.isArray(p.tech)) {
-        p.tech.forEach((t: any) => t && suggestions.add(String(t).trim()));
-      }
-    }
-    // Collect from skills items in portfolio
-    const skillCats = previewData?.skills?.categories || [];
-    for (const cat of skillCats) {
-      if (Array.isArray(cat.items)) {
-        cat.items.forEach((item: any) => item && suggestions.add(String(item).trim()));
-      }
-    }
-    // Collect from techStack settings
-    const featuredTech = previewData?.techStack?.featured || [];
-    featuredTech.forEach((t: any) => t && suggestions.add(String(t).trim()));
-    const allTech = previewData?.techStack?.all || [];
-    allTech.forEach((t: any) => t && suggestions.add(String(t).trim()));
-
-    // Add default popular tech items if none found
-    if (suggestions.size === 0) {
-      ['Python', 'TypeScript', 'React', 'Next.js', 'PyTorch', 'Docker', 'AWS', 'TensorFlow', 'FastAPI', 'LangChain'].forEach(s => suggestions.add(s));
-    }
-  }
-
-  // 3. BLOG TYPE
-  if (fieldName === 'type') {
-    // Collect from all existing blogs' type
-    const blogs = previewData?.blog || [];
-    for (const b of blogs) {
-      if (Array.isArray(b.type)) {
-        b.type.forEach((t: any) => t && suggestions.add(String(t).trim()));
-      }
-    }
-    
-    if (suggestions.size === 0) {
-      ['article', 'tutorial', 'case-study', 'cloud', 'quick-note', 'guide'].forEach(s => suggestions.add(s));
-    }
-  }
-
-  return Array.from(suggestions).filter(Boolean).sort();
-};
-
-interface ArrayItemWrapperProps {
-  item: any;
-  index: number;
-  total: number;
-  itemSchema: z.ZodTypeAny;
-  path: string[];
-  onMoveUp?: () => void;
-  onMoveDown?: () => void;
-  onRemove: () => void;
-  onChange: (newVal: any) => void;
-}
-
-const ArrayItemWrapper: React.FC<ArrayItemWrapperProps> = ({
-  item,
-  index,
-  total,
-  itemSchema,
-  path,
-  onMoveUp,
-  onMoveDown,
-  onRemove,
-  onChange
-}) => {
-  const previewText = getItemPreview(item);
-  const [isExpanded, setIsExpanded] = React.useState(() => !previewText);
-
-  return (
-    <div className={`relative rounded-xl border transition-all duration-150 overflow-hidden ${
-      isExpanded 
-        ? 'border-accent/40 bg-slate-900/30' 
-        : 'border-border/30 bg-muted/10 hover:border-border/50 hover:bg-muted/15'
-    }`}>
-      {/* Accordion Header */}
-      <div 
-        onClick={() => setIsExpanded(prev => !prev)}
-        className={`flex items-center justify-between p-3.5 cursor-pointer select-none transition-all ${
-          isExpanded 
-            ? 'bg-accent/5 border-l-4 border-accent/70 pl-2.5' 
-            : 'bg-muted/10 hover:bg-muted/20 pl-3.5'
-        }`}
-      >
-        <div className="flex items-center gap-3 min-w-0 pr-12">
-          <span className={`text-[10px] font-mono font-bold tracking-wide uppercase shrink-0 ${
-            isExpanded ? 'text-accent font-extrabold' : 'text-muted-foreground/80'
-          }`}>
-            Item {index + 1}
-          </span>
-          {!isExpanded && previewText && (
-            <span className="text-xs text-muted-foreground font-medium truncate italic opacity-85">
-              — {previewText.length > 50 ? `${previewText.slice(0, 50)}...` : previewText}
-            </span>
-          )}
-        </div>
-        
-        <div className="flex items-center gap-1.5 shrink-0" onClick={e => e.stopPropagation()}>
-          {onMoveUp && (
-            <button
-              type="button"
-              onClick={onMoveUp}
-              className="text-muted-foreground hover:text-foreground p-1 rounded hover:bg-muted/40 transition-colors"
-              title="Move Up"
-            >
-              <ArrowUp size={13} />
-            </button>
-          )}
-          {onMoveDown && (
-            <button
-              type="button"
-              onClick={onMoveDown}
-              className="text-muted-foreground hover:text-foreground p-1 rounded hover:bg-muted/40 transition-colors"
-              title="Move Down"
-            >
-              <ArrowDown size={13} />
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={onRemove}
-            className="text-muted-foreground hover:text-destructive p-1 rounded hover:bg-muted/40 transition-colors"
-            title="Remove Item"
-          >
-            <Trash2 size={13} />
-          </button>
-          
-          <div className="w-5 h-5 flex items-center justify-center text-muted-foreground/60 ml-1">
-            <span className={`text-[10px] transform transition-transform duration-200 ${isExpanded ? 'rotate-180 text-accent font-bold' : ''}`}>
-              ▼
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Accordion Content */}
-      <div className={`grid transition-all duration-300 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] ${
-        isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-      }`}>
-        <div className="overflow-hidden">
-          <div className="p-4 border-t border-border/15 bg-black/35">
-            <DynamicForm
-              schema={itemSchema}
-              data={item}
-              path={[...path, String(index)]}
-              onChange={onChange}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+import { useTheme } from '../../hooks/useTheme';
+import { PremiumColorPicker } from './PremiumColorPicker';
+import { 
+  ENUM_ICONS, 
+  MediaPreview, 
+  formatLabel, 
+  convertToRawGitHubUrl, 
+  unwrapSchema, 
+  getSuggestionsForField 
+} from './FormHelpers';
+import { SpaciousMarkdownNotepad } from './SpaciousMarkdownNotepad';
+import { ArrayItemWrapper } from './ArrayItemWrapper';
+import { SettingsAccordionContainer } from './SettingsAccordionContainer';
 
 interface DynamicFormProps {
   schema: z.ZodTypeAny;
@@ -319,6 +34,8 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
 
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const unwrapped = unwrapSchema(schema);
+  const { theme } = useTheme();
+  const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   // ─── Graphical Synapse connections Interceptor ───
   if (path[path.length - 1] === 'connections') {
@@ -428,109 +145,7 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
     );
   }
 
-interface SettingsAccordionContainerProps {
-  groups: { id: string; title: string; desc: string; keys: string[] }[];
-  shape: Record<string, z.ZodTypeAny>;
-  currentData: any;
-  path: string[];
-  onChange: (newVal: any) => void;
-}
-
-const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
-  groups,
-  shape,
-  currentData,
-  path,
-  onChange
-}) => {
-  const [openGroup, setOpenGroup] = React.useState<string | null>(() => {
-    const storageKey = `active_accordion_group_${path.join('_')}`;
-    return sessionStorage.getItem(storageKey) || groups[0]?.id || null;
-  });
-
-  const handleToggleGroup = (groupId: string | null) => {
-    const storageKey = `active_accordion_group_${path.join('_')}`;
-    setOpenGroup(groupId);
-    if (groupId) {
-      sessionStorage.setItem(storageKey, groupId);
-    } else {
-      sessionStorage.removeItem(storageKey);
-    }
-  };
-
-  return (
-    <div className="space-y-3">
-      {groups.map(group => {
-        // Filter out keys that don't exist in the current Zod shape to prevent rendering errors
-        const activeKeys = group.keys.filter((k: string) => shape[k]);
-        if (activeKeys.length === 0) return null;
-
-        const isOpen = openGroup === group.id;
-
-        return (
-          <div 
-            key={group.id} 
-            className={`rounded-xl border transition-all duration-250 overflow-hidden ${
-              isOpen 
-                ? 'border-primary/45 bg-slate-900/35 shadow-[0_0_20px_-5px_rgba(99,102,241,0.08)]' 
-                : 'border-border/20 bg-muted/5 hover:border-border/40 hover:bg-muted/10'
-            }`}
-          >
-            {/* Header Accordion */}
-            <div
-              onClick={() => handleToggleGroup(isOpen ? null : group.id)}
-              className={`flex items-center justify-between p-4 cursor-pointer select-none transition-all ${
-                isOpen 
-                  ? 'bg-primary/5 border-l-4 border-primary/70 pl-3' 
-                  : 'bg-muted/5 hover:bg-muted/10 pl-4'
-              }`}
-            >
-              <div>
-                <h4 className={`text-xs font-bold tracking-wide uppercase transition-colors ${
-                  isOpen ? 'text-primary font-extrabold' : 'text-foreground/90'
-                }`}>
-                  {group.title}
-                </h4>
-                <p className="text-[10px] text-muted-foreground mt-0.5">{group.desc}</p>
-              </div>
-              <span className={`text-xs transform transition-transform duration-200 ${
-                isOpen ? 'rotate-180 text-primary font-bold animate-pulse' : 'text-muted-foreground/75'
-              }`}>
-                ▼
-              </span>
-            </div>
-
-            {/* Accordion Content */}
-            <div className={`grid transition-all duration-300 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] ${
-              isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-            }`}>
-              <div className="overflow-hidden">
-                <div className="p-5 space-y-5 border-t border-border/15 bg-black/40">
-                  {activeKeys.map((key: string) => (
-                    <div key={key} className="space-y-2">
-                      <label className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-wider block">
-                        {formatLabel(key)}
-                      </label>
-                      <DynamicForm
-                        schema={shape[key]}
-                        data={currentData[key]}
-                        path={[...path, key]}
-                        parentData={currentData}
-                        onChange={(newVal) => onChange({ ...currentData, [key]: newVal })}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
-
-// ── Object ──────────────────────────────────────────────────────────────────
+  // ── Object ──────────────────────────────────────────────────────────────────
   if (unwrapped instanceof z.ZodObject) {
     const shape = unwrapped.shape;
     const currentData = data || {};
@@ -559,8 +174,6 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
         'textGlowIntensity'
       ]);
 
-      const visibleKeys = keys.filter(k => !keysToHide.has(k));
-
       const groups = [
         {
           id: 'neon-fog-dark',
@@ -582,126 +195,262 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
         },
         {
           id: 'sharp-light-light',
-          title: '⚡ Sharp Outline Light (Light Mode)',
+          title: '💡 Sharp Outline Light (Light Mode)',
           desc: 'Configure the crisp inner neon edge colors and thickness for Light Mode.',
           keys: ['sharpLightColorsLight', 'sharpLightThicknessLight']
         },
         {
-          id: 'theme-colors',
-          title: '🎨 Theme & Typography Skinning',
-          desc: 'Set the primary theme color palette and choose dynamic Google Fonts.',
-          keys: ['themePrimaryColor', 'themeBackgroundColor', 'themeAccentColor', 'themeFontFamily']
+          id: 'text-animation',
+          title: '✏️ Interactive Text Animation Effects',
+          desc: 'Tweak speed, glow properties, colors, and base opacity for cursor hover animations.',
+          keys: [
+            'textTransitionSpeedDark', 'textLeaveSpeedDark', 'textAnimationSpeedDark', 'textBaseOpacityDark', 'textGlowIntensityDark', 'textHoverColorsDark',
+            'textTransitionSpeedLight', 'textLeaveSpeedLight', 'textAnimationSpeedLight', 'textBaseOpacityLight', 'textGlowIntensityLight', 'textHoverColorsLight'
+          ]
+        },
+        {
+          id: 'brand-identity',
+          title: '💎 Brand Identity & Font Family',
+          desc: 'Skin site accents, highlight themes, backgrounds, and global typography options.',
+          keys: ['themePrimaryColor', 'themeAccentColor', 'themeBackgroundColor', 'themeFontFamily', 'themeHighlightColorDark', 'themeHighlightColorLight']
         }
       ];
 
-      const groupedKeys = new Set(groups.flatMap(g => g.keys));
-      const remainingKeys = visibleKeys.filter(k => !groupedKeys.has(k));
+      const keysInGroups = new Set(groups.flatMap(g => g.keys));
+      const visibleKeys = keys.filter(k => !keysToHide.has(k) && !keysInGroups.has(k));
 
-      return (
-        <div className="space-y-4">
-          <SettingsAccordionContainer 
-            groups={groups} 
-            shape={shape} 
-            currentData={currentData} 
-            path={path} 
-            onChange={onChange} 
-          />
-          {remainingKeys.length > 0 && (
-            <div className="space-y-4 pt-4 border-t border-border/20">
-              {remainingKeys.map(key => (
-                <div key={key} className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block opacity-70">
-                    {formatLabel(key)}
-                  </label>
-                  <DynamicForm
-                    schema={shape[key]}
-                    data={currentData[key]}
-                    path={[...path, key]}
-                    parentData={currentData}
-                    onChange={(newVal) => onChange({ ...currentData, [key]: newVal })}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+      // Curated Theme Presets Registry
+      const PRESETS = [
+        {
+          name: "Cyberpunk Neon 🌌",
+          values: {
+            ropeLightColorsDark: ["#f43f5e99", "#d946ef99", "#8b5cf699", "#3b82f699"],
+            ropeLightThicknessDark: 3.5,
+            ropeLightGlowIntensityDark: 4.5,
+            ropeLightSpeedDark: 15.0,
+            sharpLightColorsDark: ["#f43f5edd", "#d946efdd", "#3b82f6dd"],
+            sharpLightThicknessDark: 2.0,
+            themePrimaryColor: "#d946ef",
+            themeAccentColor: "#3b82f6",
+            themeFontFamily: "Space Grotesk"
+          }
+        },
+        {
+          name: "Midnight Aurora 🧪",
+          values: {
+            ropeLightColorsDark: ["#10b98199", "#34d39966", "#059669cc", "#6ee7b7aa"],
+            ropeLightThicknessDark: 2.5,
+            ropeLightGlowIntensityDark: 3.5,
+            ropeLightSpeedDark: 10.0,
+            sharpLightColorsDark: ["#34d399cc", "#6ee7b7cc"],
+            sharpLightThicknessDark: 1.5,
+            themePrimaryColor: "#10b981",
+            themeAccentColor: "#059669",
+            themeFontFamily: "Outfit"
+          }
+        },
+        {
+          name: "Sunset Mist 🌅",
+          values: {
+            ropeLightColorsDark: ["#f97316aa", "#f43f5eaa", "#eab30888", "#ef444499"],
+            ropeLightThicknessDark: 3.0,
+            ropeLightGlowIntensityDark: 4.0,
+            ropeLightSpeedDark: 12.5,
+            sharpLightColorsDark: ["#f97316dd", "#f43f5edd"],
+            sharpLightThicknessDark: 1.8,
+            themePrimaryColor: "#f97316",
+            themeAccentColor: "#f43f5e",
+            themeFontFamily: "Poppins"
+          }
+        },
+        {
+          name: "Cosmic Nebula 🛸",
+          values: {
+            ropeLightColorsDark: ["#8b5cf6aa", "#6366f1aa", "#ec489999", "#a855f7aa"],
+            ropeLightThicknessDark: 4.0,
+            ropeLightGlowIntensityDark: 5.0,
+            ropeLightSpeedDark: 16.0,
+            sharpLightColorsDark: ["#8b5cf6dd", "#6366f1dd", "#ec4899dd"],
+            sharpLightThicknessDark: 2.2,
+            themePrimaryColor: "#8b5cf6",
+            themeAccentColor: "#ec4899",
+            themeFontFamily: "Syne"
+          }
+        },
+        {
+          name: "Minimalist Silver 💎",
+          values: {
+            ropeLightColorsDark: ["#cbd5e1aa", "#94a3b8aa", "#e2e8f088"],
+            ropeLightThicknessDark: 1.5,
+            ropeLightGlowIntensityDark: 2.0,
+            ropeLightSpeedDark: 8.0,
+            sharpLightColorsDark: ["#e2e8f0cc", "#94a3b8cc"],
+            sharpLightThicknessDark: 1.0,
+            themePrimaryColor: "#64748b",
+            themeAccentColor: "#475569",
+            themeFontFamily: "Inter"
+          }
+        }
+      ];
+
+      // Factory Reset Defaults Helper
+      const handleFactoryResetLights = () => {
+        const fallbacks: Record<string, any> = {
+          // Rope lights baseline
+          ropeLightColors: ["#eab30866", "#67e8f966", "#6366f166", "#a855f766"],
+          ropeLightSpeed: 12.0,
+          ropeLightThickness: 1.5,
+          ropeLightGlowIntensity: 3.0,
+
+          // Dark wash baseline
+          ropeLightColorsDark: ["#eab30866", "#67e8f966", "#6366f166", "#a855f766"],
+          ropeLightThicknessDark: 1.5,
+          ropeLightGlowIntensityDark: 3.0,
+          ropeLightSpeedDark: 12.0,
+
+          // Light wash baseline
+          ropeLightColorsLight: ["#fde68a44", "#93c5fd44", "#67e8f944"],
+          ropeLightThicknessLight: 1.5,
+          ropeLightGlowIntensityLight: 3.0,
+          ropeLightSpeedLight: 12.0,
+
+          // Fallbacks for legacy/light keys
+          ropeLightColorLight: "#fde68a44",
+          ropeLightColorDark: "#a1620744",
+
+          // Sharp Outline Light baseline
+          sharpLightColorsDark: ["#facc1544", "#93c5fd44", "#67e8f944"],
+          sharpLightThicknessDark: 1.5,
+          sharpLightColorsLight: ["#facc1533", "#93c5fd33"],
+          sharpLightThicknessLight: 1.5,
+
+          // Text animation baseline settings
+          textHoverColors: ["#22d3ee", "#fbbf24", "#6366f1", "#8b5cf6"],
+          textTransitionSpeed: "0.8s",
+          textAnimationSpeed: "4s",
+          textGlowIntensity: 1.3,
+
+          // Interactive Text Anim Dark baseline
+          textTransitionSpeedDark: "0.8s",
+          textLeaveSpeedDark: "0.4s",
+          textAnimationSpeedDark: "4s",
+          textBaseOpacityDark: 0.7,
+          textGlowIntensityDark: 1.3,
+          textHoverColorsDark: ["#22d3ee", "#fbbf24", "#6366f1", "#8b5cf6"],
+
+          // Interactive Text Anim Light baseline
+          textTransitionSpeedLight: "0.6s",
+          textLeaveSpeedLight: "0.3s",
+          textAnimationSpeedLight: "5s",
+          textBaseOpacityLight: 0.8,
+          textGlowIntensityLight: 1.0,
+          textHoverColorsLight: ["#2563eb", "#ea580c", "#4f46e5"],
+
+          // Theme branding colors and Google Fonts baseline reset values
+          themePrimaryColor: "#6366f1",
+          themeBackgroundColor: "#030712",
+          themeAccentColor: "#c084fc",
+          themeFontFamily: "Inter"
+        };
+
+        const updated = { ...currentData };
+        Object.entries(fallbacks).forEach(([key, val]) => {
+          if (shape[key]) {
+            updated[key] = val;
+          }
+        });
+
+        onChange(updated);
+        toast.success("All aesthetic configurations reset to baseline defaults!");
+      };
+
+      const handleApplyPreset = (preset: typeof PRESETS[0]) => {
+        const updated = { ...currentData };
+        Object.entries(preset.values).forEach(([key, val]) => {
+          if (shape[key]) {
+            updated[key] = val;
+          }
+        });
+        onChange(updated);
+        toast.success(`Applied ${preset.name} combination!`);
+      };
+
+      const renderField = (key: string) => (
+        <DynamicForm
+          schema={shape[key]}
+          data={currentData[key]}
+          path={[...path, key]}
+          parentData={currentData}
+          onChange={(newVal) => onChange({ ...currentData, [key]: newVal })}
+        />
       );
-    }
-
-    const isProject = keys.includes('problem_statement') || keys.includes('howItWorks') || keys.includes('architectureImage');
-
-    if (isProject) {
-      const projectGroups = [
-        {
-          id: 'proj-basic',
-          title: '📌 Basic Information',
-          desc: 'Title, ID, category tags, description, and featured status.',
-          keys: ['title', 'id', 'category', 'description', 'featured']
-        },
-        {
-          id: 'proj-links',
-          title: '🔗 Links & Media',
-          desc: 'GitHub link, live deployment, and core project display media.',
-          keys: ['github', 'live', 'media']
-        },
-        {
-          id: 'proj-overview',
-          title: '💡 Project Overview & Objectives',
-          desc: 'Problem statements, goals, success criteria, and learning outcomes.',
-          keys: ['problem_statement', 'objectives', 'success_criteria', 'learning_outcomes']
-        },
-        {
-          id: 'proj-architecture',
-          title: '🏗️ High-Level Architecture & Flow',
-          desc: 'Architecture diagrams, operational stages, flow steps, and deployment.',
-          keys: ['architecture', 'architectureImage', 'howItWorks', 'deployment']
-        },
-        {
-          id: 'proj-ml-pipeline',
-          title: '🧠 Deep Engineering & ML Pipeline',
-          desc: 'Data sources, targets, preprocessing, models, and explainability.',
-          keys: ['data_sources', 'target_variable', 'features', 'preprocessing', 'modeling', 'evaluation_metrics', 'validation_strategy', 'explainability']
-        },
-        {
-          id: 'proj-ethics',
-          title: '⚖️ Ethics & Operational Risks',
-          desc: 'Potential failure modes, constraints, safety profile, and public license.',
-          keys: ['risks', 'ethics']
-        },
-        {
-          id: 'proj-resources',
-          title: '📚 Spec Documents & Reference Materials',
-          desc: 'Research papers, presentation decks, or other resource attachments.',
-          keys: ['resources', 'open_resources']
-        }
-      ];
-
-      const groupedKeys = new Set(projectGroups.flatMap(g => g.keys));
-      const remainingKeys = keys.filter(k => !groupedKeys.has(k));
 
       return (
-        <div className="space-y-4">
-          <SettingsAccordionContainer 
-            groups={projectGroups} 
-            shape={shape} 
-            currentData={currentData} 
-            path={path} 
-            onChange={onChange} 
+        <div className="space-y-6">
+          {/* Aesthetic Controls Board */}
+          <div className={`p-4 rounded-2xl border ${
+            isDark ? 'bg-slate-900/40 border-border/30' : 'bg-slate-50 border-slate-350 shadow-sm'
+          }`}>
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4 select-none">
+              <div>
+                <h3 className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5 text-foreground/90">
+                  <Sparkles size={14} className="text-primary animate-pulse" />
+                  Aesthetic Controls Board
+                </h3>
+                <p className="text-[10px] text-muted-foreground mt-0.5">Quickly select curated combinations or reset edge properties.</p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleFactoryResetLights}
+                className="px-3 py-1.5 bg-destructive/10 hover:bg-destructive/20 border border-destructive/20 text-destructive text-[10px] font-bold rounded-lg transition-all flex items-center gap-1 cursor-pointer"
+                title="Restore all edge lights, theme colors, background colors, and Google Fonts to clean baseline defaults"
+              >
+                <RotateCcw size={12} /> Reset All Settings to Baseline
+              </button>
+            </div>
+
+            {/* Scrolling curations list */}
+            <div className="space-y-1.5">
+              <span className="text-[9px] font-bold text-muted-foreground/80 uppercase tracking-widest block">Curated Theme Combos:</span>
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none snap-x max-w-full">
+                {PRESETS.map((preset, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleApplyPreset(preset)}
+                    className={`shrink-0 px-3 py-2 rounded-xl text-xs font-bold border transition-all snap-start select-none cursor-pointer hover:scale-103 ${
+                      isDark 
+                        ? 'bg-slate-950/60 border-border/40 hover:border-primary/50 text-foreground hover:bg-slate-900' 
+                        : 'bg-white border-slate-300 hover:border-primary/50 hover:bg-slate-100 text-slate-800'
+                    }`}
+                  >
+                    {preset.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <SettingsAccordionContainer
+            groups={groups}
+            shape={shape}
+            currentData={currentData}
+            path={path}
+            onChange={onChange}
+            renderField={renderField}
           />
-          {remainingKeys.length > 0 && (
-            <div className="space-y-4 pt-4 border-t border-border/20">
-              {remainingKeys.map(key => (
-                <div key={key} className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block opacity-70">
+
+          {/* Any settings keys not wrapped by accordion groups rendered normally */}
+          {visibleKeys.length > 0 && (
+            <div className={`p-4 rounded-xl border space-y-4 ${isDark ? 'bg-muted/5 border-border/20' : 'bg-slate-100/20 border-slate-200 shadow-sm'}`}>
+              <span className="text-[10px] font-extrabold text-muted-foreground/85 uppercase tracking-widest block">Additional Configuration:</span>
+              {visibleKeys.map((key: string) => (
+                <div key={key} className="space-y-2">
+                  <label className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-wider block">
                     {formatLabel(key)}
                   </label>
-                  <DynamicForm
-                    schema={shape[key]}
-                    data={currentData[key]}
-                    path={[...path, key]}
-                    parentData={currentData}
-                    onChange={(newVal) => onChange({ ...currentData, [key]: newVal })}
-                  />
+                  {renderField(key)}
                 </div>
               ))}
             </div>
@@ -711,15 +460,15 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
     }
 
     return (
-      <div className={`space-y-4 ${path.length > 0 ? "pl-2 md:pl-4 border-l-2 border-border/40 mt-2" : ""}`}>
-        {keys.map(key => (
+      <div className="space-y-4">
+        {keys.map((key: string) => (
           <div key={key} className="space-y-1.5">
-            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block opacity-70">
+            <label className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-wider block">
               {formatLabel(key)}
             </label>
             {key === 'themeFontFamily' && (
               <div className="bg-primary/5 border border-primary/10 rounded-lg p-2.5 text-[10px] text-muted-foreground/90 leading-relaxed max-w-lg mt-0.5 mb-1.5">
-                <strong className="text-primary flex items-center gap-1 mb-0.5">💡 Google Fonts Integrator:</strong>
+                <strong className="text-primary flex items-center gap-1 mb-0.5 font-bold">💡 Google Fonts Integrator:</strong>
                 Type any standard Google Font family name (for example: <span className="font-semibold text-foreground">Space Grotesk</span>, <span className="font-semibold text-foreground">Outfit</span>, <span className="font-semibold text-foreground">Poppins</span>, or <span className="font-semibold text-foreground">Inter</span>) to dynamically load and skin the site typography in real-time.
               </div>
             )}
@@ -782,7 +531,18 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
                   a[index] = newVal;
                   onChange(a);
                 }}
-              />
+              >
+                <DynamicForm
+                  schema={itemSchema}
+                  data={item}
+                  path={[...path, String(index)]}
+                  onChange={(newVal) => {
+                    const a = [...currentArray];
+                    a[index] = newVal;
+                    onChange(a);
+                  }}
+                />
+              </ArrayItemWrapper>
             ))}
           </div>
         ) : (
@@ -866,7 +626,7 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
         <select
           value={currentVal}
           onChange={e => onChange(e.target.value)}
-          className="w-full appearance-none bg-background border border-border/40 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/30 text-foreground pr-10 cursor-pointer transition-colors hover:border-border/70"
+          className="w-full appearance-none bg-background border border-border/40 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/30 text-foreground pr-10 cursor-pointer transition-colors hover:border-border/70 animate-in fade-in duration-100"
         >
           {options.map((opt: string) => (
             <option key={opt} value={opt}>
@@ -887,32 +647,43 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
     const suggestions = supportsSuggestions && previewData ? getSuggestionsForField(path, previewData, false) : [];
     const fieldKeyLower = fieldKey.toLowerCase();
 
-    // Detect URL fields by name
-    const isUrlField =
-      fieldKeyLower.includes('url') ||
-      fieldKeyLower.includes('link') ||
-      fieldKeyLower.includes('github') ||
-      fieldKeyLower.includes('live') ||
-      fieldKeyLower.includes('source') ||
-      fieldKeyLower.includes('dataset') ||
-      fieldKeyLower.includes('kaggle') ||
-      fieldKeyLower.includes('paper') ||
-      fieldKeyLower.includes('repo') ||
-      fieldKeyLower.includes('demo');
+    // Specific string conditions
+    const isUrlField = fieldKeyLower.includes('url') || fieldKeyLower.includes('link') || fieldKeyLower.includes('href') || fieldKeyLower.includes('website');
+    const isMediaUrl = fieldKeyLower === 'url' && path.includes('media');
+    const isImage = fieldKeyLower.includes('image') || fieldKeyLower.includes('avatar') || fieldKeyLower.includes('logo') || fieldKeyLower.includes('thumbnail') || fieldKeyLower.includes('icon');
+    const isLargeText = fieldKeyLower.includes('content') || fieldKeyLower.includes('description') || fieldKeyLower.includes('bio') || fieldKeyLower.includes('readme') || fieldKeyLower.includes('text') || fieldKeyLower.includes('markdown') || fieldKeyLower.includes('statement') || fieldKeyLower.includes('summary');
 
-    // Also detect by value — if it looks like a URL, treat it as clickable
-    const valueIsUrl = typeof data === 'string' && /^https?:\/\//i.test(data.trim());
-    const isClickable = (isUrlField || valueIsUrl) && valueIsUrl;
-
-    const isImage = fieldKeyLower.includes('image') || path.includes('profileImage');
-    const isLargeText = ['description', 'content', 'impact', 'architecture', 'problem_statement', 'howItWorks', 'explainability', 'deployment', 'validation_strategy'].includes(fieldKey);
-    const isMediaUrl = fieldKey === 'url' && path.includes('media');
-
-    // Performance Optimization: Local state for inputs to prevent global re-renders on every keystroke
+    // State for local sync and uploads
     const [localValue, setLocalValue] = React.useState(data || '');
     const [isUploading, setIsUploading] = React.useState(false);
     const [uploadError, setUploadError] = React.useState<string | null>(null);
-    
+
+    // Notepad states
+    const [isNotepadOpen, setIsNotepadOpen] = React.useState(false);
+
+    // Notepad local draft manager
+    const draftKey = React.useMemo(() => `cms-notepad-draft-${path.join('.')}`, [path]);
+    const [hasDraft, setHasDraft] = React.useState(false);
+
+    // Save draft to localStorage whenever localValue changes during edit session
+    React.useEffect(() => {
+      if (isNotepadOpen && localValue) {
+        localStorage.setItem(draftKey, localValue);
+      }
+    }, [localValue, isNotepadOpen, draftKey]);
+
+    // Check for draft on Notepad load
+    React.useEffect(() => {
+      if (isNotepadOpen) {
+        const savedDraft = localStorage.getItem(draftKey);
+        if (savedDraft && savedDraft !== (data || '')) {
+          setHasDraft(true);
+        } else {
+          setHasDraft(false);
+        }
+      }
+    }, [isNotepadOpen, data, draftKey]);
+
     // Sync local state with global data if global data changes from outside (e.g. undo/redo or sync)
     React.useEffect(() => {
       if (data !== localValue) {
@@ -990,6 +761,7 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
           const convertedUrl = convertToRawGitHubUrl(result.url);
           setLocalValue(convertedUrl);
           onChange(convertedUrl);
+          toast.success("Image uploaded and compressed successfully!");
         } else {
           throw new Error(result.error || "Upload failed");
         }
@@ -999,6 +771,19 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
         setIsUploading(false);
       }
     };
+
+    // Color fields detection (e.g. ropeLightColorsDark element or themePrimaryColor)
+    const isColorField = fieldKeyLower.includes('color') || fieldKeyLower.includes('accent') || fieldKeyLower.includes('hex') || path.some(p => p.toLowerCase().includes('color'));
+
+    if (isColorField) {
+      return (
+        <PremiumColorPicker
+          value={data || ''}
+          onChange={onChange}
+          isDark={isDark}
+        />
+      );
+    }
 
     if (fieldKey === 'themeFontFamily') {
       const popularFonts = [
@@ -1021,10 +806,9 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
             Type any standard Google Font family name or select from the premium layout fonts below to dynamically skin your portfolio's typography in real-time.
           </div>
 
-          <div className="flex gap-2 items-center max-w-lg">
-            {/* Font Selector Dropdown next to input */}
+          <div className="flex gap-2">
             <select
-              value={popularFonts.includes(localValue) ? localValue : ''}
+              value={popularFonts.includes(localValue) ? localValue : ""}
               onChange={(e) => {
                 const val = e.target.value;
                 if (val) {
@@ -1078,25 +862,51 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
       );
     }
 
+    // Also detect by value — if it looks like a URL, treat it as clickable
+    const valueIsUrl = typeof data === 'string' && /^https?:\/\//i.test(data.trim());
+    const isClickable = (isUrlField || valueIsUrl) && valueIsUrl;
+
     return (
       <div className="w-full">
         {isLargeText ? (
-          <textarea
-            value={localValue}
-            onChange={(e) => {
-              const val = e.target.value;
-              if (isImage || isMediaUrl) {
-                const converted = convertToRawGitHubUrl(val);
-                setLocalValue(converted);
-                onChange(converted);
-              } else {
-                setLocalValue(val);
-              }
-            }}
-            onBlur={handleBlur}
-            className="w-full bg-background border border-border/30 rounded-lg p-2.5 text-sm focus:outline-none focus:border-primary/50 text-foreground resize-y min-h-[80px] transition-colors"
-            placeholder="Type here..."
-          />
+          <div className="w-full relative group/editor font-sans">
+            <div className="flex items-center justify-between mb-1.5 select-none">
+              <span className="text-[10px] text-muted-foreground/80 font-medium italic">
+                📝 Click editor area below to open spacious Notepad
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsNotepadOpen(true)}
+                className="text-[10px] font-bold text-primary hover:text-primary-foreground hover:bg-primary/20 border border-primary/20 px-2 py-0.5 rounded transition-all bg-primary/5 shrink-0 flex items-center gap-1.5 shadow-sm"
+              >
+                <FileText size={11} /> Fullscreen Notepad
+              </button>
+            </div>
+            
+            <textarea
+              value={localValue}
+              onChange={(e) => setLocalValue(e.target.value)}
+              onBlur={handleBlur}
+              onClick={() => setIsNotepadOpen(true)}
+              className="w-full bg-background/50 hover:bg-background/80 hover:border-border/60 border border-border/30 rounded-lg p-3 text-xs md:text-sm focus:outline-none focus:border-primary/50 text-foreground/90 resize-y min-h-[90px] transition-all cursor-pointer font-mono leading-relaxed"
+              placeholder="Click to type and edit in Fullscreen Notepad..."
+              readOnly
+            />
+
+            <SpaciousMarkdownNotepad
+              isNotepadOpen={isNotepadOpen}
+              setIsNotepadOpen={setIsNotepadOpen}
+              localValue={localValue}
+              setLocalValue={setLocalValue}
+              onChange={onChange}
+              fieldKey={fieldKey}
+              isDark={isDark}
+              draftKey={draftKey}
+              hasDraft={hasDraft}
+              setHasDraft={setHasDraft}
+              data={data || ''}
+            />
+          </div>
         ) : (
           <div className="flex items-center gap-1.5">
             <input
@@ -1209,12 +1019,13 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
                     onClick={() => {
                       setLocalValue(sug);
                       onChange(sug);
-                      toast.success(`Selected category: ${sug}`);
+                      setShowSuggestions(false);
+                      toast.success(`Applied: ${sug}`);
                     }}
-                    className={`px-2 py-0.5 rounded text-[9px] font-bold border transition-all cursor-pointer ${
-                      isActive
-                        ? 'bg-primary/20 border-primary/50 text-primary'
-                        : 'bg-muted/10 border-border/30 hover:border-primary/30 text-muted-foreground'
+                    className={`px-2.5 py-1 rounded bg-muted/35 hover:bg-primary/20 hover:text-primary text-[10px] font-bold border transition-all ${
+                      isActive 
+                        ? 'bg-primary/20 text-primary border-primary/40' 
+                        : 'border-border/30'
                     }`}
                   >
                     {sug}
@@ -1228,115 +1039,61 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
     );
   }
 
-  // ── Number → Dynamic Sliders or Manual Inputs ───────────────────────────────
+  // ── Number ──────────────────────────────────────────────────────────────────
   if (unwrapped instanceof z.ZodNumber) {
-    const fieldKey = path[path.length - 1] || '';
-    const fieldKeyLower = fieldKey.toLowerCase();
-    
-    // Smart aesthetic boundaries
-    let min = 0;
-    let max = 100;
-    let step = 1;
-
-    if (fieldKeyLower.includes('speed')) {
-      min = 0.1;
-      max = 20;
-      step = 0.1;
-    } else if (fieldKeyLower.includes('thickness')) {
-      min = 0.5;
-      max = 15; // Enable thicker neon wash mists if desired
-      step = 0.1;
-    } else if (fieldKeyLower.includes('intensity') || fieldKeyLower.includes('glow')) {
-      min = 0;
-      max = 12;
-      step = 0.1;
-    } else if (fieldKeyLower.includes('opacity')) {
-      min = 0;
-      max = 1;
-      step = 0.05;
-    } else if (fieldKeyLower.includes('count')) {
-      min = 0;
-      max = 100;
-      step = 1;
-    }
-
-    const currentVal = data ?? min;
-    const [localVal, setLocalVal] = React.useState(currentVal);
-
-    React.useEffect(() => {
-      setLocalVal(currentVal);
-    }, [currentVal]);
-
-    // Check if this field should be rendered as a manual number input box rather than a slider
-    const isManualInput = fieldKeyLower.includes('count') || 
-                          fieldKeyLower.includes('experience') || 
-                          fieldKeyLower.includes('year') || 
-                          fieldKeyLower.includes('id');
-
-    if (isManualInput) {
-      return (
-        <div className="flex items-center gap-3 w-full max-w-[220px]">
-          <input
-            type="number"
-            min={min}
-            max={max}
-            step={step}
-            value={localVal}
-            onChange={(e) => {
-              const val = e.target.value === '' ? min : Number(e.target.value);
-              setLocalVal(val);
-              onChange(val);
-            }}
-            className="w-24 bg-background border border-border/30 rounded-lg p-2.5 text-sm focus:outline-none focus:border-primary/50 text-foreground font-semibold font-mono text-center shadow-inner h-9"
-          />
-          <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
-            Manual Count
-          </span>
-        </div>
-      );
-    }
-
-    // Debounced onChange to prevent intermediate lagging during slider drag
-    const debouncedOnChange = React.useMemo(() => {
-      let timeoutId: any = null;
-      return (val: number) => {
-        if (timeoutId) clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-          onChange(val);
-        }, 50); // Small debouncing buffer to keep visual dragging extremely silky
-      };
-    }, [onChange]);
+    const currentNum = typeof data === 'number' ? data : 0;
+    const minVal = typeof (unwrapped as any).minValue === 'number' ? (unwrapped as any).minValue : undefined;
+    const maxVal = typeof (unwrapped as any).maxValue === 'number' ? (unwrapped as any).maxValue : undefined;
+    const step = typeof (unwrapped as any).step === 'number' ? (unwrapped as any).step : undefined;
 
     return (
-      <div className="flex items-center gap-4 w-full bg-muted/5 border border-border/20 rounded-xl px-4 py-2.5">
+      <div className="w-full max-w-sm animate-in fade-in duration-100">
         <input
-          type="range"
-          min={min}
-          max={max}
+          type="number"
+          min={minVal}
+          max={maxVal}
           step={step}
-          value={localVal}
+          value={data === undefined || data === null ? "" : data}
           onChange={(e) => {
-            const val = Number(e.target.value);
-            setLocalVal(val);
-            debouncedOnChange(val);
+            const val = e.target.value;
+            if (val === "") {
+              onChange(undefined);
+            } else {
+              const num = Number(val);
+              if (!isNaN(num)) {
+                onChange(num);
+              }
+            }
           }}
-          className="flex-1 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary focus:outline-none"
+          className={`w-full p-2.5 text-sm rounded-lg border focus:outline-none focus:border-primary/50 shadow-inner ${
+            isDark ? 'bg-slate-900 border-border/30 text-foreground font-semibold' : 'bg-white border-slate-350 text-slate-800 font-semibold'
+          }`}
+          placeholder={minVal !== undefined && maxVal !== undefined ? `Range: [${minVal} to ${maxVal}]...` : "Enter numeric value..."}
         />
-        <span className="px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20 text-primary font-mono font-bold text-xs shrink-0 min-w-[42px] text-center shadow-inner">
-          {localVal}
-        </span>
       </div>
     );
   }
 
-  // ── Boolean → Toggle ────────────────────────────────────────────────────────
+  // ── ZodBoolean → Custom Styled Switch ─────────────────────────────────────────
   if (unwrapped instanceof z.ZodBoolean) {
     return (
-      <label className="flex items-center gap-2 cursor-pointer pt-1">
-        <div className={`w-10 h-5 rounded-full p-0.5 transition-colors ${data ? 'bg-primary' : 'bg-border'}`}>
-          <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${data ? 'translate-x-5' : 'translate-x-0'}`} />
+      <label className="relative inline-flex items-center cursor-pointer select-none mt-1 animate-in fade-in duration-100">
+        <div 
+          onClick={() => onChange(!data)}
+          className={`w-11 h-6 rounded-full border transition-all duration-200 relative ${
+            data 
+              ? 'bg-primary border-primary shadow-[0_0_10px_rgba(99,102,241,0.25)]' 
+              : `border-border/30 ${isDark ? 'bg-slate-900' : 'bg-slate-200'}`
+          }`}
+        >
+          {/* Thumb circle slider */}
+          <div className={`absolute top-0.5 left-0.5 w-4.5 h-4.5 rounded-full bg-white shadow transition-all duration-200 ${
+            data ? 'translate-x-5' : 'translate-x-0'
+          }`} />
         </div>
-        <span className="text-sm font-medium select-none">{data ? 'Yes' : 'No'}</span>
+        <span className="ml-3 text-xs font-semibold text-muted-foreground/90 uppercase tracking-wider">
+          {data ? 'Enabled' : 'Disabled'}
+        </span>
         <input type="checkbox" checked={!!data} onChange={(e) => onChange(e.target.checked)} className="hidden" />
       </label>
     );
@@ -1351,4 +1108,3 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
     />
   );
 });
-
