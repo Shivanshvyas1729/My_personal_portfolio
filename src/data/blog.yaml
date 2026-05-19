@@ -19,7 +19,7 @@ blog:
       - python
     featured: false
     draft: false
-    date: 2026-05-19
+    date: 2026-05-19T00:00:00.000Z
     slug: pandas-data-combining-functions-purpose-key-parameters
     readingTime: 1
   - id: 5
@@ -45,7 +45,7 @@ blog:
     category: Notes
     type:
       - cloud
-    link: ""
+    link: ''
     date: 2026-05-09T00:00:00.000Z
     featured: false
     draft: false
@@ -57,7 +57,7 @@ blog:
     category: Thoughts
     type:
       - gernal
-    link: ""
+    link: ''
     date: 2026-04-11T00:00:00.000Z
     featured: true
     draft: true
@@ -70,7 +70,7 @@ blog:
     type:
       - Deep Learning
       - NLP
-    link: ""
+    link: ''
     date: 2026-04-11T00:00:00.000Z
     featured: false
     draft: false
@@ -81,7 +81,7 @@ blog:
     title: Time
     content: “Time doesn’t just pass… it teaches. Every second you lose either becomes a regret or a lesson.”
     category: Thoughts
-    link: no
+    link: 'no'
     date: 2026-04-10T00:00:00.000Z
   - id: 6
     title: Research agents and platform
@@ -91,14 +91,26 @@ blog:
     category: Links
     type:
       - GERNAL
-    link: ""
-    date: 2026-05-17
+    link: ''
+    date: 2026-05-17T00:00:00.000Z
     featured: true
     draft: false
     resources:
-      - label: "scispace "
+      - label: 'scispace '
         url: https://scispace.com/
-      - label: "bohrium "
+      - label: 'bohrium '
         url: https://www.bohrium.com/en
-      - label: "openbio "
+      - label: 'openbio '
         url: https://openbio.tech/
+  - id: 8
+    title: mansi
+    slug: mansi
+    readingTime: 1
+    content: she is my sister
+    category: Thoughts
+    type:
+      - s
+    link: ''
+    date: '2026-05-19'
+    featured: false
+    draft: true
