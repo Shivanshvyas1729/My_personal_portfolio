@@ -1,3 +1,4 @@
+/// <reference path="../vite-env.d.ts" />
 import rawData from "./portfolio.yaml?raw";
 import rawProjects from "./projects.yaml?raw";
 import rawBlog from "./blog.yaml?raw";

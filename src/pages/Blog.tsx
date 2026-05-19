@@ -1,3 +1,4 @@
+/// <reference path="../vite-env.d.ts" />
 import { useState, useEffect, useMemo } from "react";
 import Navbar from "@/components/portfolio/Navbar";
 import Footer from "@/components/portfolio/Footer";
@@ -7,7 +8,6 @@ import { BlogCard } from "@/components/blog/BlogCard";
 import { BlogModal } from "@/components/blog/BlogModal";
 
 import { AdminPanel } from "@/components/blog/AdminPanel";
-// @ts-ignore
 import rawBlogData from "@/data/blog.yaml?raw";
 import yaml from "yaml";
 import { BookOpen, FileWarning, EyeOff } from "lucide-react";

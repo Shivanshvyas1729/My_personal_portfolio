@@ -284,7 +284,7 @@ const ArrayItemWrapper: React.FC<ArrayItemWrapperProps> = ({
       </div>
 
       {/* Accordion Content */}
-      <div className={`grid transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] ${
+      <div className={`grid transition-all duration-300 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] ${
         isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
       }`}>
         <div className="overflow-hidden">
@@ -501,7 +501,7 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
             </div>
 
             {/* Accordion Content */}
-            <div className={`grid transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] ${
+            <div className={`grid transition-all duration-300 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] ${
               isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
             }`}>
               <div className="overflow-hidden">
@@ -819,7 +819,7 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
           )}
         </div>
 
-        <div className={`grid transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] ${
+        <div className={`grid transition-all duration-300 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] ${
           showSuggestions && suggestions.length > 0 ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0'
         }`}>
           <div className="overflow-hidden">
@@ -1195,7 +1195,7 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
           </div>
         )}
 
-        <div className={`grid transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] ${
+        <div className={`grid transition-all duration-300 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] ${
           showSuggestions && suggestions.length > 0 ? 'grid-rows-[1fr] opacity-100 mt-2.5' : 'grid-rows-[0fr] opacity-0'
         }`}>
           <div className="overflow-hidden">

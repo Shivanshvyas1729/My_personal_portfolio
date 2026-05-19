@@ -156,7 +156,7 @@ export const BlogsAdmin: React.FC<BlogsAdminProps> = ({ blogs, onChange, onSave,
       </div>
 
       {/* Editor Modal */}
-      <div className={`absolute inset-0 z-50 flex flex-col overflow-hidden rounded-xl transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+      <div className={`absolute inset-0 z-50 flex flex-col overflow-hidden rounded-xl transition-all duration-500 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] ${
         isModalOpen 
           ? 'opacity-100 pointer-events-auto visible' 
           : 'opacity-0 pointer-events-none invisible translate-y-4 scale-[0.98]'
@@ -164,7 +164,7 @@ export const BlogsAdmin: React.FC<BlogsAdminProps> = ({ blogs, onChange, onSave,
         <div className={`absolute inset-0 bg-background/60 backdrop-blur-sm transition-opacity duration-500 ${
           isModalOpen ? 'opacity-100' : 'opacity-0'
         }`} onClick={closeModal} />
-        <div className={`glass-card shadow-2xl border-l border-border/50 flex flex-col h-full absolute right-0 top-0 bottom-0 w-full max-w-full transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+        <div className={`glass-card shadow-2xl border-l border-border/50 flex flex-col h-full absolute right-0 top-0 bottom-0 w-full max-w-full transition-all duration-500 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] ${
           isModalOpen ? 'translate-y-0 scale-100' : 'translate-y-8 scale-[0.96]'
         }`}>
            <div className="flex items-center justify-between p-4 border-b border-border/50 bg-muted/20">
