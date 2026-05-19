@@ -29,6 +29,7 @@ projects:
     open_resources:
       - url: https://drive.google.com/drive/u/0/folders/1WeKzWkeb7GvV_xYDwJLzbdd-kXy29vov
         label: "Research "
+    architectureImage: /assets/uploads/9fed8422-4558-4568-ad5f-68f70186a6a9_1779183573719.webp
   - id: 4
     title: ☀️ Solar Panel Defect Detection System
     category:
