@@ -2,6 +2,7 @@ import React from 'react';
 import { z } from 'zod';
 import { Plus, Trash2, Image as ImageIcon, Video, ExternalLink, ArrowUp, ArrowDown, Upload } from 'lucide-react';
 import { toast } from 'sonner';
+import { useCMSState } from '@/context/CMSContext';
 
 // ─── Enum Option Icons ────────────────────────────────────────────────────────
 const ENUM_ICONS: Record<string, string> = {
@@ -49,6 +50,32 @@ const formatLabel = (key: string) => {
   return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
 };
 
+// Helper to convert GitHub blob URLs and relative upload paths to raw.githubusercontent.com direct image URLs
+const convertToRawGitHubUrl = (url: string): string => {
+  if (!url) return url;
+  
+  const trimmed = url.trim();
+
+  // Handle relative upload paths by resolving them to GitHub Raw CDN
+  if (trimmed.startsWith('/assets/uploads/')) {
+    const filename = trimmed.substring('/assets/uploads/'.length);
+    return `https://raw.githubusercontent.com/Shivanshvyas1729/My_personal_portfolio/refs/heads/main/public/assets/uploads/${filename}`;
+  }
+  if (trimmed.startsWith('assets/uploads/')) {
+    const filename = trimmed.substring('assets/uploads/'.length);
+    return `https://raw.githubusercontent.com/Shivanshvyas1729/My_personal_portfolio/refs/heads/main/public/assets/uploads/${filename}`;
+  }
+
+  // Match: https://github.com/owner/repo/blob/branch/path
+  const githubBlobRegex = /^https?:\/\/(?:www\.)?github\.com\/([^/]+)\/([^/]+)\/blob\/([^/]+)\/(.+)$/i;
+  const match = trimmed.match(githubBlobRegex);
+  if (match) {
+    const [, owner, repo, branch, path] = match;
+    return `https://raw.githubusercontent.com/${owner}/${repo}/refs/heads/${branch}/${path}`;
+  }
+  return url;
+};
+
 // ─── Fully unwrap nested Zod types ───────────────────────────────────────────
 function unwrapSchema(schema: z.ZodTypeAny): z.ZodTypeAny {
   let s = schema;
@@ -85,6 +112,85 @@ const getItemPreview = (item: any): string => {
   return "";
 };
 
+const getSuggestionsForField = (path: string[], previewData: any, isArray: boolean): string[] => {
+  const fieldName = path[path.length - 1];
+  if (!fieldName) return [];
+
+  const suggestions = new Set<string>();
+
+  // 1. PROJECT OR BLOG CATEGORIES (COMPLETELY SEPARATED)
+  if (fieldName === 'category') {
+    if (isArray) {
+      // PROJECT CATEGORIES ONLY (Project category is an array)
+      const projects = previewData?.projects || [];
+      for (const p of projects) {
+        if (Array.isArray(p.category)) {
+          p.category.forEach((c: any) => c && suggestions.add(String(c).trim()));
+        }
+      }
+      if (suggestions.size === 0) {
+        ['Computer Vision', 'Deep Learning', 'Machine Learning', 'Generative AI', 'NLP', 'MLOps', 'Cloud Infrastructure', 'DevOps'].forEach(s => suggestions.add(s));
+      }
+    } else {
+      // BLOG CATEGORIES ONLY (Blog category is a simple string)
+      const blogs = previewData?.blog || [];
+      for (const b of blogs) {
+        if (typeof b.category === 'string' && b.category) {
+          suggestions.add(b.category.trim());
+        }
+      }
+      if (suggestions.size === 0) {
+        ['Thoughts', 'Notes', 'Books', 'Links', 'General'].forEach(s => suggestions.add(s));
+      }
+    }
+  }
+
+  // 2. TECH STACK (for 'tech' inside project, 'featured' or 'all' inside techStack, etc.)
+  if (fieldName === 'tech' || fieldName === 'techStack' || fieldName === 'featured' || fieldName === 'all' || fieldName === 'items') {
+    // Collect from all existing projects' tech
+    const projects = previewData?.projects || [];
+    for (const p of projects) {
+      if (Array.isArray(p.tech)) {
+        p.tech.forEach((t: any) => t && suggestions.add(String(t).trim()));
+      }
+    }
+    // Collect from skills items in portfolio
+    const skillCats = previewData?.skills?.categories || [];
+    for (const cat of skillCats) {
+      if (Array.isArray(cat.items)) {
+        cat.items.forEach((item: any) => item && suggestions.add(String(item).trim()));
+      }
+    }
+    // Collect from techStack settings
+    const featuredTech = previewData?.techStack?.featured || [];
+    featuredTech.forEach((t: any) => t && suggestions.add(String(t).trim()));
+    const allTech = previewData?.techStack?.all || [];
+    allTech.forEach((t: any) => t && suggestions.add(String(t).trim()));
+
+    // Add default popular tech items if none found
+    if (suggestions.size === 0) {
+      ['Python', 'TypeScript', 'React', 'Next.js', 'PyTorch', 'Docker', 'AWS', 'TensorFlow', 'FastAPI', 'LangChain'].forEach(s => suggestions.add(s));
+    }
+  }
+
+  // 3. BLOG TYPE
+  if (fieldName === 'type') {
+    // Collect from all existing blogs' type
+    const blogs = previewData?.blog || [];
+    for (const b of blogs) {
+      if (Array.isArray(b.type)) {
+        b.type.forEach((t: any) => t && suggestions.add(String(t).trim()));
+      }
+    }
+    
+    if (suggestions.size === 0) {
+      ['article', 'tutorial', 'case-study', 'cloud', 'quick-note', 'guide'].forEach(s => suggestions.add(s));
+    }
+  }
+
+  return Array.from(suggestions).filter(Boolean).sort();
+};
+
 interface ArrayItemWrapperProps {
   item: any;
   index: number;
@@ -108,18 +214,28 @@ const ArrayItemWrapper: React.FC<ArrayItemWrapperProps> = ({
   onRemove,
   onChange
 }) => {
-  const [isExpanded, setIsExpanded] = React.useState(false);
   const previewText = getItemPreview(item);
+  const [isExpanded, setIsExpanded] = React.useState(() => !previewText);
 
   return (
-    <div className="relative rounded-xl border border-border/40 bg-muted/10 overflow-hidden transition-all duration-150">
+    <div className={`relative rounded-xl border transition-all duration-150 overflow-hidden ${
+      isExpanded 
+        ? 'border-accent/40 bg-slate-900/30' 
+        : 'border-border/30 bg-muted/10 hover:border-border/50 hover:bg-muted/15'
+    }`}>
       {/* Accordion Header */}
       <div 
         onClick={() => setIsExpanded(prev => !prev)}
-        className="flex items-center justify-between p-3.5 cursor-pointer hover:bg-muted/20 select-none transition-colors"
+        className={`flex items-center justify-between p-3.5 cursor-pointer select-none transition-all ${
+          isExpanded 
+            ? 'bg-accent/5 border-l-4 border-accent/70 pl-2.5' 
+            : 'bg-muted/10 hover:bg-muted/20 pl-3.5'
+        }`}
       >
         <div className="flex items-center gap-3 min-w-0 pr-12">
-          <span className="text-[10px] font-mono font-bold text-muted-foreground/80 tracking-wide uppercase shrink-0">
+          <span className={`text-[10px] font-mono font-bold tracking-wide uppercase shrink-0 ${
+            isExpanded ? 'text-accent font-extrabold' : 'text-muted-foreground/80'
+          }`}>
             Item {index + 1}
           </span>
           {!isExpanded && previewText && (
@@ -132,6 +248,7 @@ const ArrayItemWrapper: React.FC<ArrayItemWrapperProps> = ({
         <div className="flex items-center gap-1.5 shrink-0" onClick={e => e.stopPropagation()}>
           {onMoveUp && (
             <button
+              type="button"
               onClick={onMoveUp}
               className="text-muted-foreground hover:text-foreground p-1 rounded hover:bg-muted/40 transition-colors"
               title="Move Up"
@@ -141,6 +258,7 @@ const ArrayItemWrapper: React.FC<ArrayItemWrapperProps> = ({
           )}
           {onMoveDown && (
             <button
+              type="button"
               onClick={onMoveDown}
               className="text-muted-foreground hover:text-foreground p-1 rounded hover:bg-muted/40 transition-colors"
               title="Move Down"
@@ -149,6 +267,7 @@ const ArrayItemWrapper: React.FC<ArrayItemWrapperProps> = ({
             </button>
           )}
           <button
+            type="button"
             onClick={onRemove}
             className="text-muted-foreground hover:text-destructive p-1 rounded hover:bg-muted/40 transition-colors"
             title="Remove Item"
@@ -157,7 +276,7 @@ const ArrayItemWrapper: React.FC<ArrayItemWrapperProps> = ({
           </button>
           
           <div className="w-5 h-5 flex items-center justify-center text-muted-foreground/60 ml-1">
-            <span className={`text-[10px] transform transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
+            <span className={`text-[10px] transform transition-transform duration-200 ${isExpanded ? 'rotate-180 text-accent font-bold' : ''}`}>
               ▼
             </span>
           </div>
@@ -165,16 +284,20 @@ const ArrayItemWrapper: React.FC<ArrayItemWrapperProps> = ({
       </div>
 
       {/* Accordion Content */}
-      {isExpanded && (
-        <div className="p-4 pt-1 border-t border-border/20 bg-background/30 animate-in fade-in slide-in-from-top-1 duration-150">
-          <DynamicForm
-            schema={itemSchema}
-            data={item}
-            path={[...path, String(index)]}
-            onChange={onChange}
-          />
+      <div className={`grid transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] ${
+        isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+      }`}>
+        <div className="overflow-hidden">
+          <div className="p-4 border-t border-border/15 bg-black/35">
+            <DynamicForm
+              schema={itemSchema}
+              data={item}
+              path={[...path, String(index)]}
+              onChange={onChange}
+            />
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
@@ -188,6 +311,13 @@ interface DynamicFormProps {
 }
 
 export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, data, onChange, path = [], parentData }) => {
+  let previewData: any = null;
+  try {
+    const cmsState = useCMSState();
+    previewData = cmsState?.previewData;
+  } catch (e) {}
+
+  const [showSuggestions, setShowSuggestions] = React.useState(false);
   const unwrapped = unwrapSchema(schema);
 
   // ─── Graphical Synapse connections Interceptor ───
@@ -252,6 +382,7 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
         </div>
 
         <button
+          type="button"
           onClick={handleAddConnection}
           className="w-full py-2 bg-primary/10 border border-primary/30 rounded-lg text-xs font-bold text-primary hover:bg-primary/20 transition-all flex items-center justify-center gap-1.5"
         >
@@ -274,6 +405,7 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
                     <span className="px-2 py-0.5 rounded bg-accent/5 text-accent text-[10px]">{conn[1]}</span>
                   </div>
                   <button
+                    type="button"
                     onClick={() => {
                       const copy = [...currentConnections];
                       copy.splice(idx, 1);
@@ -311,7 +443,20 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
   path,
   onChange
 }) => {
-  const [openGroup, setOpenGroup] = React.useState<string | null>(groups[0]?.id || null);
+  const [openGroup, setOpenGroup] = React.useState<string | null>(() => {
+    const storageKey = `active_accordion_group_${path.join('_')}`;
+    return sessionStorage.getItem(storageKey) || groups[0]?.id || null;
+  });
+
+  const handleToggleGroup = (groupId: string | null) => {
+    const storageKey = `active_accordion_group_${path.join('_')}`;
+    setOpenGroup(groupId);
+    if (groupId) {
+      sessionStorage.setItem(storageKey, groupId);
+    } else {
+      sessionStorage.removeItem(storageKey);
+    }
+  };
 
   return (
     <div className="space-y-3">
@@ -325,41 +470,59 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
         return (
           <div 
             key={group.id} 
-            className="rounded-2xl border border-border/40 bg-muted/5 overflow-hidden transition-all duration-200"
+            className={`rounded-xl border transition-all duration-250 overflow-hidden ${
+              isOpen 
+                ? 'border-primary/45 bg-slate-900/35 shadow-[0_0_20px_-5px_rgba(99,102,241,0.08)]' 
+                : 'border-border/20 bg-muted/5 hover:border-border/40 hover:bg-muted/10'
+            }`}
           >
             {/* Header Accordion */}
             <div
-              onClick={() => setOpenGroup(isOpen ? null : group.id)}
-              className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/10 select-none transition-colors bg-muted/5"
+              onClick={() => handleToggleGroup(isOpen ? null : group.id)}
+              className={`flex items-center justify-between p-4 cursor-pointer select-none transition-all ${
+                isOpen 
+                  ? 'bg-primary/5 border-l-4 border-primary/70 pl-3' 
+                  : 'bg-muted/5 hover:bg-muted/10 pl-4'
+              }`}
             >
               <div>
-                <h4 className="text-xs font-bold text-foreground/90 tracking-wide uppercase">{group.title}</h4>
+                <h4 className={`text-xs font-bold tracking-wide uppercase transition-colors ${
+                  isOpen ? 'text-primary font-extrabold' : 'text-foreground/90'
+                }`}>
+                  {group.title}
+                </h4>
                 <p className="text-[10px] text-muted-foreground mt-0.5">{group.desc}</p>
               </div>
-              <span className={`text-xs transform transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
+              <span className={`text-xs transform transition-transform duration-200 ${
+                isOpen ? 'rotate-180 text-primary font-bold animate-pulse' : 'text-muted-foreground/75'
+              }`}>
                 ▼
               </span>
             </div>
 
             {/* Accordion Content */}
-            {isOpen && (
-              <div className="p-5 space-y-4 border-t border-border/20 bg-background/20 animate-in fade-in slide-in-from-top-1 duration-150">
-                {activeKeys.map((key: string) => (
-                  <div key={key} className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block opacity-85">
-                      {formatLabel(key)}
-                    </label>
-                    <DynamicForm
-                      schema={shape[key]}
-                      data={currentData[key]}
-                      path={[...path, key]}
-                      parentData={currentData}
-                      onChange={(newVal) => onChange({ ...currentData, [key]: newVal })}
-                    />
-                  </div>
-                ))}
+            <div className={`grid transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] ${
+              isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+            }`}>
+              <div className="overflow-hidden">
+                <div className="p-5 space-y-5 border-t border-border/15 bg-black/40">
+                  {activeKeys.map((key: string) => (
+                    <div key={key} className="space-y-2">
+                      <label className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-wider block">
+                        {formatLabel(key)}
+                      </label>
+                      <DynamicForm
+                        schema={shape[key]}
+                        data={currentData[key]}
+                        path={[...path, key]}
+                        parentData={currentData}
+                        onChange={(newVal) => onChange({ ...currentData, [key]: newVal })}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
-            )}
+            </div>
           </div>
         );
       })}
@@ -465,6 +628,88 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
       );
     }
 
+    const isProject = keys.includes('problem_statement') || keys.includes('howItWorks') || keys.includes('architectureImage');
+
+    if (isProject) {
+      const projectGroups = [
+        {
+          id: 'proj-basic',
+          title: '📌 Basic Information',
+          desc: 'Title, ID, category tags, description, and featured status.',
+          keys: ['title', 'id', 'category', 'description', 'featured']
+        },
+        {
+          id: 'proj-links',
+          title: '🔗 Links & Media',
+          desc: 'GitHub link, live deployment, and core project display media.',
+          keys: ['github', 'live', 'media']
+        },
+        {
+          id: 'proj-overview',
+          title: '💡 Project Overview & Objectives',
+          desc: 'Problem statements, goals, success criteria, and learning outcomes.',
+          keys: ['problem_statement', 'objectives', 'success_criteria', 'learning_outcomes']
+        },
+        {
+          id: 'proj-architecture',
+          title: '🏗️ High-Level Architecture & Flow',
+          desc: 'Architecture diagrams, operational stages, flow steps, and deployment.',
+          keys: ['architecture', 'architectureImage', 'howItWorks', 'deployment']
+        },
+        {
+          id: 'proj-ml-pipeline',
+          title: '🧠 Deep Engineering & ML Pipeline',
+          desc: 'Data sources, targets, preprocessing, models, and explainability.',
+          keys: ['data_sources', 'target_variable', 'features', 'preprocessing', 'modeling', 'evaluation_metrics', 'validation_strategy', 'explainability']
+        },
+        {
+          id: 'proj-ethics',
+          title: '⚖️ Ethics & Operational Risks',
+          desc: 'Potential failure modes, constraints, safety profile, and public license.',
+          keys: ['risks', 'ethics']
+        },
+        {
+          id: 'proj-resources',
+          title: '📚 Spec Documents & Reference Materials',
+          desc: 'Research papers, presentation decks, or other resource attachments.',
+          keys: ['resources', 'open_resources']
+        }
+      ];
+
+      const groupedKeys = new Set(projectGroups.flatMap(g => g.keys));
+      const remainingKeys = keys.filter(k => !groupedKeys.has(k));
+
+      return (
+        <div className="space-y-4">
+          <SettingsAccordionContainer 
+            groups={projectGroups} 
+            shape={shape} 
+            currentData={currentData} 
+            path={path} 
+            onChange={onChange} 
+          />
+          {remainingKeys.length > 0 && (
+            <div className="space-y-4 pt-4 border-t border-border/20">
+              {remainingKeys.map(key => (
+                <div key={key} className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block opacity-70">
+                    {formatLabel(key)}
+                  </label>
+                  <DynamicForm
+                    schema={shape[key]}
+                    data={currentData[key]}
+                    path={[...path, key]}
+                    parentData={currentData}
+                    onChange={(newVal) => onChange({ ...currentData, [key]: newVal })}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
     return (
       <div className={`space-y-4 ${path.length > 0 ? "pl-2 md:pl-4 border-l-2 border-border/40 mt-2" : ""}`}>
         {keys.map(key => (
@@ -495,56 +740,119 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
   if (unwrapped instanceof z.ZodArray) {
     const itemSchema = unwrapped.element;
     const currentArray = Array.isArray(data) ? data : [];
+    
+    // Check suggestions support
+    const fieldKey = path[path.length - 1] || '';
+    const supportsSuggestions = ['category', 'tech', 'techStack', 'featured', 'all', 'items', 'type'].includes(fieldKey);
+    const suggestions = supportsSuggestions && previewData ? getSuggestionsForField(path, previewData, true) : [];
+
     return (
-      <div className="space-y-3">
-        {currentArray.map((item, index) => (
-          <ArrayItemWrapper
-            key={index}
-            item={item}
-            index={index}
-            total={currentArray.length}
-            itemSchema={itemSchema}
-            path={path}
-            onMoveUp={index > 0 ? () => {
-              const a = [...currentArray];
-              const temp = a[index];
-              a[index] = a[index - 1];
-              a[index - 1] = temp;
-              onChange(a);
-            } : undefined}
-            onMoveDown={index < currentArray.length - 1 ? () => {
-              const a = [...currentArray];
-              const temp = a[index];
-              a[index] = a[index + 1];
-              a[index + 1] = temp;
-              onChange(a);
-            } : undefined}
-            onRemove={() => {
-              const a = [...currentArray];
-              a.splice(index, 1);
-              onChange(a);
+      <div className="bg-muted/5 border border-border/20 rounded-xl p-3.5 space-y-3.5 shadow-sm">
+        {currentArray.length > 0 ? (
+          <div className="space-y-3">
+            {currentArray.map((item, index) => (
+              <ArrayItemWrapper
+                key={index}
+                item={item}
+                index={index}
+                total={currentArray.length}
+                itemSchema={itemSchema}
+                path={path}
+                onMoveUp={index > 0 ? () => {
+                  const a = [...currentArray];
+                  const temp = a[index];
+                  a[index] = a[index - 1];
+                  a[index - 1] = temp;
+                  onChange(a);
+                } : undefined}
+                onMoveDown={index < currentArray.length - 1 ? () => {
+                  const a = [...currentArray];
+                  const temp = a[index];
+                  a[index] = a[index + 1];
+                  a[index + 1] = temp;
+                  onChange(a);
+                } : undefined}
+                onRemove={() => {
+                  const a = [...currentArray];
+                  a.splice(index, 1);
+                  onChange(a);
+                }}
+                onChange={(newVal) => {
+                  const a = [...currentArray];
+                  a[index] = newVal;
+                  onChange(a);
+                }}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-xs text-muted-foreground/60 italic py-3 px-4 bg-muted/5 rounded-lg border border-dashed border-border/40 text-center">
+            No items defined yet. Click "Add" below to begin.
+          </div>
+        )}
+        
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              let empty: any = "";
+              const inner = unwrapSchema(itemSchema);
+              if (inner instanceof z.ZodObject) empty = {};
+              if (inner instanceof z.ZodNumber) empty = 0;
+              if (inner instanceof z.ZodBoolean) empty = false;
+              if (inner instanceof z.ZodEnum) empty = inner.options[0];
+              onChange([...currentArray, empty]);
             }}
-            onChange={(newVal) => {
-              const a = [...currentArray];
-              a[index] = newVal;
-              onChange(a);
-            }}
-          />
-        ))}
-        <button
-          onClick={() => {
-            let empty: any = "";
-            const inner = unwrapSchema(itemSchema);
-            if (inner instanceof z.ZodObject) empty = {};
-            if (inner instanceof z.ZodNumber) empty = 0;
-            if (inner instanceof z.ZodBoolean) empty = false;
-            if (inner instanceof z.ZodEnum) empty = inner.options[0];
-            onChange([...currentArray, empty]);
-          }}
-          className="flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors px-2 py-1.5 rounded-md hover:bg-primary/5"
-        >
-          <Plus size={14} /> Add {formatLabel(path[path.length - 1] || "Item")}
-        </button>
+            className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors px-3 py-1.5 rounded-lg bg-primary/5 hover:bg-primary/10 border border-primary/20 w-fit"
+          >
+            <Plus size={14} /> Add {formatLabel(path[path.length - 1] || "Item")}
+          </button>
+
+          {supportsSuggestions && suggestions.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowSuggestions(!showSuggestions)}
+              className="flex items-center gap-1.5 text-xs font-semibold text-accent hover:text-accent/80 transition-colors px-3 py-1.5 rounded-lg bg-accent/5 hover:bg-accent/10 border border-accent/20 select-none cursor-pointer"
+            >
+              💡 {showSuggestions ? "Hide Options" : "Show Suggestions"}
+            </button>
+          )}
+        </div>
+
+        <div className={`grid transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] ${
+          showSuggestions && suggestions.length > 0 ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0'
+        }`}>
+          <div className="overflow-hidden">
+            <div className="bg-black/35 rounded-lg p-3 border border-border/20 space-y-2">
+              <span className="text-[10px] font-bold text-muted-foreground/85 uppercase tracking-wider block">
+                Used Previously:
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {suggestions.map(sug => {
+                  const alreadyAdded = currentArray.some((x: any) => String(x).toLowerCase().trim() === sug.toLowerCase().trim());
+                  return (
+                    <button
+                      key={sug}
+                      type="button"
+                      disabled={alreadyAdded}
+                      onClick={() => {
+                        onChange([...currentArray, sug]);
+                        toast.success(`Added option: ${sug}`);
+                      }}
+                      className={`px-2.5 py-1 rounded-md text-[10px] font-bold border transition-all select-none ${
+                        alreadyAdded
+                          ? 'bg-muted/15 border-border/10 text-muted-foreground/45 cursor-not-allowed opacity-50'
+                          : 'bg-primary/5 hover:bg-primary/15 border-primary/25 hover:border-primary/50 text-primary cursor-pointer'
+                      }`}
+                    >
+                      {sug}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -575,6 +883,8 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
   // ── String ──────────────────────────────────────────────────────────────────
   if (unwrapped instanceof z.ZodString) {
     const fieldKey = path[path.length - 1] || '';
+    const supportsSuggestions = ['category', 'tech', 'techStack', 'featured', 'all', 'items', 'type'].includes(fieldKey);
+    const suggestions = supportsSuggestions && previewData ? getSuggestionsForField(path, previewData, false) : [];
     const fieldKeyLower = fieldKey.toLowerCase();
 
     // Detect URL fields by name
@@ -594,7 +904,7 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
     const valueIsUrl = typeof data === 'string' && /^https?:\/\//i.test(data.trim());
     const isClickable = (isUrlField || valueIsUrl) && valueIsUrl;
 
-    const isImage = fieldKeyLower.includes('image') || fieldKeyLower.includes('architecture') || path.includes('profileImage');
+    const isImage = fieldKeyLower.includes('image') || path.includes('profileImage');
     const isLargeText = ['description', 'content', 'impact', 'architecture', 'problem_statement', 'howItWorks', 'explainability', 'deployment', 'validation_strategy'].includes(fieldKey);
     const isMediaUrl = fieldKey === 'url' && path.includes('media');
 
@@ -605,12 +915,16 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
     
     // Sync local state with global data if global data changes from outside (e.g. undo/redo or sync)
     React.useEffect(() => {
-      if (data !== localValue) setLocalValue(data || '');
+      if (data !== localValue) {
+        const converted = convertToRawGitHubUrl(data || '');
+        setLocalValue(converted);
+      }
     }, [data]);
 
     const handleBlur = () => {
-      if (localValue !== data) {
-        onChange(localValue);
+      const converted = convertToRawGitHubUrl(localValue);
+      if (converted !== data) {
+        onChange(converted);
       }
     };
 
@@ -673,8 +987,9 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
 
         const result = await res.json();
         if (result.success) {
-          setLocalValue(result.url);
-          onChange(result.url);
+          const convertedUrl = convertToRawGitHubUrl(result.url);
+          setLocalValue(convertedUrl);
+          onChange(convertedUrl);
         } else {
           throw new Error(result.error || "Upload failed");
         }
@@ -768,7 +1083,16 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
         {isLargeText ? (
           <textarea
             value={localValue}
-            onChange={(e) => setLocalValue(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (isImage || isMediaUrl) {
+                const converted = convertToRawGitHubUrl(val);
+                setLocalValue(converted);
+                onChange(converted);
+              } else {
+                setLocalValue(val);
+              }
+            }}
             onBlur={handleBlur}
             className="w-full bg-background border border-border/30 rounded-lg p-2.5 text-sm focus:outline-none focus:border-primary/50 text-foreground resize-y min-h-[80px] transition-colors"
             placeholder="Type here..."
@@ -778,7 +1102,16 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
             <input
               type={isUrlField || isMediaUrl ? "url" : "text"}
               value={localValue}
-              onChange={(e) => setLocalValue(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (isImage || isMediaUrl) {
+                  const converted = convertToRawGitHubUrl(val);
+                  setLocalValue(converted);
+                  onChange(converted);
+                } else {
+                  setLocalValue(val);
+                }
+              }}
               onBlur={handleBlur}
               onKeyDown={(e) => { if (e.key === 'Enter') handleBlur(); }}
               className="flex-1 bg-background border border-border/30 rounded-lg p-2.5 text-sm focus:outline-none focus:border-primary/50 text-foreground min-w-0 transition-colors"
@@ -842,14 +1175,55 @@ const SettingsAccordionContainer: React.FC<SettingsAccordionContainerProps> = ({
         )}
 
         {/* Show media preview for media[].url field */}
-        {isMediaUrl && data && <MediaPreview url={data} type={parentData?.type} />}
+        {isMediaUrl && localValue && <MediaPreview url={localValue} type={parentData?.type} />}
         {/* Show image preview for architectureImage and similar */}
-        {isImage && data && !isMediaUrl && (
-          <div className="mt-2 w-full h-28 rounded-lg bg-muted/30 border border-border/50 overflow-hidden">
-            <img src={data} alt="Preview" className="w-full h-full object-cover"
-              onError={(e) => { e.currentTarget.style.opacity = '0.3'; }} />
+        {isImage && localValue && !isMediaUrl && (
+          <div className="mt-2 w-full h-28 rounded-lg bg-muted/30 border border-border/50 overflow-hidden flex items-center justify-center relative">
+            <img 
+              src={localValue} 
+              alt="Preview" 
+              className="w-full h-full object-cover animate-in fade-in duration-300"
+              onError={(e) => { 
+                e.currentTarget.style.display = 'none';
+                (e.currentTarget.nextElementSibling as HTMLElement)?.style.setProperty('display', 'flex');
+              }} 
+            />
+            <div className="absolute inset-0 hidden flex-col items-center justify-center bg-muted/40 text-muted-foreground/50">
+              <ImageIcon size={22} className="mb-1" />
+              <span className="text-[10px]">Image failed to load / invalid URL</span>
+            </div>
           </div>
         )}
+
+        <div className={`grid transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] ${
+          showSuggestions && suggestions.length > 0 ? 'grid-rows-[1fr] opacity-100 mt-2.5' : 'grid-rows-[0fr] opacity-0'
+        }`}>
+          <div className="overflow-hidden">
+            <div className="bg-black/35 rounded-lg p-2.5 border border-border/20 flex flex-wrap gap-1.5 animate-in fade-in duration-100">
+              {suggestions.map(sug => {
+                const isActive = localValue.toLowerCase().trim() === sug.toLowerCase().trim();
+                return (
+                  <button
+                    key={sug}
+                    type="button"
+                    onClick={() => {
+                      setLocalValue(sug);
+                      onChange(sug);
+                      toast.success(`Selected category: ${sug}`);
+                    }}
+                    className={`px-2 py-0.5 rounded text-[9px] font-bold border transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-primary/20 border-primary/50 text-primary'
+                        : 'bg-muted/10 border-border/30 hover:border-primary/30 text-muted-foreground'
+                    }`}
+                  >
+                    {sug}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

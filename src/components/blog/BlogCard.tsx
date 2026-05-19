@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Calendar, Clock, Lock, Trash2, Loader2 } from "lucide-react";
 import { BlogPost } from "@/pages/Blog";
 import { apiFetch, API_ROUTES } from "@/lib/apiClient";
+import Tilt from "react-parallax-tilt";
 
 interface BlogCardProps {
   post: BlogPost;
@@ -49,13 +50,21 @@ export function BlogCard({ post, onClick, isAdmin, onDelete }: BlogCardProps) {
   };
 
   return (
-    <article
-      onClick={!confirmDelete ? onClick : undefined}
-      className={`glass-card p-6 md:p-8 rounded-2xl hover:border-primary/40 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 relative
-        ${post.draft ? "border-dashed border-destructive/50 opacity-80" : ""}
-        ${confirmDelete ? "border-destructive/60 cursor-default" : "cursor-pointer"}
-      `}
+    <Tilt
+      tiltMaxAngleX={4}
+      tiltMaxAngleY={4}
+      perspective={1200}
+      scale={1.015}
+      transitionSpeed={1500}
+      className="h-full w-full"
     >
+      <article
+        onClick={!confirmDelete ? onClick : undefined}
+        className={`glass-card p-6 md:p-8 rounded-2xl hover:border-primary/45 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 relative h-full flex flex-col
+          ${post.draft ? "border-dashed border-destructive/50 opacity-80" : ""}
+          ${confirmDelete ? "border-destructive/60 cursor-default" : "cursor-pointer"}
+        `}
+      >
       {/* ── Delete Confirmation Overlay ──────────────────────── */}
       {confirmDelete && (
         <div
@@ -157,5 +166,6 @@ export function BlogCard({ post, onClick, isAdmin, onDelete }: BlogCardProps) {
         </div>
       )}
     </article>
+  </Tilt>
   );
 }

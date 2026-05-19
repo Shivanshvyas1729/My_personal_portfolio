@@ -231,6 +231,7 @@ const ChatAssistant = () => {
               originX: "calc(100% - 24px)",
               originY: "bottom"
             }}
+            data-lenis-prevent
             className="no-text-effect max-w-[calc(100vw-48px)] max-h-[calc(100vh-140px)] bg-background/95 backdrop-blur-3xl border border-border/60 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden pointer-events-auto select-none"
           >
             {/* Header - Drag Handle */}

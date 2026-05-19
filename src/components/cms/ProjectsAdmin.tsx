@@ -378,12 +378,22 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
       </div>
 
       {/* Editor Modal — fills the CMS matrix panel exactly, never overflows */}
-      {isModalOpen && (
-        <div className="absolute inset-0 z-50 flex flex-col animate-in fade-in duration-150 overflow-hidden rounded-xl">
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-background/60 backdrop-blur-sm" onClick={closeModal} />
-          {/* Panel — slides in from right, capped to parent width */}
-          <div className="glass-card shadow-2xl border-l border-border/50 flex flex-col h-full absolute right-0 top-0 bottom-0 w-full max-w-full" style={{ maxWidth: '100%' }}>
+      <div className={`absolute inset-0 z-50 flex flex-col overflow-hidden rounded-xl transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+        isModalOpen 
+          ? 'opacity-100 pointer-events-auto visible' 
+          : 'opacity-0 pointer-events-none invisible translate-y-4 scale-[0.98]'
+      }`}>
+        {/* Backdrop */}
+        <div className={`absolute inset-0 bg-background/60 backdrop-blur-sm transition-opacity duration-500 ${
+          isModalOpen ? 'opacity-100' : 'opacity-0'
+        }`} onClick={closeModal} />
+        {/* Panel — slides and scales beautifully */}
+        <div 
+          className={`glass-card shadow-2xl border-l border-border/50 flex flex-col h-full absolute right-0 top-0 bottom-0 w-full max-w-full transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+            isModalOpen ? 'translate-y-0 scale-100' : 'translate-y-8 scale-[0.96]'
+          }`} 
+          style={{ maxWidth: '100%' }}
+        >
              <div className="flex items-center justify-between p-4 border-b border-border/50 bg-muted/20">
                <h3 className="font-bold">{addingNew ? "New Project" : "Edit Project"}</h3>
                <button onClick={closeModal} className="p-1.5 rounded hover:bg-muted/60 text-muted-foreground transition-colors">
@@ -490,7 +500,6 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
              </div>
           </div>
         </div>
-      )}
       {/* Delete Confirmation Modal */}
       {projectToDelete !== null && (
         <div className="absolute inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-150 rounded-xl">

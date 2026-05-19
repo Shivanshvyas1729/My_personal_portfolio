@@ -37,7 +37,17 @@ export function AdminPanel({ onSuccess }: AdminPanelProps) {
   const [resources, setResources] = useState<{ label: string; url: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem('cms-blog-admin-minimized');
+      return saved ? saved === 'true' : true; // Default to true (collapsed)
+    }
+    return true;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('cms-blog-admin-minimized', String(isMinimized));
+  }, [isMinimized]);
 
   // ── DOM ref for direct style mutation (zero-rerender during move) ──────────
   const panelRef = useRef<HTMLDivElement>(null);
@@ -45,13 +55,11 @@ export function AdminPanel({ onSuccess }: AdminPanelProps) {
   // ── Persistent position/size in refs (not state) for smooth operations ────
   const geom = useRef({ x: 0, y: 0, w: DEFAULT_W, h: DEFAULT_H, ready: false });
 
-  // ── Set initial position once on mount ────────────────────────────────────
+  // ── Set initial position once on mount (repositioned to free space in top-left) ──
   useEffect(() => {
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
     geom.current = {
-      x: Math.max(8, vw - DEFAULT_W - 16),
-      y: Math.max(72, vh - DEFAULT_H - 16),
+      x: 24,
+      y: 96,
       w: DEFAULT_W,
       h: DEFAULT_H,
       ready: true,
@@ -229,7 +237,7 @@ export function AdminPanel({ onSuccess }: AdminPanelProps) {
         zIndex: 60,
         willChange: "transform",
       }}
-      className="glass-card rounded-2xl shadow-2xl border border-primary/20 flex flex-col overflow-hidden"
+      className={`glass-card rounded-2xl shadow-2xl border border-primary/20 flex flex-col overflow-hidden ${isMinimized ? "!h-12 !w-52" : ""}`}
     >
       {/* ── Resize Handles (only when not minimized) ────────────────────── */}
       {!isMinimized && (

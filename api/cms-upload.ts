@@ -59,10 +59,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           branch: "main"
         });
 
+        const rawUrl = `https://raw.githubusercontent.com/${OWNER}/${REPO}/refs/heads/main/${targetRelativePath}`;
         return res.status(200).json({
           success: true,
           mode: "github",
-          url: `/assets/uploads/${cleanFileName}`
+          url: rawUrl
         });
       } catch (ghErr: any) {
         console.error("[CMS UPLOAD] GitHub API commit failed:", ghErr);

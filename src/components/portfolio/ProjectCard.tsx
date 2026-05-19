@@ -2,17 +2,20 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { ExternalLink, Github, Star, GitFork, Image as ImageIcon } from "lucide-react";
 import type { Project } from "@/data/portfolioData";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useGithubStats } from "@/hooks/useGithubStats";
+import Tilt from "react-parallax-tilt";
 import { ResourcesModal } from "./ResourcesModal";
 
 interface Props {
   project: Project;
   index: number;
   disableInViewAnimation?: boolean;
+  onClick?: () => void;
 }
 
-const ProjectCard = ({ project, index, disableInViewAnimation = false }: Props) => {
+const ProjectCard = ({ project, index, disableInViewAnimation = false, onClick }: Props) => {
+  const navigate = useNavigate();
   const [isInView, setIsInView] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -42,15 +45,31 @@ const ProjectCard = ({ project, index, disableInViewAnimation = false }: Props) 
   const [imageLoaded, setImageLoaded] = useState(false);
   const mediaUrl = project.media?.[0]?.url;
 
-  return (
+  const handleCardClick = (e: React.MouseEvent) => {
+    // If the click is inside a real link or button, let the browser handle it (e.g. GitHub or Live Demo buttons)
+    if ((e.target as HTMLElement).closest("a") || (e.target as HTMLElement).closest("button")) {
+      return;
+    }
+    if (onClick) {
+      onClick();
+    } else {
+      navigate(`/project/${project.id}`);
+    }
+  };
+
+  const cardContent = (
     <motion.div
       ref={cardRef}
       initial={disableInViewAnimation ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
       whileInView={disableInViewAnimation ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={disableInViewAnimation ? { duration: 0.2 } : { delay: index * 0.1, duration: 0.5 }}
-      whileHover={{ y: -6 }}
-      className="glass-card-hover flex flex-col h-full group overflow-hidden"
+      onClick={handleCardClick}
+      className={
+        disableInViewAnimation
+          ? "flex flex-col h-full group overflow-hidden cursor-grab active:cursor-grabbing bg-card border border-border/50 rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] transition-colors duration-300 hover:border-primary/40"
+          : "glass-card-hover flex flex-col h-full group overflow-hidden cursor-pointer"
+      }
     >
       {/* Media Thumbnail Block */}
       <div className="relative aspect-video w-full bg-muted overflow-hidden">
@@ -91,11 +110,11 @@ const ProjectCard = ({ project, index, disableInViewAnimation = false }: Props) 
       </div>
 
       <div className="p-6 flex flex-col flex-1">
-        <Link to={`/project/${project.id}`} className="block mb-2 mt-2">
+        <div className="block mb-2 mt-2">
           <h3 className="font-heading font-semibold text-foreground text-lg group-hover:text-primary transition-colors line-clamp-1">
             {project.title}
           </h3>
-        </Link>
+        </div>
         <p className="text-muted-foreground text-sm mb-4 line-clamp-3 min-h-[60px] flex-1">{project.description}</p>
 
         {project.impact && (
@@ -158,6 +177,23 @@ const ProjectCard = ({ project, index, disableInViewAnimation = false }: Props) 
         </div>
       </div>
     </motion.div>
+  );
+
+  if (disableInViewAnimation) {
+    return <div className="h-full w-full">{cardContent}</div>;
+  }
+
+  return (
+    <Tilt
+      tiltMaxAngleX={4}
+      tiltMaxAngleY={4}
+      perspective={1200}
+      scale={1.015}
+      transitionSpeed={1500}
+      className="h-full w-full"
+    >
+      {cardContent}
+    </Tilt>
   );
 };
 

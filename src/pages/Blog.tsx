@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from "react";
 import Navbar from "@/components/portfolio/Navbar";
 import Footer from "@/components/portfolio/Footer";
 import SEO from "@/components/portfolio/SEO";
-import { AddBlogChatbot } from "@/components/blog/AddBlogChatbot";
 import { FilterBar } from "@/components/blog/FilterBar";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { BlogModal } from "@/components/blog/BlogModal";
@@ -264,9 +263,6 @@ export default function Blog() {
 
       {/* Floating Admin Panel (draggable + resizable) */}
       {isAdmin && <AdminPanel onSuccess={handleOptimisticInject} />}
-
-      {/* Floating CMS Chatbot (only active when Admin) */}
-      {isAdmin && <AddBlogChatbot onSuccessPayload={handleOptimisticInject} />}
 
       <BlogModal post={selectedPost} isOpen={!!selectedPost} onClose={() => setSelectedPost(null)} isAdmin={isAdmin} />
     </div>

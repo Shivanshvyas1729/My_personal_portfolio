@@ -298,6 +298,7 @@ export const DashboardPanel: React.FC<DashboardPanelProps> = ({
     <div
       ref={panelRef}
       style={containerStyle}
+      data-lenis-prevent
       className={`no-text-effect glass-card ${isMaximized || isMobile ? 'rounded-2xl' : 'rounded-2xl shadow-2xl border border-primary/20'} flex flex-col overflow-hidden bg-background/95 backdrop-blur-3xl ${!isInteracting ? 'transition-all duration-300' : ''} ${isMinimized ? '!h-12 !w-80' : ''}`}
     >
       {/* HEADER WITH DRAG AND POINTER EVENTS */}

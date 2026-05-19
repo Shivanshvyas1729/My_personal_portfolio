@@ -283,6 +283,26 @@ const TechSphere = () => {
   const isDark = theme === "dark";
   const gridClass = "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6";
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isInView, setIsInView] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { rootMargin: "200px" } // Pre-load or unload within 200px of entering viewport
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   return (
     <section className="section-padding relative overflow-hidden bg-background">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[160px] -z-10 pointer-events-none" />
@@ -303,14 +323,15 @@ const TechSphere = () => {
         </AnimatedSection>
 
         <AnimatedSection>
-          <div className="relative w-full h-[350px] md:h-[600px] mb-12 md:mb-20 group">
+          <div className="relative w-full h-[350px] md:h-[600px] mb-12 md:mb-20 group" ref={containerRef}>
             <div className={`absolute inset-0 ${isDark ? "bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.08)_0%,transparent_70%)]" : "bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.12)_0%,transparent_70%)]"} pointer-events-none`} />
             
             <div className="relative z-10 w-full h-full cursor-grab active:cursor-grabbing">
               <Canvas 
                 camera={{ position: [0, 0, 8], fov: 45 }}
-                dpr={[1, 1.5]}
+                dpr={[1, 1.2]} // Slightly reduced maximum DPR for higher performance on 4K/retina screens
                 gl={{ antialias: true, powerPreference: "high-performance" }}
+                frameloop={isInView ? "always" : "never"}
               >
                 <Suspense fallback={null}>
                   <Scene />

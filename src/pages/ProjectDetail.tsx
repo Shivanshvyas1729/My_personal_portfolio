@@ -8,6 +8,40 @@ import { useState } from "react";
 import { ResourcesModal } from "@/components/portfolio/ResourcesModal";
 import { useCMSData } from "@/context/CMSContext";
 import Magnetic from "@/components/ui/Magnetic";
+import { motion } from "framer-motion";
+
+const springTransition = {
+  type: "spring",
+  stiffness: 110,
+  damping: 18,
+  mass: 0.75,
+};
+
+const pageVariants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.95,
+    y: 20,
+    filter: "blur(10px)",
+    transformPerspective: 1200,
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: springTransition,
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.97,
+    y: 10,
+    filter: "blur(8px)",
+    transition: {
+      duration: 0.25,
+    },
+  },
+};
 
 const ProjectDetail = () => {
   const { id } = useParams();
@@ -29,14 +63,24 @@ const ProjectDetail = () => {
   const hasMedia = project.media && project.media.length > 0;
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background overflow-hidden">
       <SEO 
         title={project.title} 
         description={project.description} 
         image={project.media?.[0]?.url} 
       />
       <Navbar />
-      <div className="section-padding pt-28">
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+        variants={pageVariants}
+        style={{
+          willChange: "transform, opacity, filter",
+          transform: "translate3d(0,0,0)",
+        }}
+        className="section-padding pt-28"
+      >
         <div className="w-full max-w-[1600px] mx-auto px-6 md:px-12 lg:px-16 xl:px-24">
           <Link to="/projects" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors">
             <ArrowLeft size={16} /> Back to Projects
@@ -374,7 +418,7 @@ const ProjectDetail = () => {
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
       <Footer />
     </div>
   );

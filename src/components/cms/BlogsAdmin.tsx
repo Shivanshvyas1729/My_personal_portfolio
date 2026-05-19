@@ -156,46 +156,52 @@ export const BlogsAdmin: React.FC<BlogsAdminProps> = ({ blogs, onChange, onSave,
       </div>
 
       {/* Editor Modal */}
-      {isModalOpen && (
-        <div className="absolute inset-0 z-50 flex flex-col animate-in fade-in duration-150 overflow-hidden rounded-xl">
-          <div className="absolute inset-0 bg-background/60 backdrop-blur-sm" onClick={closeModal} />
-          <div className="glass-card shadow-2xl border-l border-border/50 flex flex-col h-full absolute right-0 top-0 bottom-0 w-full max-w-full">
-             <div className="flex items-center justify-between p-4 border-b border-border/50 bg-muted/20">
-               <h3 className="font-bold">{addingNew ? "New Post" : "Edit Post"}</h3>
-               <button onClick={closeModal} className="p-1.5 rounded hover:bg-muted/60 text-muted-foreground transition-colors">
-                 <X size={16} />
-               </button>
-             </div>
-             
-             <div className="flex-1 overflow-y-auto p-5">
-                <DynamicForm 
-                  schema={BlogSchema} 
-                  data={tempBlog} 
-                  onChange={setTempBlog} 
-                />
-             </div>
+      <div className={`absolute inset-0 z-50 flex flex-col overflow-hidden rounded-xl transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+        isModalOpen 
+          ? 'opacity-100 pointer-events-auto visible' 
+          : 'opacity-0 pointer-events-none invisible translate-y-4 scale-[0.98]'
+      }`}>
+        <div className={`absolute inset-0 bg-background/60 backdrop-blur-sm transition-opacity duration-500 ${
+          isModalOpen ? 'opacity-100' : 'opacity-0'
+        }`} onClick={closeModal} />
+        <div className={`glass-card shadow-2xl border-l border-border/50 flex flex-col h-full absolute right-0 top-0 bottom-0 w-full max-w-full transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+          isModalOpen ? 'translate-y-0 scale-100' : 'translate-y-8 scale-[0.96]'
+        }`}>
+           <div className="flex items-center justify-between p-4 border-b border-border/50 bg-muted/20">
+             <h3 className="font-bold">{addingNew ? "New Post" : "Edit Post"}</h3>
+             <button onClick={closeModal} className="p-1.5 rounded hover:bg-muted/60 text-muted-foreground transition-colors">
+               <X size={16} />
+             </button>
+           </div>
+           
+           <div className="flex-1 overflow-y-auto p-5">
+              <DynamicForm 
+                schema={BlogSchema} 
+                data={tempBlog} 
+                onChange={setTempBlog} 
+              />
+           </div>
 
-             <div className="p-4 border-t border-border/50 bg-muted/10 flex justify-end gap-2">
-               <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium hover:bg-muted text-muted-foreground transition-colors">
-                 Cancel
-               </button>
-               <button onClick={saveEdit} className="px-4 py-2 bg-primary/20 text-primary rounded-lg text-sm font-medium hover:bg-primary/30 transition-colors">
-                 Apply to Preview
-               </button>
-               <button 
-                 onClick={async () => {
-                   const updated = saveEdit();
-                   if (updated) setTimeout(() => onSave(updated), 0);
-                 }} 
-                 className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg flex items-center gap-2"
-               >
-                 <Save size={14} />
-                 Apply & {mode === 'local' ? "Save" : "Push"}
-               </button>
-             </div>
-          </div>
+           <div className="p-4 border-t border-border/50 bg-muted/10 flex justify-end gap-2">
+             <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium hover:bg-muted text-muted-foreground transition-colors">
+               Cancel
+             </button>
+             <button onClick={saveEdit} className="px-4 py-2 bg-primary/20 text-primary rounded-lg text-sm font-medium hover:bg-primary/30 transition-colors">
+               Apply to Preview
+             </button>
+             <button 
+               onClick={async () => {
+                 const updated = saveEdit();
+                 if (updated) setTimeout(() => onSave(updated), 0);
+               }} 
+               className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg flex items-center gap-2"
+             >
+               <Save size={14} />
+               Apply & {mode === 'local' ? "Save" : "Push"}
+             </button>
+           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

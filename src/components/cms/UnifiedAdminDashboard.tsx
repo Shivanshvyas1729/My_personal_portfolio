@@ -332,7 +332,18 @@ export const UnifiedAdminDashboard = () => {
 
   const [activeTab, setActiveTab] = useState<'portfolio' | 'projects' | 'blog' | 'settings' | 'history' | 'logs'>('portfolio');
   const [localActiveSection, setLocalActiveSection] = useState<string>('hero');
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem('cms-minimized');
+      return saved ? saved === 'true' : true; // Default to true (minimized/collapsed) so it starts tidy!
+    }
+    return true;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('cms-minimized', String(isMinimized));
+  }, [isMinimized]);
+
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [historyLogs, setHistoryLogs] = useState<CommitLog[]>([]);

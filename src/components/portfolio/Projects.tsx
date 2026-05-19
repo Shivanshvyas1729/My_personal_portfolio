@@ -1,18 +1,24 @@
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getFeaturedProjects, portfolioData as initialData } from "@/data/portfolioData";
 import { useCMSData } from "@/context/CMSContext";
 import AnimatedSection from "./AnimatedSection";
 import ProjectCard from "./ProjectCard";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 const Projects = () => {
+  const navigate = useNavigate();
   const currentData = useCMSData(d => d) || initialData;
   const featured = getFeaturedProjects(currentData);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const constraintsRef = useRef<HTMLDivElement>(null);
   const [dragConstraints, setDragConstraints] = useState({ left: 0, right: 0 });
+  const [shouldAnimate, setShouldAnimate] = useState(false);
+
+  const isDraggingRef = useRef(false);
+  const dragStartPos = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const updateConstraints = () => {
@@ -22,12 +28,13 @@ const Projects = () => {
         // The left constraint is the difference (negative) between the scroll width and container width
         const left = Math.min(0, containerWidth - scrollWidth - 48); // includes margins
         setDragConstraints({ left, right: 0 });
+        setShouldAnimate(left < 0);
       }
     };
 
     updateConstraints();
     window.addEventListener("resize", updateConstraints);
-    // Double-check layouts after brief render tick
+    // Double-check layouts after brief render ticks
     const timer1 = setTimeout(updateConstraints, 100);
     const timer2 = setTimeout(updateConstraints, 500);
 
@@ -37,6 +44,30 @@ const Projects = () => {
       clearTimeout(timer2);
     };
   }, [featured]);
+
+  const handleDragStart = (event: any, info: any) => {
+    isDraggingRef.current = true;
+    dragStartPos.current = { x: info.point.x, y: info.point.y };
+  };
+
+  const handleDragEnd = (event: any, info: any) => {
+    const distance = Math.sqrt(
+      Math.pow(info.point.x - dragStartPos.current.x, 2) +
+      Math.pow(info.point.y - dragStartPos.current.y, 2)
+    );
+    
+    // If the drag movement was substantial, mark it as dragging to block click trigger
+    if (distance > 5) {
+      isDraggingRef.current = true;
+    } else {
+      isDraggingRef.current = false;
+    }
+    
+    // Clear dragging state after a tiny tick to let standard card clicks capture the value
+    setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 80);
+  };
 
   if (!featured || featured.length === 0) {
     return (
@@ -65,7 +96,7 @@ const Projects = () => {
 
   return (
     <section id="projects" className="section-padding overflow-hidden">
-      <div className="container mx-auto" ref={containerRef}>
+      <div className="container mx-auto">
         <AnimatedSection>
           <h2 className="text-sm font-medium text-primary tracking-widest uppercase mb-2">Projects</h2>
           <h3 className="text-3xl md:text-4xl font-heading font-bold mb-12">
@@ -73,7 +104,7 @@ const Projects = () => {
           </h3>
         </AnimatedSection>
 
-        <div className="relative -mx-6 px-6 overflow-hidden group mb-8">
+        <div className="relative -mx-6 px-6 overflow-hidden group mb-8" ref={containerRef}>
           {/* Subtle Fade Edges */}
           <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-background to-transparent z-20 pointer-events-none" />
           <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-background to-transparent z-20 pointer-events-none" />
@@ -85,10 +116,19 @@ const Projects = () => {
             drag="x"
             dragConstraints={dragConstraints}
             dragElastic={0.15}
+            animate={shouldAnimate ? { x: [0, dragConstraints.left] } : { x: 0 }}
+            transition={shouldAnimate ? {
+              duration: Math.max(15, featured.length * 4), // Smooth linear scroll time
+              ease: "linear",
+              repeat: Infinity,
+              repeatType: "reverse",
+            } : undefined}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
             whileTap={{ cursor: "grabbing" }}
             style={{ 
               willChange: 'transform',
-              contain: 'layout paint style'
+              transform: 'translate3d(0, 0, 0)'
             }}
           >
             {featured.map((p, i) => (
@@ -101,6 +141,10 @@ const Projects = () => {
                     project={p} 
                     index={i} 
                     disableInViewAnimation={true} // Bypasses expensive intersection transitions for butter-smooth dragging
+                    onClick={() => {
+                      if (isDraggingRef.current) return;
+                      navigate(`/project/${p.id}`);
+                    }}
                   />
                 </div>
               </div>
