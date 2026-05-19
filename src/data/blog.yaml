@@ -1,4 +1,27 @@
 blog:
+  - id: 7
+    title: Pandas Data Combining Functions — Purpose & Key Parameters
+    content: |
+      | Function      | What it does                                                    | Main Use                   | Most Used Parameters               |
+      | ------------- | --------------------------------------------------------------- | -------------------------- | ---------------------------------- |
+      | `pd.concat()` | Combines DataFrames by stacking them vertically or horizontally | Add rows or columns        | `axis=0/1`, `ignore_index=True`    |
+      | `df.join()`   | Joins DataFrames mainly using indexes                           | Attach columns using index | `how`, `on`                        |
+      | `pd.merge()`  | SQL-style join using common columns                             | Relational data joining    | `on`, `how`, `left_on`, `right_on` |
+
+      ### Quick Meaning
+
+      * `concat` → Stack data
+      * `join` → Index-based combine
+      * `merge` → Database/SQL-like join
+    category: Notes
+    type:
+      - pandas
+      - python
+    featured: false
+    draft: false
+    date: 2026-05-19
+    slug: pandas-data-combining-functions-purpose-key-parameters
+    readingTime: 1
   - id: 5
     title: type of Cloud storage based on  By Architecture
     slug: type-of-cloud-storage-based-on-by-architecture
@@ -22,7 +45,7 @@ blog:
     category: Notes
     type:
       - cloud
-    link: ''
+    link: ""
     date: 2026-05-09T00:00:00.000Z
     featured: false
     draft: false
@@ -34,7 +57,7 @@ blog:
     category: Thoughts
     type:
       - gernal
-    link: ''
+    link: ""
     date: 2026-04-11T00:00:00.000Z
     featured: true
     draft: true
@@ -47,7 +70,7 @@ blog:
     type:
       - Deep Learning
       - NLP
-    link: ''
+    link: ""
     date: 2026-04-11T00:00:00.000Z
     featured: false
     draft: false
@@ -58,7 +81,7 @@ blog:
     title: Time
     content: “Time doesn’t just pass… it teaches. Every second you lose either becomes a regret or a lesson.”
     category: Thoughts
-    link: 'no'
+    link: no
     date: 2026-04-10T00:00:00.000Z
   - id: 6
     title: Research agents and platform
@@ -68,14 +91,14 @@ blog:
     category: Links
     type:
       - GERNAL
-    link: ''
-    date: '2026-05-17'
+    link: ""
+    date: 2026-05-17
     featured: true
     draft: false
     resources:
-      - label: 'scispace '
+      - label: "scispace "
         url: https://scispace.com/
-      - label: 'bohrium '
+      - label: "bohrium "
         url: https://www.bohrium.com/en
-      - label: 'openbio '
+      - label: "openbio "
         url: https://openbio.tech/
