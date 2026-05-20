@@ -44,11 +44,11 @@ settings:
   themeBackgroundColor: "#030712"
   themeAccentColor: "#c084fc"
   themeFontFamily: "Inter"
-  customCursorEnabled: true
+  customCursorEnabled: false
 
   # Intro / Transition
   introEnabled: true
-  introStyle: "namaste"
+  introStyle: "pulse"
   introPrimaryText: "नमस्ते"
   introSubtitle: "Namaste"
   introTagline: "Welcome to my universe"
