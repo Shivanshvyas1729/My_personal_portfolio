@@ -13,7 +13,11 @@ home:
 # region GLOBAL SETTINGS
 settings:
   # Softened for "eye-softening" premium look
-  ropeLightColors: [ "#eab30866", "#67e8f966", "#6366f166", "#a855f766" ]
+  ropeLightColors:
+    - "#eab30866"
+    - "#67e8f966"
+    - "#6366f166"
+    - "#a855f766"
   ropeLightSpeed: 12
   ropeLightThickness: 1.5
   ropeLightGlowIntensity: 3
@@ -21,11 +25,18 @@ settings:
   ropeLightColorLight: "#fde68a44"
   ropeLightColorDark: "#a1620744"
 
-  sharpLightColorsDark: [ "#facc1544", "#93c5fd44", "#67e8f944" ]
+  sharpLightColorsDark:
+    - "#facc1544"
+    - "#93c5fd44"
+    - "#67e8f944"
   sharpLightThickness: 1.5
 
   # Global Text Hover Interaction
-  textHoverColors: [ "#22d3ee", "#fbbf24", "#6366f1", "#8b5cf6" ]
+  textHoverColors:
+    - "#22d3ee"
+    - "#fbbf24"
+    - "#6366f1"
+    - "#8b5cf6"
   textTransitionSpeed: "0.8s"
   textAnimationSpeed: "4s"
   textGlowIntensity: 1.3
