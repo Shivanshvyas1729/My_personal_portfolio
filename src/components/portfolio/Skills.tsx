@@ -1,7 +1,7 @@
 import { portfolioData as initialData, hasContent } from "@/data/portfolioData";
 import { useCMSData } from "@/context/CMSContext";
 import { motion } from "framer-motion";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
 const TiltCard = ({ 
   cat, 
@@ -24,15 +24,25 @@ const TiltCard = ({
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [centerShift, setCenterShift] = useState({ x: 0, y: 0 });
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+  const [isMobile, setIsMobile] = useState(false);
 
-  const isHovered = hoveredIndex === index;
-  const isSelected = selectedIndex === index;
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.matchMedia("(hover: none) and (pointer: coarse)").matches || window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  const isHovered = !isMobile && hoveredIndex === index;
+  const isSelected = !isMobile && selectedIndex === index;
   const isActive = isSelected || (selectedIndex === null && isHovered);
-  const isAnyActive = selectedIndex !== null || hoveredIndex !== null;
+  const isAnyActive = !isMobile && (selectedIndex !== null || hoveredIndex !== null);
   const isInactive = isAnyActive && !isActive;
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
+    if (isMobile || !cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
     const width = rect.width;
     const height = rect.height;
@@ -69,16 +79,19 @@ const TiltCard = ({
   };
 
   const handleMouseEnter = () => {
-    setHoveredIndex(index);
+    if (!isMobile) setHoveredIndex(index);
   };
 
   const handleMouseLeave = () => {
-    setHoveredIndex(null);
-    setTilt({ x: 0, y: 0 });
-    setCenterShift({ x: 0, y: 0 });
+    if (!isMobile) {
+      setHoveredIndex(null);
+      setTilt({ x: 0, y: 0 });
+      setCenterShift({ x: 0, y: 0 });
+    }
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
+    if (isMobile) return;
     e.stopPropagation();
     setSelectedIndex(isSelected ? null : index);
   };
@@ -146,16 +159,16 @@ const TiltCard = ({
         }}
         transition={{
           type: "spring",
-          stiffness: 90,  // Softer spring
-          damping: 16,    // Premium inertia cushioning
-          mass: 0.9,
+          stiffness: isMobile ? 200 : 90,
+          damping: isMobile ? 25 : 16,
+          mass: isMobile ? 0.5 : 0.9,
         }}
         style={{
           transformStyle: "preserve-3d",
           zIndex: isActive ? 50 : 0,
           transition: "background-color 0.3s, border-color 0.3s, box-shadow 0.3s, filter 0.3s"
         }}
-        className="glass-card-hover no-text-effect p-8 h-full flex flex-col border border-border/40 dark:border-white/10 hover:border-primary/40 shadow-xl overflow-visible cursor-pointer select-none relative rounded-2xl bg-card/60 dark:bg-black/30 backdrop-blur-md transition-colors duration-300"
+        className={`glass-card-hover no-text-effect p-8 h-full flex flex-col border border-border/40 dark:border-white/10 ${!isMobile && 'hover:border-primary/40'} shadow-xl overflow-visible ${!isMobile ? 'cursor-pointer' : ''} select-none relative rounded-2xl bg-card/60 dark:bg-black/30 backdrop-blur-md transition-colors duration-300`}
       >
         {/* Dynamic neon shadow expansion underneath */}
         <div

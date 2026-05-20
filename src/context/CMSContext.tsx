@@ -23,6 +23,7 @@ interface CMSActions {
   setSafeMode: (val: boolean) => void;
   setForceLocalMode: (val: boolean) => void;
   updatePreviewSection: (section: string, data: any) => void;
+  updateLiveSection: (section: string, data: any) => void;
   updateNestedField: (path: string, value: any) => void;
   setActiveSection: (sec: string | null) => void;
   refreshData: () => Promise<void>;
@@ -283,6 +284,18 @@ export const CMSProvider = ({ children }: { children: ReactNode }) => {
     });
   }, [pushToUndo]);
 
+  const updateLiveSection = useCallback((section: string, data: any) => {
+    setLiveData(prev => ({
+      ...prev,
+      [section]: data
+    } as PortfolioData));
+    // Also sync previewData so the CRM panel stays consistent
+    setPreviewData(prev => ({
+      ...prev,
+      [section]: data
+    } as PortfolioData));
+  }, []);
+
   const updateNestedField = useCallback((path: string, value: any) => {
     setPreviewMode(true); // Automatically ensure preview is active so changes show immediately
     setPreviewData(prev => {
@@ -494,6 +507,7 @@ export const CMSProvider = ({ children }: { children: ReactNode }) => {
     setSafeMode,
     setForceLocalMode,
     updatePreviewSection,
+    updateLiveSection,
     updateNestedField,
     setActiveSection,
     refreshData,
@@ -501,7 +515,7 @@ export const CMSProvider = ({ children }: { children: ReactNode }) => {
     undo,
     redo,
     restoreStateFromCommit
-  }), [setPreviewMode, setSafeMode, setForceLocalMode, updatePreviewSection, updateNestedField, setActiveSection, refreshData, undo, redo, restoreStateFromCommit]);
+  }), [setPreviewMode, setSafeMode, setForceLocalMode, updatePreviewSection, updateLiveSection, updateNestedField, setActiveSection, refreshData, undo, redo, restoreStateFromCommit]);
 
   return (
     <CMSStateContext.Provider value={stateValue}>

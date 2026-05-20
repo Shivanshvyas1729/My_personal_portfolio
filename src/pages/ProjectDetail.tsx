@@ -63,8 +63,8 @@ const ProjectDetail = () => {
   const hasMedia = project.media && project.media.length > 0;
 
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
-      <SEO 
+    <div className="min-h-screen bg-background w-full overflow-x-hidden flex flex-col relative">
+      <SEO
         title={project.title} 
         description={project.description} 
         image={project.media?.[0]?.url} 

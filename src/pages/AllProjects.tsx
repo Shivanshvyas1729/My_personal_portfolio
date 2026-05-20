@@ -12,7 +12,7 @@ const AllProjects = () => {
   const { categories, selectedCategory, setSelectedCategory, filteredProjects, counts } = useProjectFilter(cmsProjects);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-background w-full overflow-x-hidden flex flex-col relative">
       <SEO title="All Projects" />
       <Navbar />
       <div className="flex-1 section-padding pt-28">
@@ -34,17 +34,17 @@ const AllProjects = () => {
                     <button
                       key={cat}
                       onClick={() => setSelectedCategory(cat)}
-                      className={`flex items-center justify-between w-full px-4 py-2.5 rounded-lg text-sm transition-all duration-300 ${
+                      className={`flex items-center justify-between w-full px-4 py-2.5 rounded-lg text-sm transition-all duration-300 border ${
                         selectedCategory === cat
-                          ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
-                          : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                          ? "bg-primary/15 text-primary border-primary/30 shadow-sm shadow-primary/20 font-semibold"
+                          : "border-transparent text-muted-foreground hover:bg-secondary/10 hover:text-foreground"
                       }`}
                     >
                       <span className="font-medium">{cat}</span>
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
                         selectedCategory === cat 
-                          ? "bg-primary-foreground/20 text-primary-foreground" 
-                          : "bg-secondary text-secondary-foreground"
+                          ? "bg-primary/20 text-primary" 
+                          : "bg-secondary/20 text-secondary-foreground"
                       }`}>
                         {counts[cat] || 0}
                       </span>

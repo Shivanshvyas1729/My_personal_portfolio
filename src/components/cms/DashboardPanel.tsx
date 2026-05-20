@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ChevronDown, ChevronUp, Minimize2, Maximize2, ShieldCheck, ShieldAlert, Undo2, Redo2, Github, RefreshCw } from 'lucide-react';
+import { ChevronDown, ChevronUp, Minimize2, Maximize2, ShieldCheck, ShieldAlert, Undo2, Redo2, Github, RefreshCw, Sun, Moon } from 'lucide-react';
+import { useTheme } from '@/hooks/useTheme';
 
 interface DashboardPanelProps {
   children: React.ReactNode;
@@ -41,6 +42,9 @@ export const DashboardPanel: React.FC<DashboardPanelProps> = ({
   isSuperAdmin,
   auditLogs
 }) => {
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+
   const [isMaximized, setIsMaximized] = useState(() => {
     if (typeof window !== "undefined") return localStorage.getItem('cms-maximized') === 'true';
     return false;
@@ -395,6 +399,13 @@ export const DashboardPanel: React.FC<DashboardPanelProps> = ({
                >
                  {safeMode ? <ShieldCheck size={12}/> : <ShieldAlert size={12}/>} 
                  Safe Mode
+               </button>
+               <button
+                 onClick={() => setTheme(isDark ? "light" : "dark")}
+                 className="flex items-center justify-center p-1.5 sm:ml-1 rounded text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                 title={`Switch to ${isDark ? "Light" : "Dark"} Mode`}
+               >
+                 {isDark ? <Sun size={14} className="text-yellow-500" /> : <Moon size={14} className="text-slate-700" />}
                </button>
                <label className="flex items-center gap-1.5 cursor-pointer text-[10px] uppercase font-bold text-muted-foreground ml-2">
                  Preview

@@ -171,7 +171,7 @@ export default function Blog() {
 
 
   return (
-    <div className="min-h-screen flex flex-col bg-background selection:bg-primary/20">
+    <div className="min-h-screen bg-background w-full overflow-x-hidden flex flex-col relative selection:bg-primary/20">
       <SEO title="Digital Garden | Blog CMS" description="Thoughts, notes, and technical architectures." />
       <Navbar />
 

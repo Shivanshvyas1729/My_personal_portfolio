@@ -12,7 +12,7 @@ import Contact from "@/components/portfolio/Contact";
 import Footer from "@/components/portfolio/Footer";
 
 const Index = () => (
-  <div className="min-h-screen bg-background">
+  <div className="min-h-screen bg-background w-full overflow-x-hidden flex flex-col relative">
     <SEO />
     <Navbar />
     <Hero />

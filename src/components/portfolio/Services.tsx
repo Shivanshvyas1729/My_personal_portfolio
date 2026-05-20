@@ -1,7 +1,7 @@
 import { portfolioData as initialData, hasContent } from "@/data/portfolioData";
 import { useCMSData } from "@/context/CMSContext";
 import { motion } from "framer-motion";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Brain, BarChart3, Sparkles, Zap, Cog } from "lucide-react";
 
 const iconMap: Record<string, typeof Brain> = { Brain, BarChart3, Sparkles, Zap, Cog };
@@ -24,15 +24,25 @@ const ServiceCard = ({
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [centerShift, setCenterShift] = useState({ x: 0, y: 0 });
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+  const [isMobile, setIsMobile] = useState(false);
 
-  const isHovered = hoveredIndex === index;
-  const isAnyHovered = hoveredIndex !== null;
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.matchMedia("(hover: none) and (pointer: coarse)").matches || window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  const isHovered = !isMobile && hoveredIndex === index;
+  const isAnyHovered = !isMobile && hoveredIndex !== null;
   const isInactive = isAnyHovered && !isHovered;
 
   const Icon = iconMap[service.icon || "Cog"] || Cog;
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
+    if (isMobile || !cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
     const width = rect.width;
     const height = rect.height;
@@ -65,12 +75,16 @@ const ServiceCard = ({
     }
   };
 
-  const handleMouseEnter = () => setHoveredIndex(index);
+  const handleMouseEnter = () => {
+    if (!isMobile) setHoveredIndex(index);
+  };
 
   const handleMouseLeave = () => {
-    setHoveredIndex(null);
-    setTilt({ x: 0, y: 0 });
-    setCenterShift({ x: 0, y: 0 });
+    if (!isMobile) {
+      setHoveredIndex(null);
+      setTilt({ x: 0, y: 0 });
+      setCenterShift({ x: 0, y: 0 });
+    }
   };
 
   // Animation values — less aggressive than Skills
@@ -107,16 +121,16 @@ const ServiceCard = ({
         }}
         transition={{
           type: "spring",
-          stiffness: 100,
-          damping: 18,
-          mass: 0.85,
+          stiffness: isMobile ? 150 : 100,
+          damping: isMobile ? 20 : 18,
+          mass: isMobile ? 0.6 : 0.85,
         }}
         style={{
           transformStyle: "preserve-3d",
           zIndex: isHovered ? 50 : 0,
           transition: "background-color 0.3s, border-color 0.3s, box-shadow 0.3s, filter 0.3s",
         }}
-        className="glass-card-hover no-text-effect p-6 h-full flex flex-col border border-border/40 dark:border-white/10 hover:border-primary/40 shadow-xl overflow-visible cursor-pointer select-none relative rounded-2xl bg-card/60 dark:bg-black/30 backdrop-blur-md transition-colors duration-300 group"
+        className={`glass-card-hover no-text-effect p-6 h-full flex flex-col border border-border/40 dark:border-white/10 ${!isMobile && 'hover:border-primary/40'} shadow-xl overflow-visible ${!isMobile ? 'cursor-pointer' : ''} select-none relative rounded-2xl bg-card/60 dark:bg-black/30 backdrop-blur-md transition-colors duration-300 group`}
       >
         {/* Dynamic neon shadow */}
         <div

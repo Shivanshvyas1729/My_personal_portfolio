@@ -499,6 +499,9 @@ export default function IntroTransition({
   };
 
   useEffect(() => {
+    setPhase("enter");
+    chimePlayed.current = false;
+
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (mediaQuery.matches) { onComplete(); return; }
 
@@ -534,7 +537,7 @@ export default function IntroTransition({
     const t2 = setTimeout(() => setPhase("exit"), exitAt);
     const t3 = setTimeout(onComplete, doneAt);
     return () => { clearTimeout(t0); clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  }, [onComplete, duration, style]);
+  }, [style, primaryText, subtitle, tagline, duration, colors, onComplete]);
 
   const styleProps = { primaryText, subtitle, tagline, colors, phase };
 

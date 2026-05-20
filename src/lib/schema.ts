@@ -96,7 +96,7 @@ export const GlobalSettingsSchema = z.object({
   ropeLightSpeed: z.number().min(0.1).optional(),
   ropeLightThickness: z.number().min(0.5).optional(),
   ropeLightGlowIntensity: z.number().min(0).optional(),
-  
+
   // Independent dark and light mode wash settings
   ropeLightColorsLight: z.array(z.string()).optional(),
   ropeLightColorsDark: z.array(z.string()).optional(),
@@ -106,18 +106,18 @@ export const GlobalSettingsSchema = z.object({
   ropeLightThicknessDark: z.number().min(0.5).optional(),
   ropeLightGlowIntensityLight: z.number().min(0).optional(),
   ropeLightGlowIntensityDark: z.number().min(0).optional(),
-  
+
   ropeLightColorLight: z.string().optional(),
   ropeLightColorDark: z.string().optional(),
   ropeLightAccentLight: z.string().optional(),
   ropeLightAccentDark: z.string().optional(),
-  
+
   // Sharp line edge light controls for dark and light mode
   sharpLightColorsLight: z.array(z.string()).optional(),
   sharpLightColorsDark: z.array(z.string()).optional(),
   sharpLightThicknessLight: z.number().min(0.5).optional(),
   sharpLightThicknessDark: z.number().min(0.5).optional(),
-  
+
   textHoverColors: z.array(z.string()).optional(),
   textTransitionSpeed: z.string().optional(),
   textLeaveSpeed: z.string().optional(),
@@ -129,6 +129,7 @@ export const GlobalSettingsSchema = z.object({
   themeAccentColor: z.string().optional(),
   themeFontFamily: z.string().optional(),
   customCursorEnabled: z.boolean().optional(),
+  edgeLightsEnabled: z.boolean().optional(),
 
   // ─── Intro / Transition Settings ───
   introEnabled: z.boolean().optional(),
@@ -166,14 +167,14 @@ export const ProjectSchema = z.object({
   live: z.string().optional().default(""),
   featured: z.boolean().optional().default(false),
   impact: z.string().optional(),
-  
+
   // Media: type is a dropdown chooser, url and caption are optional
   media: z.array(z.object({
     type: z.enum(["image", "video"]).default("image"),
     url: z.string().optional(),
     caption: z.string().optional()
   })).optional(),
-  
+
   // Data science / extended fields - all optional
   problem_statement: z.string().optional(),
   learning_outcomes: z.array(z.string()).optional(),

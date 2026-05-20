@@ -84,7 +84,7 @@ export interface Settings {
   ropeLightSpeed?: number;
   ropeLightThickness?: number;
   ropeLightGlowIntensity?: number;
-  
+
   // Independent dark and light mode wash settings
   ropeLightColorsLight?: string[];
   ropeLightColorsDark?: string[];
@@ -119,6 +119,7 @@ export interface Settings {
   themeAccentColor?: string;
   themeFontFamily?: string;
   customCursorEnabled?: boolean;
+  edgeLightsEnabled?: boolean;
 
   // Intro / Transition Settings
   introEnabled?: boolean;
@@ -224,7 +225,7 @@ export const portfolioData: PortfolioData = {
  */
 export async function getLivePortfolioData(): Promise<PortfolioData> {
   if (typeof window === 'undefined') return portfolioData; // SSR fallback
-  
+
   try {
     const RAW_BASE = "https://raw.githubusercontent.com/Shivanshvyas1729/My_personal_portfolio/main/src/data";
     const [pRes, sRes, bRes] = await Promise.all([
@@ -232,17 +233,17 @@ export async function getLivePortfolioData(): Promise<PortfolioData> {
       fetch(`${RAW_BASE}/projects.yaml?t=${Date.now()}`),
       fetch(`${RAW_BASE}/blog.yaml?t=${Date.now()}`)
     ]);
-    
+
     if (!pRes.ok || !sRes.ok || !bRes.ok) throw new Error("GitHub fetch failed");
-    
+
     const pYaml = await pRes.text();
     const sYaml = await sRes.text();
     const bYaml = await bRes.text();
-    
+
     const pData = YAML.parse(pYaml);
     const sData = YAML.parse(sYaml);
     const bData = YAML.parse(bYaml);
-    
+
     return {
       ...pData,
       projects: (sData?.projects || []).sort((a: any, b: any) => (b.id || 0) - (a.id || 0)),
@@ -264,8 +265,8 @@ export const getFeaturedProjects = (data: PortfolioData): Project[] => {
       .filter((p): p is Project => p !== undefined);
   }
 
-  const limit = (config?.featuredProjectsCount !== undefined && config.featuredProjectsCount >= 0) 
-    ? config.featuredProjectsCount 
+  const limit = (config?.featuredProjectsCount !== undefined && config.featuredProjectsCount >= 0)
+    ? config.featuredProjectsCount
     : 3;
 
   return allProjects.filter((p) => p.featured).slice(0, limit);

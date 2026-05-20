@@ -21,10 +21,10 @@ import { AdminAuth } from "./components/blog/AdminAuth";
 import { AnimatePresence, motion } from "framer-motion";
 
 // Lazy — only load when navigated to (reduces initial bundle ~40%)
-const AllProjects  = lazy(() => import("./pages/AllProjects.tsx"));
+const AllProjects = lazy(() => import("./pages/AllProjects.tsx"));
 const ProjectDetail = lazy(() => import("./pages/ProjectDetail.tsx"));
-const Blog          = lazy(() => import("./pages/Blog.tsx"));
-const NotFound      = lazy(() => import("./pages/NotFound.tsx"));
+const Blog = lazy(() => import("./pages/Blog.tsx"));
+const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -36,7 +36,7 @@ const PageLoader = () => (
 );
 
 import { useCMSData } from "./context/CMSContext";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 
 
 
@@ -51,17 +51,25 @@ function AppShell() {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
 
+  const handleIntroComplete = useCallback(() => setShowIntro(false), []);
+
   // Cursor preference — default true (premium experience)
   const cursorEnabled = settings?.customCursorEnabled !== false;
 
   useEffect(() => {
     if (cursorEnabled) {
       document.documentElement.classList.add('has-custom-cursor');
+      document.body.style.cursor = 'none';
     } else {
       document.documentElement.classList.remove('has-custom-cursor');
+      document.body.style.cursor = 'default';
+      // Force repaint
+      void document.body.offsetHeight;
+      document.body.style.cursor = '';
     }
     return () => {
       document.documentElement.classList.remove('has-custom-cursor');
+      document.body.style.cursor = '';
     };
   }, [cursorEnabled]);
 
@@ -186,8 +194,8 @@ function AppShell() {
       }
 
       // 3. Detect light vs dark modes dynamically
-      const isDarkModeActive = 
-        theme === "dark" || 
+      const isDarkModeActive =
+        theme === "dark" ||
         (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
 
       const bgIsLight = !isDarkModeActive;
@@ -288,7 +296,8 @@ function AppShell() {
       <AnimatePresence>
         {showIntro && settings?.introEnabled !== false && (
           <IntroTransition
-            onComplete={() => setShowIntro(false)}
+            key="main-intro"
+            onComplete={handleIntroComplete}
             style={settings?.introStyle || 'namaste'}
             primaryText={settings?.introPrimaryText || 'नमस्ते'}
             subtitle={settings?.introSubtitle || 'Namaste'}
@@ -299,12 +308,12 @@ function AppShell() {
         )}
       </AnimatePresence>
 
-      <div className="w-full min-h-screen">
+      <div className="w-full min-h-screen overflow-x-hidden flex flex-col relative">
         {/* Global Trailing Interactive Cursor */}
         {cursorEnabled && <InteractiveCursor />}
 
         {/* Global Cursor Ambient Glow */}
-        <CursorGlow />
+        {cursorEnabled && <CursorGlow />}
 
         {/* Global Dynamic Text Interaction */}
         <GlobalTextEffector />
@@ -313,18 +322,18 @@ function AppShell() {
         <GlobalScrollReveal />
 
         {/* Global Seamless Rope Light Layer */}
-        <EdgeRopeLight />
+        {settings?.edgeLightsEnabled !== false && <EdgeRopeLight />}
 
         {/* Global floating lock — visible on every page */}
         <AdminAuth isAdmin={isAdmin} setIsAdmin={setIsAdmin} />
 
         <Suspense fallback={<PageLoader />}>
           <Routes>
-            <Route path="/"           element={<Index />} />
-            <Route path="/projects"   element={<AllProjects />} />
+            <Route path="/" element={<Index />} />
+            <Route path="/projects" element={<AllProjects />} />
             <Route path="/project/:id" element={<ProjectDetail />} />
-            <Route path="/blog"       element={<Blog />} />
-            <Route path="*"           element={<NotFound />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
 
