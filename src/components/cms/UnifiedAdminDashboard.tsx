@@ -687,6 +687,7 @@ export const UnifiedAdminDashboard = () => {
     safeMode,
     cmsMode,
     forceLocalMode,
+    isLocalEnvironment,
     auditLogs,
     canUndo,
     canRedo
@@ -1245,12 +1246,15 @@ export const UnifiedAdminDashboard = () => {
                           <button
                             onClick={() => {
                               const next = previewData.settings?.customCursorEnabled === false ? true : false;
-                              updateLiveSection('settings', { ...previewData.settings, customCursorEnabled: next });
+                              const updated = { ...previewData.settings, customCursorEnabled: next };
+                              updateLiveSection('settings', updated);
+                              updatePreviewSection('settings', updated);
                             }}
                             className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                               previewData.settings?.customCursorEnabled !== false ? 'bg-primary border-primary shadow-[0_0_10px_hsl(var(--primary)/0.4)]' : 'bg-muted border-border/60'
                             }`}
                             role="switch" aria-checked={previewData.settings?.customCursorEnabled !== false}
+                            title="Toggle premium cursor effect on/off"
                           >
                             <span className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-md transition-transform duration-200 ${
                               previewData.settings?.customCursorEnabled !== false ? 'translate-x-5' : 'translate-x-0.5'
@@ -1280,7 +1284,9 @@ export const UnifiedAdminDashboard = () => {
                           <button
                             onClick={() => {
                               const next = previewData.settings?.edgeLightsEnabled === false ? true : false;
-                              updateLiveSection('settings', { ...previewData.settings, edgeLightsEnabled: next });
+                              const updated = { ...previewData.settings, edgeLightsEnabled: next };
+                              updateLiveSection('settings', updated);
+                              updatePreviewSection('settings', updated);
                             }}
                             className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                               previewData.settings?.edgeLightsEnabled !== false ? 'bg-primary border-primary shadow-[0_0_10px_hsl(var(--primary)/0.4)]' : 'bg-muted border-border/60'
@@ -1294,6 +1300,32 @@ export const UnifiedAdminDashboard = () => {
                           </button>
                         </div>
 
+                        {/* Save / Push buttons for Global Effects */}
+                        <div className="mt-4 pt-3 border-t border-border/30 flex justify-end gap-3">
+                          {isLocalEnvironment && (
+                            <button
+                              disabled={isLoading}
+                              onClick={() => saveContent('settings', previewData.settings || {})}
+                              className="px-4 py-2.5 bg-muted text-foreground border border-border/60 rounded-xl font-semibold text-sm flex items-center gap-2 hover:bg-muted/80 disabled:opacity-50 transition-colors"
+                            >
+                              {isLoading ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
+                              Save Local
+                            </button>
+                          )}
+                          <button
+                            disabled={isLoading}
+                            onClick={async () => {
+                              const prevForce = forceLocalMode;
+                              setForceLocalMode(false);
+                              await saveContent('settings', previewData.settings || {});
+                              setForceLocalMode(prevForce);
+                            }}
+                            className="px-4 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm flex items-center gap-2 hover:bg-primary/90 disabled:opacity-50 transition-colors shadow-lg"
+                          >
+                            {isLoading ? <RefreshCw size={14} className="animate-spin" /> : <Github size={14} />}
+                            Push to GitHub
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -1328,14 +1360,16 @@ export const UnifiedAdminDashboard = () => {
                           onChange={(newSettings) => updatePreviewSection('settings', newSettings)}
                         />
                         <div className="mt-6 flex justify-end gap-3">
-                          <button
-                            disabled={isLoading}
-                            onClick={() => saveContent('settings', previewData.settings || {})}
-                            className="px-4 py-2.5 bg-muted text-foreground border border-border/60 rounded-xl font-semibold text-sm flex items-center gap-2 hover:bg-muted/80 disabled:opacity-50 transition-colors"
-                          >
-                            {isLoading ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
-                            Save Local
-                          </button>
+                          {isLocalEnvironment && (
+                            <button
+                              disabled={isLoading}
+                              onClick={() => saveContent('settings', previewData.settings || {})}
+                              className="px-4 py-2.5 bg-muted text-foreground border border-border/60 rounded-xl font-semibold text-sm flex items-center gap-2 hover:bg-muted/80 disabled:opacity-50 transition-colors"
+                            >
+                              {isLoading ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
+                              Save Local
+                            </button>
+                          )}
                           <button
                             disabled={isLoading}
                             onClick={async () => {
