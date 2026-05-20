@@ -44,7 +44,7 @@ settings:
   themeBackgroundColor: "#030712"
   themeAccentColor: "#c084fc"
   themeFontFamily: "Inter"
-  customCursorEnabled: false
+  customCursorEnabled: true
 
   # Intro / Transition
   introEnabled: true
