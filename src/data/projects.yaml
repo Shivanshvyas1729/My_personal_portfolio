@@ -1,5 +1,65 @@
 # region PROJECTS
 projects:
+  - id: 6
+    title: hi
+    category:
+      - MLOps
+    description: |-
+      [dabao](https://indiatyping.com/index.php/typing-tutor/english-typing-tutor)   
+      An AI-powered solar panel defect detection system...
+    tech:
+      - Python
+      - PyTorch
+      - Streamlit
+    github: https://github.com/...
+    live: https://...
+    featured: false
+    media:
+      - type: image
+        url: https://i.ibb.co/...
+    problem_statement: Explain the core challenge/problem your project solves...
+    learning_outcomes:
+      - Architected custom Transfer Learning models
+      - Streamlined containerized MLOps pipelines
+    architecture: Describe the underlying server and execution flow...
+    architectureImage: https://...
+    resources:
+      - label: Research Paper
+        url: https://...
+    howItWorks: Detailed description of the pipeline flow...
+    objectives:
+      - Achieve >95% operational classification accuracy
+      - Minimize detection inference latency to under 150ms
+    success_criteria:
+      - F1-score of at least 0.94 across imbalanced defect labels
+      - Zero memory leakage during continuous Streamlit socket connections
+    data_sources:
+      - https://www.kaggle.com/datasets/...
+    target_variable: Defect Label (Dust, Bird Drops, Physical Damage, Clean)
+    features:
+      - Grayscale luminance histogram values
+      - Normalized RGB color channel moments
+    preprocessing:
+      - Resize all input frames to 224x224 pixels
+      - Perform Z-score standardization using ImageNet statistics
+    modeling:
+      - Transfer Learning utilizing pre-trained EfficientNet-B0 weights
+      - Linear dense head with dropout regularization
+    evaluation_metrics:
+      - Weighted F1-Score (Primary metric due to class skew)
+      - Macro Recall (Secondary metric to ensure high detection sensitivity)
+    validation_strategy: 5-Fold stratified cross-validation split across localized images
+    explainability: Integrated Grad-CAM heatmaps showing exact visual pixels triggering defect predictions
+    deployment: Deployed as a Streamlit server connected to an AWS ECS Fargate container instance
+    risks:
+      - Sensitivity to low lighting or deep shadow variations
+      - Potential false positives on reflective panel borders
+    ethics:
+      - All data gathered from public and consented community databases
+      - Algorithms audited to prevent biased false detections across regional modules
+    open_resources:
+      - label: Research Drive Folder
+        url: https://drive.google.com/...
   - id: 5
     title: Cancer Detection with Explainable AI
     category: []
