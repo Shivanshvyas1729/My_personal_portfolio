@@ -48,11 +48,11 @@ settings:
 
   # Intro / Transition
   introEnabled: true
-  introStyle: "pulse"
+  introStyle: "minimal"
   introPrimaryText: "नमस्ते"
   introSubtitle: "Namaste"
   introTagline: "Welcome to my universe"
-  introDuration: 3000
+  introDuration: 4000
 # endregion
 
 # region PERSONAL
