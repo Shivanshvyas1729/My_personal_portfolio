@@ -14,7 +14,7 @@ const AnimatedSection = ({ children, className = "", delay = 0 }: Props) => (
     viewport={{ once: true, margin: "100px" }}
     transition={{ duration: 0.4, delay, ease: [0.25, 1, 0.5, 1] }} // Fast, responsive ease
     className={`transform-gpu will-change-[transform,opacity] ${className}`}
-    style={{ contain: 'layout paint style' }}
+    style={{ contain: 'layout style' }}
   >
     {children}
   </motion.div>

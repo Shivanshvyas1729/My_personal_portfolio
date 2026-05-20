@@ -11,10 +11,11 @@ import EdgeRopeLight from "./components/portfolio/EdgeRopeLight";
 import GlobalTextEffector from "./components/portfolio/GlobalTextEffector";
 import GlobalScrollReveal from "./components/portfolio/GlobalScrollReveal";
 import CursorGlow from "./components/ui/CursorGlow";
+import InteractiveCursor from "./components/ui/InteractiveCursor";
 
 // Eager — homepage, welcome intro, chatbot, and admin auth load instantly
 import Index from "./pages/Index.tsx";
-import NamasteIntro from "./components/portfolio/NamasteIntro";
+import IntroTransition from "./components/portfolio/IntroTransition";
 import ChatAssistant from "./components/portfolio/ChatAssistant";
 import { AdminAuth } from "./components/blog/AdminAuth";
 import { AnimatePresence, motion } from "framer-motion";
@@ -49,6 +50,20 @@ function AppShell() {
   const { theme } = useTheme();
   const location = useLocation();
   const isHomePage = location.pathname === "/";
+
+  // Cursor preference — default true (premium experience)
+  const cursorEnabled = settings?.customCursorEnabled !== false;
+
+  useEffect(() => {
+    if (cursorEnabled) {
+      document.documentElement.classList.add('has-custom-cursor');
+    } else {
+      document.documentElement.classList.remove('has-custom-cursor');
+    }
+    return () => {
+      document.documentElement.classList.remove('has-custom-cursor');
+    };
+  }, [cursorEnabled]);
 
   useEffect(() => {
     const lenis = new Lenis({
@@ -271,10 +286,23 @@ function AppShell() {
     <>
       {/* Welcome Greeting Intro */}
       <AnimatePresence>
-        {showIntro && <NamasteIntro onComplete={() => setShowIntro(false)} />}
+        {showIntro && settings?.introEnabled !== false && (
+          <IntroTransition
+            onComplete={() => setShowIntro(false)}
+            style={settings?.introStyle || 'namaste'}
+            primaryText={settings?.introPrimaryText || 'नमस्ते'}
+            subtitle={settings?.introSubtitle || 'Namaste'}
+            tagline={settings?.introTagline || 'Welcome to my universe'}
+            colors={settings?.introColors}
+            duration={settings?.introDuration || 3000}
+          />
+        )}
       </AnimatePresence>
 
       <div className="w-full min-h-screen">
+        {/* Global Trailing Interactive Cursor */}
+        {cursorEnabled && <InteractiveCursor />}
+
         {/* Global Cursor Ambient Glow */}
         <CursorGlow />
 

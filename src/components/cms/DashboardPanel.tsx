@@ -106,6 +106,28 @@ export const DashboardPanel: React.FC<DashboardPanelProps> = ({
 
   const updatePanelDOM = useCallback(() => {
     if (panelRef.current && !isMaximized && !isMobile) {
+      const wWidth = typeof window !== "undefined" ? window.innerWidth : 1200;
+      const wHeight = typeof window !== "undefined" ? window.innerHeight : 800;
+      
+      const minVisibleWidth = 100;
+      const headerHeight = 48;
+      
+      const clampedW = Math.max(360, geom.current.w);
+      const clampedH = Math.max(300, geom.current.h);
+      
+      // y must be at least 0 (top edge of viewport) and at most window height minus header height
+      const clampedY = Math.max(0, Math.min(wHeight - headerHeight, geom.current.y));
+      
+      // x must keep at least minVisibleWidth of the panel visible on screen horizontally
+      const clampedX = Math.max(-clampedW + minVisibleWidth, Math.min(wWidth - minVisibleWidth, geom.current.x));
+      
+      geom.current = {
+        x: clampedX,
+        y: clampedY,
+        w: clampedW,
+        h: clampedH
+      };
+
       panelRef.current.style.transform = `translate3d(${geom.current.x}px, ${geom.current.y}px, 0)`;
       panelRef.current.style.width = `${geom.current.w}px`;
       panelRef.current.style.height = `${geom.current.h}px`;
@@ -139,6 +161,18 @@ export const DashboardPanel: React.FC<DashboardPanelProps> = ({
       updatePanelDOM();
     }
   }, [isMobile, dimensions, updatePanelDOM]);
+
+  // Dynamic window resize adjustment to prevent panel going off-screen when resizing the browser
+  useEffect(() => {
+    if (typeof window === "undefined" || isMobile) return;
+    
+    const handleResize = () => {
+      updatePanelDOM();
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isMobile, updatePanelDOM]);
 
   useEffect(() => {
     localStorage.setItem('cms-maximized', String(isMaximized));

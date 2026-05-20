@@ -64,7 +64,11 @@ const ProjectCard = ({ project, index, disableInViewAnimation = false, onClick }
       whileInView={disableInViewAnimation ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={disableInViewAnimation ? { duration: 0.2 } : { delay: index * 0.1, duration: 0.5 }}
+      whileHover={{
+        boxShadow: "0 30px 60px -15px hsla(var(--primary), 0.25)"
+      }}
       onClick={handleCardClick}
+      style={{ transition: "background-color 0.3s, border-color 0.3s, box-shadow 0.3s" }}
       className={
         disableInViewAnimation
           ? "glass-card-hover flex flex-col h-full group overflow-hidden cursor-grab active:cursor-grabbing"
@@ -185,11 +189,11 @@ const ProjectCard = ({ project, index, disableInViewAnimation = false, onClick }
 
   return (
     <Tilt
-      tiltMaxAngleX={4}
-      tiltMaxAngleY={4}
+      tiltMaxAngleX={7}
+      tiltMaxAngleY={7}
       perspective={1200}
-      scale={1.015}
-      transitionSpeed={1500}
+      scale={1.04}
+      transitionSpeed={1200}
       className="h-full w-full"
     >
       {cardContent}

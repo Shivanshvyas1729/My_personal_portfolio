@@ -177,3 +177,14 @@
   0%, 100% { opacity: 0.4; }
   50% { opacity: 0.8; }
 }
+
+@media (min-width: 768px) {
+  .has-custom-cursor,
+  .has-custom-cursor *,
+  .has-custom-cursor a,
+  .has-custom-cursor button,
+  .has-custom-cursor [role="button"],
+  .has-custom-cursor .cursor-pointer {
+    cursor: none !important;
+  }
+}

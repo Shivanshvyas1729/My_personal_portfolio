@@ -128,6 +128,16 @@ export const GlobalSettingsSchema = z.object({
   themeBackgroundColor: z.string().optional(),
   themeAccentColor: z.string().optional(),
   themeFontFamily: z.string().optional(),
+  customCursorEnabled: z.boolean().optional(),
+
+  // ─── Intro / Transition Settings ───
+  introEnabled: z.boolean().optional(),
+  introStyle: z.enum(['namaste', 'pulse', 'academic', 'terminal', 'minimal', 'creative']).optional(),
+  introPrimaryText: z.string().optional(),
+  introSubtitle: z.string().optional(),
+  introTagline: z.string().optional(),
+  introColors: z.array(z.string()).optional(),
+  introDuration: z.number().min(1000).max(8000).optional(),
 });
 
 // Used if storing entire portfolio.yaml 

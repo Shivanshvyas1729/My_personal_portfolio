@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { useCMSState, useCMSActions } from '@/context/CMSContext';
 import { useAuth } from '@/hooks/useAuth';
 import { SECTION_SCHEMAS, validateData } from '@/lib/schema';
@@ -10,6 +11,7 @@ import { PortfolioData, Project } from '@/data/portfolioData';
 import { ChevronDown, RefreshCw, AlertTriangle, ListRestart, ScrollText, Layout, User, Award, GraduationCap, RotateCcw, Save, Undo2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
+import IntroTransition, { IntroStyle } from '@/components/portfolio/IntroTransition';
 
 // ─── Collapsible Section Groups (Accordion UI) ──────────────────────────────
 const SECTION_GROUPS = [
@@ -296,6 +298,351 @@ const getChangesSummary = (live: any, preview: any): FieldChange[] => {
 
   compare(live, preview, "");
   return changes;
+};
+
+// ─── Intro Preview Card (right-side live preview) ────────────────────────────
+const STYLE_PALETTE: Record<string, { bg: string; colors: string[]; icon: string; label: string }> = {
+  namaste:  { bg: 'linear-gradient(135deg, #0a0a1a 0%, #0d0520 100%)', colors: ['#38bdf8','#818cf8','#e879f9','#f472b6'], icon: '🙏', label: 'Namaste' },
+  pulse:    { bg: 'linear-gradient(135deg, #011a0f 0%, #000d06 100%)', colors: ['#34d399','#6ee7b7','#059669','#10b981'], icon: '💓', label: 'Pulse' },
+  academic: { bg: 'linear-gradient(135deg, #18100a 0%, #0f0800 100%)', colors: ['#f59e0b','#fcd34d','#92400e','#d97706'], icon: '🎓', label: 'Academic' },
+  terminal: { bg: '#000000',                                            colors: ['#4ade80','#86efac','#22d3ee','#16a34a'], icon: '💻', label: 'Terminal' },
+  minimal:  { bg: 'linear-gradient(135deg, #0a0a10 0%, #000000 100%)', colors: ['#e2e8f0','#cbd5e1','#94a3b8','#64748b'], icon: '✦',  label: 'Minimal' },
+  creative: { bg: 'linear-gradient(135deg, #100a18 0%, #0a0010 100%)', colors: ['#f97316','#fb923c','#a855f7','#ec4899'], icon: '🎨', label: 'Creative' },
+};
+
+interface IntroPreviewCardProps {
+  settings: Record<string, any>;
+}
+
+const IntroPreviewCard: React.FC<IntroPreviewCardProps> = ({ settings }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const enabled = settings.introEnabled !== false;
+  const style = (settings.introStyle as IntroStyle) || 'namaste';
+  const meta = STYLE_PALETTE[style] || STYLE_PALETTE.namaste;
+  const primaryText = settings.introPrimaryText || 'नमस्ते';
+  const subtitle    = settings.introSubtitle    || 'Namaste';
+  const tagline     = settings.introTagline     || 'Welcome to my universe';
+  const duration    = settings.introDuration    || 3000;
+  const colors      = (settings.introColors?.length >= 2) ? settings.introColors : meta.colors;
+
+  const handlePlay = () => setIsPlaying(true);
+
+  return (
+    <>
+      {/* Real fullscreen IntroTransition overlay */}
+      <AnimatePresence>
+        {isPlaying && (
+          <IntroTransition
+            key={String(Date.now())}
+            style={style}
+            primaryText={primaryText}
+            subtitle={subtitle}
+            tagline={tagline}
+            colors={settings.introColors}
+            duration={duration}
+            onComplete={() => setIsPlaying(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Static thumbnail card */}
+      <div className="bg-background/40 border border-border/40 rounded-2xl overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border/30">
+        <div className="flex items-center gap-2">
+          <span className="text-base">{meta.icon}</span>
+          <div>
+            <p className="text-xs font-bold text-foreground">{meta.label} Style</p>
+            <p className="text-[9px] text-muted-foreground/60 uppercase tracking-widest">
+              {enabled ? 'Enabled' : 'Disabled'}
+            </p>
+          </div>
+        </div>
+        <span className={`w-2 h-2 rounded-full ${enabled ? 'bg-primary shadow-[0_0_6px_hsl(var(--primary))]' : 'bg-muted-foreground/30'}`} />
+      </div>
+
+      {/* Scaled preview viewport */}
+      <div className="relative overflow-hidden" style={{ height: 180, background: meta.bg }}>
+        {/* Scanline overlay for terminal style */}
+        {style === 'terminal' && (
+          <div className="absolute inset-0 pointer-events-none opacity-[0.04] z-10"
+            style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,1) 2px, rgba(0,0,0,1) 4px)' }} />
+        )}
+
+        {/* Ambient glow */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="w-32 h-32 rounded-full" style={{
+            background: `radial-gradient(circle, ${colors[0]}25 0%, transparent 70%)`,
+            filter: 'blur(20px)',
+            animation: 'pulse 3s ease-in-out infinite',
+          }} />
+          {colors[1] && (
+            <div className="absolute w-24 h-24 rounded-full" style={{
+              background: `radial-gradient(circle, ${colors[1]}15 0%, transparent 70%)`,
+              filter: 'blur(15px)',
+              animation: 'pulse 2.5s ease-in-out infinite reverse',
+            }} />
+          )}
+        </div>
+
+        {/* Static preview content */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-4">
+          {/* Primary text preview */}
+          <div className="text-center">
+            <div
+              className="font-bold leading-tight"
+              style={{
+                fontSize: primaryText.length > 10 ? '1.1rem' : '1.5rem',
+                color: colors[0],
+                textShadow: `0 0 20px ${colors[0]}aa, 0 0 40px ${colors[0]}44`,
+                fontFamily: style === 'terminal' ? 'monospace' : undefined,
+              }}
+            >
+              {style === 'terminal' ? `> ${primaryText}` : primaryText}
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="w-12 h-px" style={{ background: `linear-gradient(90deg, transparent, ${colors[1] || colors[0]}, transparent)` }} />
+
+          {/* Subtitle */}
+          <div
+            className="text-[10px] font-bold tracking-[0.4em] uppercase"
+            style={{
+              color: colors[1] || colors[0],
+              opacity: 0.8,
+            }}
+          >
+            {subtitle}
+          </div>
+
+          {/* Tagline */}
+          <div className="text-[9px] tracking-[0.3em] uppercase" style={{ color: `${colors[2] || colors[0]}60` }}>
+            {tagline}
+          </div>
+        </div>
+
+        {/* Style-specific decoration */}
+        {style === 'pulse' && (
+          <svg className="absolute bottom-0 left-0 right-0 w-full opacity-40" height="30" viewBox="0 0 280 30" fill="none">
+            <path d="M 0,15 L 40,15 L 50,5 L 60,25 L 70,15 L 90,15 L 100,8 L 110,22 L 120,15 L 280,15"
+              stroke={colors[0]} strokeWidth="1.5" strokeLinecap="round" fill="none" />
+          </svg>
+        )}
+        {(style === 'namaste' || style === 'creative') && (
+          <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none" viewBox="0 0 280 180" fill="none">
+            <defs>
+              <linearGradient id="prev-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+                {colors.map((c, i) => <stop key={i} offset={`${(i / (colors.length - 1)) * 100}%`} stopColor={c} />)}
+              </linearGradient>
+            </defs>
+            <path d="M 20,160 C 20,80 260,120 260,20" stroke="url(#prev-grad)" strokeWidth="2" strokeLinecap="round" fill="none" />
+          </svg>
+        )}
+        {style === 'academic' && (
+          <div className="absolute top-2 right-3 text-2xl opacity-40">🎓</div>
+        )}
+        {style === 'minimal' && (
+          <div className="absolute inset-0 border border-white/5 m-3 rounded-lg pointer-events-none" />
+        )}
+
+        {/* Playing animation overlay */}
+        {isPlaying && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-20 animate-in fade-in">
+            <div className="text-center">
+              <div className="text-2xl mb-1 animate-bounce">{meta.icon}</div>
+              <p className="text-[9px] text-white/70 uppercase tracking-widest">Playing…</p>
+            </div>
+          </div>
+        )}
+
+        {/* Disabled overlay */}
+        {!enabled && (
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-10">
+            <p className="text-[9px] text-white/40 uppercase tracking-widest font-bold">Intro Disabled</p>
+          </div>
+        )}
+      </div>
+
+        {/* Footer */}
+        <div className="px-4 py-3 flex items-center justify-between border-t border-border/30 bg-muted/5">
+          <div className="text-[9px] text-muted-foreground/60 font-mono">
+            {(duration / 1000).toFixed(1)}s · {meta.label}
+          </div>
+          <button
+            onClick={handlePlay}
+            disabled={!enabled}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            title="Preview the full intro transition"
+          >
+            ▶ Play Preview
+          </button>
+        </div>
+    </div>
+    </>
+  );
+};
+
+// ─── Intro & Transitions Settings Panel ─────────────────────────────────────
+type IntroStyleKey = 'namaste' | 'pulse' | 'academic' | 'terminal' | 'minimal' | 'creative';
+
+const INTRO_STYLES: { key: IntroStyleKey; label: string; icon: string; desc: string; bg: string }[] = [
+  { key: 'namaste',  label: 'Namaste',  icon: '🙏', desc: 'Spiritual / Wellness / Portfolio',  bg: 'from-blue-900/30 to-violet-900/30' },
+  { key: 'pulse',    label: 'Pulse',    icon: '💓', desc: 'Medical / Healthcare / Clinic',       bg: 'from-emerald-900/30 to-teal-900/30' },
+  { key: 'academic', label: 'Academic', icon: '🎓', desc: 'Education / University / School',     bg: 'from-amber-900/30 to-orange-900/30' },
+  { key: 'terminal', label: 'Terminal', icon: '💻', desc: 'Tech / Developer / SaaS',             bg: 'from-green-900/30 to-cyan-900/30' },
+  { key: 'minimal',  label: 'Minimal',  icon: '✦',  desc: 'Any / Clean / Professional',         bg: 'from-slate-800/30 to-slate-900/30' },
+  { key: 'creative', label: 'Creative', icon: '🎨', desc: 'Agency / Design Studio / Brand',     bg: 'from-orange-900/30 to-purple-900/30' },
+];
+
+interface IntroSettingsPanelProps {
+  settings: Record<string, any>;
+  onUpdate: (updated: Record<string, any>) => void;
+}
+
+const IntroSettingsPanel: React.FC<IntroSettingsPanelProps> = ({ settings, onUpdate }) => {
+  const [isOpen, setIsOpen] = useState(true);
+  const enabled = settings.introEnabled !== false;
+  const currentStyle: IntroStyleKey = (settings.introStyle as IntroStyleKey) || 'namaste';
+
+  const update = (key: string, value: any) => onUpdate({ ...settings, [key]: value });
+
+  return (
+    <div className="border-t border-border/40 pt-6">
+      {/* Section header — collapsible */}
+      <button
+        onClick={() => setIsOpen(v => !v)}
+        className="w-full flex items-center justify-between mb-4 group"
+      >
+        <h3 className="text-lg font-bold flex items-center gap-2 group-hover:text-primary transition-colors">
+          <span className="text-xl">🎬</span> Intro &amp; Transitions
+          {enabled && (
+            <span className="ml-2 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest rounded-full bg-primary/15 text-primary border border-primary/20">Active</span>
+          )}
+        </h3>
+        <ChevronDown size={16} className={`text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="space-y-5 animate-in fade-in duration-200">
+          {/* Enable / Disable toggle */}
+          <div className={`p-4 rounded-2xl border flex items-center justify-between gap-4 transition-all duration-300 ${enabled ? 'border-primary/30 bg-primary/5' : 'border-border/50 bg-muted/10'}`}>
+            <div className="flex items-center gap-3">
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-lg transition-all duration-300 ${enabled ? 'bg-primary/15' : 'bg-muted/40 opacity-50'}`}>🎬</div>
+              <div>
+                <p className="font-bold text-sm">Show Site Intro</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{enabled ? 'Intro screen plays on first visit' : 'Visitors go directly to the site'}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => update('introEnabled', !enabled)}
+              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border-2 transition-all duration-200 ${enabled ? 'bg-primary border-primary shadow-[0_0_10px_hsl(var(--primary)/0.4)]' : 'bg-muted border-border/60'}`}
+              role="switch" aria-checked={enabled}
+            >
+              <span className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-md transition-transform duration-200 ${enabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
+            </button>
+          </div>
+
+          {/* Collapsed when disabled */}
+          {enabled && (
+            <>
+              {/* Style picker */}
+              <div className="space-y-2.5">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">Transition Style</label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {INTRO_STYLES.map(s => (
+                    <button
+                      key={s.key}
+                      onClick={() => update('introStyle', s.key)}
+                      className={`relative p-3 rounded-xl border text-left transition-all duration-200 bg-gradient-to-br ${s.bg} ${
+                        currentStyle === s.key
+                          ? 'border-primary/50 shadow-[0_0_14px_hsl(var(--primary)/0.25)] ring-1 ring-primary/30'
+                          : 'border-border/40 hover:border-border/70'
+                      }`}
+                    >
+                      {currentStyle === s.key && (
+                        <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary))]" />
+                      )}
+                      <div className="text-xl mb-1">{s.icon}</div>
+                      <div className="text-xs font-bold text-foreground">{s.label}</div>
+                      <div className="text-[9px] text-muted-foreground/70 leading-tight mt-0.5">{s.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Text fields group */}
+              <div className="p-4 rounded-2xl border border-border/40 bg-muted/5 space-y-4">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Content</p>
+
+                {/* Primary text */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-semibold text-muted-foreground/80 uppercase tracking-wider block">
+                    Primary Text
+                    <span className="ml-2 font-normal normal-case text-muted-foreground/50">Big display text (e.g. नमस्ते, Hello, Welcome)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.introPrimaryText ?? 'नमस्ते'}
+                    onChange={e => update('introPrimaryText', e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-border/50 bg-background/60 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all"
+                    placeholder="e.g. नमस्ते"
+                  />
+                </div>
+
+                {/* Subtitle */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-semibold text-muted-foreground/80 uppercase tracking-wider block">
+                    Subtitle
+                    <span className="ml-2 font-normal normal-case text-muted-foreground/50">Appears below in smaller text</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.introSubtitle ?? 'Namaste'}
+                    onChange={e => update('introSubtitle', e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-border/50 bg-background/60 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all"
+                    placeholder="e.g. Namaste"
+                  />
+                </div>
+
+                {/* Tagline */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-semibold text-muted-foreground/80 uppercase tracking-wider block">
+                    Tagline
+                    <span className="ml-2 font-normal normal-case text-muted-foreground/50">Smallest line at the bottom</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.introTagline ?? 'Welcome to my universe'}
+                    onChange={e => update('introTagline', e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-border/50 bg-background/60 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all"
+                    placeholder="e.g. Welcome to my universe"
+                  />
+                </div>
+              </div>
+
+              {/* Duration slider */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Duration</label>
+                  <span className="text-xs font-bold text-primary">{((settings.introDuration ?? 3000) / 1000).toFixed(1)}s</span>
+                </div>
+                <input
+                  type="range" min={1500} max={6000} step={250}
+                  value={settings.introDuration ?? 3000}
+                  onChange={e => update('introDuration', Number(e.target.value))}
+                  className="w-full h-1.5 rounded-full appearance-none bg-muted accent-primary cursor-pointer"
+                />
+                <div className="flex justify-between text-[9px] text-muted-foreground/50">
+                  <span>1.5s (snappy)</span><span>6s (cinematic)</span>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
 };
 
 export const UnifiedAdminDashboard = () => {
@@ -794,23 +1141,82 @@ export const UnifiedAdminDashboard = () => {
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
                   <div>
                     <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><RefreshCw size={18} /> Sync Settings</h3>
-                    <div className="p-5 rounded-2xl border border-border/50 bg-muted/10">
-                      <div className="flex items-center justify-between">
+                    <div className="space-y-3">
+                      {/* Force Local Mode Toggle */}
+                      <div className="p-4 rounded-2xl border border-border/50 bg-muted/10 flex items-center justify-between gap-4">
                         <div>
                           <p className="font-bold text-sm">Force Local Mode</p>
-                          <p className="text-xs text-muted-foreground">Force-save to local filesystem.</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">Force-save to local filesystem instead of GitHub.</p>
                         </div>
-                        <input 
-                          type="checkbox" 
-                          checked={forceLocalMode} 
-                          onChange={(e) => setForceLocalMode(e.target.checked)}
-                          className="w-4 h-4 cursor-pointer" 
-                        />
+                        <button
+                          onClick={() => setForceLocalMode(!forceLocalMode)}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                            forceLocalMode
+                              ? 'bg-primary border-primary shadow-[0_0_10px_hsl(var(--primary)/0.4)]'
+                              : 'bg-muted border-border/60'
+                          }`}
+                          role="switch"
+                          aria-checked={forceLocalMode}
+                          title="Toggle Force Local Mode"
+                        >
+                          <span className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-md transition-transform duration-200 ${forceLocalMode ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                        </button>
+                      </div>
+
+                      {/* Custom Cursor Toggle */}
+                      <div className={`p-4 rounded-2xl border transition-all duration-300 flex items-center justify-between gap-4 ${
+                        previewData.settings?.customCursorEnabled !== false
+                          ? 'border-primary/30 bg-primary/5 shadow-[0_0_20px_-8px_hsl(var(--primary)/0.25)]'
+                          : 'border-border/50 bg-muted/10'
+                      }`}>
+                        <div className="flex items-center gap-3">
+                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 ${
+                            previewData.settings?.customCursorEnabled !== false
+                              ? 'bg-primary/15 text-primary shadow-[0_0_12px_hsl(var(--primary)/0.2)]'
+                              : 'bg-muted/40 text-muted-foreground'
+                          }`}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="m4 4 7.07 17 2.51-7.39L21 11.07z"/>
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="font-bold text-sm">Premium Cursor Effect</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {previewData.settings?.customCursorEnabled !== false
+                                ? 'Custom trailing cursor is active'
+                                : 'System default cursor is active'}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => updatePreviewSection('settings', {
+                            ...previewData.settings,
+                            customCursorEnabled: previewData.settings?.customCursorEnabled === false ? true : false
+                          })}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                            previewData.settings?.customCursorEnabled !== false
+                              ? 'bg-primary border-primary shadow-[0_0_10px_hsl(var(--primary)/0.4)]'
+                              : 'bg-muted border-border/60'
+                          }`}
+                          role="switch"
+                          aria-checked={previewData.settings?.customCursorEnabled !== false}
+                          title="Toggle custom cursor effect on/off"
+                        >
+                          <span className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-md transition-transform duration-200 ${
+                            previewData.settings?.customCursorEnabled !== false ? 'translate-x-5' : 'translate-x-0.5'
+                          }`} />
+                        </button>
                       </div>
                     </div>
                   </div>
 
-                  <div className="border-t border-border/40 pt-6">
+                   {/* ── Intro & Transitions Section ───────────────── */}
+                   <IntroSettingsPanel
+                     settings={previewData.settings || {}}
+                     onUpdate={(updated) => updatePreviewSection('settings', updated)}
+                   />
+
+                   <div className="border-t border-border/40 pt-6">
                     <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><Layout size={18} /> Global Aesthetic Settings</h3>
                     {errorMsg && <div className="mb-4 bg-destructive/10 text-destructive border border-destructive/20 rounded-lg p-3 text-sm">{errorMsg}</div>}
                     <DynamicForm
@@ -829,14 +1235,18 @@ export const UnifiedAdminDashboard = () => {
                       </button>
                     </div>
                   </div>
+                
                 </div>
 
-                {/* Right Side: Interactive Aesthetic Preview Simulator */}
+                {/* Right Side: Interactive Aesthetic + Intro Preview Simulator */}
                 <div className="hidden lg:flex w-[320px] shrink-0 border-l border-border/40 bg-muted/10 p-6 flex-col overflow-y-auto space-y-6">
                   <div>
-                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Live Aesthetic Preview</h4>
-                    <p className="text-[10px] text-muted-foreground/60">See how your changes affect neon lighting and theme colors instantly.</p>
+                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Live Preview</h4>
+                    <p className="text-[10px] text-muted-foreground/60">Intro transition &amp; aesthetic changes reflected instantly.</p>
                   </div>
+
+                  {/* Intro Preview Card */}
+                  <IntroPreviewCard settings={previewData.settings || {}} />
 
                   {/* Neon Rope Light Preview */}
                   <div className="bg-background/40 border border-border/40 rounded-2xl p-4 flex flex-col items-center justify-center space-y-2 relative overflow-hidden h-36">

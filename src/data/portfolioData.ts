@@ -118,6 +118,16 @@ export interface Settings {
   themeBackgroundColor?: string;
   themeAccentColor?: string;
   themeFontFamily?: string;
+  customCursorEnabled?: boolean;
+
+  // Intro / Transition Settings
+  introEnabled?: boolean;
+  introStyle?: 'namaste' | 'pulse' | 'academic' | 'terminal' | 'minimal' | 'creative';
+  introPrimaryText?: string;
+  introSubtitle?: string;
+  introTagline?: string;
+  introColors?: string[];
+  introDuration?: number;
 }
 
 export interface PortfolioData {

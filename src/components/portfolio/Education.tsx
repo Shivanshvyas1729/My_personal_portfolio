@@ -2,6 +2,7 @@ import { portfolioData as initialData, hasContent } from "@/data/portfolioData";
 import { useCMSData } from "@/context/CMSContext";
 import AnimatedSection from "./AnimatedSection";
 import { GraduationCap } from "lucide-react";
+import { motion } from "framer-motion";
 
 const Education = () => {
   const education = useCMSData(d => d.education) || initialData.education;
@@ -16,7 +17,16 @@ const Education = () => {
           <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, 360px), 1fr))` }}>
             {(education || []).map((edu, i) => (
               <AnimatedSection key={i} delay={i * 0.1}>
-                <div className="glass-card-hover p-6">
+                <motion.div 
+                  whileHover={{ 
+                    scale: 1.04, 
+                    y: -5,
+                    boxShadow: "0 20px 40px -15px hsla(var(--primary), 0.2)"
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  style={{ transition: "background-color 0.3s, border-color 0.3s" }}
+                  className="glass-card-hover p-6 h-full cursor-pointer"
+                >
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                       <GraduationCap className="text-primary" size={22} />
@@ -28,7 +38,7 @@ const Education = () => {
                       {edu.description && <p className="text-muted-foreground text-sm mt-3">{edu.description}</p>}
                     </div>
                   </div>
-                </div>
+                </motion.div>
               </AnimatedSection>
             ))}
           </div>

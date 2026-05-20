@@ -9,12 +9,40 @@ import AnimatedSection from "./AnimatedSection";
 import { Code2, Cpu, Database, Cloud, Layers, Terminal } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 
+const useThreeThemeColors = () => {
+  const { theme } = useTheme();
+  const techStack = useCMSData(d => d.techStack); // Trigger on CMS updates
+  const [colors, setColors] = useState({ primary: "hsl(217, 91%, 60%)", accent: "hsl(260, 60%, 55%)" });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const getHSLString = (variable: string, fallback: string) => {
+      const raw = getComputedStyle(root).getPropertyValue(variable).trim();
+      if (!raw) return fallback;
+      const formatted = raw.replace(/\s+/g, ', ');
+      return `hsl(${formatted})`;
+    };
+
+    const timer = setTimeout(() => {
+      setColors({
+        primary: getHSLString('--primary', 'hsl(217, 91%, 60%)'),
+        accent: getHSLString('--accent', 'hsl(260, 60%, 55%)')
+      });
+    }, 50);
+
+    return () => clearTimeout(timer);
+  }, [theme, techStack]);
+
+  return colors;
+};
+
 interface TechLabelProps {
   text: string;
   position: [number, number, number];
 }
 
 const TechLabel = ({ text, position }: TechLabelProps) => {
+  const { primary } = useThreeThemeColors();
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
@@ -22,11 +50,11 @@ const TechLabel = ({ text, position }: TechLabelProps) => {
     <Billboard position={position} follow={true}>
       <Text
         fontSize={0.22}
-        color={isDark ? "#93c5fd" : "#2563eb"}
+        color={primary}
         anchorX="center"
         anchorY="middle"
         outlineWidth={0.005}
-        outlineColor={isDark ? "#1e3a8a" : "#dbeafe"}
+        outlineColor={isDark ? "hsl(222, 47%, 8%)" : "hsl(0, 0%, 100%)"}
       >
         {text}
       </Text>
@@ -41,8 +69,7 @@ interface SynapseLinesProps {
 }
 
 const SynapseLines = ({ positions, tools, connections }: SynapseLinesProps) => {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
+  const { primary } = useThreeThemeColors();
   const ref = useRef<THREE.LineSegments>(null);
   
   const lineGeometry = useMemo(() => {
@@ -93,14 +120,13 @@ const SynapseLines = ({ positions, tools, connections }: SynapseLinesProps) => {
 
   return (
     <lineSegments ref={ref} geometry={lineGeometry}>
-      <lineBasicMaterial color={isDark ? "#3b82f6" : "#2563eb"} transparent opacity={0.12} />
+      <lineBasicMaterial color={primary} transparent opacity={0.12} />
     </lineSegments>
   );
 };
 
 const DataField = () => {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
+  const { accent } = useThreeThemeColors();
   const ref = useRef<THREE.Points>(null);
   
   const [positions] = useState(() => {
@@ -133,7 +159,7 @@ const DataField = () => {
         />
       </bufferGeometry>
       <pointsMaterial
-        color={isDark ? "#60a5fa" : "#3b82f6"}
+        color={accent}
         size={0.015}
         sizeAttenuation={true}
         transparent
@@ -145,8 +171,7 @@ const DataField = () => {
 };
 
 const SphereShell = () => {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
+  const { primary } = useThreeThemeColors();
   const ref = useRef<THREE.Mesh>(null);
   useFrame(({ clock }) => {
     if (ref.current) {
@@ -157,12 +182,13 @@ const SphereShell = () => {
   return (
     <mesh ref={ref}>
       <sphereGeometry args={[3.6, 24, 24]} />
-      <meshBasicMaterial color={isDark ? "#3b82f6" : "#2563eb"} wireframe opacity={0.03} transparent />
+      <meshBasicMaterial color={primary} wireframe opacity={0.03} transparent />
     </mesh>
   );
 };
 
 const RobotAvatar = () => {
+  const { primary, accent } = useThreeThemeColors();
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const groupRef = useRef<THREE.Group>(null);
@@ -182,7 +208,7 @@ const RobotAvatar = () => {
     <group ref={groupRef}>
       <mesh ref={haloRef} rotation={[Math.PI / 2.5, 0, 0]} position={[0, 0.1, 0]}>
         <torusGeometry args={[1.2, 0.01, 16, 100]} />
-        <meshBasicMaterial color={isDark ? "#3b82f6" : "#2563eb"} transparent opacity={0.2} />
+        <meshBasicMaterial color={primary} transparent opacity={0.2} />
       </mesh>
       <mesh>
         <boxGeometry args={[0.9, 0.9, 0.9]} />
@@ -194,16 +220,16 @@ const RobotAvatar = () => {
       </mesh>
       <mesh position={[-0.2, 0.1, 0.47]}>
         <planeGeometry args={[0.18, 0.04]} />
-        <meshBasicMaterial color={isDark ? "#60a5fa" : "#3b82f6"} />
+        <meshBasicMaterial color={accent} />
       </mesh>
       <mesh position={[0.2, 0.1, 0.47]}>
         <planeGeometry args={[0.18, 0.04]} />
-        <meshBasicMaterial color={isDark ? "#60a5fa" : "#3b82f6"} />
+        <meshBasicMaterial color={accent} />
       </mesh>
-      <pointLight color={isDark ? "#3b82f6" : "#2563eb"} intensity={isDark ? 2 : 1} distance={2} />
+      <pointLight color={primary} intensity={isDark ? 2 : 1} distance={2} />
       <mesh position={[0, 0.7, 0]}>
         <sphereGeometry args={[0.05]} />
-        <meshBasicMaterial color={isDark ? "#60a5fa" : "#3b82f6"} />
+        <meshBasicMaterial color={accent} />
       </mesh>
       <mesh position={[0, 0.55, 0]}>
         <cylinderGeometry args={[0.01, 0.01, 0.3]} />
@@ -214,8 +240,7 @@ const RobotAvatar = () => {
 };
 
 const Scene = () => {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
+  const { primary } = useThreeThemeColors();
   const techStack = useCMSData(d => d.techStack) || initialData.techStack;
   const tools = techStack?.featured || initialData.techStack.featured;
   const groupRef = useRef<THREE.Group>(null);
@@ -250,7 +275,7 @@ const Scene = () => {
   return (
     <group ref={groupRef}>
       <ambientLight intensity={0.5} />
-      <pointLight position={[5, 5, 5]} intensity={1.5} color="#60a5fa" />
+      <pointLight position={[5, 5, 5]} intensity={1.5} color={primary} />
       <DataField />
       <SphereShell />
       <SynapseLines positions={positions} tools={tools} connections={techStack?.connections} />

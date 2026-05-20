@@ -34,12 +34,15 @@ const InteractiveCursor = () => {
 
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
+      if (!target) return;
+      const cursorStyle = window.getComputedStyle(target).cursor;
       const isInteractive = 
         target.tagName === 'A' || 
         target.tagName === 'BUTTON' || 
         target.closest('a') || 
         target.closest('button') ||
-        window.getComputedStyle(target).cursor === 'pointer';
+        cursorStyle === 'pointer' ||
+        cursorStyle === 'none';
       
       setIsHovering(!!isInteractive);
     };
