@@ -48,7 +48,7 @@ settings:
 
   # Intro / Transition
   introEnabled: true
-  introStyle: "minimal"
+  introStyle: "terminal"
   introPrimaryText: "नमस्ते"
   introSubtitle: "Namaste"
   introTagline: "Welcome to my universe"
