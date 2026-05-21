@@ -296,7 +296,7 @@ blog:
 
       ---
 
-      # Avg-2-Max Pooling Idea
+      # Avg-2-Max Pooling Idea   (used in skip connection
 
       ```text
       Output = Average Information + Max Information
