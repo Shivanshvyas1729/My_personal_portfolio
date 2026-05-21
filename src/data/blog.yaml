@@ -463,6 +463,13 @@ blog:
     draft: true
     date: 2026-05-21
     slug: ""
+    excerpt: |
+      - Lightweight deep learning models with very few parameters (~1.4M)
+      - Fast inference and low computational cost
+      - Efficient deployment on edge/mobile/low-resource devices
+      - Better handling of class imbalance and edge-sensitive features
+      - Improved feature reuse without extremely deep architectures
+      - Reduced memory usage compared to standard CNNs
   - id: 7
     title: Pandas Data Combining Functions — Purpose & Key Parameters
     content: |
