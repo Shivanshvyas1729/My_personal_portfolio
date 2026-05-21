@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BlogPost } from "@/pages/Blog";
-import { Calendar, Clock, ExternalLink, Link as LinkIcon, BookOpen, Star, Lock, X } from "lucide-react";
+import { Calendar, Clock, ExternalLink, Link as LinkIcon, BookOpen, Star, Lock, X, Maximize2, Minimize2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import { getLocalImage } from '@/lib/localImageStore';
+import { convertToRawGitHubUrl } from "@/components/cms/FormHelpers";
 
 interface BlogModalProps {
   post: BlogPost | null;
@@ -47,12 +50,26 @@ const modalVariants = {
 
 export function BlogModal({ post, isOpen, onClose, isAdmin }: BlogModalProps) {
   const [activePost, setActivePost] = useState<BlogPost | null>(null);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   useEffect(() => {
     if (post) {
       setActivePost(post);
     }
   }, [post]);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      // Reset fullscreen state when opened newly
+      setIsFullScreen(false);
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   return (
     <AnimatePresence mode="wait">
@@ -78,20 +95,29 @@ export function BlogModal({ post, isOpen, onClose, isAdmin }: BlogModalProps) {
               willChange: "transform, opacity, filter",
               transform: "translate3d(0,0,0)",
             }}
-            className={`relative w-full h-[90vh] overflow-hidden flex flex-col p-0 gap-0 bg-background/90 backdrop-blur-2xl border border-border/50 shadow-2xl rounded-2xl z-10 transition-all duration-300 ${
-              activePost.content.length > 800 
-                ? "max-w-6xl lg:max-w-7xl" 
-                : "max-w-3xl"
+            className={`relative flex flex-col p-0 gap-0 bg-background/90 backdrop-blur-2xl border border-border/50 shadow-2xl z-10 transition-all duration-300 ${
+              isFullScreen 
+                ? "w-screen h-screen max-w-none rounded-none inset-0 absolute" 
+                : `w-full h-[90vh] overflow-hidden rounded-2xl ${activePost.content.length > 800 ? "max-w-6xl lg:max-w-7xl" : "max-w-3xl"}`
             }`}
           >
-            {/* Native App Style Top Title Bar Close Trigger */}
-            <button
-              onClick={onClose}
-              className="absolute top-5 right-5 p-2 rounded-full bg-muted/40 hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-all duration-300 z-50 cursor-pointer shadow-sm border border-border/10 flex items-center justify-center"
-              title="Close Panel"
-            >
-              <X size={15} />
-            </button>
+            {/* Native App Style Top Title Bar Buttons */}
+            <div className="absolute top-5 right-5 flex items-center gap-2 z-50">
+              <button
+                onClick={() => setIsFullScreen(!isFullScreen)}
+                className="p-2 rounded-full bg-muted/40 hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-all duration-300 cursor-pointer shadow-sm border border-border/10 flex items-center justify-center"
+                title={isFullScreen ? "Restore" : "Full Screen"}
+              >
+                {isFullScreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+              </button>
+              <button
+                onClick={onClose}
+                className="p-2 rounded-full bg-muted/40 hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-all duration-300 cursor-pointer shadow-sm border border-border/10 flex items-center justify-center"
+                title="Close Panel"
+              >
+                <X size={15} />
+              </button>
+            </div>
 
             {/* Header Section */}
             <div className="flex-none p-6 md:p-10 border-b border-border/40 bg-muted/20 pb-8 pr-16">
@@ -130,7 +156,7 @@ export function BlogModal({ post, isOpen, onClose, isAdmin }: BlogModalProps) {
             </div>
 
             {/* Scrollable Body */}
-            <div className="flex-1 overflow-y-auto p-6 md:p-10 leading-relaxed scrollbar-thin">
+            <div data-lenis-prevent="true" className="flex-1 overflow-y-auto p-6 md:p-10 leading-relaxed scrollbar-thin">
               <div className="prose prose-invert prose-lg max-w-none 
                               prose-headings:font-heading prose-headings:font-bold prose-headings:text-foreground
                               prose-a:text-primary prose-a:no-underline hover:prose-a:underline
@@ -140,21 +166,32 @@ export function BlogModal({ post, isOpen, onClose, isAdmin }: BlogModalProps) {
                               leading-relaxed text-muted-foreground">
                 <ReactMarkdown 
                   remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeRaw]}
                   components={{
-                    img: ({ node, ...props }) => (
-                      <div className="my-8 flex flex-col items-center gap-2 group/img">
-                        <img 
-                          {...props} 
-                          className="rounded-2xl border border-border/60 max-h-[500px] w-auto max-w-full object-contain shadow-2xl hover:border-primary/40 hover:scale-[1.01] transition-all duration-300" 
-                          loading="lazy" 
-                        />
-                        {props.alt && (
-                          <span className="text-xs text-muted-foreground/75 italic select-none">
-                            {props.alt}
-                          </span>
-                        )}
-                      </div>
-                    ),
+                    img: ({ node, ...props }) => {
+                      let src = props.src;
+                      if (src?.startsWith('https://local.image/')) {
+                        const b64 = getLocalImage(src);
+                        if (b64) src = `data:image/webp;base64,${b64}`;
+                      } else if (src) {
+                        src = convertToRawGitHubUrl(src);
+                      }
+                      return (
+                        <div className="my-8 flex flex-col items-center gap-2 group/img">
+                          <img 
+                            {...props} 
+                            src={src}
+                            className="rounded-2xl border border-border/40 max-h-[450px] w-auto max-w-full object-contain shadow-2xl hover:border-primary/30 hover:scale-[1.01] transition-all duration-300" 
+                            loading="lazy" 
+                          />
+                          {props.alt && (
+                            <span className="text-xs text-muted-foreground/60 italic opacity-0 group-hover/img:opacity-100 transition-opacity">
+                              {props.alt}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    },
                     table: ({ node, ...props }) => (
                       <div className="overflow-x-auto my-6 border border-border/40 rounded-xl shadow-lg bg-card/25">
                         <table {...props} className="min-w-full divide-y divide-border/30 text-sm" />

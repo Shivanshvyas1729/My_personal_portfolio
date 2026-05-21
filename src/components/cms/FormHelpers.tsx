@@ -24,7 +24,7 @@ export const MediaPreview = ({ url, type }: { url: string; type?: string }) => {
         </div>
       ) : (
         <img
-          src={url}
+          src={convertToRawGitHubUrl(url)}
           alt="Preview"
           className="w-full h-full object-cover"
           onError={(e) => {
@@ -57,7 +57,7 @@ export const formatLabel = (key: string) => {
 };
 
 // Helper to convert GitHub blob URLs and relative upload paths to raw.githubusercontent.com direct image URLs
-export const convertToRawGitHubUrl = (url: string): string => {
+export function convertToRawGitHubUrl(url: string): string {
   if (!url) return url;
   
   const trimmed = url.trim();

@@ -51,12 +51,9 @@ const GlobalTextEffector = () => {
         100% { background-position: 200% 50%; }
       }
 
-      /* Optimized Base Styles */
-      h1, h2, h3, h4, h5, h6, p, span, a, button {
-        transition: color ${speed} cubic-bezier(0.4, 0, 0.2, 1), 
-                    text-shadow ${speed} cubic-bezier(0.4, 0, 0.2, 1), 
-                    filter ${speed} cubic-bezier(0.4, 0, 0.2, 1);
-        will-change: color;
+      /* Optimized Base Styles - Removed global will-change to prevent GPU layer exhaustion and scroll lag */
+      a, button, .gradient-text, .interactive-hover {
+        transition: color ${speed} ease-out, text-shadow ${speed} ease-out, background-position ${speed} ease-out;
       }
       
       /* Global RESET - Simplified */

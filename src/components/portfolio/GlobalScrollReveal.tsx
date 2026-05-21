@@ -21,7 +21,8 @@ const GlobalScrollReveal = () => {
     // 2. Define the animation logic
     const setupAnimations = () => {
       // Find all text-heavy elements, excluding those marked with 'no-reveal' or 'gradient-text'
-      const elements = document.querySelectorAll('h1:not(.no-reveal), h2:not(.no-reveal), h3:not(.no-reveal), h4:not(.no-reveal), h5:not(.no-reveal), h6:not(.no-reveal), p:not(.no-reveal), li:not(.no-reveal)');
+      // Optimized: Excluded 'p' and 'li' to prevent observing thousands of elements which causes massive scroll lag
+      const elements = document.querySelectorAll('h1:not(.no-reveal), h2:not(.no-reveal), h3:not(.no-reveal), h4:not(.no-reveal), h5:not(.no-reveal), h6:not(.no-reveal), .reveal-block');
       
       elements.forEach((el) => {
         const htmlEl = el as HTMLElement;

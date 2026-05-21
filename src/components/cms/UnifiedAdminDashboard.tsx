@@ -3,6 +3,8 @@ import { AnimatePresence } from 'framer-motion';
 import { useCMSState, useCMSActions } from '@/context/CMSContext';
 import { useAuth } from '@/hooks/useAuth';
 import { SECTION_SCHEMAS, validateData } from '@/lib/schema';
+import { convertToRawGitHubUrl } from './FormHelpers';
+import { getLocalImage, clearLocalImages } from '@/lib/localImageStore';
 import { DynamicForm } from './DynamicForm';
 import { ProjectsAdmin } from './ProjectsAdmin';
 import { BlogsAdmin } from './BlogsAdmin';
@@ -872,10 +874,86 @@ export const UnifiedAdminDashboard = () => {
       const filePath = isBlog ? 'src/data/blog.yaml' : (isProject ? 'src/data/projects.yaml' : 'src/data/portfolio.yaml');
       const sectionKey = isBlog ? 'blog' : (isProject ? 'projects' : section);
 
+      // --- Intercept & Upload Embedded Base64 Images ---
+      const processBase64Images = async (obj: any): Promise<any> => {
+        if (!obj) return obj;
+
+        if (typeof obj === 'string') {
+          // Look for local pseudo-URLs injected by the markdown editors and forms
+          const localUrlRegex = /(https:\/\/local\.image\/img_[0-9]+_[0-9]+\.webp)(?:#filename=([^)"\s]+))?/g;
+          const matches = [];
+          let match;
+
+          // Collect all matches
+          while ((match = localUrlRegex.exec(obj)) !== null) {
+            const b64 = getLocalImage(match[1]);
+            if (b64) {
+              matches.push({
+                fullMatch: match[0],
+                localId: match[1],
+                base64Data: b64,
+                fileName: match[2] || `${match[1].replace('https://local.image/', '')}`
+              });
+            }
+          }
+
+          if (matches.length > 0) {
+            let processedStr = obj;
+            toast.loading(`Uploading ${matches.length} embedded image(s)...`, { id: 'img-upload' });
+            
+            for (const m of matches) {
+              try {
+                // Remove base64 data prefix if someone manually supplied it, otherwise it's just pure base64 from the store
+                const pureBase64 = m.base64Data.includes('base64,') ? m.base64Data.split(',')[1] : m.base64Data;
+                const uploadRes = await fetch("/api/cms-upload", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    fileName: m.fileName,
+                    fileContent: pureBase64
+                  })
+                });
+                const uploadResult = await uploadRes.json();
+                
+                if (uploadResult.success) {
+                  const finalUrl = convertToRawGitHubUrl(uploadResult.url);
+                  // Replace the exact base64 match with the final GitHub URL
+                  processedStr = processedStr.replace(m.fullMatch, finalUrl);
+                } else {
+                  console.error("Image upload failed inside save loop", uploadResult.error);
+                }
+              } catch (err) {
+                console.error("Exception during delayed image upload", err);
+              }
+            }
+            toast.success(`Uploaded ${matches.length} image(s)!`, { id: 'img-upload' });
+            return processedStr;
+          }
+          return obj;
+        }
+
+        if (Array.isArray(obj)) {
+          return Promise.all(obj.map(item => processBase64Images(item)));
+        }
+
+        if (typeof obj === 'object') {
+          const newObj: any = {};
+          for (const key of Object.keys(obj)) {
+            newObj[key] = await processBase64Images(obj[key]);
+          }
+          return newObj;
+        }
+
+        return obj;
+      };
+
+      logger.addLog({ action: "SAVE_DATA", status: "pending", message: `Scanning for embedded images...` });
+      const processedData = await processBase64Images(data);
+
       // Perform Frontend Schema Validation
       const currentSchema = SECTION_SCHEMAS[section];
       if (currentSchema) {
-        const validation = validateData(currentSchema, data);
+        const validation = validateData(currentSchema, processedData);
 
         // Strict explicit validation state check to guarantee type narrowing under all compilers
         if (validation.success === false) {
@@ -895,13 +973,18 @@ export const UnifiedAdminDashboard = () => {
           role: userRole,
           filePath,
           sectionKey,
-          newData: data,
+          newData: processedData,
           isSafeMode: safeMode,
           providedSha: forceSha
         })
       });
 
       const result = await res.json();
+      
+      // Cleanup local images on successful save
+      if (res.ok) {
+        clearLocalImages();
+      }
 
       if (res.status === 409) {
         logger.addLog({ action: "SAVE_DATA", status: "error", message: "Conflict: Git SHA mismatch detected." });

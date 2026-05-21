@@ -4,6 +4,7 @@ import { useCMSData } from "@/context/CMSContext";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import defaultProfileImg from "@/assets/profile-placeholder.jpg";
 import Magnetic from "@/components/ui/Magnetic";
+import { convertToRawGitHubUrl } from "@/components/cms/FormHelpers";
 
 const Hero = () => {
   const hero = useCMSData(d => d.hero) || initialData.hero;
@@ -103,7 +104,7 @@ const Hero = () => {
               src={
                 !personal?.profileImage?.value || personal.profileImage.value.includes('profile-placeholder')
                   ? defaultProfileImg
-                  : personal.profileImage.value
+                  : convertToRawGitHubUrl(personal.profileImage.value)
               }
               alt={personal?.name || initialData.personal.name}
               width={320}

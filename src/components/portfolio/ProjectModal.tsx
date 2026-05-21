@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Project } from "@/data/portfolioData";
+import { convertToRawGitHubUrl } from "@/components/cms/FormHelpers";
 import { Calendar, ExternalLink, Link as LinkIcon, BookOpen, Star, Lock, X, Play, ShieldAlert, HeartHandshake } from "lucide-react";
 
 interface ProjectModalProps {
@@ -140,7 +141,7 @@ export function ProjectModal({ project, isOpen, onClose }: ProjectModalProps) {
             </div>
 
             {/* Scrollable Body */}
-            <div className="flex-1 overflow-y-auto p-6 md:p-12 md:px-16 lg:px-24 leading-relaxed scrollbar-thin">
+            <div data-lenis-prevent="true" className="flex-1 overflow-y-auto p-6 md:p-12 md:px-16 lg:px-24 leading-relaxed scrollbar-thin">
               {/* Media Block & Overview Side-by-Side */}
               <div className={`grid gap-8 lg:gap-10 mb-10 ${hasMedia ? "lg:grid-cols-[1.2fr,1fr]" : ""}`}>
                 {/* Media Gallery */}
@@ -149,13 +150,13 @@ export function ProjectModal({ project, isOpen, onClose }: ProjectModalProps) {
                     <div className="glass-card rounded-xl overflow-hidden aspect-video border border-border/40 relative">
                       {activeProject.media![activeMedia].type === "video" || (!activeProject.media![activeMedia].type && activeProject.media![activeMedia].url?.match(/\.(mp4|webm|ogg)$/i)) ? (
                         <video
-                          src={activeProject.media![activeMedia].url}
+                          src={convertToRawGitHubUrl(activeProject.media![activeMedia].url || '')}
                           controls
                           className="w-full h-full object-cover"
                         />
                       ) : (
                         <img
-                          src={activeProject.media![activeMedia].url}
+                          src={convertToRawGitHubUrl(activeProject.media![activeMedia].url || '')}
                           alt={activeProject.media![activeMedia].caption || activeProject.title}
                           className="w-full h-full object-cover"
                         />
@@ -181,7 +182,7 @@ export function ProjectModal({ project, isOpen, onClose }: ProjectModalProps) {
                                 <Play size={14} className="text-primary" />
                               </div>
                             ) : (
-                              <img src={m.url} alt="" className="w-full h-full object-cover" />
+                              <img src={convertToRawGitHubUrl(m.url || '')} alt="" className="w-full h-full object-cover" />
                             )}
                           </button>
                         ))}
@@ -238,7 +239,7 @@ export function ProjectModal({ project, isOpen, onClose }: ProjectModalProps) {
                     )}
                     {activeProject.architectureImage && (
                       <img 
-                        src={activeProject.architectureImage} 
+                        src={convertToRawGitHubUrl(activeProject.architectureImage)} 
                         alt="High-level architectural workflow" 
                         className="w-full max-h-[50vh] object-contain rounded-xl border border-border/40 bg-background/50 p-2 mx-auto" 
                       />

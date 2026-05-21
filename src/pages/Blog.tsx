@@ -18,6 +18,7 @@ export interface BlogPost {
   id: number;
   title: string;
   slug?: string;
+  excerpt?: string;
   content: string;
   category: string;
   type?: string[];
@@ -29,8 +30,9 @@ export interface BlogPost {
   isPending?: boolean;
 }
 
-const CATEGORIES = ["All", "Thoughts", "Notes", "Books", "Links"];
 const POSTS_PER_PAGE = 6;
+// Default preset order for filter tabs — custom categories added via CMS will appear after these
+const PRESET_CATEGORIES = ['Thoughts', 'Notes', 'Books', 'Links'];
 
 export default function Blog() {
   const cmsBlogs = useCMSData(d => d.blog);
@@ -66,7 +68,20 @@ export default function Blog() {
     }
   }, [cmsBlogs]);
 
-  // Compute Tags globally relative to visible items
+  // Derive filter tabs dynamically from posts — presets first, then any custom categories
+  const dynamicCategories = useMemo(() => {
+    const fromPosts = new Set(
+      posts
+        .filter(p => !p.draft || isAdmin)
+        .map(p => p.category)
+        .filter(Boolean)
+    );
+    const ordered = PRESET_CATEGORIES.filter(c => fromPosts.has(c));
+    const extras = Array.from(fromPosts).filter(c => !PRESET_CATEGORIES.includes(c)).sort();
+    return ['All', ...ordered, ...extras];
+  }, [posts, isAdmin]);
+
+  // Compute type tags globally relative to all visible posts
   const availableTags = useMemo(() => {
     const tagSet = new Set<string>();
     posts.forEach(p => {
@@ -76,6 +91,13 @@ export default function Blog() {
     });
     return Array.from(tagSet);
   }, [posts]);
+
+  // Fallback: If the currently active category was completely deleted from all posts, revert to "All"
+  useEffect(() => {
+    if (activeCategory !== "All" && !dynamicCategories.includes(activeCategory)) {
+      setActiveCategory("All");
+    }
+  }, [dynamicCategories, activeCategory]);
 
   // SMART SEARCH RANKING AND FILTERING PIPELINE
   const filteredAndSortedPosts = useMemo(() => {
@@ -190,7 +212,7 @@ export default function Blog() {
             <div className="flex-1 min-w-0">
               
               <FilterBar 
-                categories={CATEGORIES}
+                categories={dynamicCategories}
                 activeCategory={activeCategory}
                 setActiveCategory={setActiveCategory}
                 searchQuery={searchQuery}

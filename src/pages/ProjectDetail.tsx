@@ -5,10 +5,11 @@ import Footer from "@/components/portfolio/Footer";
 import SEO from "@/components/portfolio/SEO";
 import { ArrowLeft, Github, ExternalLink, Play, Lock } from "lucide-react";
 import { useState } from "react";
-import { ResourcesModal } from "@/components/portfolio/ResourcesModal";
 import { useCMSData } from "@/context/CMSContext";
 import Magnetic from "@/components/ui/Magnetic";
 import { motion } from "framer-motion";
+import { convertToRawGitHubUrl } from "@/components/cms/FormHelpers";
+import { ResourcesModal } from "@/components/portfolio/ResourcesModal";
 
 const springTransition = {
   type: "spring",
@@ -148,13 +149,13 @@ const ProjectDetail = () => {
                 <div className="glass-card rounded-xl overflow-hidden aspect-video">
                   {project.media![activeMedia].type === "video" || (!project.media![activeMedia].type && project.media![activeMedia].url?.match(/\.(mp4|webm|ogg)$/i)) ? (
                     <video
-                      src={project.media![activeMedia].url}
+                      src={convertToRawGitHubUrl(project.media![activeMedia].url || '')}
                       controls
                       className="w-full h-full object-cover"
                     />
                   ) : (
                     <img
-                      src={project.media![activeMedia].url}
+                      src={convertToRawGitHubUrl(project.media![activeMedia].url || '')}
                       alt={project.media![activeMedia].caption || project.title}
                       className="w-full h-full object-cover"
                     />
@@ -179,7 +180,7 @@ const ProjectDetail = () => {
                             <Play size={14} className="text-primary" />
                           </div>
                         ) : (
-                          <img src={m.url} alt="" className="w-full h-full object-cover" />
+                          <img src={convertToRawGitHubUrl(m.url || '')} alt="" className="w-full h-full object-cover" />
                         )}
                       </button>
                     ))}
@@ -222,7 +223,7 @@ const ProjectDetail = () => {
             
             {project.architectureImage ? (
               <img 
-                src={project.architectureImage} 
+                src={convertToRawGitHubUrl(project.architectureImage)} 
                 alt="Architecture" 
                 className="w-full max-h-[70vh] object-contain rounded-xl border border-border bg-muted/5 mx-auto" 
               />

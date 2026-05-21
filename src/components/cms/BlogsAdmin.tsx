@@ -1,10 +1,18 @@
-import React, { useState } from 'react';
-import { BookOpen, Edit3, Trash2, X, Star, EyeOff, Save, Plus, Calendar, Clock, Link as LinkIcon, Eye } from 'lucide-react';
-import { DynamicForm } from './DynamicForm';
-import { BlogSchema } from '@/lib/schema';
+import React, { useState, useMemo } from 'react';
+import { BookOpen, Edit3, Trash2, X, Star, EyeOff, Save, Plus, Calendar, Clock, Link as LinkIcon, Eye, Tag, Hash } from 'lucide-react';
 import { useCMSState } from '@/context/CMSContext';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
+import { getLocalImage } from '@/lib/localImageStore';
+import { convertToRawGitHubUrl } from './FormHelpers';
+import { SpaciousMarkdownNotepad } from './SpaciousMarkdownNotepad';
+import { useTheme } from '@/hooks/useTheme';
+
+
+// ── Default preset categories (always shown as quick picks) ─────────────────
+const DEFAULT_CATEGORIES = ['Thoughts', 'Notes', 'Books', 'Links'];
+
 
 interface BlogsAdminProps {
   blogs: any[];
@@ -14,12 +22,330 @@ interface BlogsAdminProps {
   mode: "local" | "github" | "unknown";
 }
 
+// ─── Dedicated Blog Post Form ────────────────────────────────────────────────
+const BlogPostForm: React.FC<{ blog: any; onChange: (b: any) => void; allBlogs: any[] }> = ({ blog, onChange, allBlogs }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+  // ── Category + Type tag state ──────────────────────────────────────────────
+  const [tagInput, setTagInput] = useState('');
+  const [catInput, setCatInput] = useState('');
+
+  const [isNotepadOpen, setIsNotepadOpen] = useState(false);
+  const [localContent, setLocalContent] = useState(blog.content || '');
+  const [hasDraft, setHasDraft] = useState(false);
+  const draftKey = `cms-notepad-draft-blog-${blog.id}`;
+
+  // Sync local content when blog changes (e.g. switching posts)
+  React.useEffect(() => { setLocalContent(blog.content || ''); }, [blog.id]);
+
+  // Collect all unique type tags from existing blogs — normalized to Title Case
+  const allTypeSuggestions = useMemo(() => {
+    const set = new Set<string>();
+    for (const b of allBlogs) {
+      if (Array.isArray(b.type)) {
+        for (const t of b.type) {
+          if (t && typeof t === 'string') {
+            set.add(t.trim().toLowerCase()
+              .split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
+          }
+        }
+      }
+    }
+    return Array.from(set).sort();
+  }, [allBlogs]);
+
+  const currentTypes: string[] = Array.isArray(blog.type) ? blog.type : [];
+
+  const normalizeTag = (t: string) =>
+    t.trim().toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+  const addTag = (raw: string) => {
+    const tag = normalizeTag(raw);
+    if (!tag) return;
+    if (currentTypes.some(t => t.toLowerCase() === tag.toLowerCase())) return; // deduplicate
+    onChange({ ...blog, type: [...currentTypes, tag] });
+    setTagInput('');
+  };
+
+  const removeTag = (tag: string) => {
+    onChange({ ...blog, type: currentTypes.filter(t => t !== tag) });
+  };
+
+  const field = 'text-sm font-medium text-muted-foreground uppercase tracking-wider block mb-1.5';
+  const input = 'w-full px-3 py-2.5 rounded-lg border border-border/40 bg-background/60 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all text-foreground';
+
+  return (
+    <div className="space-y-5">
+
+      {/* Title */}
+      <div>
+        <label className={field}>Title *</label>
+        <input type="text" value={blog.title || ''} onChange={e => onChange({ ...blog, title: e.target.value })}
+          className={input} placeholder="Post title..." />
+      </div>
+
+      {/* ── CATEGORY — dynamic picker + custom input ──────────────────────── */}
+      <div>
+        <label className={field}>Category *</label>
+        <p className="text-[10px] text-muted-foreground/60 mb-2">
+          Pick a preset or type a new one — it will appear as a filter tab on the blog page.
+        </p>
+
+        {/* All known categories: presets + any already used in other posts */}
+        {(() => {
+          const usedInBlogs = Array.from(
+            new Set(
+              allBlogs
+                .map(b => (typeof b.category === 'string' ? b.category.trim() : ''))
+                .filter(Boolean)
+            )
+          ).sort();
+          const allCats = Array.from(new Set([...DEFAULT_CATEGORIES, ...usedInBlogs]));
+          return (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {allCats.map(cat => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => onChange({ ...blog, category: cat })}
+                  className={`px-3 py-2 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
+                    blog.category === cat
+                      ? 'bg-primary text-primary-foreground border-primary shadow-[0_0_12px_hsl(var(--primary)/0.35)]'
+                      : DEFAULT_CATEGORIES.includes(cat)
+                        ? 'bg-muted/20 border-border/40 text-muted-foreground hover:bg-muted/40 hover:text-foreground hover:border-border/70'
+                        : 'bg-accent/10 border-accent/30 text-accent hover:bg-accent/20 hover:border-accent/60'
+                  }`}
+                >
+                  {cat}
+                  {!DEFAULT_CATEGORIES.includes(cat) && (
+                    <span className="ml-1.5 text-[9px] opacity-60 font-normal">custom</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          );
+        })()}
+
+        {/* Add a new custom category */}
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={catInput}
+            onChange={e => setCatInput(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && catInput.trim()) {
+                e.preventDefault();
+                const cat = catInput.trim();
+                onChange({ ...blog, category: cat });
+                setCatInput('');
+              }
+            }}
+            className={`${input} flex-1`}
+            placeholder="New custom category (e.g. Research, Tutorials…)"
+          />
+          <button
+            type="button"
+            disabled={!catInput.trim()}
+            onClick={() => {
+              const cat = catInput.trim();
+              if (cat) { onChange({ ...blog, category: cat }); setCatInput(''); }
+            }}
+            className="px-3 py-2 rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 disabled:opacity-40 cursor-pointer transition-all flex items-center gap-1 text-xs font-bold"
+          >
+            <Plus size={13} /> Create
+          </button>
+        </div>
+        {blog.category && (
+          <p className="text-[10px] mt-1.5 text-muted-foreground/60">
+            Selected: <strong className="text-foreground/80">{blog.category}</strong>
+          </p>
+        )}
+      </div>
+
+
+      {/* ── TYPE — case-normalized tag manager with deduplication ─────────── */}
+      <div>
+        <label className={field}>Type Tags</label>
+        <p className="text-[10px] text-muted-foreground/60 mb-2">
+          Sub-tags shown below the category bar. They appear in uppercase on the blog page.
+        </p>
+
+        {/* Current tags */}
+        <div className="flex flex-wrap gap-1.5 mb-2 min-h-[28px]">
+          {currentTypes.length === 0 && (
+            <span className="text-[11px] text-muted-foreground/50 italic">No tags added yet.</span>
+          )}
+          {currentTypes.map(tag => (
+            <span key={tag}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-[11px] font-semibold uppercase tracking-wider">
+              {tag}
+              <button type="button" onClick={() => removeTag(tag)}
+                className="ml-0.5 hover:text-destructive transition-colors cursor-pointer">
+                <X size={10} />
+              </button>
+            </span>
+          ))}
+        </div>
+
+        {/* Add tag input */}
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={tagInput}
+            onChange={e => setTagInput(e.target.value)}
+            onKeyDown={e => {
+              if ((e.key === 'Enter' || e.key === ',') && tagInput.trim()) {
+                e.preventDefault();
+                addTag(tagInput);
+              }
+            }}
+            className={`${input} flex-1`}
+            placeholder="Type a tag and press Enter…"
+          />
+          <button type="button" onClick={() => addTag(tagInput)}
+            disabled={!tagInput.trim()}
+            className="px-3 py-2 rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 disabled:opacity-40 cursor-pointer transition-all flex items-center gap-1 text-xs font-bold">
+            <Plus size={13} /> Add
+          </button>
+        </div>
+
+        {/* Suggestions from existing blogs */}
+        {allTypeSuggestions.length > 0 && (
+          <div className="mt-3">
+            <p className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-wider mb-1.5">Used in other posts:</p>
+            <div className="flex flex-wrap gap-1.5">
+              {allTypeSuggestions.map(tag => {
+                const already = currentTypes.some(t => t.toLowerCase() === tag.toLowerCase());
+                return (
+                  <button key={tag} type="button"
+                    disabled={already}
+                    onClick={() => addTag(tag)}
+                    className={`px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wider transition-all cursor-pointer ${
+                      already
+                        ? 'bg-primary/10 text-primary border-primary/20 opacity-50 cursor-not-allowed'
+                        : 'bg-muted/20 border-border/40 text-muted-foreground hover:bg-primary/10 hover:text-primary hover:border-primary/30'
+                    }`}>
+                    {already ? '✓ ' : '+ '}{tag}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Excerpt (Card Details) ─────────── */}
+      <div>
+        <label className={field}>Card Details / Excerpt (Optional)</label>
+        <p className="text-[10px] text-muted-foreground/60 mb-2">
+          This text appears on the blog card. If left blank, it auto-generates from the first few lines of your content.
+        </p>
+        <textarea
+          value={blog.excerpt || ''}
+          onChange={e => onChange({ ...blog, excerpt: e.target.value })}
+          className={`${input} min-h-[60px] resize-y`}
+          placeholder="Brief summary for the blog card..."
+        />
+      </div>
+
+      {/* Content — opens Notepad */}
+      <div>
+        <label className={field}>Content * (Markdown)</label>
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[10px] text-muted-foreground/60 italic">Click below to edit in full Markdown notepad</span>
+          <button type="button" onClick={() => setIsNotepadOpen(true)}
+            className="text-[10px] font-bold text-primary hover:text-primary-foreground hover:bg-primary/20 border border-primary/20 px-2 py-0.5 rounded transition-all bg-primary/5 flex items-center gap-1">
+            📝 Fullscreen Notepad
+          </button>
+        </div>
+        <textarea
+          value={localContent}
+          onClick={() => setIsNotepadOpen(true)}
+          readOnly
+          className="w-full bg-background/50 hover:bg-background/80 border border-border/30 hover:border-border/60 rounded-lg p-3 text-xs font-mono leading-relaxed cursor-pointer transition-all min-h-[90px] resize-y text-foreground/80"
+          placeholder="Click to open Markdown editor…"
+        />
+        <SpaciousMarkdownNotepad
+          isNotepadOpen={isNotepadOpen}
+          setIsNotepadOpen={setIsNotepadOpen}
+          localValue={localContent}
+          setLocalValue={setLocalContent}
+          onChange={(val) => { setLocalContent(val); onChange({ ...blog, content: val }); }}
+          fieldKey="content"
+          isDark={isDark}
+          draftKey={draftKey}
+          hasDraft={hasDraft}
+          setHasDraft={setHasDraft}
+          data={blog.content || ''}
+        />
+      </div>
+
+      {/* Date, Reading Time row */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className={field}>Date</label>
+          <input type="date" value={blog.date || ''} onChange={e => onChange({ ...blog, date: e.target.value })}
+            className={input} />
+        </div>
+        <div>
+          <label className={field}>Reading Time (min)</label>
+          <input type="number" min="1" value={blog.readingTime || ''}
+            onChange={e => onChange({ ...blog, readingTime: e.target.value ? Number(e.target.value) : undefined })}
+            className={input} placeholder="Auto-calculated" />
+        </div>
+      </div>
+
+      {/* Slug */}
+      <div>
+        <label className={field}>Slug <span className="text-muted-foreground/50 normal-case font-normal">(optional URL identifier)</span></label>
+        <input type="text" value={blog.slug || ''} onChange={e => onChange({ ...blog, slug: e.target.value })}
+          className={input} placeholder="e.g. my-post-about-pandas" />
+      </div>
+
+      {/* Link */}
+      <div>
+        <label className={field}>External Link <span className="text-muted-foreground/50 normal-case font-normal">(optional)</span></label>
+        <input type="url" value={blog.link || ''} onChange={e => onChange({ ...blog, link: e.target.value })}
+          className={input} placeholder="https://..." />
+      </div>
+
+      {/* Toggles */}
+      <div className="flex items-center gap-4 flex-wrap">
+        {[
+          { key: 'featured', label: '⭐ Featured', color: 'yellow' },
+          { key: 'draft', label: '🔒 Draft', color: 'amber' },
+        ].map(({ key, label, color }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => onChange({ ...blog, [key]: !blog[key] })}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
+              blog[key]
+                ? 'bg-primary/15 text-primary border-primary/30 shadow-sm'
+                : 'bg-muted/20 border-border/30 text-muted-foreground hover:border-border/60'
+            }`}
+          >
+            <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors ${
+              blog[key] ? 'bg-primary border-primary' : 'border-border/50'
+            }`}>
+              {blog[key] && <span className="w-2 h-2 rounded-full bg-white" />}
+            </span>
+            {label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ─── Main BlogsAdmin component ────────────────────────────────────────────────
 export const BlogsAdmin: React.FC<BlogsAdminProps> = ({ blogs, onChange, onSave, isLoading, mode }) => {
   const { liveData } = useCMSState();
   const [editingId, setEditingId] = useState<number | null>(null);
   const [addingNew, setAddingNew] = useState(false);
   const [tempBlog, setTempBlog] = useState<any>({});
-  const [saveError, setSaveError] = useState("");
+  const [saveError, setSaveError] = useState('');
   const [previewTab, setPreviewTab] = useState<'card' | 'detailed'>('card');
 
   const hasPendingChanges = JSON.stringify(blogs) !== JSON.stringify(liveData.blog);
@@ -116,7 +442,7 @@ export const BlogsAdmin: React.FC<BlogsAdminProps> = ({ blogs, onChange, onSave,
       )}
 
       {/* Grid of Blogs */}
-      <div className="flex-1 overflow-y-auto px-4 pb-12">
+      <div data-lenis-prevent="true" className="flex-1 overflow-y-auto px-4 pb-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {blogs.map(b => (
             <div key={b.id} className="group glass-card border border-border/50 rounded-xl p-4 flex flex-col hover:border-primary/40 transition-colors relative">
@@ -180,16 +506,16 @@ export const BlogsAdmin: React.FC<BlogsAdminProps> = ({ blogs, onChange, onSave,
            {/* Side-by-Side Editor & Live Preview Workspace */}
            <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
              {/* Left Column: Form Editor */}
-             <div className="w-full md:w-1/2 border-r border-border/50 overflow-y-auto p-5 scrollbar-thin">
-                <DynamicForm 
-                  schema={BlogSchema} 
-                  data={tempBlog} 
-                  onChange={setTempBlog} 
-                />
+             <div data-lenis-prevent="true" className="w-full md:w-1/2 border-r border-border/50 overflow-y-auto p-5 scrollbar-thin">
+                <BlogPostForm
+                   blog={tempBlog}
+                   onChange={setTempBlog}
+                   allBlogs={blogs}
+                 />
              </div>
              
              {/* Right Column: Interactive Live Preview Pane */}
-             <div className="w-full md:w-1/2 bg-muted/10 overflow-y-auto p-6 flex flex-col gap-6 scrollbar-thin">
+             <div data-lenis-prevent="true" className="w-full md:w-1/2 bg-muted/10 overflow-y-auto p-6 flex flex-col gap-6 scrollbar-thin">
                <div className="flex items-center justify-between border-b border-border/40 pb-3 shrink-0">
                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 select-none">
                    <Eye size={14} className="text-primary animate-pulse" /> Live Preview
@@ -240,13 +566,17 @@ export const BlogsAdmin: React.FC<BlogsAdminProps> = ({ blogs, onChange, onSave,
                          </div>
                        </div>
                        
-                       <h2 className="text-xl md:text-2xl font-bold font-heading mb-3 text-foreground line-clamp-2">
+                       <h2 className="text-xl md:text-2xl font-bold font-heading mb-3 text-foreground">
                          {tempBlog.title || "Untitled Post Title"}
                        </h2>
                        
-                       <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3 mb-5">
-                         {tempBlog.content ? (tempBlog.content.split("\n")[0].substring(0, 150) + "...") : "Type content in the editor to see it here..."}
-                       </p>
+                       <div className="text-muted-foreground text-sm leading-relaxed mb-5 prose prose-invert prose-sm max-w-none prose-p:my-0 prose-ul:my-0 prose-li:my-0 prose-ul:pl-4">
+                         {tempBlog.excerpt ? (
+                           <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>{tempBlog.excerpt}</ReactMarkdown>
+                         ) : (
+                           <p>{tempBlog.content ? (tempBlog.content.split("\n")[0].substring(0, 150) + "...") : "Type content in the editor to see it here..."}</p>
+                         )}
+                       </div>
                        
                        {tempBlog.type && tempBlog.type.length > 0 && (
                          <div className="flex flex-wrap gap-1.5 mt-auto pt-4 border-t border-border/30">
@@ -295,7 +625,7 @@ export const BlogsAdmin: React.FC<BlogsAdminProps> = ({ blogs, onChange, onSave,
                         </div>
                       </div>
                       
-                      <div className="flex-1 overflow-y-auto p-6 leading-relaxed scrollbar-thin">
+                      <div data-lenis-prevent="true" className="flex-1 overflow-y-auto p-6 leading-relaxed scrollbar-thin">
                         <div className="prose prose-invert prose-sm max-w-none 
                                         prose-headings:font-heading prose-headings:font-bold prose-headings:text-foreground
                                         prose-strong:text-foreground prose-strong:font-bold
@@ -305,21 +635,32 @@ export const BlogsAdmin: React.FC<BlogsAdminProps> = ({ blogs, onChange, onSave,
                           {tempBlog.content ? (
                             <ReactMarkdown 
                               remarkPlugins={[remarkGfm]}
+                              rehypePlugins={[rehypeRaw]}
                               components={{
-                                img: ({ node, ...props }) => (
-                                  <div className="my-8 flex flex-col items-center gap-2 group/img">
-                                    <img 
-                                      {...props} 
-                                      className="rounded-2xl border border-border/60 max-h-[350px] w-auto max-w-full object-contain shadow-2xl hover:border-primary/40 hover:scale-[1.01] transition-all duration-300" 
-                                      loading="lazy" 
-                                    />
-                                    {props.alt && (
-                                      <span className="text-[10px] text-muted-foreground/75 italic select-none">
-                                        {props.alt}
-                                      </span>
-                                    )}
-                                  </div>
-                                ),
+                                img: ({ node, ...props }) => {
+                                  let src = props.src;
+                                  if (src?.startsWith('https://local.image/')) {
+                                    const b64 = getLocalImage(src);
+                                    if (b64) src = `data:image/webp;base64,${b64}`;
+                                  } else if (src) {
+                                    src = convertToRawGitHubUrl(src);
+                                  }
+                                  return (
+                                    <div className="my-8 flex flex-col items-center gap-2 group/img">
+                                      <img 
+                                        {...props}
+                                        src={src}
+                                        className="rounded-2xl border border-border/60 max-h-[350px] w-auto max-w-full object-contain shadow-2xl hover:border-primary/40 hover:scale-[1.01] transition-all duration-300" 
+                                        loading="lazy" 
+                                      />
+                                      {props.alt && (
+                                        <span className="text-[10px] text-muted-foreground/75 italic select-none">
+                                          {props.alt}
+                                        </span>
+                                      )}
+                                    </div>
+                                  );
+                                },
                                 table: ({ node, ...props }) => (
                                   <div className="overflow-x-auto my-4 border border-border/40 rounded-xl shadow-md bg-card/25">
                                     <table {...props} className="min-w-full divide-y divide-border/30 text-xs" />

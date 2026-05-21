@@ -3,6 +3,9 @@ import { Calendar, Clock, Lock, Trash2, Loader2 } from "lucide-react";
 import { BlogPost } from "@/pages/Blog";
 import { apiFetch, API_ROUTES } from "@/lib/apiClient";
 import Tilt from "react-parallax-tilt";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 
 interface BlogCardProps {
   post: BlogPost;
@@ -147,13 +150,17 @@ export function BlogCard({ post, onClick, isAdmin, onDelete }: BlogCardProps) {
       </div>
 
       {/* ── Body ─────────────────────────────────────────────── */}
-      <h2 className="text-xl md:text-2xl font-bold font-heading mb-3 text-foreground line-clamp-2">
+      <h2 className="text-xl md:text-2xl font-bold font-heading mb-3 text-foreground">
         {post.title}
       </h2>
 
-      <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3 mb-5">
-        {post.content.split("\n")[0].substring(0, 150)}...
-      </p>
+      <div className="text-muted-foreground text-sm leading-relaxed mb-5 prose prose-invert prose-sm max-w-none prose-p:my-0 prose-ul:my-0 prose-li:my-0 prose-ul:pl-4">
+        {post.excerpt ? (
+          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>{post.excerpt}</ReactMarkdown>
+        ) : (
+          <p>{post.content.split("\n")[0].substring(0, 150)}...</p>
+        )}
+      </div>
 
       {/* Tag Chips */}
       {post.type && post.type.length > 0 && (

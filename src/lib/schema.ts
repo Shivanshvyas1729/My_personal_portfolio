@@ -204,6 +204,7 @@ export const BlogSchema = z.object({
   id: z.number().int().positive().optional(),
   title: z.string().min(1, "Title is required"),
   slug: z.string().optional(),
+  excerpt: z.string().optional(),
   content: z.string().min(1, "Content is required"),
   category: z.string().min(1, "Category is required"),
   type: z.array(z.string()).optional().default([]),

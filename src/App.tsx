@@ -13,14 +13,14 @@ import GlobalScrollReveal from "./components/portfolio/GlobalScrollReveal";
 import CursorGlow from "./components/ui/CursorGlow";
 import InteractiveCursor from "./components/ui/InteractiveCursor";
 
-// Eager — homepage, welcome intro, chatbot, and admin auth load instantly
-import Index from "./pages/Index.tsx";
+// Eager — welcome intro, chatbot, and admin auth load instantly
 import IntroTransition from "./components/portfolio/IntroTransition";
 import ChatAssistant from "./components/portfolio/ChatAssistant";
 import { AdminAuth } from "./components/blog/AdminAuth";
 import { AnimatePresence, motion } from "framer-motion";
 
 // Lazy — only load when navigated to (reduces initial bundle ~40%)
+const Index = lazy(() => import("./pages/Index.tsx"));
 const AllProjects = lazy(() => import("./pages/AllProjects.tsx"));
 const ProjectDetail = lazy(() => import("./pages/ProjectDetail.tsx"));
 const Blog = lazy(() => import("./pages/Blog.tsx"));

@@ -1,6 +1,4 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import fs from "fs";
-import path from "path";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -25,26 +23,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const isDeployed = process.env.NODE_ENV === "production" || !!process.env.VERCEL || !!process.env.NETLIFY;
     const isLocalDev = !isDeployed;
 
-    let localWriteSuccess = false;
-
-    // 1. Local Write (Always perform locally during development for immediate previews & safety)
-    if (isLocalDev) {
-      try {
-        const uploadsDir = path.resolve(process.cwd(), "public/assets/uploads");
-        if (!fs.existsSync(uploadsDir)) {
-          fs.mkdirSync(uploadsDir, { recursive: true });
-        }
-        
-        const absolutePath = path.join(uploadsDir, cleanFileName);
-        const buffer = Buffer.from(fileContent, "base64");
-        fs.writeFileSync(absolutePath, buffer);
-        localWriteSuccess = true;
-        console.log(`[CMS UPLOAD] Successfully wrote file locally to: ${absolutePath}`);
-      } catch (localErr: any) {
-        console.error("[CMS UPLOAD] Failed to write file locally:", localErr);
-      }
-    }
-
     // 2. Persist to GitHub if not in local-only mode
     if (!useLocalMode) {
       try {
@@ -67,31 +45,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
       } catch (ghErr: any) {
         console.error("[CMS UPLOAD] GitHub API commit failed:", ghErr);
-        
-        // If local write succeeded, gracefully fall back and return success!
-        if (localWriteSuccess) {
-          console.warn("[CMS UPLOAD] Falling back to local filesystem success.");
-          return res.status(200).json({
-            success: true,
-            mode: "local",
-            url: `/assets/uploads/${cleanFileName}`,
-            warning: `GitHub commit failed (${ghErr.message || ghErr}), but file was saved locally.`
-          });
-        }
-        
         throw ghErr;
       }
     } else {
-      // Strict Local Mode
-      if (localWriteSuccess) {
-        return res.status(200).json({
-          success: true,
-          mode: "local",
-          url: `/assets/uploads/${cleanFileName}`
-        });
-      } else {
-        throw new Error("Local filesystem write failed.");
-      }
+      // Local mode is disabled for uploads now per user request.
+      throw new Error("Local upload mode is disabled.");
     }
 
   } catch (err: any) {

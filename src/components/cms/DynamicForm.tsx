@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { useCMSState } from '@/context/CMSContext';
 import { useTheme } from '../../hooks/useTheme';
 import { PremiumColorPicker } from './PremiumColorPicker';
+import { registerLocalImage, getLocalImage } from "@/lib/localImageStore";
 import { 
   ENUM_ICONS, 
   MediaPreview, 
@@ -746,25 +747,14 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
         const baseName = file.name.substring(0, file.name.lastIndexOf(".")).replace(/[^a-zA-Z0-9.\-_]/g, "_");
         const uniqueFileName = `${baseName}_${Date.now()}${extension}`;
 
-        // 2. Post to our API Upload endpoint
-        const res = await fetch("/api/cms-upload", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            fileName: uniqueFileName,
-            fileContent: compressedBase64
-          })
-        });
-
-        const result = await res.json();
-        if (result.success) {
-          const convertedUrl = convertToRawGitHubUrl(result.url);
-          setLocalValue(convertedUrl);
-          onChange(convertedUrl);
-          toast.success("Image uploaded and compressed successfully!");
-        } else {
-          throw new Error(result.error || "Upload failed");
-        }
+        // Defer actual upload to GitHub until 'Apply & Save' is clicked in the CMS Dashboard.
+        // Store base64 in a temporary dictionary to keep the string value clean.
+        const localId = `https://local.image/img_${Date.now()}_${Math.floor(Math.random()*1000)}.webp#filename=${uniqueFileName}`;
+        registerLocalImage(localId, compressedBase64);
+        
+        setLocalValue(localId);
+        onChange(localId);
+        toast.success("Image embedded for preview. Will upload on save.");
       } catch (err: any) {
         setUploadError(err.message || "Failed to upload file");
       } finally {
@@ -990,7 +980,7 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
         {isImage && localValue && !isMediaUrl && (
           <div className="mt-2 w-full h-28 rounded-lg bg-muted/30 border border-border/50 overflow-hidden flex items-center justify-center relative">
             <img 
-              src={localValue} 
+              src={localValue.startsWith('https://local.image/') ? `data:image/webp;base64,${getLocalImage(localValue)}` : convertToRawGitHubUrl(localValue)} 
               alt="Preview" 
               className="w-full h-full object-cover animate-in fade-in duration-300"
               onError={(e) => { 

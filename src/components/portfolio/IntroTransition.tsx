@@ -80,16 +80,12 @@ const NamasteStyle = ({ primaryText, subtitle, tagline, colors, phase }: {
           <linearGradient id="ni-grad" x1="0%" y1="100%" x2="100%" y2="0%">
             {colors.map((c, i) => <stop key={i} offset={`${(i / (colors.length - 1)) * 100}%`} stopColor={c} />)}
           </linearGradient>
-          <filter id="ni-glow" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="10" result="b1" /><feGaussianBlur stdDeviation="25" result="b2" />
-            <feMerge><feMergeNode in="b2" /><feMergeNode in="b1" /><feMergeNode in="SourceGraphic" /></feMerge>
-          </filter>
         </defs>
         <motion.path d="M 100,850 C 100,350 900,650 900,150" stroke={`${colors[0]}12`} strokeWidth="2" strokeLinecap="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.2, ease: "easeOut" }} />
-        <motion.path d="M 100,850 C 100,350 900,650 900,150" stroke="url(#ni-grad)" strokeWidth="5" strokeLinecap="round" filter="url(#ni-glow)"
+        <motion.path d="M 100,850 C 100,350 900,650 900,150" stroke="url(#ni-grad)" strokeWidth="5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 12px rgba(255,255,255,0.3))' }}
           initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: [0, 1, 1, 1], opacity: [0, 0.95, 0.5, 0] }}
           transition={{ times: [0, 0.35, 0.65, 1], duration: 2.4, ease: [0.25, 1, 0.5, 1] }} />
-        <motion.path d="M 100,850 C 100,350 900,650 900,150" stroke="white" strokeWidth="14" strokeLinecap="round" filter="url(#ni-glow)"
+        <motion.path d="M 100,850 C 100,350 900,650 900,150" stroke="white" strokeWidth="14" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 12px rgba(255,255,255,0.5))' }}
           initial={{ pathLength: 0.12, pathOffset: -0.12, opacity: 0 }}
           animate={{ pathOffset: [-0.12, 1.12], opacity: [0, 1, 1, 0] }}
           transition={{ pathOffset: { duration: 0.85, ease: [0.2, 1, 0.4, 1] }, opacity: { times: [0, 0.05, 0.85, 1], duration: 0.85 } }} />
@@ -162,16 +158,13 @@ const PulseStyle = ({ primaryText, subtitle, tagline, colors, phase }: {
 
       {/* ECG heartbeat line */}
       <svg viewBox="0 0 800 140" fill="none" className="absolute w-full max-w-3xl mx-auto z-10 opacity-90" style={{ top: "55%", left: "50%", transform: "translateX(-50%)" }}>
-        <defs>
-          <filter id="pu-glow"><feGaussianBlur stdDeviation="4" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
-        </defs>
         <motion.path
           d="M 0,70 L 120,70 L 145,70 L 160,20 L 175,120 L 190,70 L 210,70 L 225,50 L 240,90 L 255,70 L 380,70 L 395,70 L 410,20 L 425,120 L 440,70 L 460,70 L 475,50 L 490,90 L 505,70 L 800,70"
-          stroke={c0} strokeWidth="2.5" strokeLinecap="round" filter="url(#pu-glow)"
+          stroke={c0} strokeWidth="2.5" strokeLinecap="round" style={{ filter: `drop-shadow(0 0 8px ${c0}80)` }}
           initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: [0, 1, 1, 1], opacity: [0, 1, 0.7, 0] }}
           transition={{ times: [0, 0.4, 0.7, 1], duration: 2.5, ease: "easeInOut" }} />
         <motion.path d="M 0,70 L 120,70 L 145,70 L 160,20 L 175,120 L 190,70 L 210,70 L 225,50 L 240,90 L 255,70 L 380,70"
-          stroke="white" strokeWidth="4" strokeLinecap="round" filter="url(#pu-glow)"
+          stroke="white" strokeWidth="4" strokeLinecap="round" style={{ filter: `drop-shadow(0 0 10px rgba(255,255,255,0.6))` }}
           initial={{ pathLength: 0.1, pathOffset: -0.1, opacity: 0 }}
           animate={{ pathOffset: [-0.1, 1.1], opacity: [0, 1, 0] }}
           transition={{ pathOffset: { duration: 1.0, ease: [0.3, 1, 0.4, 1] }, opacity: { times: [0, 0.05, 0.9], duration: 1.0 } }} />
