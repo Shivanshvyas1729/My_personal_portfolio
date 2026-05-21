@@ -16,6 +16,7 @@ projects:
     media:
       - url: https://i.ibb.co/0j93F19k/719086-750.jpg
         type: image
+      - url: https://i.ibb.co/PZDrx9Qn/df08103d-28d6-4be4-9257-b27ff3322dc3.jpg
     problem_statement: Thyroid Cancer is a disease in which harmful or abnormal cells grow in the thyroid gland located in the neck. The thyroid gland controls important body functions such as metabolism, energy balance, heart rate, and hormone production. If thyroid cancer is not detected at an early stage, it can spread to nearby organs and become life-threatening.
     data_sources:
       - https://www.kaggle.com/datasets/diveshzz/thyroid-cancer-classification-ultrasound-dataset/data
