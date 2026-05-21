@@ -31,6 +31,8 @@ projects:
     open_resources:
       - url: https://drive.google.com/drive/u/0/folders/1WeKzWkeb7GvV_xYDwJLzbdd-kXy29vov
         label: "Research "
+      - label: depth wise convolution layer
+        url: https://link.excalidraw.com/p/readonly/nTbHqs6Z6NhUWvvaQ1Zq
     architecture: ""
     architectureImage: https://i.ibb.co/p6CzTSCX/9fed8422-4558-4568-ad5f-68f70186a6a9.jpg
   - id: 4
