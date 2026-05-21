@@ -460,7 +460,7 @@ blog:
       - Deep Learning
       - Computer Vision
     featured: false
-    draft: true
+    draft: false
     date: 2026-05-21
     slug: ""
     excerpt: |
