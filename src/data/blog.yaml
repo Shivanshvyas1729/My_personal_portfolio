@@ -832,7 +832,7 @@ blog:
     title: Fibonacci-Net architecture
     content: |-
       # Fibonacci-Net
-
+      ![fibo_arch](https://raw.githubusercontent.com/Shivanshvyas1729/My_personal_portfolio/main/public/assets/uploads/img_1779438605641_671.webp)
       Fibonacci-Net is a lightweight CNN architecture designed for:
       - efficient feature extraction
       - low computational cost
