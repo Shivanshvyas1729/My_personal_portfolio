@@ -68,6 +68,9 @@ personal:
     type: "url"
     value: "https://local.image/img_1779366595711_208.webp#filename=Gemini_Generated_Image_9jfuyy9jfuyy9jfu_1779366595711.webp"
     position: "center"
+    publicId: image_7_xrrid7
+    secureUrl: https://res.cloudinary.com/dnw73uesc/image/upload/v1779443469/image_7_xrrid7.webp
+    resourceType: image
 # endregion
 
 # region HERO
