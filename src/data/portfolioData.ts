@@ -4,11 +4,18 @@ import rawProjects from "./projects.yaml?raw";
 import rawBlog from "./blog.yaml?raw";
 import YAML from "yaml";
 
-export interface ProfileImage {
+export interface CloudinaryMedia {
+  secureUrl: string;
+  publicId: string;
+  resourceType: "image" | "video" | "raw";
+}
+
+export type ProfileImage = CloudinaryMedia | {
   type: "local" | "url";
   value: string;
   position: "left" | "right" | "center";
-}
+  objectPosition?: string;
+} | string;
 
 export interface CTA {
   label: string;
@@ -41,8 +48,11 @@ export interface Service {
 }
 
 export interface ProjectMedia {
-  type: "image" | "video";
-  url: string;
+  secureUrl?: string;
+  publicId?: string;
+  resourceType?: "image" | "video" | "raw";
+  type?: "image" | "video";
+  url?: string;
   caption?: string;
 }
 

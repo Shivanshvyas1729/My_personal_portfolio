@@ -12,7 +12,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { formatLabel, convertToRawGitHubUrl } from './FormHelpers';
-import { registerLocalImage, getLocalImage } from '@/lib/localImageStore';
+import { useCloudinary } from '../../hooks/useCloudinary';
 
 interface SpaciousMarkdownNotepadProps {
   isNotepadOpen: boolean;
@@ -87,7 +87,7 @@ export const SpaciousMarkdownNotepad: React.FC<SpaciousMarkdownNotepadProps> = (
   const linkDialogRef = React.useRef<HTMLDivElement>(null);
 
   // ── Upload state ─────────────────────────────────────────────────────────────
-  const [isUploading, setIsUploading] = React.useState(false);
+  const { uploadMedia, isUploading, progress } = useCloudinary();
   const [uploadError, setUploadError] = React.useState<string | null>(null);
 
   // ─── History helpers ─────────────────────────────────────────────────────────
@@ -293,38 +293,15 @@ export const SpaciousMarkdownNotepad: React.FC<SpaciousMarkdownNotepadProps> = (
 
   // ─── Upload ──────────────────────────────────────────────────────────────────
   const handleUploadFile = async (file: File) => {
-    setIsUploading(true); setUploadError(null);
+    setUploadError(null);
     try {
-      const b64 = await new Promise<string>((res, rej) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = ev => {
-          const img = new Image();
-          img.src = ev.target?.result as string;
-          img.onload = () => {
-            const c = document.createElement('canvas');
-            const ctx = c.getContext('2d')!;
-            const mx = 1200;
-            let [w, h] = [img.width, img.height];
-            if (w > mx || h > mx) w > h ? (h = Math.round(h * mx / w), w = mx) : (w = Math.round(w * mx / h), h = mx);
-            c.width = w; c.height = h;
-            ctx.drawImage(img, 0, 0, w, h);
-            res(c.toDataURL('image/webp', 0.8).split(',')[1]);
-          };
-          img.onerror = () => rej(new Error('Image load failed'));
-        };
-        reader.onerror = () => rej(new Error('File reader error'));
-      });
-      // Defer actual upload to GitHub until 'Apply & Save' is clicked in the CMS Dashboard.
-      // Store base64 in a temporary dictionary to keep the markdown clean.
-      const localId = `https://local.image/img_${Date.now()}_${Math.floor(Math.random()*1000)}.webp`;
-      registerLocalImage(localId, b64);
-      insertMarkdown(`![${file.name.replace(/\.[^.]+$/, '')}](${localId})`);
-      toast.success('Image embedded for preview. Will upload on save.');
+      const result = await uploadMedia(file);
+      insertMarkdown(`![${file.name.replace(/\.[^.]+$/, '')}](${result.secureUrl})`);
+      toast.success('Image securely uploaded to Cloudinary.');
     } catch (err: any) {
       setUploadError(err.message || 'Upload failed');
       toast.error(err.message || 'Upload failed');
-    } finally { setIsUploading(false); }
+    }
   };
 
   // ─── Close menus on outside click ───────────────────────────────────────────
@@ -585,7 +562,7 @@ export const SpaciousMarkdownNotepad: React.FC<SpaciousMarkdownNotepadProps> = (
                 className={`${btn} ${isUploading ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}
                 title="Upload image (or paste/drag into editor)">
                 <Upload size={12} className={isUploading ? 'animate-spin' : ''} />
-                <span className="hidden sm:inline">{isUploading ? '…' : 'Image'}</span>
+                <span className="hidden sm:inline">{isUploading ? `Uploading... ${progress}%` : 'Image'}</span>
               </label>
             </div>
 
@@ -676,10 +653,7 @@ export const SpaciousMarkdownNotepad: React.FC<SpaciousMarkdownNotepadProps> = (
                       a: ({ node, ...p }) => <a {...p} target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2 hover:text-primary/80 font-medium transition-colors" />,
                       img: ({ node, ...p }) => {
                         let src = p.src;
-                        if (src?.startsWith('https://local.image/')) {
-                          const b64 = getLocalImage(src);
-                          if (b64) src = `data:image/webp;base64,${b64}`;
-                        } else if (src) {
+                        if (src) {
                           src = convertToRawGitHubUrl(src);
                         }
                         return (

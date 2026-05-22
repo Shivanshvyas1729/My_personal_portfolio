@@ -4,7 +4,7 @@ import { useCMSData } from "@/context/CMSContext";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import defaultProfileImg from "@/assets/profile-placeholder.jpg";
 import Magnetic from "@/components/ui/Magnetic";
-import { convertToRawGitHubUrl } from "@/components/cms/FormHelpers";
+import { getPreviewUrl } from "@/components/cms/FormHelpers";
 
 const Hero = () => {
   const hero = useCMSData(d => d.hero) || initialData.hero;
@@ -96,19 +96,22 @@ const Hero = () => {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.5, duration: 0.8 }}
-          className={`hidden md:block ${(personal?.profileImage?.position || 'right') === 'left' ? 'order-first' : 'order-last'}`}
+          className={`hidden md:block ${((personal?.profileImage as any)?.position || 'right') === 'left' ? 'order-first' : 'order-last'}`}
         >
           <div className="relative w-64 h-64 lg:w-80 lg:h-80">
             <div className="absolute inset-0 rounded-full bg-primary/20 blur-3xl animate-glow-pulse" />
             <img
               src={
-                !personal?.profileImage?.value || personal.profileImage.value.includes('profile-placeholder')
-                  ? defaultProfileImg
-                  : convertToRawGitHubUrl(personal.profileImage.value)
+                (() => {
+                  const url = getPreviewUrl(personal?.profileImage);
+                  if (!url || url.includes('profile-placeholder')) return defaultProfileImg;
+                  return url;
+                })()
               }
               alt={personal?.name || initialData.personal.name}
               width={320}
               height={320}
+              style={{ objectPosition: (personal?.profileImage as any)?.objectPosition || '50% 50%' }}
               className="relative rounded-2xl object-cover w-full h-full glow-border shadow-[0_0_30px_rgba(59,130,246,0.2)]"
             />
           </div>

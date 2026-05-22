@@ -1,13 +1,21 @@
 import { z } from "zod";
 
 // Base common types
+export const CloudinaryMediaSchema = z.object({
+  secureUrl: z.string().url(),
+  publicId: z.string(),
+  resourceType: z.enum(["image", "video", "raw"]).default("image")
+});
+
 const imageSchema = z.union([
+  CloudinaryMediaSchema,
   z.object({
     type: z.enum(["local", "url"]),
     value: z.string().url("Must be a valid URL").or(z.string().min(1, "Required")),
     position: z.enum(["left", "right", "center"]).default("right"),
-  }),
-  z.string().url("Must be a valid URL") // Simple string image fallback logic if needed
+    objectPosition: z.string().optional().default("50% 50%"),
+  }).passthrough(),
+  z.string().url("Must be a valid URL").or(z.string().min(1)) // Simple string image fallback logic if needed
 ]);
 
 // ─── PORTFOLIO SCHEMAS ───
@@ -170,8 +178,11 @@ export const ProjectSchema = z.object({
 
   // Media: type is a dropdown chooser, url and caption are optional
   media: z.array(z.object({
-    type: z.enum(["image", "video"]).default("image"),
-    url: z.string().optional(),
+    secureUrl: z.string().optional(),
+    publicId: z.string().optional(),
+    resourceType: z.enum(["image", "video", "raw"]).optional(),
+    type: z.enum(["image", "video"]).default("image"), // legacy
+    url: z.string().optional(), // legacy
     caption: z.string().optional()
   })).optional(),
 
@@ -179,7 +190,7 @@ export const ProjectSchema = z.object({
   problem_statement: z.string().optional(),
   learning_outcomes: z.array(z.string()).optional(),
   architecture: z.string().optional(),
-  architectureImage: z.string().optional(),
+  architectureImage: imageSchema.optional(),
   resources: z.array(z.object({ label: z.string().optional(), url: z.string().optional() })).optional(),
   howItWorks: z.string().optional(),
   objectives: z.array(z.string()).optional(),

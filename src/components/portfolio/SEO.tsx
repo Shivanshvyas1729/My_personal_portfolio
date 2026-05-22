@@ -21,7 +21,7 @@ const SEO = ({ title, description, image, url }: SEOProps) => {
 
   const defaultTitle = `${personal?.name ?? "Portfolio"} | ${personal?.title ?? "Developer"}`;
   const defaultDesc = heroDescription || aboutDescription || "";
-  const defaultImage = personal?.profileImage?.value || "";
+  const defaultImage = (personal?.profileImage as any)?.secureUrl || (personal?.profileImage as any)?.value || (typeof personal?.profileImage === 'string' ? personal.profileImage : "");
 
   const seoTitle = title ? `${title} | ${personal?.name ?? "Portfolio"}` : defaultTitle;
   const seoDesc = description || defaultDesc;

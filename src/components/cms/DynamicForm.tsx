@@ -1,6 +1,6 @@
 import React from 'react';
 import { z } from 'zod';
-import { Plus, Trash2, Image as ImageIcon, Video, ExternalLink, Upload, FileText, X, Eye, Save, RotateCcw, Sparkles } from 'lucide-react';
+import { Plus, Trash2, Image as ImageIcon, Video, ExternalLink, Upload, FileText, X, Eye, Save, RotateCcw, Sparkles, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Move } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCMSState } from '@/context/CMSContext';
 import { useTheme } from '../../hooks/useTheme';
@@ -12,11 +12,14 @@ import {
   formatLabel, 
   convertToRawGitHubUrl, 
   unwrapSchema, 
-  getSuggestionsForField 
+  getSuggestionsForField,
+  getPreviewUrl
 } from './FormHelpers';
 import { SpaciousMarkdownNotepad } from './SpaciousMarkdownNotepad';
 import { ArrayItemWrapper } from './ArrayItemWrapper';
 import { SettingsAccordionContainer } from './SettingsAccordionContainer';
+import { ImageCropperModal } from './ImageCropperModal';
+import { useCloudinary } from '../../hooks/useCloudinary';
 
 interface DynamicFormProps {
   schema: z.ZodTypeAny;
@@ -26,6 +29,111 @@ interface DynamicFormProps {
   parentData?: any;  // parent object so media url can read sibling 'type'
 }
 
+const MediaUploadDropzone = ({ 
+  fieldKeyLower, 
+  path, 
+  isMediaUrl, 
+  onChange 
+}: { 
+  fieldKeyLower: string;
+  path: string[];
+  isMediaUrl: boolean;
+  onChange: (data: any) => void;
+}) => {
+  const { uploadMedia, isUploading, progress } = useCloudinary();
+  const [uploadError, setUploadError] = React.useState<string | null>(null);
+  const [pendingCropFile, setPendingCropFile] = React.useState<{src: string, file: File, shape: 'rect'|'round', aspect: number, fileName: string} | null>(null);
+
+  const initiateCrop = (file: File) => {
+    const src = URL.createObjectURL(file);
+    const isAvatar = fieldKeyLower.includes('avatar') || fieldKeyLower.includes('profile');
+    const shape = 'rect'; // The user prefers a rectangle crop box rather than a circle overlay
+    const aspect = isAvatar ? 1 : (isMediaUrl ? 16/9 : 1);
+    setPendingCropFile({ src, file, shape, aspect, fileName: file.name });
+  };
+
+  const handleUploadFile = async (file: File) => {
+    setUploadError(null);
+    try {
+      const result = await uploadMedia(file);
+      onChange(result);
+    } catch (err: any) {
+      setUploadError(err.message || "Failed to upload file");
+      toast.error("Upload failed. Check console for details.");
+    }
+  };
+
+  return (
+    <div className="w-full">
+      <div 
+        onDragOver={e => e.preventDefault()}
+        onDrop={e => {
+          e.preventDefault();
+          const file = e.dataTransfer.files?.[0];
+          if (file) {
+            if (file.type.startsWith("image/") && file.type !== "image/gif" && !isMediaUrl) {
+              initiateCrop(file);
+            } else {
+              handleUploadFile(file);
+            }
+          }
+        }}
+        className={`mt-2 border border-dashed rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer transition-all ${
+          isUploading 
+            ? 'bg-muted/40 border-muted-foreground/30 pointer-events-none' 
+            : 'bg-muted/10 border-border/60 hover:bg-muted/20 hover:border-primary/50'
+        }`}
+      >
+        <input 
+          type="file" 
+          accept={isMediaUrl ? "image/*,video/*" : "image/*"}
+          onChange={e => {
+            const file = e.target.files?.[0];
+            if (file) {
+              if (file.type.startsWith("image/") && file.type !== "image/gif" && !isMediaUrl) {
+                initiateCrop(file);
+              } else {
+                handleUploadFile(file);
+              }
+            }
+          }}
+          className="hidden" 
+          id={`upload-file-${fieldKeyLower}-${path.join("-")}`}
+        />
+        <label 
+          htmlFor={`upload-file-${fieldKeyLower}-${path.join("-")}`}
+          className="w-full h-full flex flex-col items-center justify-center cursor-pointer"
+        >
+          <Upload size={18} className="text-muted-foreground mb-1 animate-pulse" />
+          <span className="text-[10px] font-semibold text-muted-foreground text-center">
+            {isUploading ? `Uploading to Cloudinary... ${progress}%` : "Drag & Drop Media or Click to Upload"}
+          </span>
+          {uploadError && (
+            <span className="text-[9px] text-destructive mt-1 font-medium">{uploadError}</span>
+          )}
+        </label>
+      </div>
+      
+      {pendingCropFile && (
+        <ImageCropperModal
+          isOpen={true}
+          imageSrc={pendingCropFile.src}
+          fileName={pendingCropFile.fileName}
+          shape={pendingCropFile.shape}
+          aspectRatio={pendingCropFile.aspect}
+          onCropComplete={(croppedFile) => {
+            setPendingCropFile(null);
+            handleUploadFile(croppedFile);
+          }}
+          onCancel={() => {
+            setPendingCropFile(null);
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
 export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, data, onChange, path = [], parentData }) => {
   let previewData: any = null;
   try {
@@ -34,6 +142,15 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
   } catch (e) {}
 
   const [showSuggestions, setShowSuggestions] = React.useState(false);
+  const [mediaInputMode, setMediaInputMode] = React.useState<'upload' | 'link'>(() => {
+    if (typeof data === 'string') {
+      if (data && !data.includes('res.cloudinary.com')) return 'link';
+    } else if (data) {
+      if (data.secureUrl && !data.secureUrl.includes('res.cloudinary.com')) return 'link';
+      if (data.url && !data.url.includes('res.cloudinary.com')) return 'link';
+    }
+    return 'upload';
+  });
   const unwrapped = unwrapSchema(schema);
   const { theme } = useTheme();
   const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
@@ -462,7 +579,57 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
 
     return (
       <div className="space-y-4">
-        {keys.map((key: string) => (
+        {/* Media Uploader Injection for objects */}
+        {(() => {
+          const isMediaObj = keys.includes('secureUrl') || keys.includes('url') || path[path.length - 1] === 'profileImage' || path[path.length - 1] === 'architectureImage';
+          if (!isMediaObj) return null;
+
+          return (
+            <div className={`p-4 rounded-xl border ${isDark ? 'bg-muted/10 border-border/20' : 'bg-slate-100/50 border-slate-200'} shadow-sm`}>
+              <div className="flex items-center gap-2 mb-3">
+                <button type="button" onClick={() => setMediaInputMode('upload')} className={`px-3 py-1.5 text-[10px] uppercase tracking-wider font-bold rounded-md transition-all ${mediaInputMode === 'upload' ? 'bg-primary text-primary-foreground shadow-sm' : 'bg-muted/50 text-muted-foreground hover:bg-muted/80'}`}>Upload from PC</button>
+                <button type="button" onClick={() => setMediaInputMode('link')} className={`px-3 py-1.5 text-[10px] uppercase tracking-wider font-bold rounded-md transition-all ${mediaInputMode === 'link' ? 'bg-primary text-primary-foreground shadow-sm' : 'bg-muted/50 text-muted-foreground hover:bg-muted/80'}`}>Provide Image Address</button>
+              </div>
+
+              {mediaInputMode === 'upload' && (
+                <>
+                  <MediaUploadDropzone
+                    fieldKeyLower={path[path.length - 1]?.toLowerCase() || ''}
+                    path={path}
+                    isMediaUrl={path.includes('media')}
+                    onChange={(result) => onChange({ ...currentData, ...result })}
+                  />
+                  {(currentData.secureUrl || currentData.url) && (
+                    <div className="mt-4 border-t border-border/30 pt-4">
+                      <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-wider block mb-2">Current Image:</span>
+                      <MediaPreview url={currentData.secureUrl || currentData.url} type={currentData.resourceType || currentData.type} />
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })()}
+
+        {keys.filter(key => {
+          const isMediaObj = keys.includes('secureUrl') || keys.includes('url') || path[path.length - 1] === 'profileImage' || path[path.length - 1] === 'architectureImage';
+          
+          if (key === 'url' && keys.includes('secureUrl')) {
+             if (currentData['url'] && !currentData['secureUrl']) return true;
+             return false;
+          }
+
+          if (isMediaObj && mediaInputMode === 'upload') {
+            if (key === 'secureUrl' || key === 'url' || key === 'publicId' || key === 'resourceType') {
+              return false;
+            }
+          }
+          // Hide internal Cloudinary fields if they are empty (i.e. user provided a manual external URL)
+          if (key === 'publicId' || key === 'resourceType') {
+            return !!currentData[key];
+          }
+          return true;
+        }).map((key: string) => (
           <div key={key} className="space-y-1.5">
             <label className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-wider block">
               {formatLabel(key)}
@@ -651,13 +818,15 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
     // Specific string conditions
     const isUrlField = fieldKeyLower.includes('url') || fieldKeyLower.includes('link') || fieldKeyLower.includes('href') || fieldKeyLower.includes('website');
     const isMediaUrl = fieldKeyLower === 'url' && path.includes('media');
-    const isImage = fieldKeyLower.includes('image') || fieldKeyLower.includes('avatar') || fieldKeyLower.includes('logo') || fieldKeyLower.includes('thumbnail') || fieldKeyLower.includes('icon');
+    
+    // Check if the current field or any parent object in the path implies this is an image URL
+    const isImage = 
+      ['image', 'avatar', 'logo', 'thumbnail', 'icon'].some(k => fieldKeyLower.includes(k)) || 
+      (fieldKeyLower === 'value' && path.some(p => ['image', 'avatar', 'logo', 'icon'].some(k => p.toLowerCase().includes(k))));
+      
     const isLargeText = fieldKeyLower.includes('content') || fieldKeyLower.includes('description') || fieldKeyLower.includes('bio') || fieldKeyLower.includes('readme') || fieldKeyLower.includes('text') || fieldKeyLower.includes('markdown') || fieldKeyLower.includes('statement') || fieldKeyLower.includes('summary');
 
-    // State for local sync and uploads
     const [localValue, setLocalValue] = React.useState(data || '');
-    const [isUploading, setIsUploading] = React.useState(false);
-    const [uploadError, setUploadError] = React.useState<string | null>(null);
 
     // Notepad states
     const [isNotepadOpen, setIsNotepadOpen] = React.useState(false);
@@ -685,6 +854,8 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
       }
     }, [isNotepadOpen, data, draftKey]);
 
+
+
     // Sync local state with global data if global data changes from outside (e.g. undo/redo or sync)
     React.useEffect(() => {
       if (data !== localValue) {
@@ -700,67 +871,7 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
       }
     };
 
-    const handleUploadFile = async (file: File) => {
-      setIsUploading(true);
-      setUploadError(null);
 
-      try {
-        // 1. Client-Side WebP Compression
-        const compressedBase64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onload = (event) => {
-            const img = new Image();
-            img.src = event.target?.result as string;
-            img.onload = () => {
-              const canvas = document.createElement("canvas");
-              const ctx = canvas.getContext("2d");
-              
-              const maxDim = 1200;
-              let w = img.width;
-              let h = img.height;
-              if (w > maxDim || h > maxDim) {
-                if (w > h) {
-                  h = Math.round((h * maxDim) / w);
-                  w = maxDim;
-                } else {
-                  w = Math.round((w * maxDim) / h);
-                  h = maxDim;
-                }
-              }
-
-              canvas.width = w;
-              canvas.height = h;
-              ctx?.drawImage(img, 0, 0, w, h);
-              
-              const dataUrl = canvas.toDataURL("image/webp", 0.8);
-              const base64 = dataUrl.split(",")[1];
-              resolve(base64);
-            };
-            img.onerror = (e) => reject(new Error("Failed to load image for compression"));
-          };
-          reader.onerror = (e) => reject(new Error("File reader error"));
-        });
-
-        // Generate clean file name with timestamp
-        const extension = ".webp";
-        const baseName = file.name.substring(0, file.name.lastIndexOf(".")).replace(/[^a-zA-Z0-9.\-_]/g, "_");
-        const uniqueFileName = `${baseName}_${Date.now()}${extension}`;
-
-        // Defer actual upload to GitHub until 'Apply & Save' is clicked in the CMS Dashboard.
-        // Store base64 in a temporary dictionary to keep the string value clean.
-        const localId = `https://local.image/img_${Date.now()}_${Math.floor(Math.random()*1000)}.webp#filename=${uniqueFileName}`;
-        registerLocalImage(localId, compressedBase64);
-        
-        setLocalValue(localId);
-        onChange(localId);
-        toast.success("Image embedded for preview. Will upload on save.");
-      } catch (err: any) {
-        setUploadError(err.message || "Failed to upload file");
-      } finally {
-        setIsUploading(false);
-      }
-    };
 
     // Color fields detection (e.g. ropeLightColorsDark element or themePrimaryColor)
     const isColorField = fieldKeyLower.includes('color') || fieldKeyLower.includes('accent') || fieldKeyLower.includes('hex') || path.some(p => p.toLowerCase().includes('color'));
@@ -773,6 +884,10 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
           isDark={isDark}
         />
       );
+    }
+
+    if (fieldKey === 'objectPosition') {
+      return null; // Hide the old position picker, we use cropper now
     }
 
     if (fieldKey === 'themeFontFamily') {
@@ -856,9 +971,21 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
     const valueIsUrl = typeof data === 'string' && /^https?:\/\//i.test(data.trim());
     const isClickable = (isUrlField || valueIsUrl) && valueIsUrl;
 
+    // Determine if this string field is a child of a media object (meaning the parent already provides the dropzone)
+    const isChildOfMediaObj = (path.includes('media') || path.includes('profileImage') || path.includes('architectureImage')) && 
+                              (path[path.length - 1] !== 'media' && path[path.length - 1] !== 'profileImage' && path[path.length - 1] !== 'architectureImage');
+
     return (
       <div className="w-full">
-        {isLargeText ? (
+        {(isImage || isMediaUrl) && !isChildOfMediaObj && (
+          <div className="flex items-center gap-2 mb-2 mt-1">
+            <button type="button" onClick={() => setMediaInputMode('upload')} className={`px-2.5 py-1 text-[9px] uppercase tracking-wider font-bold rounded transition-all ${mediaInputMode === 'upload' ? 'bg-primary text-primary-foreground shadow' : 'bg-muted/50 text-muted-foreground hover:bg-muted/80'}`}>Upload from PC</button>
+            <button type="button" onClick={() => setMediaInputMode('link')} className={`px-2.5 py-1 text-[9px] uppercase tracking-wider font-bold rounded transition-all ${mediaInputMode === 'link' ? 'bg-primary text-primary-foreground shadow' : 'bg-muted/50 text-muted-foreground hover:bg-muted/80'}`}>Provide Image Address</button>
+          </div>
+        )}
+
+        {(!(isImage || isMediaUrl) || isChildOfMediaObj || mediaInputMode === 'link') && (
+          isLargeText ? (
           <div className="w-full relative group/editor font-sans">
             <div className="flex items-center justify-between mb-1.5 select-none">
               <span className="text-[10px] text-muted-foreground/80 font-medium italic">
@@ -929,58 +1056,27 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
               </a>
             )}
           </div>
-        )}
+        ))}
 
-        {(isImage || isMediaUrl) && (
-          <div 
-            onDragOver={e => e.preventDefault()}
-            onDrop={e => {
-              e.preventDefault();
-              const file = e.dataTransfer.files?.[0];
-              if (file && file.type.startsWith("image/")) {
-                handleUploadFile(file);
-              } else {
-                setUploadError("Only images are supported.");
-              }
+        {(isImage || isMediaUrl) && !isChildOfMediaObj && mediaInputMode === 'upload' && (
+          <MediaUploadDropzone
+            fieldKeyLower={fieldKeyLower}
+            path={path}
+            isMediaUrl={isMediaUrl}
+            onChange={(result) => {
+              setLocalValue(result.secureUrl);
+              onChange(result.secureUrl);
             }}
-            className={`mt-2 border border-dashed rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer transition-all ${
-              isUploading 
-                ? 'bg-muted/40 border-muted-foreground/30 pointer-events-none' 
-                : 'bg-muted/10 border-border/60 hover:bg-muted/20 hover:border-primary/50'
-            }`}
-          >
-            <input 
-              type="file" 
-              accept="image/*"
-              onChange={e => {
-                const file = e.target.files?.[0];
-                if (file) handleUploadFile(file);
-              }}
-              className="hidden" 
-              id={`upload-file-${fieldKey}-${path.join("-")}`}
-            />
-            <label 
-              htmlFor={`upload-file-${fieldKey}-${path.join("-")}`}
-              className="w-full h-full flex flex-col items-center justify-center cursor-pointer"
-            >
-              <Upload size={18} className="text-muted-foreground mb-1 animate-pulse" />
-              <span className="text-[10px] font-semibold text-muted-foreground">
-                {isUploading ? "Uploading & Compressing..." : "Drag & Drop Image or Click to Upload (Auto-WebP)"}
-              </span>
-              {uploadError && (
-                <span className="text-[9px] text-destructive mt-1 font-medium">{uploadError}</span>
-              )}
-            </label>
-          </div>
+          />
         )}
 
         {/* Show media preview for media[].url field */}
-        {isMediaUrl && localValue && <MediaPreview url={localValue} type={parentData?.type} />}
+        {isMediaUrl && localValue && <MediaPreview url={typeof localValue === 'string' ? localValue : localValue?.secureUrl} type={parentData?.type} />}
         {/* Show image preview for architectureImage and similar */}
         {isImage && localValue && !isMediaUrl && (
           <div className="mt-2 w-full h-28 rounded-lg bg-muted/30 border border-border/50 overflow-hidden flex items-center justify-center relative">
             <img 
-              src={localValue.startsWith('https://local.image/') ? `data:image/webp;base64,${getLocalImage(localValue)}` : convertToRawGitHubUrl(localValue)} 
+              src={getPreviewUrl(typeof localValue === 'string' ? localValue : localValue?.secureUrl)} 
               alt="Preview" 
               className="w-full h-full object-cover animate-in fade-in duration-300"
               onError={(e) => { 

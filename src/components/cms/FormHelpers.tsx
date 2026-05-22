@@ -24,7 +24,7 @@ export const MediaPreview = ({ url, type }: { url: string; type?: string }) => {
         </div>
       ) : (
         <img
-          src={convertToRawGitHubUrl(url)}
+          src={getPreviewUrl(url)}
           alt="Preview"
           className="w-full h-full object-cover"
           onError={(e) => {
@@ -43,6 +43,8 @@ export const MediaPreview = ({ url, type }: { url: string; type?: string }) => {
   );
 };
 
+import { getLocalImage } from '@/lib/localImageStore';
+
 // Convert camelCase to Title Case with custom light concepts fix
 export const formatLabel = (key: string) => {
   if (key.startsWith('ropeLightColors')) return 'Fog Wash Colors ' + (key.endsWith('Dark') ? '(Dark Mode)' : '(Light Mode)');
@@ -56,21 +58,44 @@ export const formatLabel = (key: string) => {
   return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
 };
 
+const APP_BOOT_TIME = Date.now();
+
+// Helper to safely resolve local embedded base64 images for live preview rendering
+export function getPreviewUrl(url: any): string {
+  if (!url) return '';
+  
+  if (typeof url === 'object' && url !== null) {
+    if (url.secureUrl) return url.secureUrl;
+    if (url.value) url = url.value; // Fallback to extract string from legacy object
+  }
+
+  if (typeof url === 'string') {
+    const trimmed = url.trim();
+
+    // Resolve old local unsaved images to base64 if they somehow survived
+    if (trimmed.startsWith('https://local.image/')) {
+      const b64 = getLocalImage(trimmed);
+      if (b64) {
+        return b64.includes('base64,') ? b64 : `data:image/webp;base64,${b64}`;
+      }
+    }
+
+    // If it's a regular URL, return the GitHub raw URL with a cache buster
+    const rawUrl = convertToRawGitHubUrl(url);
+    if (rawUrl.includes('raw.githubusercontent.com')) {
+      return `${rawUrl}?t=${APP_BOOT_TIME}`;
+    }
+    return rawUrl;
+  }
+  
+  return '';
+}
+
 // Helper to convert GitHub blob URLs and relative upload paths to raw.githubusercontent.com direct image URLs
 export function convertToRawGitHubUrl(url: string): string {
   if (!url) return url;
   
   const trimmed = url.trim();
-
-  // Handle relative upload paths by resolving them to GitHub Raw CDN
-  if (trimmed.startsWith('/assets/uploads/')) {
-    const filename = trimmed.substring('/assets/uploads/'.length);
-    return `https://raw.githubusercontent.com/Shivanshvyas1729/My_personal_portfolio/refs/heads/main/public/assets/uploads/${filename}`;
-  }
-  if (trimmed.startsWith('assets/uploads/')) {
-    const filename = trimmed.substring('assets/uploads/'.length);
-    return `https://raw.githubusercontent.com/Shivanshvyas1729/My_personal_portfolio/refs/heads/main/public/assets/uploads/${filename}`;
-  }
 
   // Match: https://github.com/owner/repo/blob/branch/path
   const githubBlobRegex = /^https?:\/\/(?:www\.)?github\.com\/([^/]+)\/([^/]+)\/blob\/([^/]+)\/(.+)$/i;
