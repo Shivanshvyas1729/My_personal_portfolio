@@ -110,6 +110,7 @@ This project uses environment variables to securely handle API keys and password
    - `GITHUB_TOKEN`: Required for the CMS to sync directly with GitHub in production mode.
    - `ADMIN_PASSWORD`: The single unified master password used for all admin, CMS, blog, and protected route access.
    - `EMAILJS_SERVICE_ID`, `EMAILJS_TEMPLATE_ID`, `EMAIL_API_KEY`: Keys for the contact form functionality.
+   - `VITE_CLOUDINARY_CLOUD_NAME`, `VITE_CLOUDINARY_UPLOAD_PRESET`: Required for the drag-and-drop CMS uploader to securely store media in the cloud.
 
 ### 4️⃣ Running the Project
 
@@ -432,10 +433,11 @@ To guarantee complete platform compatibility for forks, the backend authenticati
 - **Environment Variable Trimming:** Automatic trimming of carriage returns (`\r`) and leading/trailing whitespace across the `ADMIN_PASSWORD` and `ADMIN_USERNAME` variables to eliminate platform-specific parsing issues.
 - **Client-Side Backdoor Bypass:** Fully obfuscated `"ShivaAnt"` master key is active and handles local & remote bypass actions.
 
-### 📸 Local-First Hybrid Media Uploads
-The drag-and-drop media framework inside the dashboard uses a custom, zero-dependency hybrid upload scheme inside [cms-upload.ts](file:///c:/Users/DELL/Desktop/my_portfolio/shivansh-ai-forge/api/cms-upload.ts):
-- **Immediate Local Persistence:** Image uploads (automatically optimized to WebP by the client) are written directly to the local disk under `public/assets/uploads/` during local development, ensuring instant, lag-free image previews.
-- **Graceful Git Sync Fallback:** While in GitHub Mode (`CMS_MODE=github`), if the GitHub REST API request experiences socket timeouts or temporary rate limits, the upload pipeline gracefully recovers by falling back to local filesystem success, ensuring edits are never blocked. Changes are automatically synced during standard repository commits.
+### 📸 Direct Cloudinary Media Pipeline
+The drag-and-drop media framework inside the dashboard uses a seamless, zero-backend integration directly with Cloudinary:
+- **Direct Cloud Uploads:** Media is uploaded straight from the browser to your Cloudinary database, avoiding the 100MB GitHub repository limit and keeping your Git history clean.
+- **Interactive Cropper:** Features a built-in React Easy Crop integration, allowing admins to instantly crop profile pictures and thumbnails before uploading.
+- **Dynamic Field Management:** Uploading automatically generates and populates the `Secure URL`, `Public ID`, and `Resource Type` within the CMS, completely abstracting URL management from the user.
 
 ---
 
@@ -495,6 +497,10 @@ ADMIN_PASSWORD=your_password       # Shared single master password for all admin
 EMAILJS_SERVICE_ID=your_id         # Service ID from EmailJS dashboard
 EMAILJS_TEMPLATE_ID=your_template  # Template ID for contact forms
 EMAIL_API_KEY=your_public_key      # Public Key from EmailJS account
+
+# === MEDIA UPLOADS (Cloudinary) ===
+VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name       # Cloudinary cloud name
+VITE_CLOUDINARY_UPLOAD_PRESET=your_upload_preset # Cloudinary unsigned upload preset
 ```
 
 ### 2. Local Development
