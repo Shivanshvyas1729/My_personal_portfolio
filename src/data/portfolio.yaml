@@ -48,10 +48,10 @@ settings:
 
   # Intro / Transition
   introEnabled: true
-  introStyle: "terminal"
+  introStyle: "namaste"
   introPrimaryText: "नमस्ते"
   introSubtitle: "Namaste"
-  introTagline: "Welcome to my universe"
+  introTagline: "Welcome to my universe.."
   introDuration: 4000
 # endregion
 
