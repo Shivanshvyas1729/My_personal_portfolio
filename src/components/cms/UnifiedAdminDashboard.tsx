@@ -497,9 +497,10 @@ const INTRO_STYLES: { key: IntroStyleKey; label: string; icon: string; desc: str
 interface IntroSettingsPanelProps {
   settings: Record<string, any>;
   onUpdate: (updated: Record<string, any>) => void;
+  children?: React.ReactNode;
 }
 
-const IntroSettingsPanel: React.FC<IntroSettingsPanelProps> = ({ settings, onUpdate }) => {
+const IntroSettingsPanel: React.FC<IntroSettingsPanelProps> = ({ settings, onUpdate, children }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const enabled = settings.introEnabled !== false;
@@ -675,6 +676,7 @@ const IntroSettingsPanel: React.FC<IntroSettingsPanelProps> = ({ settings, onUpd
               </div>
             </>
           )}
+          {children}
         </div>
       )}
     </div>
@@ -1344,7 +1346,33 @@ export const UnifiedAdminDashboard = () => {
                     <IntroSettingsPanel
                       settings={previewData.settings || {}}
                       onUpdate={(updated) => updatePreviewSection('settings', updated)}
-                    />
+                    >
+                      <div className="mt-6 flex justify-end gap-3 pt-4 border-t border-border/30">
+                        {isLocalEnvironment && (
+                          <button
+                            disabled={isLoading}
+                            onClick={() => saveContent('settings', previewData.settings || {})}
+                            className="px-4 py-2.5 bg-muted text-foreground border border-border/60 rounded-xl font-semibold text-sm flex items-center gap-2 hover:bg-muted/80 disabled:opacity-50 transition-colors"
+                          >
+                            {isLoading ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
+                            Save Local
+                          </button>
+                        )}
+                        <button
+                          disabled={isLoading}
+                          onClick={async () => {
+                            const prevForce = forceLocalMode;
+                            setForceLocalMode(false);
+                            await saveContent('settings', previewData.settings || {});
+                            setForceLocalMode(prevForce);
+                          }}
+                          className="px-4 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm flex items-center gap-2 hover:bg-primary/90 disabled:opacity-50 transition-colors shadow-lg"
+                        >
+                          {isLoading ? <RefreshCw size={14} className="animate-spin" /> : <Github size={14} />}
+                          Push to GitHub
+                        </button>
+                      </div>
+                    </IntroSettingsPanel>
                   </div>
 
                   {/* ── Global Aesthetic Settings ── */}

@@ -285,10 +285,20 @@ export const CMSProvider = ({ children }: { children: ReactNode }) => {
   }, [pushToUndo]);
 
   const updateLiveSection = useCallback((section: string, data: any) => {
-    setLiveData(prev => ({
-      ...prev,
-      [section]: data
-    } as PortfolioData));
+    setLiveData(prev => {
+      const next = {
+        ...prev,
+        [section]: data
+      } as PortfolioData;
+      
+      try {
+        localStorage.setItem("cms-cached-portfolio-data", JSON.stringify(next));
+      } catch (err) {
+        console.warn("Failed to update local storage cache", err);
+      }
+      
+      return next;
+    });
     // Also sync previewData so the CRM panel stays consistent
     setPreviewData(prev => ({
       ...prev,

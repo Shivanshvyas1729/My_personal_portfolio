@@ -39,7 +39,7 @@ const Particle = ({ delay, color }: { delay: number; color: string }) => {
   return (
     <motion.div
       className="absolute rounded-full pointer-events-none"
-      style={{ width: size, height: size, backgroundColor: color, boxShadow: `0 0 ${size * 3}px ${color}`, left: "50%", top: "50%", translateX: "-50%", translateY: "-50%" }}
+      style={{ width: size, height: size, backgroundColor: color, left: "50%", top: "50%", translateX: "-50%", translateY: "-50%", willChange: "transform, opacity" }}
       initial={{ x: 0, y: 0, opacity: 0, scale: 0 }}
       animate={{ x: [0, x * 0.4, x], y: [0, y * 0.4, y], opacity: [0, 1, 0], scale: [0, 1.6, 0] }}
       transition={{ duration: 1.8 + Math.random() * 0.8, delay, ease: [0.2, 0.8, 0.4, 1] }}
@@ -60,17 +60,17 @@ const NamasteStyle = ({ primaryText, subtitle, tagline, colors, phase }: {
     return () => clearTimeout(t);
   }, []);
   const allColors = [...colors, ...DEFAULT_PALETTES.namaste].slice(0, 8);
-  const particles = Array.from({ length: 42 }, (_, i) => ({ id: i, color: allColors[i % allColors.length], delay: i * 0.018 }));
+  const particles = Array.from({ length: 20 }, (_, i) => ({ id: i, color: allColors[i % allColors.length], delay: i * 0.035 }));
 
   return (
     <>
       {/* Ambient orbs */}
       <motion.div className="absolute w-[600px] h-[600px] rounded-full pointer-events-none"
-        style={{ background: `radial-gradient(circle, ${colors[0]}20 0%, ${colors[1]}10 50%, transparent 70%)`, filter: "blur(40px)" }}
+        style={{ background: `radial-gradient(circle, ${colors[0]}20 0%, ${colors[1]}10 50%, transparent 70%)`, willChange: "transform, opacity" }}
         animate={{ scale: [1, 1.15, 1], opacity: [0.5, 1, 0.5] }}
         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} />
       <motion.div className="absolute w-[350px] h-[350px] rounded-full pointer-events-none"
-        style={{ background: `radial-gradient(circle, ${colors[2]}15 0%, transparent 70%)`, filter: "blur(60px)" }}
+        style={{ background: `radial-gradient(circle, ${colors[2]}15 0%, transparent 70%)`, willChange: "transform, opacity" }}
         animate={{ scale: [1.1, 0.9, 1.1], opacity: [0.3, 0.8, 0.3], x: [-30, 30, -30], y: [20, -20, 20] }}
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} />
 
@@ -82,13 +82,13 @@ const NamasteStyle = ({ primaryText, subtitle, tagline, colors, phase }: {
           </linearGradient>
         </defs>
         <motion.path d="M 100,850 C 100,350 900,650 900,150" stroke={`${colors[0]}12`} strokeWidth="2" strokeLinecap="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.2, ease: "easeOut" }} />
-        <motion.path d="M 100,850 C 100,350 900,650 900,150" stroke="url(#ni-grad)" strokeWidth="5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 12px rgba(255,255,255,0.3))' }}
+        <motion.path d="M 100,850 C 100,350 900,650 900,150" stroke="url(#ni-grad)" strokeWidth="5" strokeLinecap="round"
           initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: [0, 1, 1, 1], opacity: [0, 0.95, 0.5, 0] }}
-          transition={{ times: [0, 0.35, 0.65, 1], duration: 2.4, ease: [0.25, 1, 0.5, 1] }} />
-        <motion.path d="M 100,850 C 100,350 900,650 900,150" stroke="white" strokeWidth="14" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 12px rgba(255,255,255,0.5))' }}
+          transition={{ times: [0, 0.35, 0.65, 1], duration: 2.4, ease: [0.25, 1, 0.5, 1] }} style={{ willChange: "stroke-dashoffset, opacity" }} />
+        <motion.path d="M 100,850 C 100,350 900,650 900,150" stroke="white" strokeWidth="14" strokeLinecap="round" opacity="0.3"
           initial={{ pathLength: 0.12, pathOffset: -0.12, opacity: 0 }}
-          animate={{ pathOffset: [-0.12, 1.12], opacity: [0, 1, 1, 0] }}
-          transition={{ pathOffset: { duration: 0.85, ease: [0.2, 1, 0.4, 1] }, opacity: { times: [0, 0.05, 0.85, 1], duration: 0.85 } }} />
+          animate={{ pathOffset: [-0.12, 1.12], opacity: [0, 0.6, 0.6, 0] }}
+          transition={{ pathOffset: { duration: 0.85, ease: [0.2, 1, 0.4, 1] }, opacity: { times: [0, 0.05, 0.85, 1], duration: 0.85 } }} style={{ willChange: "stroke-dashoffset, opacity" }} />
       </svg>
 
       {/* Particles */}
@@ -99,17 +99,17 @@ const NamasteStyle = ({ primaryText, subtitle, tagline, colors, phase }: {
       {/* Text */}
       <div className="relative z-30 flex flex-col items-center gap-4">
         <motion.div className="absolute rounded-full pointer-events-none"
-          style={{ width: 300, height: 300, background: `radial-gradient(circle, ${colors[0]}25 0%, transparent 70%)`, filter: "blur(20px)" }}
+          style={{ width: 300, height: 300, background: `radial-gradient(circle, ${colors[0]}25 0%, transparent 70%)` }}
           initial={{ scale: 0, opacity: 0 }} animate={{ scale: [0, 1.4, 1.1], opacity: [0, 0.9, phase === "exit" ? 0 : 0.6] }}
           transition={{ duration: 1.0, ease: [0.2, 1, 0.4, 1] }} />
         <div className="flex gap-1">
           {letters.map((letter, i) => (
             <motion.span key={i} className="font-heading font-extralight tracking-wide"
-              style={{ fontSize: "clamp(2.6rem, 7vw, 5rem)", color: colors[i % colors.length], textShadow: `0 0 30px ${colors[i % colors.length]}cc, 0 0 60px ${colors[i % colors.length]}66`, display: "inline-block" }}
-              initial={{ opacity: 0, y: 32, scale: 0.7, filter: "blur(12px)" }}
+              style={{ fontSize: "clamp(2.6rem, 7vw, 5rem)", color: colors[i % colors.length], textShadow: `0 0 30px ${colors[i % colors.length]}aa`, display: "inline-block", willChange: "transform, opacity" }}
+              initial={{ opacity: 0, y: 32, scale: 0.7 }}
               animate={phase === "exit"
-                ? { opacity: 0, y: -20, scale: 0.85, filter: "blur(8px)" }
-                : { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+                ? { opacity: 0, y: -20, scale: 0.85 }
+                : { opacity: 1, y: 0, scale: 1 }}
               transition={phase === "exit"
                 ? { duration: 0.5, delay: i * 0.04, ease: [0.4, 0, 1, 1] }
                 : { duration: 0.7, delay: 0.2 + i * 0.08, ease: [0.2, 1, 0.4, 1] }}>
