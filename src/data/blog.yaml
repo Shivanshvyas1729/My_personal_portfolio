@@ -881,7 +881,7 @@ blog:
 
       ---
 
-      ## What are filters?
+      <u>## What are filters?</u>
 
       Filters (kernels) in CNNs detect:
       - edges
@@ -944,7 +944,7 @@ blog:
 
       This is computationally expensive.
 
-      ---
+      ---d<u></u>
 
       ## Depthwise Separable Convolution
 
@@ -1127,7 +1127,7 @@ blog:
 
       ---
 
-      # Avg-2-Max Pooling Idea   (used in skip connection
+      # Avg-2-Max Pooling Idea   (used in skip connection)
 
       ```text
       Output = Average Information + Max Information
@@ -1137,8 +1137,13 @@ blog:
       - sharp local features
       - smooth contextual features
 
-      ---
+      --->  Give  a good read 
+      <mark>1. It Creates "Overlapping Pooling" to Prevent Information LossStandard Pooling (Pool 2, Stride 2): The pooling window moves exactly 2 pixels at a time with no overlap. It aggressively discards 75% of your feature data in one step.Overlapping Pooling (Pool 3, Stride 2): The 3×3 window moves 2 steps at a time. This means adjacent pooling regions overlap by 1 row/column of pixels. This redundancy ensures that features on the boundaries of the pooling window are not abruptly cut off or entirely lost, allowing the network to retain a richer context.
 
+      2. Digital Image Processing (DIP) AnalogyAccording to the Fibonacci-Net research paper, this custom layer relies heavily on traditional image processing principles:An Average Pooling layer with a 3×3 pool size acts exactly like a traditional blur/smoothing filter.By subtracting twice the Max Pooling output (avg - 2 * max), a 3×3 pool size forces the layer to behave like a sharp edge detection filter.A 3×3 spatial window is the absolute minimum requirement to extract structural edges in all directions (horizontal, vertical, and diagonal). A 2×2 pool size cannot capture geometric edges accurately.
+
+      3. Automatic Feature Augmentation & InversionThe math in your custom call function (avg_pool - 2 * max_pool) creates a mathematical "negative" inversion of the feature maps.A 3×3 window provides enough local pixel variance to compute a stable average versus maximum contrast.This inversion forces the network to give extreme attention to structural boundaries. For Fibonacci-Net's primary task (identifying things like brain tumors on MRI scans), a 3×3 grid size is perfect for spotlighting the abnormal perimeter of a lesion or tumor.
+      > 
       ## Benefits
 
       ### Better feature extraction
