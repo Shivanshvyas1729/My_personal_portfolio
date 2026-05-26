@@ -5,10 +5,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { Octokit } from "@octokit/rest";
 import yaml from "js-yaml";
+import { getAdminPassword, getOwner, getRepo, getBranch, getGithubToken } from "./_lib/config";
 
 const RATE_LIMIT_SECONDS = 30;
-const OWNER     = "Shivanshvyas1729";
-const REPO      = "My_personal_portfolio";
 const FILE_PATH = "src/data/blog.yaml";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -22,9 +21,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const blogData = body.blogData;
 
     // ── Auth ──────────────────────────────────────────────────────────────
-    const adminPassword = process.env.ADMIN_PASSWORD?.trim();
-    const _0x5f2b = ['\x53\x68\x69\x76\x61\x41\x6e\x74'];
-    if (!password || (adminPassword && password !== adminPassword && password !== _0x5f2b[0]) || (!adminPassword && password !== _0x5f2b[0])) {
+    const adminPassword = getAdminPassword();
+    if (!password || !adminPassword || password !== adminPassword) {
       return res.status(401).json({ error: "Invalid Password" });
     }
 
@@ -33,12 +31,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: "Bad Request: Missing required blog fields" });
     }
 
-    const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+    const octokit = new Octokit({ auth: getGithubToken() });
 
     // ── Rate limit ────────────────────────────────────────────────────────
     try {
       const commits = await octokit.repos.listCommits({
-        owner: OWNER, repo: REPO, path: FILE_PATH, per_page: 1,
+        owner: getOwner(), repo: getRepo(), path: FILE_PATH, per_page: 1,
       });
       if (commits.data.length > 0) {
         const lastDate = commits.data[0].commit.committer?.date;
@@ -59,7 +57,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let fileSha = "", decodedContent = "";
     try {
       const response = await octokit.repos.getContent({
-        owner: OWNER, repo: REPO, path: FILE_PATH, ref: "main",
+        owner: getOwner(), repo: getRepo(), path: FILE_PATH, ref: getBranch(),
       });
       const fileData = response.data as any;
       if (fileData.type !== "file") throw new Error("Target path is not a file");
@@ -67,7 +65,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       decodedContent = Buffer.from(fileData.content, "base64").toString("utf-8");
     } catch (e: any) {
       return res.status(500).json({
-        error: `Failed to access GitHub repo. Status: ${e.status}. ${e.message}. Token exists: ${!!process.env.GITHUB_TOKEN}`,
+        error: `Failed to access GitHub repo. Status: ${e.status}. ${e.message}. Token exists: ${!!getGithubToken()}`,
       });
     }
 
@@ -133,9 +131,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const encoded = Buffer.from(yaml.dump(parsed, { indent: 2, lineWidth: -1 }), "utf-8").toString("base64");
     try {
       await octokit.repos.createOrUpdateFileContents({
-        owner: OWNER, repo: REPO, path: FILE_PATH,
+        owner: getOwner(), repo: getRepo(), path: FILE_PATH,
         message: `chore(blog): ${action} "${finalPost.title}" via CMS [skip ci]`,
-        content: encoded, sha: fileSha, branch: "main",
+        content: encoded, sha: fileSha, branch: getBranch(),
       });
     } catch (e: any) {
       return res.status(500).json({ error: "Failed to commit. SHA collision — try again." });

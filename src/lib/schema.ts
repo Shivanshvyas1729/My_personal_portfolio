@@ -15,8 +15,11 @@ const imageSchema = z.union([
     position: z.enum(["left", "right", "center"]).default("right"),
     objectPosition: z.string().optional().default("50% 50%"),
   }).passthrough(),
-  z.string().url("Must be a valid URL").or(z.string().min(1)) // Simple string image fallback logic if needed
+  z.string().url("Must be a valid URL").or(z.string()), // allow ANY string including empty (cleared fields)
+  z.null(),                                            // allow null (YAML null / cleared)
+  z.undefined(),                                       // allow undefined
 ]);
+
 
 // ─── PORTFOLIO SCHEMAS ───
 
@@ -190,7 +193,7 @@ export const ProjectSchema = z.object({
   problem_statement: z.string().optional(),
   learning_outcomes: z.array(z.string()).optional(),
   architecture: z.string().optional(),
-  architectureImage: imageSchema.optional(),
+  architectureImage: imageSchema.optional().nullable(), // nullable so YAML null/"" never blocks sync
   resources: z.array(z.object({ label: z.string().optional(), url: z.string().optional() })).optional(),
   howItWorks: z.string().optional(),
   objectives: z.array(z.string()).optional(),

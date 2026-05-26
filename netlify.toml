@@ -3,7 +3,7 @@
   command         = "npm run build"
   publish         = "dist"
   functions       = "netlify/functions"
-  ignore          = "git log -1 --pretty=%B | grep -q '\\[skip ci\\]'"
+  ignore          = "bash scripts/should-deploy.sh"
 
 # ─── SPA Routing: all non-function paths fall back to index.html ─────────────
 [[redirects]]

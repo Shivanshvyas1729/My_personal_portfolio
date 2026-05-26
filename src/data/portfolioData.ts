@@ -3,6 +3,7 @@ import rawData from "./portfolio.yaml?raw";
 import rawProjects from "./projects.yaml?raw";
 import rawBlog from "./blog.yaml?raw";
 import YAML from "yaml";
+import { githubConfig } from "../config";
 
 export interface CloudinaryMedia {
   secureUrl: string;
@@ -237,7 +238,7 @@ export async function getLivePortfolioData(): Promise<PortfolioData> {
   if (typeof window === 'undefined') return portfolioData; // SSR fallback
 
   try {
-    const RAW_BASE = "https://raw.githubusercontent.com/Shivanshvyas1729/My_personal_portfolio/main/src/data";
+    const RAW_BASE = githubConfig.getRawBaseUrl();
     const [pRes, sRes, bRes] = await Promise.all([
       fetch(`${RAW_BASE}/portfolio.yaml?t=${Date.now()}`),
       fetch(`${RAW_BASE}/projects.yaml?t=${Date.now()}`),

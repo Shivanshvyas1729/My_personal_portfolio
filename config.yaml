@@ -1,0 +1,16 @@
+# ============================================================
+# PROJECT CONFIGURATION (Priority 2 Fallback)
+# Values here are used ONLY if not found in .env (Priority 1)
+# or deployment platform variables (Priority 3).
+# ============================================================
+
+# GitHub Repository Settings
+github_owner: Shivanshvyas1729
+github_repo: My_personal_portfolio
+github_branch: main
+
+# CMS Settings
+cms:
+  owner: Shivanshvyas1729
+  repo: My_personal_portfolio
+  branch: main

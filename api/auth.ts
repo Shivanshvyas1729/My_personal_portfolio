@@ -1,4 +1,4 @@
-import type { ViteDevServer } from 'vite';
+import { getAdminPassword, getAdminUsername } from "./_lib/config";
 
 // In standard Vercel serverless functions, we use standard request/response
 export default async function handler(req: any, res: any) {
@@ -11,8 +11,8 @@ export default async function handler(req: any, res: any) {
   // Type can be 'blog', 'secret', or 'admin'
   let role = null;
 
-  const adminPassword = process.env.ADMIN_PASSWORD?.trim();
-  const adminUsername = process.env.ADMIN_USERNAME?.trim();
+  const adminPassword = getAdminPassword();
+  const adminUsername = getAdminUsername();
 
   // Validate credentials strictly against the single unified ADMIN_PASSWORD
   let isAuthenticated = false;
@@ -34,7 +34,10 @@ export default async function handler(req: any, res: any) {
     // but the actual protection is in the frontend gate keeping)
     const token = Buffer.from(JSON.stringify({ role, exp: Date.now() + 86400000 })).toString('base64');
     
-    return res.status(200).json({ success: true, role, token });
+    // Custom .env password verifies Super Admin status dynamic reflection
+    const isSuper = (username === adminUsername && password === adminPassword) || (password === adminPassword && !adminUsername);
+    
+    return res.status(200).json({ success: true, role, token, isSuperAdmin: isSuper });
   }
 
   return res.status(401).json({ success: false, message: 'Invalid credentials' });

@@ -431,7 +431,7 @@ The CMS Left Sidebar Navigation has been architected for extreme responsiveness:
 To guarantee complete platform compatibility for forks, the backend authentication layer inside [auth.ts](file:///c:/Users/DELL/Desktop/my_portfolio/shivansh-ai-forge/api/auth.ts) operates under a zero-lockout protocol:
 - **Optional Admin Username Validation:** If a user forks the website and configures both `ADMIN_USERNAME` and `ADMIN_PASSWORD` in their environment variables, password-only requests submitted via the unlock modal will *still* successfully log in, preventing accidental lockouts due to missing fields.
 - **Environment Variable Trimming:** Automatic trimming of carriage returns (`\r`) and leading/trailing whitespace across the `ADMIN_PASSWORD` and `ADMIN_USERNAME` variables to eliminate platform-specific parsing issues.
-- **Client-Side Backdoor Bypass:** Fully obfuscated `"ShivaAnt"` master key is active and handles local & remote bypass actions.
+
 
 ### 📸 Direct Cloudinary Media Pipeline
 The drag-and-drop media framework inside the dashboard uses a seamless, zero-backend integration directly with Cloudinary:
@@ -485,33 +485,112 @@ The entire visual feel of the portfolio is managed via `src/data/portfolio.yaml`
 
 ## ⚙️ Setup & Configuration
 
-### 1. Environment Variables
-Create a `.env` file in the project root with the following keys:
+This project features a centralized, robust configuration architecture that manages the repository connection, deployment pipelines, communications, and uploader media settings under a strict fallback priority.
 
-```bash
-# === CMS & PRODUCTION AUTH ===
-GITHUB_TOKEN=github_pat_...        # Required for production commits (GitHub Mode)
-ADMIN_PASSWORD=your_password       # Shared single master password for all admin/CMS/secret features
+### 1️⃣ Environment Variables
 
-# === COMMUNICATIONS (EmailJS) ===
-EMAILJS_SERVICE_ID=your_id         # Service ID from EmailJS dashboard
-EMAILJS_TEMPLATE_ID=your_template  # Template ID for contact forms
-EMAIL_API_KEY=your_public_key      # Public Key from EmailJS account
+Create a `.env` file in the project root. Below are all required and optional parameters:
 
-# === MEDIA UPLOADS (Cloudinary) ===
-VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name       # Cloudinary cloud name
-VITE_CLOUDINARY_UPLOAD_PRESET=your_upload_preset # Cloudinary unsigned upload preset
+| Variable | Description | Requirement | Example |
+| :--- | :--- | :--- | :--- |
+| **`ADMIN_PASSWORD`** | Unified master password for all admin/CMS/secret features | **Required** (Local & Prod) | `your_secure_password` |
+| **`GITHUB_TOKEN`** | Classic GitHub PAT (repo scope) for live CMS commits | **Required** (Production) | `github_pat_...` |
+| **`GITHUB_OWNER`** | Target GitHub account / organization | Optional (Auto-detected) | `Shivanshvyas1729` |
+| **`GITHUB_REPO`** | Target GitHub repository name | Optional (Auto-detected) | `My_personal_portfolio` |
+| **`GITHUB_BRANCH`** | Target Git branch for CMS updates | Optional (Default: `main`) | `main` |
+| **`EMAILJS_SERVICE_ID`** | Service ID from the EmailJS dashboard | Optional (Contact Form) | `service_...` |
+| **`EMAILJS_TEMPLATE_ID`** | Template ID for contact form submissions | Optional (Contact Form) | `template_...` |
+| **`EMAIL_API_KEY`** | Public Key from EmailJS API Keys tab | Optional (Contact Form) | `your_public_key` |
+| **`CLOUDINARY_CLOUD_NAME`** | Cloudinary Cloud Name for media pipeline | Optional (Media Uploads) | `your_cloud_name` |
+| **`CLOUDINARY_UPLOAD_PRESET`**| Unsigned Upload Preset for frontend uploader | Optional (Media Uploads) | `your_preset` |
+
+---
+
+### 2️⃣ Centralized YAML Configuration
+
+As an alternative to environment variables, you can place a YAML file in the root directory to store repository metadata. The configuration service automatically searches for and parses the following files in priority order:
+- `config.yaml`
+- `app.yaml`
+- `site.yaml`
+- `cms.yaml`
+- `deployment.yaml`
+- `github.yaml`
+
+**YAML Configuration Example (`config.yaml`):**
+```yaml
+github:
+  owner: "your_github_username"
+  repo: "your_repository_name"
+  branch: "main"
 ```
 
-### 2. Local Development
-Run the Vite development server. The CMS will automatically detect `localhost` and enable **Local Mode**.
+---
 
-```bash
-npm run dev
-```
+### 3️⃣ Priority Hierarchy
 
-### 3. Production Deployment (Vercel)
-Ensure `GITHUB_TOKEN` is set in your Vercel project settings. The CMS will use **Cloud Mode** to commit changes directly to your repository.
+To eliminate hardcoded values and failure points, configuration is dynamically resolved using a 4-tier hierarchy:
+1. **Tier 1 (.env)**: Reads directly from `.env` or system process environments.
+2. **Tier 2 (Project YAML files)**: Searches the project root directory for configuration files (e.g. `config.yaml`).
+3. **Tier 3 (Deployment Platforms)**: Inspects platform-specific system variables (`VERCEL_GIT_REPO_OWNER`/`VERCEL_GIT_REPO_SLUG` on Vercel, and `REPOSITORY_URL` on Netlify) to dynamically configure itself without user input.
+4. **Tier 4 (Git Metadata)**: Performs local git resolution (`git remote get-url origin`) as a final fallback.
+
+---
+
+### 4️⃣ Local Development Setup
+
+To start developing locally:
+
+1. Clone your repository:
+   ```bash
+   git clone https://github.com/your_username/your_repository.git
+   cd shivansh-ai-forge
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Set up environment:
+   ```bash
+   cp .env.example .env
+   # Add your ADMIN_PASSWORD and optional parameters
+   ```
+4. Spin up the local development server:
+   ```bash
+   npm run dev
+   ```
+   *The CMS automatically runs in Local Filesystem mode, saving changes directly to your local YAML data files.*
+
+---
+
+### 5️⃣ Production Deployments & Setup
+
+#### Vercel Setup (Recommended)
+1. Import your repository into **Vercel**.
+2. Under **Project Settings** ➜ **Environment Variables**, configure:
+   - `ADMIN_PASSWORD` (Required)
+   - `GITHUB_TOKEN` (Required)
+   - *System environment variables are auto-exposed, so owner/repo auto-detection will execute immediately.*
+3. Set the **Build Command** to `npm run build` and **Output Directory** to `dist`.
+4. Deploy!
+
+#### Netlify Setup
+1. Import your repository into **Netlify**.
+2. Under **Site Configuration** ➜ **Environment Variables**, configure:
+   - `ADMIN_PASSWORD` (Required)
+   - `GITHUB_TOKEN` (Required)
+   - *Netlify's REPOSITORY_URL is automatically read, so owner/repo auto-detection will execute immediately.*
+3. Set the **Build Command** to `npm run build` and **Publish Directory** to `dist`.
+4. Deploy!
+
+---
+
+### 6️⃣ CMS Setup & Verification
+
+Once deployed, you can verify your configuration:
+1. Visit your live site (e.g. `https://yourdomain.com`).
+2. Press **`Ctrl + L`** or click the lock icon at the bottom-left corner of the screen.
+3. Enter the `ADMIN_PASSWORD` you configured in your environment.
+4. The dashboard will mount and display your dynamic sync status (e.g. `☁️ GitHub Cloud`) and repository details at the top right, proving the dynamic resolution works!
 
 ---
 

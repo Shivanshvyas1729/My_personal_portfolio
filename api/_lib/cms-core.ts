@@ -4,9 +4,8 @@ import fs from "fs";
 import path from "path";
 import { execSync } from "child_process";
 
-// ─── Constants & Configuration ──────────────────────────────────────────────
-export const OWNER = "Shivanshvyas1729";
-export const REPO = "My_personal_portfolio";
+import { getOwner, getRepo, getBranch, getGithubToken, getIsLocalMode } from "./config";
+
 export const RATE_LIMIT_SECONDS = 30;
 
 // Path Security & Normalization
@@ -62,20 +61,13 @@ export interface CmsApiResult {
   data?: any;
 }
 
-const IS_DEV = process.env.NODE_ENV === "development";
-const CMS_MODE = process.env.CMS_MODE || "github";
-
-/**
- * Determine if we should use Local Filesystem or GitHub API.
- */
-const dataDirExists = fs.existsSync(BASE_DATA_DIR);
-const isDeployed = process.env.NODE_ENV === "production" || !!process.env.VERCEL || !!process.env.NETLIFY;
-export const useLocalMode = !isDeployed && ((CMS_MODE === "local" && dataDirExists) || (IS_DEV && dataDirExists && CMS_MODE !== "github"));
-console.log(`[CMS INIT] NODE_ENV=${process.env.NODE_ENV} VERCEL=${process.env.VERCEL} CMS_MODE=${CMS_MODE} isDeployed=${isDeployed} useLocalMode=${useLocalMode}`);
+export function getUseLocalMode(): boolean {
+  return getIsLocalMode();
+}
 
 export function getOctokit() {
-  const token = process.env.GITHUB_TOKEN;
-  if (!token && !useLocalMode) {
+  const token = getGithubToken();
+  if (!token && !getUseLocalMode()) {
      throw new Error("GITHUB_TOKEN is missing. Cannot use GitHub mode.");
   }
   return new Octokit({ auth: token });
@@ -104,10 +96,10 @@ function safelyUpdateNode(doc: Document, pathKeys: string[], data: any) {
 
 // ─── Mode Implementations ───────────────────────────────────────────────────
 
-async function fetchFromGitHub(octokit: Octokit, filePath: string, ref: string = "main") {
+async function fetchFromGitHub(octokit: Octokit, filePath: string, ref: string = getBranch()) {
   const response = await octokit.repos.getContent({
-    owner: OWNER,
-    repo: REPO,
+    owner: getOwner(),
+    repo: getRepo(),
     path: filePath,
     ref: ref,
   });
@@ -129,6 +121,7 @@ export async function coreUpdateYamlSection(
   providedSha: string | undefined,
   isSafeMode: boolean,
 ): Promise<CmsApiResult> {
+  const useLocalMode = getUseLocalMode();
   if (!validateCmsFilePath(filePath)) {
     logCms(`🚨 SECURITY: Blocked unauthorized write to: ${filePath}`);
     return { success: false, error: `Access denied: ${filePath} is not an authorized CMS data file`, code: 403, mode: useLocalMode ? "local" : "github" };
@@ -211,13 +204,13 @@ export async function coreUpdateYamlSection(
       const octokit = getOctokit();
       try {
         const result = await octokit.repos.createOrUpdateFileContents({
-          owner: OWNER,
-          repo: REPO,
+          owner: getOwner(),
+          repo: getRepo(),
           path: filePath,
           message: `feat: update ${sectionKey} content [skip ci]`,
           content: Buffer.from(updatedContent, "utf-8").toString("base64"),
           sha,
-          branch: "main",
+          branch: getBranch(),
         });
         sha = (result.data as any).content.sha;
         logCms(`GitHub commit successful. New SHA: ${sha}`);
@@ -243,6 +236,7 @@ export async function coreUpdateYamlSection(
 }
 
 export async function coreGetLatestData(filePath: string): Promise<CmsApiResult> {
+  const useLocalMode = getUseLocalMode();
   if (!validateCmsFilePath(filePath)) {
     logCms(`🚨 SECURITY: Blocked unauthorized read from: ${filePath}`);
     return { success: false, error: `Access denied: ${filePath} is not an authorized CMS data file`, code: 403, mode: useLocalMode ? "local" : "github" };
@@ -273,6 +267,7 @@ export async function coreGetLatestData(filePath: string): Promise<CmsApiResult>
 }
 
 export async function coreGetHistory(filePath: string): Promise<CmsApiResult> {
+  const useLocalMode = getUseLocalMode();
   if (!validateCmsFilePath(filePath)) {
     logCms(`🚨 SECURITY: Blocked unauthorized history request for: ${filePath}`);
     return { success: false, error: `Access denied: ${filePath} is not an authorized CMS data file`, code: 403, mode: useLocalMode ? "local" : "github" };
@@ -309,8 +304,8 @@ export async function coreGetHistory(filePath: string): Promise<CmsApiResult> {
   try {
     const octokit = getOctokit();
     const commits = await octokit.repos.listCommits({
-      owner: OWNER,
-      repo: REPO,
+      owner: getOwner(),
+      repo: getRepo(),
       path: filePath,
       per_page: 4,
     });
@@ -333,6 +328,7 @@ export async function coreGetHistory(filePath: string): Promise<CmsApiResult> {
 }
 
 export async function coreGetCommitData(filePath: string, sha: string): Promise<CmsApiResult> {
+  const useLocalMode = getUseLocalMode();
   if (!validateCmsFilePath(filePath)) {
     logCms(`🚨 SECURITY: Blocked unauthorized commit snapshot request for: ${filePath}`);
     return { success: false, error: `Access denied: ${filePath} is not an authorized CMS data file`, code: 403, mode: useLocalMode ? "local" : "github" };

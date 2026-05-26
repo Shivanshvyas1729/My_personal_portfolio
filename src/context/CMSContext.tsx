@@ -3,6 +3,7 @@ import { portfolioData as initialPortfolioData, PortfolioData } from "@/data/por
 import { logger, AuditEntry } from "@/lib/logger";
 import { toast } from "sonner";
 import YAML from "yaml";
+import { githubConfig } from "../config";
 
 interface CMSState {
   previewMode: boolean;
@@ -192,7 +193,7 @@ export const CMSProvider = ({ children }: { children: ReactNode }) => {
         // Completely bypasses Vercel Serverless execution and GitHub API rate limits
         setCmsMode("github");
         
-        const RAW_BASE = "https://raw.githubusercontent.com/Shivanshvyas1729/My_personal_portfolio/main/src/data";
+        const RAW_BASE = githubConfig.getRawBaseUrl();
         // 5-minute cache-busting interval balances instant sync with aggressive browser caching
         const cacheBuster = Math.floor(Date.now() / 300000); 
 

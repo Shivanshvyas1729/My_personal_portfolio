@@ -1,9 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Project } from '@/data/portfolioData';
-import { Plus, Edit3, Trash2, X, Github, ExternalLink, Star, RefreshCw, BookOpen, Copy } from 'lucide-react';
+import { Plus, Edit3, Trash2, X, Github, ExternalLink, Star, RefreshCw, BookOpen, Copy, AlertCircle, CheckCircle2, Info } from 'lucide-react';
 import { DynamicForm } from './DynamicForm';
 import { ProjectSchema } from '@/lib/schema';
 import { useCMSState } from '@/context/CMSContext';
+
+// Required fields and their friendly names (for validation log)
+const REQUIRED_FIELDS: Record<string, string> = {
+  title: 'Project Title',
+  description: 'Description',
+};
 
 // Example project JSON template pre-filled with descriptive comments
 const SCHEMA_EXAMPLE_JSON = `{
@@ -151,6 +157,33 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
   const [saveError, setSaveError] = useState("");
   const [showExampleModal, setShowExampleModal] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  // Real-time validation state (Gmail-style: runs on every change)
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Set<string>>(new Set());
+  const [showValidationLog, setShowValidationLog] = useState(false);
+
+  // Run Zod validation on every tempProject change
+  useEffect(() => {
+    const result = ProjectSchema.safeParse(tempProject);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach(e => {
+        const field = e.path.join('.');
+        fieldErrors[field] = e.message;
+      });
+      setValidationErrors(fieldErrors);
+    } else {
+      setValidationErrors({});
+    }
+  }, [tempProject]);
+
+  // Mark a field as touched so errors only show after first interaction
+  const markTouched = (field: string) => {
+    setTouched(prev => new Set(prev).add(field));
+  };
+
+  const isFieldInvalid = (field: string) => touched.has(field) && !!validationErrors[field];
+  const isFormValid = Object.keys(validationErrors).filter(k => REQUIRED_FIELDS[k]).length === 0;
 
   const handleCodeChange = (val: string) => {
     setCodeValue(val);
@@ -257,13 +290,24 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
 
   const saveEdit = () => {
     if (editorMode === 'code' && codeError) {
-      alert("Please fix all JSON syntax errors before saving: " + codeError);
+      // Show code error inline — no alert
+      setShowValidationLog(true);
       return;
     }
 
-    if (!tempProject.title || !tempProject.description) {
-      alert("Title and Description are required.");
-      return;
+    // Mark all required fields as touched so errors appear
+    const allTouched = new Set(touched);
+    Object.keys(REQUIRED_FIELDS).forEach(f => allTouched.add(f));
+    setTouched(allTouched);
+
+    // Run final validation
+    const result = ProjectSchema.safeParse(tempProject);
+    if (!result.success) {
+      const requiredErrors = result.error.errors.filter(e => REQUIRED_FIELDS[e.path[0]]);
+      if (requiredErrors.length > 0) {
+        setShowValidationLog(true);
+        return;
+      }
     }
 
     let updated: Project[];
@@ -297,6 +341,9 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
     setEditorMode('form');
     setCodeValue("");
     setCodeError("");
+    setValidationErrors({});
+    setTouched(new Set());
+    setShowValidationLog(false);
   };
 
   const isModalOpen = editingId !== null || addingNew;
@@ -395,7 +442,19 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
           style={{ maxWidth: '100%' }}
         >
              <div className="flex items-center justify-between p-4 border-b border-border/50 bg-muted/20">
-               <h3 className="font-bold">{addingNew ? "New Project" : "Edit Project"}</h3>
+               <div className="flex items-center gap-2">
+                 <h3 className="font-bold">{addingNew ? "New Project" : "Edit Project"}</h3>
+                 {/* Live validity indicator */}
+                 {isFormValid ? (
+                   <span className="flex items-center gap-1 text-[9px] font-bold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                     <CheckCircle2 size={10} /> Ready
+                   </span>
+                 ) : (
+                   <span className="flex items-center gap-1 text-[9px] font-bold text-destructive bg-destructive/10 border border-destructive/20 px-2 py-0.5 rounded-full">
+                     <AlertCircle size={10} /> Required fields missing
+                   </span>
+                 )}
+               </div>
                <button onClick={closeModal} className="p-1.5 rounded hover:bg-muted/60 text-muted-foreground transition-colors">
                  <X size={16} />
                </button>
@@ -428,13 +487,199 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
                </button>
              </div>
              
+             {/* ── Validation Log Panel ── */}
+             {showValidationLog && (
+               <div className="mx-4 mt-3 rounded-xl border border-destructive/40 bg-destructive/5 overflow-hidden">
+                 {/* Header */}
+                 <div className="flex items-center justify-between px-4 py-2.5 border-b border-destructive/20 bg-destructive/10">
+                   <div className="flex items-center gap-2">
+                     <AlertCircle size={13} className="text-destructive" />
+                     <span className="text-[11px] font-black text-destructive uppercase tracking-wider">
+                       Validation Log — {Object.keys(validationErrors).length + (codeError ? 1 : 0)} issue(s) found
+                     </span>
+                   </div>
+                   <button onClick={() => setShowValidationLog(false)} className="text-destructive/60 hover:text-destructive transition-colors p-0.5">
+                     <X size={13} />
+                   </button>
+                 </div>
+
+                 <div className="p-3 space-y-2 max-h-52 overflow-y-auto">
+                   {/* JSON Syntax Error */}
+                   {codeError && (
+                     <div className="flex items-start gap-2.5 p-2 rounded-lg bg-destructive/10 border border-destructive/20">
+                       <AlertCircle size={11} className="text-destructive mt-0.5 shrink-0" />
+                       <div className="flex-1 min-w-0">
+                         <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                           <span className="font-black text-[10px] text-destructive uppercase tracking-wider">Code Editor</span>
+                           <span className="px-1.5 py-0.5 rounded bg-destructive text-destructive-foreground text-[8px] font-bold uppercase">REQUIRED</span>
+                           <span className="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20 text-[8px] font-bold">→ Check this field</span>
+                         </div>
+                         <p className="text-[10px] text-muted-foreground leading-relaxed">JSON Syntax Error: {codeError}</p>
+                       </div>
+                     </div>
+                   )}
+
+                   {/* Required field errors — shown first, bright red */}
+                   {Object.entries(validationErrors)
+                     .filter(([field]) => REQUIRED_FIELDS[field])
+                     .map(([field, message]) => (
+                       <div key={field} className="flex items-start gap-2.5 p-2 rounded-lg bg-destructive/10 border border-destructive/20">
+                         <AlertCircle size={11} className="text-destructive mt-0.5 shrink-0" />
+                         <div className="flex-1 min-w-0">
+                           <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                             <span className="font-black text-[10px] text-destructive uppercase tracking-wider">
+                               {REQUIRED_FIELDS[field]}
+                             </span>
+                             <span className="px-1.5 py-0.5 rounded bg-destructive text-destructive-foreground text-[8px] font-bold uppercase">REQUIRED</span>
+                             <span className="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20 text-[8px] font-bold">→ Check this field</span>
+                           </div>
+                           <p className="text-[10px] text-muted-foreground leading-relaxed">{message}</p>
+                         </div>
+                       </div>
+                     ))
+                   }
+
+                   {/* Optional field warnings — amber, shown below */}
+                   {Object.entries(validationErrors)
+                     .filter(([field]) => !REQUIRED_FIELDS[field])
+                     .map(([field, message]) => {
+                       // Make path human-readable: "media.0.url" → "Media › Item 1 › URL"
+                       const readablePath = field
+                         .split('.')
+                         .map((part, i, arr) => {
+                           if (!isNaN(Number(part))) return `Item ${Number(part) + 1}`;
+                           return part.replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2');
+                         })
+                         .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+                         .join(' › ');
+                       return (
+                         <div key={field} className="flex items-start gap-2.5 p-2 rounded-lg bg-amber-500/5 border border-amber-500/20">
+                           <Info size={11} className="text-amber-500 mt-0.5 shrink-0" />
+                           <div className="flex-1 min-w-0">
+                             <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                               <span className="font-black text-[10px] text-amber-500 uppercase tracking-wider">{readablePath}</span>
+                               <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-600 text-[8px] font-bold uppercase">OPTIONAL</span>
+                               <span className="px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground border border-border/50 text-[8px] font-bold">→ Check this field</span>
+                             </div>
+                             <p className="text-[10px] text-muted-foreground leading-relaxed">{message}</p>
+                           </div>
+                         </div>
+                       );
+                     })
+                   }
+
+                   {/* All clear */}
+                   {Object.keys(validationErrors).length === 0 && !codeError && (
+                     <div className="flex items-center gap-2 text-[11px] text-emerald-500 p-2 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
+                       <CheckCircle2 size={12} />
+                       All fields look good! You can save now.
+                     </div>
+                   )}
+                 </div>
+
+                 {/* Footer tip */}
+                 <div className="px-4 py-2 border-t border-destructive/15 bg-muted/10">
+                   <p className="text-[10px] text-muted-foreground/70">
+                     🔴 <strong>Required</strong> fields must be filled to save.&nbsp;
+                     🟡 <strong>Optional</strong> fields have format issues but won't block saving.
+                   </p>
+                 </div>
+               </div>
+             )}
+
              <div className="flex-1 overflow-y-auto p-5">
                 {editorMode === 'form' ? (
-                  <DynamicForm 
-                    schema={ProjectSchema} 
-                    data={tempProject} 
-                    onChange={setTempProject} 
-                  />
+                  <>
+                    {/* Required field guide at top of form */}
+                    <div className="mb-4 p-3 rounded-lg bg-muted/20 border border-border/30 flex items-start gap-2">
+                      <Info size={12} className="text-primary mt-0.5 shrink-0" />
+                      <p className="text-[10px] text-muted-foreground leading-relaxed">
+                        Fields marked <span className="text-destructive font-black">*</span> are <strong className="text-foreground">required</strong>.
+                        Validation runs as you type — errors appear instantly like Gmail.
+                      </p>
+                    </div>
+
+                    {/* Title — required, validated in real-time */}
+                    <div className="mb-4">
+                      <label className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground/80 uppercase tracking-wider mb-1.5">
+                        Project Title
+                        <span className="text-destructive font-black text-[11px]">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={(tempProject as any).title ?? ''}
+                        onChange={e => { setTempProject({...tempProject, title: e.target.value}); markTouched('title'); }}
+                        onBlur={() => markTouched('title')}
+                        placeholder="e.g. Cancer Detection with Explainable AI"
+                        className={`w-full px-3 py-2.5 rounded-lg border text-sm bg-background text-foreground focus:outline-none transition-all ${
+                          isFieldInvalid('title')
+                            ? 'border-destructive/70 ring-1 ring-destructive/40 focus:border-destructive'
+                            : touched.has('title') && !(validationErrors['title'])
+                            ? 'border-emerald-500/50 ring-1 ring-emerald-500/20'
+                            : 'border-border/40 focus:border-primary/60 focus:ring-1 focus:ring-primary/30'
+                        }`}
+                      />
+                      {isFieldInvalid('title') && (
+                        <div className="flex items-center gap-1 mt-1 text-[10px] text-destructive font-semibold">
+                          <AlertCircle size={10} />
+                          {validationErrors['title']}
+                        </div>
+                      )}
+                      {touched.has('title') && !validationErrors['title'] && (
+                        <div className="flex items-center gap-1 mt-1 text-[10px] text-emerald-500 font-semibold">
+                          <CheckCircle2 size={10} /> Looks good!
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Description — required, validated in real-time */}
+                    <div className="mb-4">
+                      <label className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground/80 uppercase tracking-wider mb-1.5">
+                        Description
+                        <span className="text-destructive font-black text-[11px]">*</span>
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={(tempProject as any).description ?? ''}
+                        onChange={e => { setTempProject({...tempProject, description: e.target.value}); markTouched('description'); }}
+                        onBlur={() => markTouched('description')}
+                        placeholder="A compelling 1-2 sentence summary of what the project does..."
+                        className={`w-full px-3 py-2.5 rounded-lg border text-sm bg-background text-foreground focus:outline-none transition-all resize-none ${
+                          isFieldInvalid('description')
+                            ? 'border-destructive/70 ring-1 ring-destructive/40 focus:border-destructive'
+                            : touched.has('description') && !validationErrors['description']
+                            ? 'border-emerald-500/50 ring-1 ring-emerald-500/20'
+                            : 'border-border/40 focus:border-primary/60 focus:ring-1 focus:ring-primary/30'
+                        }`}
+                      />
+                      {isFieldInvalid('description') && (
+                        <div className="flex items-center gap-1 mt-1 text-[10px] text-destructive font-semibold">
+                          <AlertCircle size={10} />
+                          {validationErrors['description']}
+                        </div>
+                      )}
+                      {touched.has('description') && !validationErrors['description'] && (
+                        <div className="flex items-center gap-1 mt-1 text-[10px] text-emerald-500 font-semibold">
+                          <CheckCircle2 size={10} /> Looks good!
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Separator before rest of form */}
+                    <div className="mb-4 pb-2 border-b border-border/30">
+                      <span className="text-[10px] text-muted-foreground/60 font-semibold uppercase tracking-wider">Optional Fields</span>
+                    </div>
+
+                    {/* Rest of form — all optional fields */}
+                    <DynamicForm 
+                      schema={ProjectSchema} 
+                      data={tempProject} 
+                      onChange={data => {
+                        // Keep title/description from dedicated inputs
+                        setTempProject(prev => ({...data, title: (prev as any).title, description: (prev as any).description}));
+                      }} 
+                    />
+                  </>
                 ) : (
                   <div className="flex flex-col h-full min-h-[300px]">
                     <div className="flex items-center justify-between mb-2">
@@ -461,42 +706,81 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
                       placeholder="Paste or edit project JSON code here..."
                     />
                     {codeError && (
-                      <div className="mt-2 p-2.5 bg-destructive/10 border border-destructive/25 text-destructive rounded-lg font-medium text-[10px] leading-relaxed">
-                        ⚠️ {codeError}
+                      <div className="mt-2 p-2.5 bg-destructive/10 border border-destructive/25 text-destructive rounded-lg font-medium text-[10px] leading-relaxed flex items-start gap-1.5">
+                        <AlertCircle size={12} className="mt-0.5 shrink-0" />
+                        <span>{codeError}</span>
                       </div>
                     )}
                   </div>
                 )}
              </div>
 
-             <div className="p-4 border-t border-border/50 bg-muted/10 flex justify-end gap-2">
-               <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium hover:bg-muted text-muted-foreground transition-colors">
-                 Cancel
-               </button>
-               <button onClick={saveEdit} className="px-4 py-2 bg-primary/20 text-primary rounded-lg text-sm font-medium hover:bg-primary/30 transition-colors">
-                 Apply to Preview
-               </button>
-               {mode === 'local' ? (
-                 <button 
-                   onClick={async () => {
-                     const updated = saveEdit();
-                     setTimeout(() => onSave(updated), 0);
-                   }} 
-                   className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg"
+             <div className="p-4 border-t border-border/50 bg-muted/10">
+               {/* Validation summary row above buttons */}
+               {!isFormValid && (
+                 <div
+                   className="mb-3 flex items-center gap-2 p-2.5 rounded-lg bg-destructive/8 border border-destructive/25 cursor-pointer hover:bg-destructive/12 transition-colors"
+                   onClick={() => setShowValidationLog(v => !v)}
                  >
-                   Apply & Save to Local
-                 </button>
-               ) : (
-                 <button 
-                   onClick={async () => {
-                     const updated = saveEdit();
-                     setTimeout(() => onSave(updated), 0);
-                   }} 
-                   className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg"
-                 >
-                   Apply & Sync to GitHub
-                 </button>
+                   <AlertCircle size={13} className="text-destructive shrink-0" />
+                   <p className="text-[10px] text-destructive font-semibold flex-1">
+                     {Object.keys(validationErrors).filter(k => REQUIRED_FIELDS[k]).length} required field(s) need attention before saving
+                   </p>
+                   <span className="text-[9px] text-destructive/70 font-bold uppercase tracking-wider">
+                     {showValidationLog ? 'Hide Details ▲' : 'Show Details ▼'}
+                   </span>
+                 </div>
                )}
+               <div className="flex justify-end gap-2">
+                 <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium hover:bg-muted text-muted-foreground transition-colors">
+                   Cancel
+                 </button>
+                 <button
+                   onClick={saveEdit}
+                   disabled={!isFormValid}
+                   title={!isFormValid ? 'Fill required fields first' : 'Apply changes to preview'}
+                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                     isFormValid
+                       ? 'bg-primary/20 text-primary hover:bg-primary/30'
+                       : 'bg-muted/40 text-muted-foreground/50 cursor-not-allowed'
+                   }`}
+                 >
+                   Apply to Preview
+                 </button>
+                 {mode === 'local' ? (
+                   <button 
+                     onClick={async () => {
+                       const updated = saveEdit();
+                       if (updated) setTimeout(() => onSave(updated), 0);
+                     }}
+                     disabled={!isFormValid}
+                     title={!isFormValid ? 'Fill required fields first' : 'Save to local file'}
+                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-lg ${
+                       isFormValid
+                         ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                         : 'bg-muted/50 text-muted-foreground/50 cursor-not-allowed'
+                     }`}
+                   >
+                     Apply & Save to Local
+                   </button>
+                 ) : (
+                   <button 
+                     onClick={async () => {
+                       const updated = saveEdit();
+                       if (updated) setTimeout(() => onSave(updated), 0);
+                     }}
+                     disabled={!isFormValid}
+                     title={!isFormValid ? 'Fill required fields first' : 'Sync to GitHub'}
+                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-lg ${
+                       isFormValid
+                         ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                         : 'bg-muted/50 text-muted-foreground/50 cursor-not-allowed'
+                     }`}
+                   >
+                     Apply & Sync to GitHub
+                   </button>
+                 )}
+               </div>
              </div>
           </div>
         </div>

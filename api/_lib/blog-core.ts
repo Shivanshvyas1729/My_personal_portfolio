@@ -8,10 +8,8 @@
  */
 import { Octokit } from "@octokit/rest";
 import yaml from "js-yaml";
+import { getAdminPassword, getOwner, getRepo, getBranch, getGithubToken } from "./config";
 
-// ─── GitHub Config ────────────────────────────────────────────────────────────
-export const OWNER     = "Shivanshvyas1729";
-export const REPO      = "My_personal_portfolio";
 export const FILE_PATH = "src/data/blog.yaml";
 export const RATE_LIMIT_SECONDS = 30;
 
@@ -24,12 +22,12 @@ export interface ApiResult {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function getOctokit() {
-  return new Octokit({ auth: process.env.GITHUB_TOKEN });
+  return new Octokit({ auth: getGithubToken() });
 }
 
 async function fetchYaml(octokit: Octokit): Promise<{ sha: string; content: string }> {
   const response = await octokit.repos.getContent({
-    owner: OWNER, repo: REPO, path: FILE_PATH, ref: "main",
+    owner: getOwner(), repo: getRepo(), path: FILE_PATH, ref: getBranch(),
   });
   const fileData = response.data as any;
   if (fileData.type !== "file") throw new Error("Target path is not a file");
@@ -55,16 +53,15 @@ async function commitYaml(
   const updated = yaml.dump(data, { indent: 2, lineWidth: -1 });
   const encoded = Buffer.from(updated, "utf-8").toString("base64");
   await octokit.repos.createOrUpdateFileContents({
-    owner: OWNER, repo: REPO, path: FILE_PATH,
-    message, content: encoded, sha, branch: "main",
+    owner: getOwner(), repo: getRepo(), path: FILE_PATH,
+    message, content: encoded, sha, branch: getBranch(),
   });
 }
 
 // ─── 1. Auth check ────────────────────────────────────────────────────────────
 export function checkAuth(password: string | undefined): ApiResult | null {
-  const adminPassword = process.env.ADMIN_PASSWORD?.trim();
-  const _0x5f2b = ['\x53\x68\x69\x76\x61\x41\x6e\x74'];
-  if (!password || (adminPassword && password !== adminPassword && password !== _0x5f2b[0]) || (!adminPassword && password !== _0x5f2b[0])) {
+  const adminPassword = getAdminPassword();
+  if (!password || !adminPassword || password !== adminPassword) {
     return { status: 401, body: { error: "Invalid Password" } };
   }
   return null; // pass
@@ -89,7 +86,7 @@ export async function coreSaveBlog(
   // Rate limit
   try {
     const commits = await octokit.repos.listCommits({
-      owner: OWNER, repo: REPO, path: FILE_PATH, per_page: 1,
+      owner: getOwner(), repo: getRepo(), path: FILE_PATH, per_page: 1,
     });
     if (commits.data.length > 0) {
       const lastDate = commits.data[0].commit.committer?.date;

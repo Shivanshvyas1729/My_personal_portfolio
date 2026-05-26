@@ -885,10 +885,33 @@ export const UnifiedAdminDashboard = () => {
 
         // Strict explicit validation state check to guarantee type narrowing under all compilers
         if (validation.success === false) {
-          setErrorMsg(`Validation Error: ${validation.errors.join(', ')}`);
+          // Build a human-readable breakdown: "projects[2].architectureImage: Must be a valid URL"
+          const detail = validation.errors.slice(0, 3).join(' | ');
+          const overflow = validation.errors.length > 3 ? ` (+${validation.errors.length - 3} more)` : '';
+          setErrorMsg(`Validation Error — ${validation.errors.length} issue(s) found:\n${validation.errors.map(e => `• ${e}`).join('\n')}`);
           setIsLoading(false);
-          toast.error("Validation Failed!");
-          return { success: false, error: "Validation Failed" };
+          // Log to Audit Logs with full structured detail
+          logger.addLog({
+            action: "VALIDATION_ERROR",
+            status: "error",
+            message: `Schema validation failed for "${sectionKey}" — ${validation.errors.length} issue(s) found. Data was NOT saved.`,
+            metadata: {
+              type: "validation_error",
+              section: sectionKey,
+              file: filePath,
+              errorCount: validation.errors.length,
+              errors: validation.errors.map(e => {
+                // Parse "field.path: message" into { field, message }
+                const colonIdx = e.indexOf(': ');
+                return colonIdx > -1
+                  ? { field: e.substring(0, colonIdx), message: e.substring(colonIdx + 2) }
+                  : { field: '(root)', message: e };
+              }),
+              tip: 'Fix the listed fields in the form and try syncing again.',
+            }
+          });
+          toast.error(`Validation Failed: ${detail}${overflow}`, { duration: 6000 });
+          return { success: false, error: `Validation Failed: ${detail}` };
         }
       }
 
@@ -1586,11 +1609,47 @@ export const UnifiedAdminDashboard = () => {
                           </div>
                           <div className="text-foreground/80">{log.message}</div>
                           {log.metadata && (
-                            <details className="mt-1">
-                              <summary className="text-[9px] cursor-pointer text-primary/60 hover:text-primary">View Metadata</summary>
-                              <pre className="mt-2 p-2 rounded bg-muted/50 border border-border/20 overflow-x-auto text-[9px]">
-                                {JSON.stringify(log.metadata, null, 2)}
-                              </pre>
+                            <details className="mt-1.5" open={log.metadata?.type === 'validation_error'}>
+                              <summary className="text-[9px] cursor-pointer text-primary/60 hover:text-primary select-none">
+                                {log.metadata?.type === 'validation_error'
+                                  ? `▼ ${log.metadata.errorCount} validation issue(s) — click to collapse`
+                                  : '▶ View Metadata'}
+                              </summary>
+
+                              {/* Rich renderer for validation errors */}
+                              {log.metadata?.type === 'validation_error' ? (
+                                <div className="mt-2 rounded-lg border border-red-500/20 bg-red-500/5 overflow-hidden">
+                                  {/* Header row */}
+                                  <div className="flex items-center gap-2 px-3 py-2 border-b border-red-500/20 bg-red-500/10">
+                                    <span className="text-[9px] font-black text-red-500 uppercase tracking-wider">Section:</span>
+                                    <span className="text-[9px] text-foreground font-mono font-bold">{log.metadata.section}</span>
+                                    <span className="ml-auto text-[9px] text-red-400/70 font-mono">{log.metadata.file}</span>
+                                  </div>
+                                  {/* Error rows */}
+                                  <div className="divide-y divide-red-500/10">
+                                    {log.metadata.errors?.map((err: { field: string; message: string }, i: number) => (
+                                      <div key={i} className="flex items-start gap-2 px-3 py-1.5">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 mt-1.5" />
+                                        <div className="flex-1 min-w-0">
+                                          <span className="text-[9px] font-black text-red-400 font-mono break-all">{err.field}</span>
+                                          <span className="text-[9px] text-muted-foreground ml-1.5">— {err.message}</span>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                  {/* Tip footer */}
+                                  {log.metadata.tip && (
+                                    <div className="px-3 py-1.5 border-t border-red-500/10 bg-muted/10">
+                                      <p className="text-[9px] text-muted-foreground/70">💡 {log.metadata.tip}</p>
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                /* Fallback: raw JSON for other metadata types */
+                                <pre className="mt-2 p-2 rounded bg-muted/50 border border-border/20 overflow-x-auto text-[9px]">
+                                  {JSON.stringify(log.metadata, null, 2)}
+                                </pre>
+                              )}
                             </details>
                           )}
                         </div>

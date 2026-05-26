@@ -13,6 +13,10 @@ const localApiProxy = () => ({
       const url = req.originalUrl || req.url;
       if (url && url.startsWith('/api/')) {
         try {
+          // Dynamic environment variable reload to support dev hot-reloads of .env
+          const env = loadEnv(server.config.mode, process.cwd(), '');
+          process.env = { ...process.env, ...env };
+
           const cleanUrl = url.split('?')[0].replace(/\/$/, ''); // Remove trailing slash
           const modulePath = `.${cleanUrl}.ts`;
           
@@ -68,7 +72,16 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   process.env = { ...process.env, ...env };
 
+  // Dynamically resolve the GitHub owner and repository at build-time
+  const netlifyMatch = process.env.REPOSITORY_URL?.match(/github\.com\/([^\/]+)\/([^\/.]+)/);
+  const owner = process.env.VITE_GITHUB_OWNER || process.env.VERCEL_GIT_REPO_OWNER || netlifyMatch?.[1] || "Shivanshvyas1729";
+  const repo = process.env.VITE_GITHUB_REPO || process.env.VERCEL_GIT_REPO_SLUG || netlifyMatch?.[2] || "My_personal_portfolio";
+
   return {
+    define: {
+      'import.meta.env.VITE_GITHUB_OWNER': JSON.stringify(owner),
+      'import.meta.env.VITE_GITHUB_REPO': JSON.stringify(repo),
+    },
     server: {
       host: true,
       port: 8080,
