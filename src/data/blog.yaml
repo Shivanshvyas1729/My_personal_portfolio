@@ -828,6 +828,7 @@ blog:
     featured: false
     draft: false
     date: 2026-05-21
+    excerpt: some style of writing in tensorflow
   - id: 8
     title: Fibonacci-Net architecture
     content: |-
