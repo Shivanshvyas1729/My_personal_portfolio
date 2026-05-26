@@ -1,11 +1,11 @@
 # region PROJECTS
 projects:
   - id: 6
-    title: dd
+    title: p
     category:
       - Deep Learning
       - Computer Vision
-    description: a
+    description: p
     tech:
       - Python
       - PyTorch
