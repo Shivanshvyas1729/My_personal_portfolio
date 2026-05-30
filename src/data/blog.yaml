@@ -1,4 +1,13 @@
 blog:
+  - id: 10
+    title: all secret prompt and flow
+    content: https://github.com/Shivanshvyas1729/Cancer_Detection_with_xai#appendix-master-prompt--dynamic-ai-document-generator
+    category: Links
+    type: []
+    featured: false
+    draft: true
+    date: 2026-05-28
+    excerpt: like code to make word
   - id: 9
     title: TensorFlow Layer Writing Styles and Best Practices
     content: |
