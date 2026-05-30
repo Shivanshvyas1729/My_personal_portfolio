@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -31,18 +31,24 @@ const DEFAULT_PALETTES: Record<IntroStyle, string[]> = {
 
 // ─── Floating Particle ───────────────────────────────────────────────────────
 const Particle = ({ delay, color }: { delay: number; color: string }) => {
-  const angle = Math.random() * 360;
-  const dist  = 80 + Math.random() * 240;
-  const size  = 1.5 + Math.random() * 3;
-  const x = Math.cos((angle * Math.PI) / 180) * dist;
-  const y = Math.sin((angle * Math.PI) / 180) * dist;
+  const { size, x, y, duration } = useMemo(() => {
+    const angle = Math.random() * 360;
+    const dist  = 80 + Math.random() * 240;
+    return {
+      size: 1.5 + Math.random() * 3,
+      x: Math.cos((angle * Math.PI) / 180) * dist,
+      y: Math.sin((angle * Math.PI) / 180) * dist,
+      duration: 1.8 + Math.random() * 0.8
+    };
+  }, []);
+
   return (
     <motion.div
       className="absolute rounded-full pointer-events-none"
       style={{ width: size, height: size, backgroundColor: color, left: "50%", top: "50%", translateX: "-50%", translateY: "-50%", willChange: "transform, opacity" }}
       initial={{ x: 0, y: 0, opacity: 0, scale: 0 }}
       animate={{ x: [0, x * 0.4, x], y: [0, y * 0.4, y], opacity: [0, 1, 0], scale: [0, 1.6, 0] }}
-      transition={{ duration: 1.8 + Math.random() * 0.8, delay, ease: [0.2, 0.8, 0.4, 1] }}
+      transition={{ duration, delay, ease: [0.2, 0.8, 0.4, 1] }}
     />
   );
 };
@@ -60,22 +66,22 @@ const NamasteStyle = ({ primaryText, subtitle, tagline, colors, phase }: {
     return () => clearTimeout(t);
   }, []);
   const allColors = [...colors, ...DEFAULT_PALETTES.namaste].slice(0, 8);
-  const particles = Array.from({ length: 20 }, (_, i) => ({ id: i, color: allColors[i % allColors.length], delay: i * 0.035 }));
+  const particles = Array.from({ length: 12 }, (_, i) => ({ id: i, color: allColors[i % allColors.length], delay: i * 0.05 }));
 
   return (
     <>
       {/* Ambient orbs */}
       <motion.div className="absolute w-[600px] h-[600px] rounded-full pointer-events-none"
-        style={{ background: `radial-gradient(circle, ${colors[0]}20 0%, ${colors[1]}10 50%, transparent 70%)`, willChange: "transform, opacity" }}
+        style={{ background: `radial-gradient(circle, ${colors[0]}20 0%, ${colors[1]}10 50%, transparent 70%)`, willChange: "transform, opacity", transform: "translateZ(0)" }}
         animate={{ scale: [1, 1.15, 1], opacity: [0.5, 1, 0.5] }}
         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} />
       <motion.div className="absolute w-[350px] h-[350px] rounded-full pointer-events-none"
-        style={{ background: `radial-gradient(circle, ${colors[2]}15 0%, transparent 70%)`, willChange: "transform, opacity" }}
+        style={{ background: `radial-gradient(circle, ${colors[2]}15 0%, transparent 70%)`, willChange: "transform, opacity", transform: "translateZ(0)" }}
         animate={{ scale: [1.1, 0.9, 1.1], opacity: [0.3, 0.8, 0.3], x: [-30, 30, -30], y: [20, -20, 20] }}
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} />
 
       {/* S-curve laser */}
-      <svg viewBox="0 0 1000 1000" fill="none" className="absolute inset-0 w-full h-full pointer-events-none z-10 p-10 md:p-16" preserveAspectRatio="xMidYMid meet">
+      <svg viewBox="0 0 1000 1000" fill="none" className="absolute inset-0 w-full h-full pointer-events-none z-10 p-10 md:p-16" preserveAspectRatio="xMidYMid meet" style={{ transform: "translateZ(0)" }}>
         <defs>
           <linearGradient id="ni-grad" x1="0%" y1="100%" x2="100%" y2="0%">
             {colors.map((c, i) => <stop key={i} offset={`${(i / (colors.length - 1)) * 100}%`} stopColor={c} />)}
@@ -99,13 +105,13 @@ const NamasteStyle = ({ primaryText, subtitle, tagline, colors, phase }: {
       {/* Text */}
       <div className="relative z-30 flex flex-col items-center gap-4">
         <motion.div className="absolute rounded-full pointer-events-none"
-          style={{ width: 300, height: 300, background: `radial-gradient(circle, ${colors[0]}25 0%, transparent 70%)` }}
+          style={{ width: 300, height: 300, background: `radial-gradient(circle, ${colors[0]}25 0%, transparent 70%)`, transform: "translateZ(0)" }}
           initial={{ scale: 0, opacity: 0 }} animate={{ scale: [0, 1.4, 1.1], opacity: [0, 0.9, phase === "exit" ? 0 : 0.6] }}
           transition={{ duration: 1.0, ease: [0.2, 1, 0.4, 1] }} />
         <div className="flex gap-1">
           {letters.map((letter, i) => (
             <motion.span key={i} className="font-heading font-extralight tracking-wide"
-              style={{ fontSize: "clamp(2.6rem, 7vw, 5rem)", color: colors[i % colors.length], textShadow: `0 0 30px ${colors[i % colors.length]}aa`, display: "inline-block", willChange: "transform, opacity" }}
+              style={{ fontSize: "clamp(2.6rem, 7vw, 5rem)", color: colors[i % colors.length], display: "inline-block", willChange: "transform, opacity", transform: "translateZ(0)" }}
               initial={{ opacity: 0, y: 32, scale: 0.7 }}
               animate={phase === "exit"
                 ? { opacity: 0, y: -20, scale: 0.85 }
@@ -117,16 +123,16 @@ const NamasteStyle = ({ primaryText, subtitle, tagline, colors, phase }: {
             </motion.span>
           ))}
         </div>
-        <motion.div className="overflow-hidden"
-          initial={{ width: 0, opacity: 0 }}
-          animate={phase === "exit" ? { width: 0, opacity: 0 } : { width: 160, opacity: 1 }}
-          transition={{ duration: 0.7, delay: phase === "exit" ? 0 : 0.65, ease: [0.2, 1, 0.4, 1] }}>
-          <div className="h-px" style={{ background: `linear-gradient(90deg, transparent, ${colors[1]}, ${colors[2]}, transparent)`, width: 160 }} />
-        </motion.div>
-        <motion.p className="text-xs md:text-sm font-bold tracking-[0.55em] uppercase"
+        <motion.div className="origin-center h-px w-[160px]"
+          style={{ background: `linear-gradient(90deg, transparent, ${colors[1]}, ${colors[2]}, transparent)` }}
+          initial={{ scaleX: 0, opacity: 0 }}
+          animate={phase === "exit" ? { scaleX: 0, opacity: 0 } : { scaleX: 1, opacity: 1 }}
+          transition={{ duration: 0.7, delay: phase === "exit" ? 0 : 0.65, ease: [0.2, 1, 0.4, 1] }}
+        />
+        <motion.p className="text-xs md:text-sm font-bold tracking-[0.55em] uppercase mt-2"
           style={{ background: `linear-gradient(90deg, ${colors[0]}, ${colors[1]}, ${colors[2]})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
-          initial={{ opacity: 0, letterSpacing: "0.2em" }}
-          animate={phase === "exit" ? { opacity: 0, letterSpacing: "0.8em" } : { opacity: 0.9, letterSpacing: "0.55em" }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={phase === "exit" ? { opacity: 0, scale: 1.05 } : { opacity: 0.9, scale: 1 }}
           transition={{ duration: 0.8, delay: phase === "exit" ? 0 : 0.75, ease: "easeInOut" }}>
           {subtitle}
         </motion.p>
@@ -153,11 +159,11 @@ const PulseStyle = ({ primaryText, subtitle, tagline, colors, phase }: {
     <>
       {/* Clean radial glow */}
       <motion.div className="absolute inset-0 pointer-events-none"
-        style={{ background: `radial-gradient(ellipse at 50% 60%, ${c0}18 0%, transparent 65%)` }}
+        style={{ background: `radial-gradient(ellipse at 50% 60%, ${c0}18 0%, transparent 65%)`, willChange: "opacity", transform: "translateZ(0)" }}
         animate={{ opacity: [0.4, 0.9, 0.4] }} transition={{ duration: 2.5, repeat: Infinity }} />
 
       {/* ECG heartbeat line */}
-      <svg viewBox="0 0 800 140" fill="none" className="absolute w-full max-w-3xl mx-auto z-10 opacity-90" style={{ top: "55%", left: "50%", transform: "translateX(-50%)" }}>
+      <svg viewBox="0 0 800 140" fill="none" className="absolute w-full max-w-3xl mx-auto z-10 opacity-90" style={{ top: "55%", left: "50%", transform: "translateX(-50%) translateZ(0)" }}>
         <motion.path
           d="M 0,70 L 120,70 L 145,70 L 160,20 L 175,120 L 190,70 L 210,70 L 225,50 L 240,90 L 255,70 L 380,70 L 395,70 L 410,20 L 425,120 L 440,70 L 460,70 L 475,50 L 490,90 L 505,70 L 800,70"
           stroke={c0} strokeWidth="2.5" strokeLinecap="round" style={{ filter: `drop-shadow(0 0 8px ${c0}80)` }}
@@ -182,11 +188,11 @@ const PulseStyle = ({ primaryText, subtitle, tagline, colors, phase }: {
       </motion.div>
 
       {/* Text block */}
-      <div className="relative z-30 flex flex-col items-center gap-3 text-center">
+      <div className="relative z-30 flex flex-col items-center gap-3 text-center" style={{ transform: "translateZ(0)" }}>
         <motion.h1 className="font-heading font-light tracking-wider"
-          style={{ fontSize: "clamp(2.5rem, 7vw, 4.5rem)", color: c0, textShadow: `0 0 40px ${c0}80` }}
-          initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
-          animate={phase === "exit" ? { opacity: 0, y: -16, filter: "blur(8px)" } : { opacity: 1, y: 0, filter: "blur(0px)" }}
+          style={{ fontSize: "clamp(2.5rem, 7vw, 4.5rem)", color: c0 }}
+          initial={{ opacity: 0, y: 24, scale: 0.9 }}
+          animate={phase === "exit" ? { opacity: 0, y: -16, scale: 1.05 } : { opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.7, delay: 0.3, ease: [0.2, 1, 0.4, 1] }}>
           {primaryText}
         </motion.h1>
@@ -218,7 +224,7 @@ const AcademicStyle = ({ primaryText, subtitle, tagline, colors, phase }: {
     <>
       {/* Warm academic glow */}
       <motion.div className="absolute inset-0 pointer-events-none"
-        style={{ background: `radial-gradient(ellipse at 50% 50%, ${c0}15 0%, transparent 65%)` }}
+        style={{ background: `radial-gradient(ellipse at 50% 50%, ${c0}15 0%, transparent 65%)`, willChange: "opacity", transform: "translateZ(0)" }}
         animate={{ opacity: [0.3, 0.8, 0.3] }} transition={{ duration: 3, repeat: Infinity }} />
 
       {/* Book pages opening */}
@@ -262,9 +268,9 @@ const AcademicStyle = ({ primaryText, subtitle, tagline, colors, phase }: {
         <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
           {words.map((word, i) => (
             <motion.span key={i} className="font-heading font-bold"
-              style={{ fontSize: "clamp(2rem, 6vw, 4rem)", color: i % 2 === 0 ? c0 : c1, textShadow: `0 0 30px ${c0}66` }}
-              initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
-              animate={phase === "exit" ? { opacity: 0, y: -16 } : { opacity: 1, y: 0, filter: "blur(0px)" }}
+              style={{ fontSize: "clamp(2rem, 6vw, 4rem)", color: i % 2 === 0 ? c0 : c1, display: "inline-block", willChange: "transform, opacity", transform: "translateZ(0)" }}
+              initial={{ opacity: 0, y: 20, scale: 0.9 }}
+              animate={phase === "exit" ? { opacity: 0, y: -16, scale: 1.05 } : { opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.4 + i * 0.12, ease: [0.2, 1, 0.4, 1] }}>
               {word}
             </motion.span>
@@ -322,7 +328,7 @@ const TerminalStyle = ({ primaryText, subtitle, tagline, colors, phase }: {
         style={{ backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,1) 2px, rgba(0,0,0,1) 4px)" }} />
       {/* Green glow */}
       <motion.div className="absolute w-[500px] h-[500px] rounded-full pointer-events-none"
-        style={{ background: `radial-gradient(circle, ${c0}15 0%, transparent 70%)`, filter: "blur(60px)" }}
+        style={{ background: `radial-gradient(circle, ${c0}15 0%, transparent 70%)`, filter: "blur(60px)", willChange: "opacity", transform: "translateZ(0)" }}
         animate={{ opacity: [0.4, 0.9, 0.4] }} transition={{ duration: 2, repeat: Infinity }} />
 
       {/* Terminal window */}
@@ -360,7 +366,7 @@ const MinimalStyle = ({ primaryText, subtitle, tagline, colors, phase }: {
 }) => {
   const c0 = colors[0] || "#e2e8f0";
   return (
-    <div className="relative z-30 flex flex-col items-center gap-6 text-center">
+    <div className="relative z-30 flex flex-col items-center gap-6 text-center" style={{ transform: "translateZ(0)" }}>
       <motion.div className="relative"
         initial={{ opacity: 0 }} animate={phase === "exit" ? { opacity: 0 } : { opacity: 1 }}
         transition={{ duration: 0.8, ease: "easeInOut" }}>
@@ -402,15 +408,15 @@ const CreativeStyle = ({ primaryText, subtitle, tagline, colors, phase }: {
   const c1 = colors[1] || "#a855f7";
   const [showParticles, setShowParticles] = useState(false);
   useEffect(() => { const t = setTimeout(() => setShowParticles(true), 200); return () => clearTimeout(t); }, []);
-  const particles = Array.from({ length: 30 }, (_, i) => ({ id: i, color: i % 2 === 0 ? c0 : c1, delay: i * 0.022 }));
+  const particles = Array.from({ length: 15 }, (_, i) => ({ id: i, color: i % 2 === 0 ? c0 : c1, delay: i * 0.04 }));
   return (
     <>
       {/* Dual glow orbs */}
       <motion.div className="absolute w-[500px] h-[500px] rounded-full pointer-events-none"
-        style={{ background: `radial-gradient(circle, ${c0}18 0%, transparent 70%)`, filter: "blur(50px)", left: "20%", top: "30%" }}
+        style={{ background: `radial-gradient(circle, ${c0}18 0%, transparent 70%)`, filter: "blur(50px)", left: "20%", top: "30%", willChange: "transform, opacity", transform: "translateZ(0)" }}
         animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.9, 0.5] }} transition={{ duration: 2.5, repeat: Infinity }} />
       <motion.div className="absolute w-[400px] h-[400px] rounded-full pointer-events-none"
-        style={{ background: `radial-gradient(circle, ${c1}15 0%, transparent 70%)`, filter: "blur(50px)", right: "20%", bottom: "30%" }}
+        style={{ background: `radial-gradient(circle, ${c1}15 0%, transparent 70%)`, filter: "blur(50px)", right: "20%", bottom: "30%", willChange: "transform, opacity", transform: "translateZ(0)" }}
         animate={{ scale: [1.1, 0.9, 1.1], opacity: [0.4, 0.85, 0.4] }} transition={{ duration: 3, repeat: Infinity }} />
 
       {/* Diagonal brush stroke */}
@@ -438,11 +444,11 @@ const CreativeStyle = ({ primaryText, subtitle, tagline, colors, phase }: {
       </div>
 
       {/* Text */}
-      <div className="relative z-30 flex flex-col items-center gap-4">
+      <div className="relative z-30 flex flex-col items-center gap-4" style={{ transform: "translateZ(0)" }}>
         <motion.h1 className="font-heading font-black uppercase tracking-tight text-center leading-none"
-          style={{ fontSize: "clamp(3rem, 9vw, 6.5rem)", background: `linear-gradient(135deg, ${c0}, ${c1})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
-          initial={{ opacity: 0, scale: 1.3, filter: "blur(20px)" }}
-          animate={phase === "exit" ? { opacity: 0, scale: 0.8, filter: "blur(12px)" } : { opacity: 1, scale: 1, filter: "blur(0px)" }}
+          style={{ fontSize: "clamp(3rem, 9vw, 6.5rem)", background: `linear-gradient(135deg, ${c0}, ${c1})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", willChange: "transform, opacity" }}
+          initial={{ opacity: 0, scale: 1.1 }}
+          animate={phase === "exit" ? { opacity: 0, scale: 0.95 } : { opacity: 1, scale: 1 }}
           transition={{ duration: 0.75, ease: [0.2, 1, 0.4, 1] }}>
           {primaryText}
         </motion.h1>
