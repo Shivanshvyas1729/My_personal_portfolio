@@ -29,6 +29,7 @@ settings:
     - "#facc1544"
     - "#93c5fd44"
     - "#67e8f944"
+    - ""
   sharpLightThickness: 1.5
 
   # Global Text Hover Interaction
@@ -53,6 +54,10 @@ settings:
   introSubtitle: "Namaste"
   introTagline: "Welcome to my universe.."
   introDuration: 4000
+  sharpLightThicknessDark: 2.5
+  sharpLightSpeedDark: 1.1
+  ropeLightColorsDark:
+    - "#ffffff"
 # endregion
 
 # region PERSONAL
