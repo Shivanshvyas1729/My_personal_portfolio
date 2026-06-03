@@ -95,6 +95,7 @@ export interface Settings {
   ropeLightSpeed?: number;
   ropeLightThickness?: number;
   ropeLightGlowIntensity?: number;
+  sharpLightSpeed?: number;
 
   // Independent dark and light mode wash settings
   ropeLightColorsLight?: string[];
@@ -118,6 +119,8 @@ export interface Settings {
   sharpLightThicknessDark?: number;
   sharpLightThickness?: number;
   sharpLightColors?: string[];
+  sharpLightSpeedLight?: number;
+  sharpLightSpeedDark?: number;
 
   textHoverColors?: string[];
   textTransitionSpeed?: string;
@@ -223,8 +226,36 @@ try {
 const projects = (parsedProjects?.projects || []).slice();
 projects.sort((a, b) => (b.id || 0) - (a.id || 0));
 
+export const LIGHT_DEFAULTS = {
+  ropeLightColors: ["#eab30866", "#67e8f966", "#6366f166", "#a855f766"],
+  ropeLightSpeed: 12.0,
+  ropeLightThickness: 1.5,
+  ropeLightGlowIntensity: 3.0,
+  ropeLightColorsLight: ["#fde68a44", "#93c5fd44", "#67e8f944"],
+  ropeLightColorsDark: ["#eab30866", "#67e8f966", "#6366f166", "#a855f766"],
+  ropeLightSpeedLight: 12.0,
+  ropeLightSpeedDark: 12.0,
+  ropeLightThicknessLight: 1.5,
+  ropeLightThicknessDark: 1.5,
+  ropeLightGlowIntensityLight: 3.0,
+  ropeLightGlowIntensityDark: 3.0,
+  ropeLightColorLight: "#fde68a44",
+  ropeLightColorDark: "#a1620744",
+  sharpLightColorsDark: ["#facc1544", "#93c5fd44", "#67e8f944"],
+  sharpLightThicknessDark: 1.5,
+  sharpLightColorsLight: ["#facc1533", "#93c5fd33"],
+  sharpLightThicknessLight: 1.5,
+  sharpLightSpeed: 12.0,
+  sharpLightSpeedDark: 12.0,
+  sharpLightSpeedLight: 12.0,
+};
+
 export const portfolioData: PortfolioData = {
   ...parsedData,
+  settings: {
+    ...LIGHT_DEFAULTS,
+    ...(parsedData?.settings || {})
+  },
   projects,
   blog: (parsedBlog?.blog || []).sort((a, b) => (b.id || 0) - (a.id || 0))
 } as PortfolioData;
@@ -257,6 +288,10 @@ export async function getLivePortfolioData(): Promise<PortfolioData> {
 
     return {
       ...pData,
+      settings: {
+        ...LIGHT_DEFAULTS,
+        ...(pData?.settings || {})
+      },
       projects: (sData?.projects || []).sort((a: any, b: any) => (b.id || 0) - (a.id || 0)),
       blog: (bData?.blog || []).sort((a: any, b: any) => (b.id || 0) - (a.id || 0))
     } as PortfolioData;

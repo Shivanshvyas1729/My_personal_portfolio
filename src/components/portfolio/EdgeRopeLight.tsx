@@ -30,7 +30,11 @@ const EdgeRopeLight = () => {
     ).filter(Boolean);
 
     // ── Dynamic mode parameters ──
-    const speed = isDark
+    const sharpSpeed = isDark
+      ? (settings.sharpLightSpeedDark ?? settings.sharpLightSpeed ?? settings.ropeLightSpeedDark ?? settings.ropeLightSpeed ?? 15)
+      : (settings.sharpLightSpeedLight ?? settings.sharpLightSpeed ?? settings.ropeLightSpeedLight ?? settings.ropeLightSpeed ?? 15);
+
+    const fogSpeed = isDark
       ? (settings.ropeLightSpeedDark ?? settings.ropeLightSpeed ?? 15)
       : (settings.ropeLightSpeedLight ?? settings.ropeLightSpeed ?? 15);
 
@@ -49,7 +53,8 @@ const EdgeRopeLight = () => {
     return {
       colors,
       sharpColors,
-      speed,
+      sharpSpeed,
+      fogSpeed,
       thickness,
       sharpThickness,
       glow,
@@ -60,96 +65,153 @@ const EdgeRopeLight = () => {
 
   const horizontalGradient = useMemo(() => {
     const c = config.sharpColors.map(col => col).join(', ');
-    return `linear-gradient(to right, transparent, ${c}, transparent)`;
+    return `linear-gradient(to right, transparent, ${c}, transparent, ${c}, transparent)`;
   }, [config.sharpColors]);
 
   const verticalGradient = useMemo(() => {
     const c = config.sharpColors.map(col => col).join(', ');
-    return `linear-gradient(to bottom, transparent, ${c}, transparent)`;
+    return `linear-gradient(to bottom, transparent, ${c}, transparent, ${c}, transparent)`;
   }, [config.sharpColors]);
 
   const horizontalBlurGradient = useMemo(() => {
     const c = config.colors.map(col => col).join(', ');
-    return `linear-gradient(to right, transparent, ${c}, transparent)`;
+    return `linear-gradient(to right, transparent, ${c}, transparent, ${c}, transparent)`;
   }, [config.colors]);
 
   const verticalBlurGradient = useMemo(() => {
     const c = config.colors.map(col => col).join(', ');
-    return `linear-gradient(to bottom, transparent, ${c}, transparent)`;
+    return `linear-gradient(to bottom, transparent, ${c}, transparent, ${c}, transparent)`;
   }, [config.colors]);
+
+  const key = `${config.sharpSpeed}-${config.fogSpeed}-${config.glow}-${config.thickness}-${config.sharpThickness}-${config.colors.join(',')}-${config.sharpColors.join(',')}`;
 
   return (
     <div 
+      key={key}
       className="fixed inset-0 z-[9999] pointer-events-none select-none overflow-hidden" 
-      style={{ height: '100lvh' }}
+      style={{ 
+        height: '100lvh',
+        '--rope-glow-1-min': config.glow * 0.04,
+        '--rope-glow-1-max': config.glow * 0.08,
+        '--rope-glow-2-min': config.glow * 0.04,
+        '--rope-glow-2-max': config.glow * 0.08,
+        '--rope-glow-3-min': config.glow * 0.05,
+        '--rope-glow-3-max': config.glow * 0.09,
+        '--rope-glow-4-min': config.glow * 0.05,
+        '--rope-glow-4-max': config.glow * 0.09,
+      } as React.CSSProperties}
       aria-hidden="true"
     >
       {/* ==================== FOG ROPE LIGHTS (High-Performance Masked Ambient Glow) ==================== */}
       {/* Top Fog */}
       <div 
-        className="absolute top-0 left-0 w-full animate-rope-breathe-1"
+        className="absolute top-0 left-0 w-full"
         style={{ 
           height: `${config.thickness * 18}px`, 
-          background: horizontalBlurGradient,
-          opacity: 0.35,
           maskImage: 'linear-gradient(to bottom, black 15%, transparent 100%)',
           WebkitMaskImage: 'linear-gradient(to bottom, black 15%, transparent 100%)',
+          animation: `rope-breathe-1 7s ease-in-out infinite`,
           willChange: 'opacity',
           contain: 'layout paint style',
         }}
-      />
+      >
+        <div className="w-[200%] h-full overflow-hidden">
+          <div 
+            className="w-full h-full"
+            style={{ 
+              background: horizontalBlurGradient,
+              animation: `rope-h ${config.fogSpeed}s linear infinite`,
+              willChange: 'transform',
+              contain: 'layout paint style',
+            }}
+          />
+        </div>
+      </div>
 
       {/* Bottom Fog */}
       <div 
-        className="absolute bottom-0 left-0 w-full animate-rope-breathe-2"
+        className="absolute bottom-0 left-0 w-full"
         style={{ 
           height: `${config.thickness * 18}px`, 
-          background: horizontalBlurGradient,
-          opacity: 0.35,
           maskImage: 'linear-gradient(to top, black 15%, transparent 100%)',
           WebkitMaskImage: 'linear-gradient(to top, black 15%, transparent 100%)',
+          animation: `rope-breathe-2 7s ease-in-out infinite`,
           willChange: 'opacity',
           contain: 'layout paint style',
         }}
-      />
+      >
+        <div className="w-[200%] h-full overflow-hidden">
+          <div 
+            className="w-full h-full"
+            style={{ 
+              background: horizontalBlurGradient,
+              animation: `rope-h-rev ${config.fogSpeed * 1.1}s linear infinite`,
+              willChange: 'transform',
+              contain: 'layout paint style',
+            }}
+          />
+        </div>
+      </div>
 
       {/* Left Fog */}
       <div 
-        className="absolute top-0 left-0 h-full animate-rope-breathe-3"
+        className="absolute top-0 left-0 h-full"
         style={{ 
           width: `${config.thickness * 18}px`, 
-          background: verticalBlurGradient,
-          opacity: 0.35,
           maskImage: 'linear-gradient(to right, black 15%, transparent 100%)',
           WebkitMaskImage: 'linear-gradient(to right, black 15%, transparent 100%)',
+          animation: `rope-breathe-3 8s ease-in-out infinite`,
           willChange: 'opacity',
           contain: 'layout paint style',
         }}
-      />
+      >
+        <div className="w-full h-[200%] overflow-hidden">
+          <div 
+            className="w-full h-full"
+            style={{ 
+              background: verticalBlurGradient,
+              animation: `rope-v-rev ${config.fogSpeed * 1.3}s linear infinite`,
+              willChange: 'transform',
+              contain: 'layout paint style',
+            }}
+          />
+        </div>
+      </div>
 
       {/* Right Fog */}
       <div 
-        className="absolute top-0 right-0 h-full animate-rope-breathe-4"
+        className="absolute top-0 right-0 h-full"
         style={{ 
           width: `${config.thickness * 18}px`, 
-          background: verticalBlurGradient,
-          opacity: 0.35,
           maskImage: 'linear-gradient(to left, black 15%, transparent 100%)',
           WebkitMaskImage: 'linear-gradient(to left, black 15%, transparent 100%)',
+          animation: `rope-breathe-4 8s ease-in-out infinite`,
           willChange: 'opacity',
           contain: 'layout paint style',
         }}
-      />
+      >
+        <div className="w-full h-[200%] overflow-hidden">
+          <div 
+            className="w-full h-full"
+            style={{ 
+              background: verticalBlurGradient,
+              animation: `rope-v ${config.fogSpeed * 1.2}s linear infinite`,
+              willChange: 'transform',
+              contain: 'layout paint style',
+            }}
+          />
+        </div>
+      </div>
 
       {/* ==================== SHARP ROPE LIGHTS (Crisp Inner Neon Outline) ==================== */}
       {/* Top Sharp */}
       <div className="absolute top-0 left-0 w-[200%] h-full overflow-hidden">
         <div 
-          className="absolute top-0 left-0 w-full animate-rope-h"
+          className="absolute top-0 left-0 w-full"
           style={{ 
             height: `${config.sharpThickness}px`, 
             background: horizontalGradient,
-            animationDuration: `${config.speed}s`,
+            animation: `rope-h ${config.sharpSpeed}s linear infinite`,
             willChange: 'transform',
             contain: 'layout paint style',
           }}
@@ -159,11 +221,11 @@ const EdgeRopeLight = () => {
       {/* Bottom Sharp */}
       <div className="absolute bottom-0 left-0 w-[200%] h-full overflow-hidden">
         <div 
-          className="absolute bottom-0 left-0 w-full animate-rope-h-rev"
+          className="absolute bottom-0 left-0 w-full"
           style={{ 
             height: `${config.sharpThickness}px`, 
             background: horizontalGradient,
-            animationDuration: `${config.speed * 1.1}s`,
+            animation: `rope-h-rev ${config.sharpSpeed * 1.1}s linear infinite`,
             willChange: 'transform',
             contain: 'layout paint style',
           }}
@@ -173,11 +235,11 @@ const EdgeRopeLight = () => {
       {/* Left Sharp */}
       <div className="absolute top-0 left-0 w-full h-[200%] overflow-hidden">
         <div 
-          className="absolute top-0 left-0 h-full animate-rope-v-rev"
+          className="absolute top-0 left-0 h-full"
           style={{ 
             width: `${config.sharpThickness}px`, 
             background: verticalGradient,
-            animationDuration: `${config.speed * 1.3}s`,
+            animation: `rope-v-rev ${config.sharpSpeed * 1.3}s linear infinite`,
             willChange: 'transform',
             contain: 'layout paint style',
           }}
@@ -187,11 +249,11 @@ const EdgeRopeLight = () => {
       {/* Right Sharp */}
       <div className="absolute top-0 right-0 w-full h-[200%] overflow-hidden">
         <div 
-          className="absolute top-0 right-0 h-full animate-rope-v"
+          className="absolute top-0 right-0 h-full"
           style={{ 
             width: `${config.sharpThickness}px`, 
             background: verticalGradient,
-            animationDuration: `${config.speed * 1.2}s`,
+            animation: `rope-v ${config.sharpSpeed * 1.2}s linear infinite`,
             willChange: 'transform',
             contain: 'layout paint style',
           }}
@@ -216,26 +278,21 @@ const EdgeRopeLight = () => {
           100% { transform: translate3d(0, -50%, 0); }
         }
         @keyframes rope-breathe-1 {
-          0%, 100% { opacity: 0.20; transform: translate3d(0, 0, 0); }
-          50% { opacity: 0.40; transform: translate3d(0, 0, 0); }
+          0%, 100% { opacity: var(--rope-glow-1-min); transform: translate3d(0, 0, 0); }
+          50% { opacity: var(--rope-glow-1-max); transform: translate3d(0, 0, 0); }
         }
         @keyframes rope-breathe-2 {
-          0%, 100% { opacity: 0.40; transform: translate3d(0, 0, 0); }
-          50% { opacity: 0.20; transform: translate3d(0, 0, 0); }
+          0%, 100% { opacity: var(--rope-glow-2-max); transform: translate3d(0, 0, 0); }
+          50% { opacity: var(--rope-glow-2-min); transform: translate3d(0, 0, 0); }
         }
         @keyframes rope-breathe-3 {
-          0%, 100% { opacity: 0.25; transform: translate3d(0, 0, 0); }
-          50% { opacity: 0.45; transform: translate3d(0, 0, 0); }
+          0%, 100% { opacity: var(--rope-glow-3-min); transform: translate3d(0, 0, 0); }
+          50% { opacity: var(--rope-glow-3-max); transform: translate3d(0, 0, 0); }
         }
         @keyframes rope-breathe-4 {
-          0%, 100% { opacity: 0.45; transform: translate3d(0, 0, 0); }
-          50% { opacity: 0.25; transform: translate3d(0, 0, 0); }
+          0%, 100% { opacity: var(--rope-glow-4-max); transform: translate3d(0, 0, 0); }
+          50% { opacity: var(--rope-glow-4-min); transform: translate3d(0, 0, 0); }
         }
-        .animate-rope-h { animation: rope-h linear infinite; }
-        .animate-rope-h-rev { animation: rope-h-rev linear infinite; }
-        .animate-rope-v { animation: rope-v linear infinite; }
-        .animate-rope-v-rev { animation: rope-v-rev linear infinite; }
-        
         .animate-rope-breathe-1 { animation: rope-breathe-1 7s ease-in-out infinite; }
         .animate-rope-breathe-2 { animation: rope-breathe-2 7s ease-in-out infinite; }
         .animate-rope-breathe-3 { animation: rope-breathe-3 8s ease-in-out infinite; }

@@ -54,6 +54,7 @@ export const formatLabel = (key: string) => {
   
   if (key.startsWith('sharpLightColors')) return 'Sharp Outline Colors ' + (key.endsWith('Dark') ? '(Dark Mode)' : '(Light Mode)');
   if (key.startsWith('sharpLightThickness')) return 'Sharp Outline Thickness ' + (key.endsWith('Dark') ? '(Dark Mode)' : '(Light Mode)');
+  if (key.startsWith('sharpLightSpeed')) return 'Sharp Outline Speed ' + (key.endsWith('Dark') ? '(Dark Mode)' : '(Light Mode)');
 
   return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
 };

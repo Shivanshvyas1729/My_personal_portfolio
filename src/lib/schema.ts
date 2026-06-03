@@ -107,6 +107,7 @@ export const GlobalSettingsSchema = z.object({
   ropeLightSpeed: z.number().min(0.1).optional(),
   ropeLightThickness: z.number().min(0.5).optional(),
   ropeLightGlowIntensity: z.number().min(0).optional(),
+  sharpLightSpeed: z.number().min(0.1).optional(),
 
   // Independent dark and light mode wash settings
   ropeLightColorsLight: z.array(z.string()).optional(),
@@ -128,6 +129,8 @@ export const GlobalSettingsSchema = z.object({
   sharpLightColorsDark: z.array(z.string()).optional(),
   sharpLightThicknessLight: z.number().min(0.5).optional(),
   sharpLightThicknessDark: z.number().min(0.5).optional(),
+  sharpLightSpeedLight: z.number().min(0.1).optional(),
+  sharpLightSpeedDark: z.number().min(0.1).optional(),
 
   textHoverColors: z.array(z.string()).optional(),
   textTransitionSpeed: z.string().optional(),

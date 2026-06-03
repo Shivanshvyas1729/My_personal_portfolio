@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useCMSState, useCMSActions } from '@/context/CMSContext';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/hooks/useTheme';
 import { SECTION_SCHEMAS, validateData } from '@/lib/schema';
 import { convertToRawGitHubUrl } from './FormHelpers';
 import { getLocalImage, clearLocalImages } from '@/lib/localImageStore';
@@ -696,6 +697,37 @@ export const UnifiedAdminDashboard = () => {
     canUndo,
     canRedo
   } = useCMSState();
+
+  const { theme } = useTheme();
+  const resolvedTheme = theme === 'system' 
+    ? (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    : theme;
+  const isDark = resolvedTheme === 'dark';
+
+  const previewRopeLightSettings = useMemo(() => {
+    const s = previewData?.settings || {};
+    const colors = isDark
+      ? (s.ropeLightColorsDark && s.ropeLightColorsDark.length > 0 ? s.ropeLightColorsDark : (s.ropeLightColors || ['#eab308', '#67e8f9', '#6366f1', '#a855f7']))
+      : (s.ropeLightColorsLight && s.ropeLightColorsLight.length > 0 ? s.ropeLightColorsLight : (s.ropeLightColors || ['#eab308', '#67e8f9', '#6366f1', '#a855f7']));
+
+    const glow = isDark
+      ? (s.ropeLightGlowIntensityDark ?? s.ropeLightGlowIntensity ?? 3)
+      : (s.ropeLightGlowIntensityLight ?? s.ropeLightGlowIntensity ?? 3);
+
+    const thickness = isDark
+      ? (s.ropeLightThicknessDark ?? s.ropeLightThickness ?? 1.5)
+      : (s.ropeLightThicknessLight ?? s.ropeLightThickness ?? 1.5);
+
+    const speed = isDark
+      ? (s.ropeLightSpeedDark ?? s.ropeLightSpeed ?? 12)
+      : (s.ropeLightSpeedLight ?? s.ropeLightSpeed ?? 12);
+
+    const sharpSpeed = isDark
+      ? (s.sharpLightSpeedDark ?? s.sharpLightSpeed ?? s.ropeLightSpeedDark ?? s.ropeLightSpeed ?? 12)
+      : (s.sharpLightSpeedLight ?? s.sharpLightSpeed ?? s.ropeLightSpeedLight ?? s.ropeLightSpeed ?? 12);
+
+    return { colors, glow, thickness, speed, sharpSpeed };
+  }, [previewData?.settings, isDark]);
 
   const {
     setPreviewMode,
@@ -1461,7 +1493,10 @@ export const UnifiedAdminDashboard = () => {
                   <IntroPreviewCard settings={previewData.settings || {}} />
 
                   {/* Neon Rope Light Preview */}
-                  <div className="bg-background/40 border border-border/40 rounded-2xl p-4 flex flex-col items-center justify-center space-y-2 relative overflow-hidden h-36">
+                  <div 
+                    key={`preview-card-${previewRopeLightSettings.sharpSpeed}-${previewRopeLightSettings.speed}-${previewRopeLightSettings.glow}-${previewRopeLightSettings.thickness}-${previewRopeLightSettings.colors.join(',')}`}
+                    className="bg-background/40 border border-border/40 rounded-2xl p-4 flex flex-col items-center justify-center space-y-2 relative overflow-hidden h-36"
+                  >
                     <span className="absolute top-2 left-3 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Neon Rope Light</span>
                     <style dangerouslySetInnerHTML={{
                       __html: `
@@ -1477,12 +1512,12 @@ export const UnifiedAdminDashboard = () => {
                     <svg className="w-full h-16" overflow="visible">
                       <defs>
                         <linearGradient id="ropeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                          {(previewData.settings?.ropeLightColors || ['#eab308', '#67e8f9', '#6366f1', '#a855f7']).map((color: string, idx: number, arr: any[]) => (
+                          {(previewRopeLightSettings.colors).map((color: string, idx: number, arr: any[]) => (
                             <stop key={idx} offset={`${(idx / (arr.length - 1)) * 100}%`} stopColor={color} />
                           ))}
                         </linearGradient>
                         <filter id="ropeGlow" x="-50%" y="-50%" width="200%" height="200%">
-                          <feGaussianBlur stdDeviation={previewData.settings?.ropeLightGlowIntensity ?? 3} result="coloredBlur" />
+                          <feGaussianBlur stdDeviation={previewRopeLightSettings.glow} result="coloredBlur" />
                           <feMerge>
                             <feMergeNode in="coloredBlur" />
                             <feMergeNode in="SourceGraphic" />
@@ -1493,15 +1528,17 @@ export const UnifiedAdminDashboard = () => {
                         d="M 10,32 C 70,5 130,59 190,32 C 230,12 270,32 290,20"
                         fill="none"
                         stroke="url(#ropeGrad)"
-                        strokeWidth={previewData.settings?.ropeLightThickness ?? 1.5}
+                        strokeWidth={previewRopeLightSettings.thickness}
                         filter="url(#ropeGlow)"
                         style={{
                           strokeDasharray: '30 10',
-                          animation: `ropeFlow ${20 / (previewData.settings?.ropeLightSpeed ?? 12)}s linear infinite`
+                          animation: `ropeFlow ${20 / previewRopeLightSettings.sharpSpeed}s linear infinite`
                         }}
                       />
                     </svg>
-                    <span className="text-[9px] text-muted-foreground/60">Speed: {previewData.settings?.ropeLightSpeed ?? 12} • Width: {previewData.settings?.ropeLightThickness ?? 1.5}px</span>
+                    <span className="text-[9px] text-muted-foreground/60">
+                      Fog Spd: {previewRopeLightSettings.speed} • Sharp Spd: {previewRopeLightSettings.sharpSpeed} • Width: {previewRopeLightSettings.thickness}px
+                    </span>
                   </div>
 
                   {/* Dynamic Font and Text Glow Preview */}

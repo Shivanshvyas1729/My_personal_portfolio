@@ -284,6 +284,7 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
         'ropeLightAccentLight',
         'ropeLightAccentDark',
         'sharpLightThickness',
+        'sharpLightSpeed',
         'textHoverColors',
         'textTransitionSpeed',
         'textLeaveSpeed',
@@ -308,14 +309,14 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
         {
           id: 'sharp-light-dark',
           title: '⚡ Sharp Outline Light (Dark Mode)',
-          desc: 'Configure the crisp inner neon edge colors and thickness for Dark Mode.',
-          keys: ['sharpLightColorsDark', 'sharpLightThicknessDark']
+          desc: 'Configure the crisp inner neon edge colors, thickness, and flow speed for Dark Mode.',
+          keys: ['sharpLightColorsDark', 'sharpLightThicknessDark', 'sharpLightSpeedDark']
         },
         {
           id: 'sharp-light-light',
           title: '💡 Sharp Outline Light (Light Mode)',
-          desc: 'Configure the crisp inner neon edge colors and thickness for Light Mode.',
-          keys: ['sharpLightColorsLight', 'sharpLightThicknessLight']
+          desc: 'Configure the crisp inner neon edge colors, thickness, and flow speed for Light Mode.',
+          keys: ['sharpLightColorsLight', 'sharpLightThicknessLight', 'sharpLightSpeedLight']
         },
         {
           id: 'text-animation',
@@ -412,6 +413,42 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
       ];
 
       // Factory Reset Defaults Helper
+      const handleResetLightsOnly = () => {
+        const lightFallbacks: Record<string, any> = {
+          ropeLightColors: ["#eab30866", "#67e8f966", "#6366f166", "#a855f766"],
+          ropeLightSpeed: 12.0,
+          ropeLightThickness: 1.5,
+          ropeLightGlowIntensity: 3.0,
+          ropeLightColorsLight: ["#fde68a44", "#93c5fd44", "#67e8f944"],
+          ropeLightColorsDark: ["#eab30866", "#67e8f966", "#6366f166", "#a855f766"],
+          ropeLightSpeedLight: 12.0,
+          ropeLightSpeedDark: 12.0,
+          ropeLightThicknessLight: 1.5,
+          ropeLightThicknessDark: 1.5,
+          ropeLightGlowIntensityLight: 3.0,
+          ropeLightGlowIntensityDark: 3.0,
+          ropeLightColorLight: "#fde68a44",
+          ropeLightColorDark: "#a1620744",
+          sharpLightColorsDark: ["#facc1544", "#93c5fd44", "#67e8f944"],
+          sharpLightThicknessDark: 1.5,
+          sharpLightColorsLight: ["#facc1533", "#93c5fd33"],
+          sharpLightThicknessLight: 1.5,
+          sharpLightSpeed: 12.0,
+          sharpLightSpeedDark: 12.0,
+          sharpLightSpeedLight: 12.0,
+        };
+
+        const updated = { ...currentData };
+        Object.entries(lightFallbacks).forEach(([key, val]) => {
+          if (shape[key]) {
+            updated[key] = val;
+          }
+        });
+
+        onChange(updated);
+        toast.success("Light configurations reset to premium defaults!");
+      };
+
       const handleFactoryResetLights = () => {
         const fallbacks: Record<string, any> = {
           // Rope lights baseline
@@ -441,6 +478,9 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
           sharpLightThicknessDark: 1.5,
           sharpLightColorsLight: ["#facc1533", "#93c5fd33"],
           sharpLightThicknessLight: 1.5,
+          sharpLightSpeed: 12.0,
+          sharpLightSpeedDark: 12.0,
+          sharpLightSpeedLight: 12.0,
 
           // Text animation baseline settings
           textHoverColors: ["#22d3ee", "#fbbf24", "#6366f1", "#8b5cf6"],
@@ -518,14 +558,25 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
                 <p className="text-[10px] text-muted-foreground mt-0.5">Quickly select curated combinations or reset edge properties.</p>
               </div>
 
-              <button
-                type="button"
-                onClick={handleFactoryResetLights}
-                className="px-3 py-1.5 bg-destructive/10 hover:bg-destructive/20 border border-destructive/20 text-destructive text-[10px] font-bold rounded-lg transition-all flex items-center gap-1 cursor-pointer"
-                title="Restore all edge lights, theme colors, background colors, and Google Fonts to clean baseline defaults"
-              >
-                <RotateCcw size={12} /> Reset All Settings to Baseline
-              </button>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleResetLightsOnly}
+                  className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 border border-primary/20 text-primary text-[10px] font-bold rounded-lg transition-all flex items-center gap-1 cursor-pointer"
+                  title="Restore all edge lights, thickness, colors and speeds to balanced, visually appealing defaults"
+                >
+                  <RotateCcw size={12} /> Reset Lights
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleFactoryResetLights}
+                  className="px-3 py-1.5 bg-destructive/10 hover:bg-destructive/20 border border-destructive/20 text-destructive text-[10px] font-bold rounded-lg transition-all flex items-center gap-1 cursor-pointer"
+                  title="Restore all edge lights, theme colors, background colors, and Google Fonts to clean baseline defaults"
+                >
+                  <RotateCcw size={12} /> Reset All
+                </button>
+              </div>
             </div>
 
             {/* Scrolling curations list */}
