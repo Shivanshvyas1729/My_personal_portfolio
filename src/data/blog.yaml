@@ -7,7 +7,7 @@ blog:
       - Fastapi
     featured: false
     draft: false
-    date: 2026-06-05
+    date: 2026-06-05T00:00:00.000Z
     link: https://drive.google.com/drive/u/0/folders/17qeN5jTs2Vh5EyQWOk0NCNJIoJu2mG17
   - id: 10
     title: all secret prompt and flow
@@ -16,7 +16,7 @@ blog:
     type: []
     featured: false
     draft: false
-    date: 2026-05-28
+    date: 2026-05-28T00:00:00.000Z
     excerpt: a prompt to make a functionality that   makes a   word file for u
   - id: 9
     title: TensorFlow Layer Writing Styles and Best Practices
@@ -846,7 +846,7 @@ blog:
       - Tensorflow
     featured: false
     draft: false
-    date: 2026-05-21
+    date: 2026-05-21T00:00:00.000Z
     excerpt: some style of writing in tensorflow
   - id: 8
     title: Fibonacci-Net architecture
@@ -1318,8 +1318,8 @@ blog:
       - Computer Vision
     featured: false
     draft: false
-    date: 2026-05-21
-    slug: ""
+    date: 2026-05-21T00:00:00.000Z
+    slug: ''
     excerpt: |
       - Lightweight deep learning models with very few parameters (~1.4M)
       - Fast inference and low computational cost
@@ -1373,7 +1373,7 @@ blog:
     category: Notes
     type:
       - cloud
-    link: ""
+    link: ''
     date: 2026-05-09T00:00:00.000Z
     featured: false
     draft: false
@@ -1385,7 +1385,7 @@ blog:
     category: Thoughts
     type:
       - gernal
-    link: ""
+    link: ''
     date: 2026-04-11T00:00:00.000Z
     featured: true
     draft: true
@@ -1398,7 +1398,7 @@ blog:
     type:
       - Deep Learning
       - NLP
-    link: ""
+    link: ''
     date: 2026-04-11T00:00:00.000Z
     featured: false
     draft: false
@@ -1409,7 +1409,7 @@ blog:
     title: Time
     content: “Time doesn’t just pass… it teaches. Every second you lose either becomes a regret or a lesson.”
     category: Thoughts
-    link: no
+    link: 'no'
     date: 2026-04-10T00:00:00.000Z
   - id: 6
     title: Research agents and platform
@@ -1419,14 +1419,29 @@ blog:
     category: Links
     type:
       - GERNAL
-    link: ""
+    link: ''
     date: 2026-05-17T00:00:00.000Z
     featured: true
     draft: false
     resources:
-      - label: "scispace "
+      - label: 'scispace '
         url: https://scispace.com/
-      - label: "bohrium "
+      - label: 'bohrium '
         url: https://www.bohrium.com/en
-      - label: "openbio "
+      - label: 'openbio '
         url: https://openbio.tech/
+  - id: 12
+    title: FastAPI Questions
+    slug: fastapi-questions
+    readingTime: 1
+    content: one min look
+    category: Links
+    type:
+      - Questions
+    link: ''
+    date: '2026-06-05'
+    featured: false
+    draft: false
+    resources:
+      - label: set1
+        url: https://drive.google.com/drive/u/0/folders/17qeN5jTs2Vh5EyQWOk0NCNJIoJu2mG17
