@@ -1,14 +1,4 @@
 blog:
-  - id: 11
-    title: Fast API basic questions to read
-    content: some basic questions of fastapi
-    category: Questions
-    type:
-      - Fastapi
-    featured: false
-    draft: false
-    date: 2026-06-05T00:00:00.000Z
-    link: https://drive.google.com/drive/u/0/folders/17qeN5jTs2Vh5EyQWOk0NCNJIoJu2mG17
   - id: 10
     title: all secret prompt and flow
     content: https://github.com/Shivanshvyas1729/Cancer_Detection_with_xai#appendix-master-prompt--dynamic-ai-document-generator
