@@ -1,11 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { getFeaturedProjects, portfolioData as initialData } from "@/data/portfolioData";
 import { useCMSData } from "@/context/CMSContext";
 import AnimatedSection from "./AnimatedSection";
 import ProjectCard from "./ProjectCard";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 const Projects = () => {
   const navigate = useNavigate();
@@ -13,60 +12,67 @@ const Projects = () => {
   const featured = getFeaturedProjects(currentData);
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const constraintsRef = useRef<HTMLDivElement>(null);
-  const [dragConstraints, setDragConstraints] = useState({ left: 0, right: 0 });
-  const [shouldAnimate, setShouldAnimate] = useState(false);
-
   const isDraggingRef = useRef(false);
+  const isMouseDownRef = useRef(false);
   const dragStartPos = useRef({ x: 0, y: 0 });
+  const scrollStartPos = useRef(0);
+  const [isGrabbed, setIsGrabbed] = useState(false);
 
-  useEffect(() => {
-    const updateConstraints = () => {
-      if (containerRef.current && constraintsRef.current) {
-        const containerWidth = containerRef.current.offsetWidth;
-        const scrollWidth = constraintsRef.current.scrollWidth;
-        // The left constraint is the difference (negative) between the scroll width and container width
-        const left = Math.min(0, containerWidth - scrollWidth - 48); // includes margins
-        setDragConstraints({ left, right: 0 });
-        setShouldAnimate(left < 0);
-      }
-    };
-
-    updateConstraints();
-    window.addEventListener("resize", updateConstraints);
-    // Double-check layouts after brief render ticks
-    const timer1 = setTimeout(updateConstraints, 100);
-    const timer2 = setTimeout(updateConstraints, 500);
-
-    return () => {
-      window.removeEventListener("resize", updateConstraints);
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    };
-  }, [featured]);
-
-  const handleDragStart = (event: any, info: any) => {
-    isDraggingRef.current = true;
-    dragStartPos.current = { x: info.point.x, y: info.point.y };
+  const scroll = (direction: "left" | "right") => {
+    if (containerRef.current) {
+      const { scrollLeft } = containerRef.current;
+      const isMobile = window.innerWidth < 768;
+      const scrollAmount = isMobile 
+        ? (direction === "left" ? -280 : 280)
+        : (direction === "left" ? -404 : 404);
+      
+      containerRef.current.scrollTo({
+        left: scrollLeft + scrollAmount,
+        behavior: "smooth",
+      });
+    }
   };
 
-  const handleDragEnd = (event: any, info: any) => {
-    const distance = Math.sqrt(
-      Math.pow(info.point.x - dragStartPos.current.x, 2) +
-      Math.pow(info.point.y - dragStartPos.current.y, 2)
-    );
+  const onMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
     
-    // If the drag movement was substantial, mark it as dragging to block click trigger
+    // Don't drag if click starts on interactive element
+    if ((e.target as HTMLElement).closest("a") || (e.target as HTMLElement).closest("button")) {
+      return;
+    }
+
+    setIsGrabbed(true);
+    isMouseDownRef.current = true;
+    dragStartPos.current = { x: e.clientX, y: e.clientY };
+    scrollStartPos.current = containerRef.current?.scrollLeft || 0;
+    isDraggingRef.current = false;
+  };
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!isMouseDownRef.current || !containerRef.current) return;
+    
+    const dx = e.clientX - dragStartPos.current.x;
+    const dy = e.clientY - dragStartPos.current.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
     if (distance > 5) {
       isDraggingRef.current = true;
-    } else {
-      isDraggingRef.current = false;
+      containerRef.current.scrollLeft = scrollStartPos.current - dx;
     }
-    
-    // Clear dragging state after a tiny tick to let standard card clicks capture the value
+  };
+
+  const onMouseUp = () => {
+    setIsGrabbed(false);
+    isMouseDownRef.current = false;
     setTimeout(() => {
       isDraggingRef.current = false;
-    }, 80);
+    }, 100);
+  };
+
+  const onMouseLeave = () => {
+    setIsGrabbed(false);
+    isMouseDownRef.current = false;
+    isDraggingRef.current = false;
   };
 
   if (!featured || featured.length === 0) {
@@ -96,51 +102,65 @@ const Projects = () => {
 
   return (
     <section id="projects" className="section-padding overflow-hidden">
-      <div className="container mx-auto">
+      <div className="container mx-auto px-4 md:px-8">
         <AnimatedSection>
-          <h2 className="text-sm font-medium text-primary tracking-widest uppercase mb-2">Projects</h2>
-          <h3 className="text-3xl md:text-4xl font-heading font-bold mb-12">
-            Featured <span className="gradient-text">Work</span>
-          </h3>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
+            <div>
+              <h2 className="text-sm font-medium text-primary tracking-widest uppercase mb-2">Projects</h2>
+              <h3 className="text-3xl md:text-4xl font-heading font-bold mb-0">
+                Featured <span className="gradient-text">Work</span>
+              </h3>
+            </div>
+            {/* Navigation buttons */}
+            <div className="hidden md:flex gap-3">
+              <button
+                onClick={() => scroll("left")}
+                className="p-2.5 rounded-full border border-border bg-card/80 backdrop-blur-md text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300 shadow-sm cursor-pointer"
+                aria-label="Scroll Left"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button
+                onClick={() => scroll("right")}
+                className="p-2.5 rounded-full border border-border bg-card/80 backdrop-blur-md text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300 shadow-sm cursor-pointer"
+                aria-label="Scroll Right"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          </div>
         </AnimatedSection>
 
-        <div className="relative -mx-6 px-6 overflow-hidden group mb-8" ref={containerRef}>
-          {/* Subtle Fade Edges */}
-          <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-background to-transparent z-20 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-background to-transparent z-20 pointer-events-none" />
-
-          {/* Draggable Track Container */}
-          <motion.div
-            ref={constraintsRef}
-            className="flex gap-6 w-max cursor-grab active:cursor-grabbing py-4"
-            drag="x"
-            dragConstraints={dragConstraints}
-            dragElastic={0.15}
-            animate={shouldAnimate ? { x: [0, dragConstraints.left] } : { x: 0 }}
-            transition={shouldAnimate ? {
-              duration: Math.max(15, featured.length * 4), // Smooth linear scroll time
-              ease: "linear",
-              repeat: Infinity,
-              repeatType: "reverse",
-            } : undefined}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-            whileTap={{ cursor: "grabbing" }}
-            style={{ 
-              willChange: 'transform',
-              transform: 'translate3d(0, 0, 0)'
+        {/* Carousel Viewport Container (stretches to edge on mobile/tablet/desktop) */}
+        <div className="relative -mx-4 sm:-mx-6 md:-mx-8 lg:-mx-12 overflow-hidden mb-8">
+          <div
+            ref={containerRef}
+            className={`flex gap-6 overflow-x-auto scrollbar-none snap-x snap-mandatory md:snap-none py-8 px-4 sm:px-6 md:px-8 lg:px-12 select-none ${
+              isGrabbed ? "cursor-grabbing" : "cursor-grab"
+            }`}
+            style={{
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+              WebkitOverflowScrolling: "touch",
             }}
+            onMouseDown={onMouseDown}
+            onMouseMove={onMouseMove}
+            onMouseUp={onMouseUp}
+            onMouseLeave={onMouseLeave}
           >
+            {/* Lead spacer for centering on mobile */}
+            <div className="w-[calc((100vw-280px)/2-16px)] xs:w-[calc((100vw-320px)/2-16px)] sm:w-[calc((100vw-350px)/2-24px)] md:hidden shrink-0" />
+            
             {featured.map((p, i) => (
               <div 
                 key={p.id} 
-                className="w-[300px] sm:w-[350px] md:w-[380px] flex-shrink-0 select-none h-full"
+                className="w-[280px] xs:w-[320px] sm:w-[350px] md:w-[380px] flex-shrink-0 h-full snap-center md:snap-align-none transition-all duration-300 md:hover:scale-[1.03] md:hover:-translate-y-2 py-2"
               >
                 <div className="pointer-events-auto h-full">
                   <ProjectCard 
                     project={p} 
                     index={i} 
-                    disableInViewAnimation={true} // Bypasses expensive intersection transitions for butter-smooth dragging
+                    disableInViewAnimation={true}
                     onClick={() => {
                       if (isDraggingRef.current) return;
                       navigate(`/project/${p.id}`);
@@ -149,7 +169,10 @@ const Projects = () => {
                 </div>
               </div>
             ))}
-          </motion.div>
+
+            {/* Trail spacer for centering on mobile */}
+            <div className="w-[calc((100vw-280px)/2-16px)] xs:w-[calc((100vw-320px)/2-16px)] sm:w-[calc((100vw-350px)/2-24px)] md:hidden shrink-0" />
+          </div>
         </div>
 
         <AnimatedSection className="text-center mt-6">
