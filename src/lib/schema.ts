@@ -230,6 +230,7 @@ export const BlogSchema = z.object({
   draft: z.boolean().optional().default(true),
   readingTime: z.number().optional(),
   link: z.string().optional().default(""),
+  linkText: z.string().optional().default(""),
   resources: z.array(z.object({
     label: z.string().optional(),
     url: z.string().optional()

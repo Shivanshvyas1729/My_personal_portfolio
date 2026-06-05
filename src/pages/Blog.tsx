@@ -28,9 +28,10 @@ export interface BlogPost {
   draft?: boolean;
   readingTime?: number;
   isPending?: boolean;
+  link?: string;
+  linkText?: string;
 }
 
-const POSTS_PER_PAGE = 6;
 // Default preset order for filter tabs — custom categories added via CMS will appear after these
 const PRESET_CATEGORIES = ['Thoughts', 'Notes', 'Books', 'Links'];
 
@@ -49,6 +50,7 @@ export default function Blog() {
   });
   const { hasAccess } = useAuth();
   const isAdmin = hasAccess("admin");
+  const [postsPerPage, setPostsPerPage] = useState(6);
 
   // Filters State
   const [activeCategory, setActiveCategory] = useState("All");
@@ -60,6 +62,53 @@ export default function Blog() {
   // View State
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+
+  const handleOpenPost = (post: BlogPost) => {
+    setSelectedPost(post);
+    if (post.slug) {
+      window.history.pushState(null, "", `#${post.slug}`);
+    } else {
+      window.history.pushState(null, "", `#${post.id}`);
+    }
+  };
+
+  const handleClosePost = () => {
+    setSelectedPost(null);
+    const url = new URL(window.location.href);
+    url.hash = "";
+    url.searchParams.delete("post");
+    window.history.pushState(null, "", url.pathname + url.search);
+  };
+
+  // Listen for hash/popstate changes to support browser Back/Forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      const hash = window.location.hash.replace("#", "");
+      const params = new URLSearchParams(window.location.search);
+      const query = params.get("post");
+      const targetSlug = query || hash;
+
+      if (targetSlug) {
+        const found = posts.find(p => p.slug === targetSlug || String(p.id) === targetSlug);
+        if (found) {
+          setSelectedPost(found);
+          return;
+        }
+      }
+      setSelectedPost(null);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    window.addEventListener("hashchange", handlePopState);
+
+    // Initial check on load/posts change
+    handlePopState();
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("hashchange", handlePopState);
+    };
+  }, [posts]);
 
   // Sync with CMS dynamic data (preview or live database updates)
   useEffect(() => {
@@ -155,13 +204,13 @@ export default function Blog() {
   // Pagination Reset Trigger
   useEffect(() => {
     setCurrentPage(1);
-  }, [activeCategory, searchQuery, selectedTags, showFeaturedOnly, sortOption]);
+  }, [activeCategory, searchQuery, selectedTags, showFeaturedOnly, sortOption, postsPerPage]);
 
   // Pagination bounds
-  const totalPages = Math.ceil(filteredAndSortedPosts.length / POSTS_PER_PAGE);
+  const totalPages = Math.ceil(filteredAndSortedPosts.length / postsPerPage);
   const paginatedPosts = filteredAndSortedPosts.slice(
-    (currentPage - 1) * POSTS_PER_PAGE, 
-    currentPage * POSTS_PER_PAGE
+    (currentPage - 1) * postsPerPage, 
+    currentPage * postsPerPage
   );
 
   const toggleTag = (tag: string) => {
@@ -225,6 +274,8 @@ export default function Blog() {
                 showFeaturedOnly={showFeaturedOnly}
                 setShowFeaturedOnly={setShowFeaturedOnly}
                 resetFilters={resetFilters}
+                pageSize={postsPerPage}
+                setPageSize={setPostsPerPage}
               />
 
               {/* Grid Result Output */}
@@ -253,7 +304,7 @@ export default function Blog() {
                       )}
 
                       <div className="h-full">
-                        <BlogCard post={post} onClick={() => setSelectedPost(post)} isAdmin={isAdmin} onDelete={handleOptimisticDelete} />
+                        <BlogCard post={post} onClick={() => handleOpenPost(post)} isAdmin={isAdmin} onDelete={handleOptimisticDelete} />
                       </div>
                     </div>
                   ))}
@@ -293,7 +344,7 @@ export default function Blog() {
       {/* Floating Admin Panel (draggable + resizable) */}
       {isAdmin && <AdminPanel onSuccess={handleOptimisticInject} />}
 
-      <BlogModal post={selectedPost} isOpen={!!selectedPost} onClose={() => setSelectedPost(null)} isAdmin={isAdmin} />
+      <BlogModal post={selectedPost} isOpen={!!selectedPost} onClose={handleClosePost} isAdmin={isAdmin} />
     </div>
   );
 }

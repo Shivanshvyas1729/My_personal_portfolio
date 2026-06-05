@@ -152,6 +152,19 @@ export function BlogModal({ post, isOpen, onClose, isAdmin }: BlogModalProps) {
                     {activePost.readingTime} min read
                   </div>
                 )}
+                {activePost.link && (
+                  <div className="flex items-center gap-2">
+                    <LinkIcon size={16} className="text-primary" />
+                    <a
+                      href={activePost.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline font-semibold"
+                    >
+                      {activePost.linkText || "External Link"}
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -216,6 +229,9 @@ export function BlogModal({ post, isOpen, onClose, isAdmin }: BlogModalProps) {
                         {...props} 
                         className="border-l-4 border-primary bg-primary/5 py-3 px-5 rounded-r-xl my-6 not-italic font-medium text-foreground/90 shadow-sm"
                       />
+                    ),
+                    p: ({ node, ...props }) => (
+                      <p {...props} className="whitespace-pre-wrap mb-4" />
                     )
                   }}
                 >

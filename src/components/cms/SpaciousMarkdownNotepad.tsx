@@ -624,7 +624,7 @@ export const SpaciousMarkdownNotepad: React.FC<SpaciousMarkdownNotepadProps> = (
           {(splitPreview || previewOnly) && (
             <div className={`h-full overflow-y-auto p-6 bg-muted/5 scrollbar-thin ${previewOnly ? 'w-full' : 'hidden md:block md:w-1/2'}`}>
               {localValue.trim() ? (
-                <div className="notepad-preview-content space-y-0">
+                <div className="notepad-preview-content">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     rehypePlugins={[rehypeRaw]}
@@ -635,7 +635,7 @@ export const SpaciousMarkdownNotepad: React.FC<SpaciousMarkdownNotepadProps> = (
                       h4: ({ node, ...p }) => <h4 {...p} className="text-base font-semibold text-foreground/90 mt-4 mb-1.5" />,
                       h5: ({ node, ...p }) => <h5 {...p} className="text-sm font-semibold text-foreground/80 mt-3 mb-1" />,
                       h6: ({ node, ...p }) => <h6 {...p} className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-3 mb-1" />,
-                      p: ({ node, ...p }) => <p {...p} className="text-sm text-foreground/80 leading-7 mb-3" />,
+                      p: ({ node, ...p }) => <p {...p} className="text-sm text-foreground/80 leading-7 mb-4 whitespace-pre-wrap" />,
                       ul: ({ node, ...p }) => <ul {...p} className="list-disc pl-5 space-y-1 mb-3 text-sm text-foreground/80" />,
                       ol: ({ node, ...p }) => <ol {...p} className="list-decimal pl-5 space-y-1 mb-3 text-sm text-foreground/80" />,
                       li: ({ node, ...p }) => <li {...p} className="leading-6 marker:text-primary/60" />,

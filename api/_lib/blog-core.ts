@@ -8,7 +8,9 @@
  */
 import { Octokit } from "@octokit/rest";
 import yaml from "js-yaml";
-import { getAdminPassword, getOwner, getRepo, getBranch, getGithubToken } from "./config.js";
+import fs from "fs";
+import path from "path";
+import { getAdminPassword, getOwner, getRepo, getBranch, getGithubToken, getIsLocalMode } from "./config.js";
 
 export const FILE_PATH = "src/data/blog.yaml";
 export const RATE_LIMIT_SECONDS = 30;
@@ -25,16 +27,23 @@ function getOctokit() {
   return new Octokit({ auth: getGithubToken() });
 }
 
-async function fetchYaml(octokit: Octokit): Promise<{ sha: string; content: string }> {
-  const response = await octokit.repos.getContent({
-    owner: getOwner(), repo: getRepo(), path: FILE_PATH, ref: getBranch(),
-  });
-  const fileData = response.data as any;
-  if (fileData.type !== "file") throw new Error("Target path is not a file");
-  return {
-    sha:     fileData.sha,
-    content: Buffer.from(fileData.content, "base64").toString("utf-8"),
-  };
+async function fetchYaml(octokit: Octokit | null): Promise<{ sha: string; content: string }> {
+  if (getIsLocalMode()) {
+    const absolutePath = path.resolve(process.cwd(), FILE_PATH);
+    const content = fs.readFileSync(absolutePath, "utf-8");
+    return { sha: "", content };
+  } else {
+    if (!octokit) throw new Error("Octokit is required in cloud mode");
+    const response = await octokit.repos.getContent({
+      owner: getOwner(), repo: getRepo(), path: FILE_PATH, ref: getBranch(),
+    });
+    const fileData = response.data as any;
+    if (fileData.type !== "file") throw new Error("Target path is not a file");
+    return {
+      sha:     fileData.sha,
+      content: Buffer.from(fileData.content, "base64").toString("utf-8"),
+    };
+  }
 }
 
 function parseYaml(rawContent: string): any {
@@ -45,17 +54,39 @@ function parseYaml(rawContent: string): any {
 }
 
 async function commitYaml(
-  octokit: Octokit,
+  octokit: Octokit | null,
   sha: string,
   data: any,
   message: string,
 ): Promise<void> {
   const updated = yaml.dump(data, { indent: 2, lineWidth: -1 });
-  const encoded = Buffer.from(updated, "utf-8").toString("base64");
-  await octokit.repos.createOrUpdateFileContents({
-    owner: getOwner(), repo: getRepo(), path: FILE_PATH,
-    message, content: encoded, sha, branch: getBranch(),
-  });
+  if (getIsLocalMode()) {
+    const absolutePath = path.resolve(process.cwd(), FILE_PATH);
+    const bakPath = `${absolutePath}.bak`;
+    const tmpPath = `${absolutePath}.tmp`;
+    try {
+      if (fs.existsSync(absolutePath)) {
+        fs.copyFileSync(absolutePath, bakPath);
+      }
+      fs.writeFileSync(tmpPath, updated);
+      fs.renameSync(tmpPath, absolutePath);
+      if (fs.existsSync(bakPath)) {
+        fs.unlinkSync(bakPath);
+      }
+    } catch (e: any) {
+      if (fs.existsSync(bakPath)) {
+        fs.renameSync(bakPath, absolutePath);
+      }
+      throw e;
+    }
+  } else {
+    if (!octokit) throw new Error("Octokit is required in cloud mode");
+    const encoded = Buffer.from(updated, "utf-8").toString("base64");
+    await octokit.repos.createOrUpdateFileContents({
+      owner: getOwner(), repo: getRepo(), path: FILE_PATH,
+      message, content: encoded, sha, branch: getBranch(),
+    });
+  }
 }
 
 // ─── 1. Auth check ────────────────────────────────────────────────────────────
@@ -81,29 +112,31 @@ export async function coreSaveBlog(
     return { status: 400, body: { error: "Bad Request: Missing required blog fields" } };
   }
 
-  const octokit = getOctokit();
+  const octokit = !getIsLocalMode() ? getOctokit() : null;
 
   // Rate limit
-  try {
-    const commits = await octokit.repos.listCommits({
-      owner: getOwner(), repo: getRepo(), path: FILE_PATH, per_page: 1,
-    });
-    if (commits.data.length > 0) {
-      const lastDate = commits.data[0].commit.committer?.date;
-      if (lastDate) {
-        const elapsed = (Date.now() - new Date(lastDate).getTime()) / 1000;
-        if (elapsed < RATE_LIMIT_SECONDS) {
-          const retryAfter = Math.ceil(RATE_LIMIT_SECONDS - elapsed);
-          return {
-            status:  429,
-            headers: { "Retry-After": String(retryAfter) },
-            body:    { error: `Rate limited. Please wait ${retryAfter}s before submitting again.`, retryAfter },
-          };
+  if (!getIsLocalMode() && octokit) {
+    try {
+      const commits = await octokit.repos.listCommits({
+        owner: getOwner(), repo: getRepo(), path: FILE_PATH, per_page: 1,
+      });
+      if (commits.data.length > 0) {
+        const lastDate = commits.data[0].commit.committer?.date;
+        if (lastDate) {
+          const elapsed = (Date.now() - new Date(lastDate).getTime()) / 1000;
+          if (elapsed < RATE_LIMIT_SECONDS) {
+            const retryAfter = Math.ceil(RATE_LIMIT_SECONDS - elapsed);
+            return {
+              status:  429,
+              headers: { "Retry-After": String(retryAfter) },
+              body:    { error: `Rate limited. Please wait ${retryAfter}s before submitting again.`, retryAfter },
+            };
+          }
         }
       }
+    } catch (e: any) {
+      console.warn("Rate-limit check failed (non-fatal):", e.message);
     }
-  } catch (e: any) {
-    console.warn("Rate-limit check failed (non-fatal):", e.message);
   }
 
   // Fetch + parse YAML
@@ -111,7 +144,7 @@ export async function coreSaveBlog(
   try {
     ({ sha, content: rawContent } = await fetchYaml(octokit));
   } catch (e: any) {
-    return { status: 500, body: { error: `Failed to access GitHub repo. Status: ${e.status}. ${e.message}` } };
+    return { status: 500, body: { error: `Failed to access data source. ${e.message}` } };
   }
 
   let parsed: any;
@@ -149,6 +182,7 @@ export async function coreSaveBlog(
     category:    blogData.category.trim(),
     type:        Array.isArray(blogData.type) ? blogData.type : [],
     link:        blogData.link?.trim() ?? "",
+    linkText:    blogData.linkText?.trim() ?? "",
     date:        date,
     featured:    !!blogData.featured,
     draft:       !!blogData.draft,
@@ -202,14 +236,14 @@ export async function coreDeleteBlog(
     return { status: 400, body: { error: "Bad Request: postId or postSlug required" } };
   }
 
-  const octokit = getOctokit();
+  const octokit = !getIsLocalMode() ? getOctokit() : null;
 
   // Fetch + parse YAML
   let sha: string, rawContent: string;
   try {
     ({ sha, content: rawContent } = await fetchYaml(octokit));
   } catch (e: any) {
-    return { status: 500, body: { error: `Failed to access GitHub repo. ${e.message}` } };
+    return { status: 500, body: { error: `Failed to access data source. ${e.message}` } };
   }
 
   let parsed: any;

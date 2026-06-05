@@ -72,6 +72,23 @@ const BlogPostForm: React.FC<{ blog: any; onChange: (b: any) => void; allBlogs: 
     onChange({ ...blog, type: currentTypes.filter(t => t !== tag) });
   };
 
+  const slugify = (text: string) => {
+    return text
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
+  const handleTitleChange = (newTitle: string) => {
+    const nextBlog = { ...blog, title: newTitle };
+    const prevSlug = slugify(blog.title || '');
+    if (!blog.slug || blog.slug === prevSlug) {
+      nextBlog.slug = slugify(newTitle);
+    }
+    onChange(nextBlog);
+  };
+
   const field = 'text-sm font-medium text-muted-foreground uppercase tracking-wider block mb-1.5';
   const input = 'w-full px-3 py-2.5 rounded-lg border border-border/40 bg-background/60 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all text-foreground';
 
@@ -81,7 +98,7 @@ const BlogPostForm: React.FC<{ blog: any; onChange: (b: any) => void; allBlogs: 
       {/* Title */}
       <div>
         <label className={field}>Title *</label>
-        <input type="text" value={blog.title || ''} onChange={e => onChange({ ...blog, title: e.target.value })}
+        <input type="text" value={blog.title || ''} onChange={e => handleTitleChange(e.target.value)}
           className={input} placeholder="Post title..." />
       </div>
 
@@ -303,11 +320,18 @@ const BlogPostForm: React.FC<{ blog: any; onChange: (b: any) => void; allBlogs: 
           className={input} placeholder="e.g. my-post-about-pandas" />
       </div>
 
-      {/* Link */}
-      <div>
-        <label className={field}>External Link <span className="text-muted-foreground/50 normal-case font-normal">(optional)</span></label>
-        <input type="url" value={blog.link || ''} onChange={e => onChange({ ...blog, link: e.target.value })}
-          className={input} placeholder="https://..." />
+      {/* Link URL & linkText */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className={field}>External Link URL <span className="text-muted-foreground/50 normal-case font-normal">(optional)</span></label>
+          <input type="url" value={blog.link || ''} onChange={e => onChange({ ...blog, link: e.target.value })}
+            className={input} placeholder="https://..." />
+        </div>
+        <div>
+          <label className={field}>Link Display Text <span className="text-muted-foreground/50 normal-case font-normal">(optional)</span></label>
+          <input type="text" value={blog.linkText || ''} onChange={e => onChange({ ...blog, linkText: e.target.value })}
+            className={input} placeholder="e.g. Read Source Code" />
+        </div>
       </div>
 
       {/* Toggles */}
@@ -578,15 +602,28 @@ export const BlogsAdmin: React.FC<BlogsAdminProps> = ({ blogs, onChange, onSave,
                          )}
                        </div>
                        
-                       {tempBlog.type && tempBlog.type.length > 0 && (
-                         <div className="flex flex-wrap gap-1.5 mt-auto pt-4 border-t border-border/30">
-                           {tempBlog.type.map((tag: string, idx: number) => (
-                             <span key={idx} className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/50 uppercase tracking-widest">
-                               {tag}
-                             </span>
-                           ))}
-                         </div>
-                       )}
+                       {tempBlog.link && (
+                          <div className="mt-3 mb-4 text-xs">
+                            <a
+                              href={tempBlog.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline inline-flex items-center gap-1 font-semibold"
+                            >
+                              {tempBlog.linkText || "Visit External Link"} →
+                            </a>
+                          </div>
+                        )}
+                        
+                        {tempBlog.type && tempBlog.type.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mt-auto pt-4 border-t border-border/30">
+                            {tempBlog.type.map((tag: string, idx: number) => (
+                              <span key={idx} className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/50 uppercase tracking-widest">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                      </article>
                    </div>
                  ) : (
@@ -685,6 +722,9 @@ export const BlogsAdmin: React.FC<BlogsAdminProps> = ({ blogs, onChange, onSave,
                                     {...props} 
                                     className="border-l-4 border-primary bg-primary/5 py-2 px-4 rounded-r-xl my-4 not-italic font-medium text-foreground/90 shadow-sm"
                                   />
+                                ),
+                                p: ({ node, ...props }) => (
+                                  <p {...props} className="whitespace-pre-wrap mb-4" />
                                 )
                               }}
                             >
@@ -713,16 +753,33 @@ export const BlogsAdmin: React.FC<BlogsAdminProps> = ({ blogs, onChange, onSave,
                             </div>
                           </div>
                         )}
-                        
-                        {tempBlog.type && tempBlog.type.length > 0 && (
-                          <div className="mt-6 flex flex-wrap gap-1.5">
-                            {tempBlog.type.map((tag: string, idx: number) => (
-                              <span key={idx} className="text-[10px] px-2 py-0.5 rounded-full bg-primary/5 text-primary border border-primary/20 uppercase tracking-widest font-semibold">
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
+
+                        {tempBlog.link && (
+                           <div className="mt-6 p-4 rounded-xl border border-border/50 bg-muted/20 flex items-center justify-between">
+                             <span className="flex items-center gap-2 font-medium text-xs text-foreground/80">
+                               <LinkIcon size={12} className="text-primary" />
+                               {tempBlog.linkText || "External Link"}
+                             </span>
+                             <a
+                               href={tempBlog.link}
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               className="text-xs text-primary hover:underline font-bold flex items-center gap-1"
+                             >
+                               Visit Page <Eye size={12} />
+                             </a>
+                           </div>
+                         )}
+
+                         {tempBlog.type && tempBlog.type.length > 0 && (
+                           <div className="mt-6 flex flex-wrap gap-1.5">
+                             {tempBlog.type.map((tag: string, idx: number) => (
+                               <span key={idx} className="text-[10px] px-2 py-0.5 rounded-full bg-primary/5 text-primary border border-primary/20 uppercase tracking-widest font-semibold">
+                                 {tag}
+                               </span>
+                             ))}
+                           </div>
+                         )}
                       </div>
                    </div>
                  )}

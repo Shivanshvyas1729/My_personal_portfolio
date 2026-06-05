@@ -20,6 +20,9 @@ interface FilterBarProps {
   setShowFeaturedOnly: (show: boolean) => void;
   
   resetFilters: () => void;
+
+  pageSize: number;
+  setPageSize: (size: number) => void;
 }
 
 export function FilterBar({
@@ -35,9 +38,12 @@ export function FilterBar({
   setSortOption,
   showFeaturedOnly,
   setShowFeaturedOnly,
-  resetFilters
+  resetFilters,
+  pageSize,
+  setPageSize
 }: FilterBarProps) {
   const [localSearch, setLocalSearch] = useState(searchQuery);
+  const [customVal, setCustomVal] = useState(String(pageSize));
 
   // Debounced search
   useEffect(() => {
@@ -51,6 +57,10 @@ export function FilterBar({
   useEffect(() => {
     setLocalSearch(searchQuery);
   }, [searchQuery]);
+
+  useEffect(() => {
+    setCustomVal(String(pageSize));
+  }, [pageSize]);
 
   const activeFilterCount = (activeCategory !== "All" ? 1 : 0) + selectedTags.length + (showFeaturedOnly ? 1 : 0) + (searchQuery ? 1 : 0);
 
@@ -124,6 +134,51 @@ export function FilterBar({
           >
             <Star size={14} className={showFeaturedOnly ? "fill-yellow-500" : ""} /> Featured
           </button>
+
+          {/* Real-time Page Size Selector */}
+          <div className="flex items-center gap-1.5 bg-muted/40 border border-border/40 p-0.5 rounded-lg text-xs text-muted-foreground select-none shrink-0 flex-wrap sm:flex-nowrap">
+            <span className="text-[9px] uppercase font-extrabold tracking-wider px-1 text-muted-foreground/60">Per Page</span>
+            <div className="flex gap-0.5">
+              {[6, 16, 100].map(size => (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => setPageSize(size)}
+                  className={`px-2.5 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                    pageSize === size 
+                      ? "bg-primary text-primary-foreground shadow-[0_1.5px_5px_hsl(var(--primary)/0.3)]" 
+                      : "hover:bg-muted/60 text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+            <div className="h-3.5 w-px bg-border/50 mx-0.5 hidden sm:block"></div>
+            <div className="flex items-center gap-1 pr-1">
+              <span className="text-[9px] font-semibold text-muted-foreground/60">Custom:</span>
+              <input
+                type="number"
+                min="1"
+                max="500"
+                value={customVal}
+                onChange={(e) => {
+                  const str = e.target.value;
+                  setCustomVal(str);
+                  const val = Number(str);
+                  if (val >= 1 && val <= 500) {
+                    setPageSize(val);
+                  }
+                }}
+                onBlur={() => {
+                  if (Number(customVal) < 1 || !customVal) {
+                    setCustomVal(String(pageSize));
+                  }
+                }}
+                className="w-10 bg-background/50 hover:bg-background border border-border/30 rounded px-1 py-0.5 text-[10px] font-bold text-center text-foreground focus:outline-none focus:border-primary/50"
+              />
+            </div>
+          </div>
 
           <div className="h-4 w-px bg-border/50 mx-1 hidden md:block"></div>
 

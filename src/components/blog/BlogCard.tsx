@@ -162,6 +162,19 @@ export function BlogCard({ post, onClick, isAdmin, onDelete }: BlogCardProps) {
         )}
       </div>
 
+      {post.link && (
+        <div className="mt-1 mb-4 text-xs select-none" onClick={e => e.stopPropagation()}>
+          <a
+            href={post.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline inline-flex items-center gap-1 font-semibold"
+          >
+            {post.linkText || "Visit Link"} →
+          </a>
+        </div>
+      )}
+
       {/* Tag Chips */}
       {post.type && post.type.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mt-auto pt-4 border-t border-border/30">
