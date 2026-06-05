@@ -293,7 +293,7 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
         'textGlowIntensity'
       ]);
 
-      const groups = [
+      const allGroups = [
         {
           id: 'neon-fog-dark',
           title: '🌙 Neon Fog Edge Wash (Dark Mode)',
@@ -319,13 +319,16 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
           keys: ['sharpLightColorsLight', 'sharpLightThicknessLight', 'sharpLightSpeedLight']
         },
         {
-          id: 'text-animation',
-          title: '✏️ Interactive Text Animation Effects',
-          desc: 'Tweak speed, glow properties, colors, and base opacity for cursor hover animations.',
-          keys: [
-            'textTransitionSpeedDark', 'textLeaveSpeedDark', 'textAnimationSpeedDark', 'textBaseOpacityDark', 'textGlowIntensityDark', 'textHoverColorsDark',
-            'textTransitionSpeedLight', 'textLeaveSpeedLight', 'textAnimationSpeedLight', 'textBaseOpacityLight', 'textGlowIntensityLight', 'textHoverColorsLight'
-          ]
+          id: 'text-animation-dark',
+          title: '✏️ Interactive Text Animation Effects (Dark Mode)',
+          desc: 'Tweak speed, glow properties, colors, and base opacity for cursor hover animations in Dark Mode.',
+          keys: ['textTransitionSpeedDark', 'textLeaveSpeedDark', 'textAnimationSpeedDark', 'textBaseOpacityDark', 'textGlowIntensityDark', 'textHoverColorsDark']
+        },
+        {
+          id: 'text-animation-light',
+          title: '✏️ Interactive Text Animation Effects (Light Mode)',
+          desc: 'Tweak speed, glow properties, colors, and base opacity for cursor hover animations in Light Mode.',
+          keys: ['textTransitionSpeedLight', 'textLeaveSpeedLight', 'textAnimationSpeedLight', 'textBaseOpacityLight', 'textGlowIntensityLight', 'textHoverColorsLight']
         },
         {
           id: 'brand-identity',
@@ -335,8 +338,28 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
         }
       ];
 
-      const keysInGroups = new Set(groups.flatMap(g => g.keys));
+      const keysInGroups = new Set(allGroups.flatMap(g => g.keys));
       const visibleKeys = keys.filter(k => !keysToHide.has(k) && !keysInGroups.has(k));
+
+      // Filter groups to display only the current theme's sections
+      const groups = allGroups
+        .map(g => {
+          if (g.id === 'brand-identity') {
+            return {
+              ...g,
+              keys: [
+                'themePrimaryColor', 'themeAccentColor', 'themeBackgroundColor', 'themeFontFamily',
+                ...(isDark ? ['themeHighlightColorDark'] : ['themeHighlightColorLight'])
+              ]
+            };
+          }
+          return g;
+        })
+        .filter(g => {
+          if (g.id.endsWith('-dark') && !isDark) return false;
+          if (g.id.endsWith('-light') && isDark) return false;
+          return true;
+        });
 
       // Curated Theme Presets Registry
       const PRESETS = [
