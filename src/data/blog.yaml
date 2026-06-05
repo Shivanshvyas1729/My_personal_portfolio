@@ -7,7 +7,7 @@ blog:
     featured: false
     draft: true
     date: 2026-05-28
-    excerpt: like code to make word
+    excerpt: a prompt to make a functionality that   makes a   word file for u
   - id: 9
     title: TensorFlow Layer Writing Styles and Best Practices
     content: |
