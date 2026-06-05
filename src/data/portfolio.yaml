@@ -64,10 +64,10 @@ settings:
     - "#06B6D4"
     - ""
   sharpLightThicknessLight: 1.5
-  sharpLightSpeedLight: 2.1
-  ropeLightThicknessLight: 1.5
-  ropeLightGlowIntensityLight: 6
-  ropeLightSpeedLight: 5.1
+  sharpLightSpeedLight: 4.1
+  ropeLightThicknessLight: 2.5
+  ropeLightGlowIntensityLight: 4
+  ropeLightSpeedLight: 6.1
   ropeLightThicknessDark: 1.5
   ropeLightGlowIntensityDark: 3
   ropeLightSpeedDark: 2.1
