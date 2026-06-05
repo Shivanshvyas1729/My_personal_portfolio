@@ -5,7 +5,7 @@ blog:
     category: Links
     type: []
     featured: false
-    draft: true
+    draft: false
     date: 2026-05-28
     excerpt: a prompt to make a functionality that   makes a   word file for u
   - id: 9
