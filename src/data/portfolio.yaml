@@ -69,8 +69,8 @@ settings:
   ropeLightGlowIntensityLight: 6
   ropeLightSpeedLight: 5.1
   ropeLightThicknessDark: 1.5
-  ropeLightGlowIntensityDark: 1
-  ropeLightSpeedDark: 1.1
+  ropeLightGlowIntensityDark: 3
+  ropeLightSpeedDark: 2.1
   ropeLightColorsLight:
     - "#D4AF37"
     - "#4F46E5"
