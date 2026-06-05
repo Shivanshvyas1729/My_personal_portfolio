@@ -65,8 +65,8 @@ settings:
     - ""
   sharpLightThicknessLight: 1.5
   sharpLightSpeedLight: 2.1
-  ropeLightThicknessLight: 7.5
-  ropeLightGlowIntensityLight: 3
+  ropeLightThicknessLight: 1.5
+  ropeLightGlowIntensityLight: 6
   ropeLightSpeedLight: 5.1
   ropeLightThicknessDark: 1.2
   ropeLightGlowIntensityDark: 4
