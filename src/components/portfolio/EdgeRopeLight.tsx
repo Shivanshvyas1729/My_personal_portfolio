@@ -193,7 +193,10 @@ const EdgeRopeLight = () => {
       : (settings.sharpLightColorsLight && settings.sharpLightColorsLight.length > 0 ? settings.sharpLightColorsLight : colors)
     ).filter(Boolean);
 
-    // ── Responsive Modifiers ──
+    // ── Responsive Modifiers & Scale Factor ──
+    // ResponsiveFogIntensity = DesktopFogIntensity * clamp(0.55 + (ViewportWidth / 1920) * 0.45, 0.55, 1.0)
+    const scaleFactor = Math.min(1.0, Math.max(0.55, 0.55 + (windowWidth / 1920) * 0.45));
+
     let glowMultiplier = 1.0;
     let speedMultiplier = 1.0;
     let thicknessMultiplier = 1.0;
@@ -246,10 +249,14 @@ const EdgeRopeLight = () => {
       ? (settings.ropeLightGlowIntensityDark ?? settings.ropeLightGlowIntensity ?? 5)
       : (settings.ropeLightGlowIntensityLight ?? settings.ropeLightGlowIntensity ?? 5);
 
-    const glow = rawGlow * glowMultiplier;
+    // Apply the responsive scale factor to glow (intensity)
+    const glow = rawGlow * glowMultiplier * scaleFactor;
 
     // Fog height / spread multiplier: thinner spread in light mode for subtle blending
     const fogHeightMultiplier = isDark ? 18 : 10;
+    
+    // Dynamic spread width/height of the fog, scaled down responsive-ly
+    const fogSpread = thickness * fogHeightMultiplier * scaleFactor;
 
     // Adjust each color string dynamically for brightness and saturation
     const adjustedColors = colors.map(c => adjustColor(c, mode, isDark, true));
@@ -265,9 +272,9 @@ const EdgeRopeLight = () => {
       glow,
       glowOpacityMinMult,
       glowOpacityMaxMult,
-      fogHeightMultiplier,
+      fogSpread,
     };
-  }, [theme, settings, mode]);
+  }, [theme, settings, mode, windowWidth]);
 
   if (!settings || !config) return null;
 
@@ -315,7 +322,7 @@ const EdgeRopeLight = () => {
       <div 
         className="absolute top-0 left-0 w-full"
         style={{ 
-          height: `${config.thickness * config.fogHeightMultiplier}px`, 
+          height: `${config.fogSpread}px`, 
           maskImage: 'linear-gradient(to bottom, black 15%, transparent 100%)',
           WebkitMaskImage: 'linear-gradient(to bottom, black 15%, transparent 100%)',
           animation: `rope-breathe-1 7s ease-in-out infinite`,
@@ -340,7 +347,7 @@ const EdgeRopeLight = () => {
       <div 
         className="absolute bottom-0 left-0 w-full"
         style={{ 
-          height: `${config.thickness * config.fogHeightMultiplier}px`, 
+          height: `${config.fogSpread}px`, 
           maskImage: 'linear-gradient(to top, black 15%, transparent 100%)',
           WebkitMaskImage: 'linear-gradient(to top, black 15%, transparent 100%)',
           animation: `rope-breathe-2 7s ease-in-out infinite`,
@@ -365,7 +372,7 @@ const EdgeRopeLight = () => {
       <div 
         className="absolute top-0 left-0 h-full"
         style={{ 
-          width: `${config.thickness * config.fogHeightMultiplier}px`, 
+          width: `${config.fogSpread}px`, 
           maskImage: 'linear-gradient(to right, black 15%, transparent 100%)',
           WebkitMaskImage: 'linear-gradient(to right, black 15%, transparent 100%)',
           animation: `rope-breathe-3 8s ease-in-out infinite`,
@@ -390,7 +397,7 @@ const EdgeRopeLight = () => {
       <div 
         className="absolute top-0 right-0 h-full"
         style={{ 
-          width: `${config.thickness * config.fogHeightMultiplier}px`, 
+          width: `${config.fogSpread}px`, 
           maskImage: 'linear-gradient(to left, black 15%, transparent 100%)',
           WebkitMaskImage: 'linear-gradient(to left, black 15%, transparent 100%)',
           animation: `rope-breathe-4 8s ease-in-out infinite`,
