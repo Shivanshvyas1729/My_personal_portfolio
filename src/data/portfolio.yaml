@@ -55,7 +55,7 @@ settings:
   introTagline: "Welcome to my universe.."
   introDuration: 4000
   sharpLightThicknessDark: 1.5
-  sharpLightSpeedDark: 1.1
+  sharpLightSpeedDark: 7.1
   ropeLightColorsDark:
     - "#ffffff"
   sharpLightColorsLight:
@@ -65,9 +65,17 @@ settings:
     - ""
   sharpLightThicknessLight: 1.5
   sharpLightSpeedLight: 2.1
-  ropeLightThicknessLight: 0.5
-  ropeLightGlowIntensityLight: 0.5
-  ropeLightSpeedLight: 2.1
+  ropeLightThicknessLight: 7.5
+  ropeLightGlowIntensityLight: 3
+  ropeLightSpeedLight: 5.1
+  ropeLightThicknessDark: 1.2
+  ropeLightGlowIntensityDark: 4
+  ropeLightSpeedDark: 1.1
+  ropeLightColorsLight:
+    - "#D4AF37"
+    - "#4F46E5"
+    - ""
+    - "#FFFFFF"
 # endregion
 
 # region PERSONAL
