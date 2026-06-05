@@ -26,10 +26,10 @@ settings:
   ropeLightColorDark: "#a1620744"
 
   sharpLightColorsDark:
-    - "#facc1544"
-    - "#93c5fd44"
-    - "#67e8f944"
-    - ""
+    - "#FFD700"
+    - "#93C5FD"
+    - "#67E8F9"
+    - "#FFFFFF"
   sharpLightThickness: 1.5
 
   # Global Text Hover Interaction
@@ -44,7 +44,7 @@ settings:
   themePrimaryColor: "#6366f1"
   themeBackgroundColor: "#030712"
   themeAccentColor: "#c084fc"
-  themeFontFamily: "Inter"
+  themeFontFamily: "Poppins"
   customCursorEnabled: false
 
   # Intro / Transition
@@ -54,10 +54,20 @@ settings:
   introSubtitle: "Namaste"
   introTagline: "Welcome to my universe.."
   introDuration: 4000
-  sharpLightThicknessDark: 2.5
+  sharpLightThicknessDark: 1.5
   sharpLightSpeedDark: 1.1
   ropeLightColorsDark:
     - "#ffffff"
+  sharpLightColorsLight:
+    - "#FFB703"
+    - "#3B82F6"
+    - "#06B6D4"
+    - ""
+  sharpLightThicknessLight: 1.5
+  sharpLightSpeedLight: 2.1
+  ropeLightThicknessLight: 0.5
+  ropeLightGlowIntensityLight: 0.5
+  ropeLightSpeedLight: 2.1
 # endregion
 
 # region PERSONAL
