@@ -1,4 +1,4 @@
-import { resolveConfig } from "./env";
+import { resolveConfig } from "./env.js";
 
 export const githubConfig = {
   get owner(): string {

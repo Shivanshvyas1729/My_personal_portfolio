@@ -1,3 +1,3 @@
-export { resolveConfig, validateEnv, verifyStartup } from "./env";
-export { githubConfig } from "./github";
-export { cmsConfig } from "./cms";
+export { resolveConfig, validateEnv, verifyStartup } from "./env.js";
+export { githubConfig } from "./github.js";
+export { cmsConfig } from "./cms.js";

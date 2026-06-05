@@ -4,7 +4,7 @@
  * Exposes identical API response contract as the Vercel version.
  */
 import type { Handler, HandlerEvent } from "@netlify/functions";
-import { coreSaveBlog } from "../../src/lib/blog-core";
+import { coreSaveBlog } from "../../api/_lib/blog-core.js";
 
 export const handler: Handler = async (event: HandlerEvent) => {
   // ── Method guard ──────────────────────────────────────────────────────────

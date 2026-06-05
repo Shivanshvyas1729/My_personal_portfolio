@@ -1,4 +1,4 @@
-import { getAdminPassword, getAdminUsername } from "./_lib/config";
+import { getAdminPassword, getAdminUsername } from "./_lib/config.js";
 
 // In standard Vercel serverless functions, we use standard request/response
 export default async function handler(req: any, res: any) {

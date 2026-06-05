@@ -8,7 +8,7 @@
  */
 import { Octokit } from "@octokit/rest";
 import yaml from "js-yaml";
-import { getAdminPassword, getOwner, getRepo, getBranch, getGithubToken } from "./config";
+import { getAdminPassword, getOwner, getRepo, getBranch, getGithubToken } from "./config.js";
 
 export const FILE_PATH = "src/data/blog.yaml";
 export const RATE_LIMIT_SECONDS = 30;

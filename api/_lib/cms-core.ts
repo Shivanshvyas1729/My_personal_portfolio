@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 import { execSync } from "child_process";
 
-import { getOwner, getRepo, getBranch, getGithubToken, getIsLocalMode } from "./config";
+import { getOwner, getRepo, getBranch, getGithubToken, getIsLocalMode } from "./config.js";
 
 export const RATE_LIMIT_SECONDS = 30;
 

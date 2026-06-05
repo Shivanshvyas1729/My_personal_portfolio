@@ -22,18 +22,4 @@ declare module "*.yml" {
   export default content;
 }
 
-// ─── Relative path variants (explicit) ─────────────────────────────────────
-declare module "./portfolio.yaml?raw" {
-  const content: string;
-  export default content;
-}
 
-declare module "./projects.yaml?raw" {
-  const content: string;
-  export default content;
-}
-
-declare module "@/data/blog.yaml?raw" {
-  const content: string;
-  export default content;
-}

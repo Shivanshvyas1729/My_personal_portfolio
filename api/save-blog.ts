@@ -5,7 +5,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { Octokit } from "@octokit/rest";
 import yaml from "js-yaml";
-import { getAdminPassword, getOwner, getRepo, getBranch, getGithubToken } from "./_lib/config";
+import { getAdminPassword, getOwner, getRepo, getBranch, getGithubToken } from "./_lib/config.js";
 
 const RATE_LIMIT_SECONDS = 30;
 const FILE_PATH = "src/data/blog.yaml";

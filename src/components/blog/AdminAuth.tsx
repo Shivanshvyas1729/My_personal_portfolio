@@ -1,7 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense, lazy } from "react";
 import { Lock, Unlock, Loader2, ShieldCheck, Key } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { UnifiedAdminDashboard } from "../cms/UnifiedAdminDashboard";
+
+const UnifiedAdminDashboard = lazy(() =>
+  import("../cms/UnifiedAdminDashboard").then(m => ({ default: m.UnifiedAdminDashboard }))
+);
 import { motion, AnimatePresence } from "framer-motion";
 
 interface AdminAuthProps {
@@ -163,7 +166,15 @@ export function AdminAuth({ isAdmin, setIsAdmin }: AdminAuthProps) {
       </AnimatePresence>
 
       {/* Global Unified Dashboard Overlay for Authorized Users */}
-      {isAdmin && <UnifiedAdminDashboard />}
+      {isAdmin && (
+        <Suspense fallback={
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[9999] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+          </div>
+        }>
+          <UnifiedAdminDashboard />
+        </Suspense>
+      )}
     </>
   );
 }

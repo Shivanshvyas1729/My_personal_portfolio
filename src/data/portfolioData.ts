@@ -3,7 +3,7 @@ import rawData from "./portfolio.yaml?raw";
 import rawProjects from "./projects.yaml?raw";
 import rawBlog from "./blog.yaml?raw";
 import YAML from "yaml";
-import { githubConfig } from "../config";
+import { githubConfig } from "../config/index.js";
 
 export interface CloudinaryMedia {
   secureUrl: string;

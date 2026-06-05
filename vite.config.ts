@@ -132,7 +132,15 @@ export default defineConfig(({ mode }) => {
               return 'vendor-query';
             }
             // CMS / Admin dashboard (only loaded when admin is open)
-            if (id.includes('UnifiedAdminDashboard') || id.includes('ProjectsAdmin') || id.includes('DynamicForm') || id.includes('AdminPanel') || id.includes('CMSContext')) {
+            if (
+              id.includes('UnifiedAdminDashboard') || 
+              id.includes('ProjectsAdmin') || 
+              id.includes('DynamicForm') || 
+              id.includes('AdminPanel') || 
+              id.includes('CMSContext') ||
+              id.includes('src/components/cms/') ||
+              id.includes('react-easy-crop')
+            ) {
               return 'cms';
             }
             // All other node_modules together (including React)
