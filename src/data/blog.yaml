@@ -1449,6 +1449,6 @@ blog:
     featured: false
     draft: false
     resources:
-      - label: set1
+      - label: basic questions
         url: https://drive.google.com/drive/u/0/folders/17qeN5jTs2Vh5EyQWOk0NCNJIoJu2mG17
     linkText: database notes
