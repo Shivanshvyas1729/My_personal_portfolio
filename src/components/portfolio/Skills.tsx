@@ -25,6 +25,7 @@ const TiltCard = ({
   const [centerShift, setCenterShift] = useState({ x: 0, y: 0 });
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
   const [isMobile, setIsMobile] = useState(false);
+  const hoverTimeoutRef = useRef<any>(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -32,7 +33,12 @@ const TiltCard = ({
     };
     checkMobile();
     window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    return () => {
+      window.removeEventListener("resize", checkMobile);
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
   }, []);
 
   const isHovered = !isMobile && hoveredIndex === index;
@@ -79,15 +85,24 @@ const TiltCard = ({
   };
 
   const handleMouseEnter = () => {
-    if (!isMobile) setHoveredIndex(index);
+    if (isMobile) return;
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    hoverTimeoutRef.current = setTimeout(() => {
+      setHoveredIndex(index);
+    }, 350); // 350ms threshold to ignore fast scrolling and brief accidental hovers
   };
 
   const handleMouseLeave = () => {
-    if (!isMobile) {
-      setHoveredIndex(null);
-      setTilt({ x: 0, y: 0 });
-      setCenterShift({ x: 0, y: 0 });
+    if (isMobile) return;
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
     }
+    setHoveredIndex(null);
+    setTilt({ x: 0, y: 0 });
+    setCenterShift({ x: 0, y: 0 });
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
@@ -148,8 +163,8 @@ const TiltCard = ({
         onMouseLeave={handleMouseLeave}
         onClick={handleCardClick}
         animate={{
-          rotateX: tilt.x,
-          rotateY: tilt.y,
+          rotateX: isActive ? tilt.x : 0,
+          rotateY: isActive ? tilt.y : 0,
           translateX,
           translateY,
           scale,

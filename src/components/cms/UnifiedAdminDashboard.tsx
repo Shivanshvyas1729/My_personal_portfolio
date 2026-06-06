@@ -502,7 +502,7 @@ interface IntroSettingsPanelProps {
 }
 
 const IntroSettingsPanel: React.FC<IntroSettingsPanelProps> = ({ settings, onUpdate, children }) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const enabled = settings.introEnabled !== false;
   const currentStyle: IntroStyleKey = (settings.introStyle as IntroStyleKey) || 'namaste';
@@ -776,7 +776,7 @@ export const UnifiedAdminDashboard = () => {
     capabilities: false,
     timeline: false,
     settings_sync: false,
-    settings_effects: true,
+    settings_effects: false,
     settings_aesthetics: false
   });
 

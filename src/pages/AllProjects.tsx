@@ -1,3 +1,5 @@
+import { useState, useMemo } from "react";
+import { Search } from "lucide-react";
 import { portfolioData as initialData } from "@/data/portfolioData";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
 import ProjectCard from "@/components/portfolio/ProjectCard";
@@ -10,6 +12,19 @@ import { useCMSData } from "@/context/CMSContext";
 const AllProjects = () => {
   const cmsProjects = useCMSData(d => d.projects) || initialData.projects;
   const { categories, selectedCategory, setSelectedCategory, filteredProjects, counts } = useProjectFilter(cmsProjects);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const finalFilteredProjects = useMemo(() => {
+    if (!searchQuery.trim()) return filteredProjects;
+    const query = searchQuery.toLowerCase().trim();
+    return filteredProjects.filter(p => {
+      const titleMatch = p.title?.toLowerCase().includes(query);
+      const descMatch = p.description?.toLowerCase().includes(query);
+      const techMatch = Array.isArray(p.tech) && p.tech.some((t: string) => t.toLowerCase().includes(query));
+      const categoryMatch = Array.isArray(p.category) && p.category.some((c: string) => c.toLowerCase().includes(query));
+      return titleMatch || descMatch || techMatch || categoryMatch;
+    });
+  }, [filteredProjects, searchQuery]);
 
   return (
     <div className="min-h-screen bg-background w-full overflow-x-hidden flex flex-col relative">
@@ -28,7 +43,29 @@ const AllProjects = () => {
             {/* Sidebar Filter */}
             <aside className="w-full md:w-64 lg:w-72 shrink-0">
               <div className="sticky top-28 glass-card p-5 rounded-xl border border-border/50">
-                <h3 className="text-lg font-heading font-semibold mb-4 text-foreground">Filter by Category</h3>
+                {/* Search Bar */}
+                <div className="relative mb-6">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60">
+                    <Search size={15} />
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="Search projects..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-8 py-2 rounded-lg border border-border/40 bg-secondary/10 text-xs focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all text-foreground"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-[10px] font-bold"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+                <h3 className="text-sm font-heading font-semibold mb-4 text-foreground uppercase tracking-wider">Categories</h3>
                 <div className="flex flex-col gap-2">
                   {categories.map((cat) => (
                     <button
@@ -61,7 +98,7 @@ const AllProjects = () => {
                   {selectedCategory === "All" ? "All Projects" : `${selectedCategory} Projects`}
                 </h2>
                 <span className="text-sm font-medium text-secondary-foreground bg-secondary px-3 py-1 rounded-full border border-border/50">
-                  Showing {filteredProjects.length} result{filteredProjects.length !== 1 ? 's' : ''}
+                  Showing {finalFilteredProjects.length} result{finalFilteredProjects.length !== 1 ? 's' : ''}
                 </span>
               </div>
               
@@ -71,7 +108,7 @@ const AllProjects = () => {
                 style={{ gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 320px), 1fr))" }}
               >
                 <AnimatePresence mode="popLayout">
-                  {filteredProjects.map((p, i) => (
+                  {finalFilteredProjects.map((p, i) => (
                     <motion.div
                       key={p.id}
                       layout
@@ -86,20 +123,28 @@ const AllProjects = () => {
                 </AnimatePresence>
               </motion.div>
 
-              {filteredProjects.length === 0 && (
+              {finalFilteredProjects.length === 0 && (
                 <motion.div 
                   initial={{ opacity: 0 }} 
                   animate={{ opacity: 1 }}
                   className="glass-card p-12 text-center rounded-xl border border-border/50 mt-4"
                 >
                   <p className="text-lg font-medium text-foreground mb-2">No projects found</p>
-                  <p className="text-muted-foreground mb-6">Try selecting a different category from the sidebar.</p>
-                  <button 
-                    onClick={() => setSelectedCategory("All")}
-                    className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
-                  >
-                    Clear Filters
-                  </button>
+                  <p className="text-muted-foreground mb-6">Try selecting a different category or clearing the search query.</p>
+                  <div className="flex justify-center gap-2">
+                    <button 
+                      onClick={() => setSelectedCategory("All")}
+                      className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg font-medium hover:bg-secondary/80 transition-colors text-xs"
+                    >
+                      Reset Category
+                    </button>
+                    <button 
+                      onClick={() => setSearchQuery("")}
+                      className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors text-xs"
+                    >
+                      Clear Search
+                    </button>
+                  </div>
                 </motion.div>
               )}
             </div>

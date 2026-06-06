@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Project } from '@/data/portfolioData';
-import { Plus, Edit3, Trash2, X, Github, ExternalLink, Star, RefreshCw, BookOpen, Copy, AlertCircle, CheckCircle2, Info } from 'lucide-react';
+import { Plus, Edit3, Trash2, X, Github, ExternalLink, Star, RefreshCw, BookOpen, Copy, AlertCircle, CheckCircle2, Info, Search } from 'lucide-react';
 import { DynamicForm } from './DynamicForm';
 import { ProjectSchema } from '@/lib/schema';
 import { useCMSState } from '@/context/CMSContext';
@@ -157,6 +157,19 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
   const [saveError, setSaveError] = useState("");
   const [showExampleModal, setShowExampleModal] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredProjects = useMemo(() => {
+    if (!searchQuery.trim()) return projects;
+    const query = searchQuery.toLowerCase().trim();
+    return projects.filter(p => {
+      const titleMatch = p.title?.toLowerCase().includes(query);
+      const descMatch = p.description?.toLowerCase().includes(query);
+      const categoryMatch = Array.isArray(p.category) && p.category.some((c: string) => c.toLowerCase().includes(query));
+      const techMatch = Array.isArray(p.tech) && p.tech.some((t: string) => t.toLowerCase().includes(query));
+      return titleMatch || descMatch || categoryMatch || techMatch;
+    });
+  }, [projects, searchQuery]);
   // Real-time validation state (Gmail-style: runs on every change)
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Set<string>>(new Set());
@@ -387,10 +400,45 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
         </div>
       )}
 
+      {/* Search Bar */}
+      <div className="px-4 mb-4 shrink-0 flex gap-2">
+        <div className="relative flex-1">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60" />
+          <input
+            type="text"
+            placeholder="Search projects by title, category, tech, or description..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-12 py-2 rounded-xl border border-border/40 bg-background/60 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all text-foreground"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-xs font-bold transition-colors"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+        <button
+          type="button"
+          className="px-4 py-2 bg-primary/10 text-primary hover:bg-primary/20 transition-colors rounded-xl text-sm font-semibold flex items-center gap-1.5 border border-primary/20"
+        >
+          <Search size={15} /> Search
+        </button>
+      </div>
+
       {/* Grid of Projects */}
       <div className="flex-1 overflow-y-auto px-4 pb-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {projects.map(p => (
+          {filteredProjects.length === 0 ? (
+            <div className="col-span-full py-16 text-center text-muted-foreground/50 italic border border-dashed border-border/30 rounded-2xl bg-muted/5 flex flex-col items-center justify-center gap-2">
+              <Search size={28} className="opacity-30 text-primary" />
+              <span className="text-sm font-semibold">No projects found</span>
+              <span className="text-xs text-muted-foreground/80 max-w-[280px]">We couldn't find any projects matching "{searchQuery}". Try a different term.</span>
+            </div>
+          ) :
+            filteredProjects.map(p => (
             <div key={p.id} className="group glass-card border border-border/50 rounded-xl p-4 flex flex-col hover:border-primary/40 transition-colors relative">
               <div className="absolute top-2 right-2 flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                 <button onClick={() => handleEdit(p)} className="p-2 bg-muted hover:bg-primary/10 hover:text-primary rounded text-muted-foreground transition-colors shadow-sm border border-border/50">

@@ -177,16 +177,31 @@ const Navbar = () => {
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 50);
-      const sections = navLinks.map((l) => l.href.replace("#", ""));
-      for (const id of [...sections].reverse()) {
-        const el = document.getElementById(id);
-        if (el && el.getBoundingClientRect().top <= 120) {
-          setActiveSection(id);
+      
+      const sections = navLinks
+        .map((l) => l.href.replace("#", ""))
+        .filter((id) => !id.startsWith("/"));
+      
+      const elements = sections
+        .map((id) => {
+          const el = document.getElementById(id);
+          return el ? { id, rect: el.getBoundingClientRect() } : null;
+        })
+        .filter(Boolean) as { id: string; rect: DOMRect }[];
+
+      // Sort bottom-to-top visually (highest top value first)
+      const sortedElements = [...elements].sort((a, b) => b.rect.top - a.rect.top);
+
+      for (const item of sortedElements) {
+        if (item.rect.top <= 160) {
+          setActiveSection(item.id);
           break;
         }
       }
     };
     window.addEventListener("scroll", onScroll, { passive: true });
+    // Run once initially
+    onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 

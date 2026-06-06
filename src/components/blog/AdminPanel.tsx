@@ -3,7 +3,7 @@ import {
   Save, Plus, Loader2, Link as LinkIcon, Trash2, GripHorizontal, 
   Minimize2, Maximize2, Star, EyeOff, Search, Edit3, ChevronLeft, 
   ChevronRight, Bold, Italic, Underline, Code, List, ListOrdered, 
-  FileText, Eye, Check, X, AlertCircle
+  FileText, Eye, Check, X, AlertCircle, BookOpen
 } from "lucide-react";
 import { BlogPost } from "@/pages/Blog";
 import { apiFetch, API_ROUTES } from "@/lib/apiClient";
@@ -924,6 +924,24 @@ export function AdminPanel({ onSuccess }: AdminPanelProps) {
                       </ReactMarkdown>
                     ) : (
                       <p className="italic text-muted-foreground/40">No content drafted yet. Switch to the editor and write content to see it here.</p>
+                    )}
+                    {resources && resources.length > 0 && (
+                      <div className="mt-6 border-t border-border/30 pt-4">
+                        <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5 mb-2 select-none">
+                          <BookOpen size={12} className="text-primary" /> Attached Resources
+                        </h4>
+                        <div className="grid grid-cols-1 gap-1.5">
+                          {resources.map((res, idx) => (
+                            <div key={idx} className="flex justify-between items-center p-2 rounded-lg border border-border/40 bg-muted/15 text-[10px]">
+                              <span className="flex items-center gap-1.5 font-medium">
+                                <LinkIcon size={10} className="text-primary" />
+                                {res.label}
+                              </span>
+                              <span className="text-[9px] text-muted-foreground break-all">{res.url}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>

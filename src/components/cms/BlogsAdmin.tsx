@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { BookOpen, Edit3, Trash2, X, Star, EyeOff, Save, Plus, Calendar, Clock, Link as LinkIcon, Eye, Tag, Hash } from 'lucide-react';
+import { BookOpen, Edit3, Trash2, X, Star, EyeOff, Save, Plus, Calendar, Clock, Link as LinkIcon, Eye, Tag, Hash, Search } from 'lucide-react';
 import { useCMSState } from '@/context/CMSContext';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -38,6 +38,22 @@ const BlogPostForm: React.FC<{ blog: any; onChange: (b: any) => void; allBlogs: 
 
   // Sync local content when blog changes (e.g. switching posts)
   React.useEffect(() => { setLocalContent(blog.content || ''); }, [blog.id]);
+
+  const resources = Array.isArray(blog.resources) ? blog.resources : [];
+
+  const addResource = () => {
+    onChange({ ...blog, resources: [...resources, { label: "", url: "" }] });
+  };
+
+  const updateResource = (idx: number, key: "label" | "url", val: string) => {
+    const updated = [...resources];
+    updated[idx] = { ...updated[idx], [key]: val };
+    onChange({ ...blog, resources: updated });
+  };
+
+  const removeResource = (idx: number) => {
+    onChange({ ...blog, resources: resources.filter((_, i) => i !== idx) });
+  };
 
   // Collect all unique type tags from existing blogs — normalized to Title Case
   const allTypeSuggestions = useMemo(() => {
@@ -334,6 +350,49 @@ const BlogPostForm: React.FC<{ blog: any; onChange: (b: any) => void; allBlogs: 
         </div>
       </div>
 
+      {/* Resources Links */}
+      <div className="pt-3 border-t border-border/30">
+        <div className="flex items-center justify-between mb-2">
+          <label className={field}>Attached Resources</label>
+          <button
+            type="button"
+            onClick={addResource}
+            className="text-xs text-primary hover:underline flex items-center gap-0.5 cursor-pointer font-bold"
+          >
+            <Plus size={13} /> Add Resource
+          </button>
+        </div>
+        <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+          {resources.length === 0 && (
+            <span className="text-xs italic text-muted-foreground/60">No resources linked yet.</span>
+          )}
+          {resources.map((res: any, i: number) => (
+            <div key={i} className="flex gap-2 items-center bg-background/40 p-2 rounded-lg border border-border/30">
+              <LinkIcon size={14} className="text-muted-foreground shrink-0" />
+              <input
+                placeholder="Resource label"
+                value={res.label || ''}
+                onChange={e => updateResource(i, "label", e.target.value)}
+                className="w-[38%] bg-transparent border-none text-xs text-foreground focus:outline-none"
+              />
+              <input
+                placeholder="https://..."
+                value={res.url || ''}
+                onChange={e => updateResource(i, "url", e.target.value)}
+                className="flex-1 bg-transparent border-none text-xs text-foreground focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => removeResource(i)}
+                className="text-destructive hover:bg-destructive/10 p-1.5 rounded cursor-pointer transition-colors"
+              >
+                <Trash2 size={13} />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Toggles */}
       <div className="flex items-center gap-4 flex-wrap">
         {[
@@ -371,8 +430,21 @@ export const BlogsAdmin: React.FC<BlogsAdminProps> = ({ blogs, onChange, onSave,
   const [tempBlog, setTempBlog] = useState<any>({});
   const [saveError, setSaveError] = useState('');
   const [previewTab, setPreviewTab] = useState<'card' | 'detailed'>('card');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const hasPendingChanges = JSON.stringify(blogs) !== JSON.stringify(liveData.blog);
+
+  const filteredBlogs = useMemo(() => {
+    if (!searchQuery.trim()) return blogs;
+    const query = searchQuery.toLowerCase().trim();
+    return blogs.filter(b => {
+      const titleMatch = b.title?.toLowerCase().includes(query);
+      const contentMatch = b.content?.toLowerCase().includes(query);
+      const categoryMatch = b.category?.toLowerCase().includes(query);
+      const typeMatch = Array.isArray(b.type) && b.type.some((t: string) => t.toLowerCase().includes(query));
+      return titleMatch || contentMatch || categoryMatch || typeMatch;
+    });
+  }, [blogs, searchQuery]);
 
   const handleEdit = (blog: any) => {
     setTempBlog({ ...blog });
@@ -389,6 +461,7 @@ export const BlogsAdmin: React.FC<BlogsAdminProps> = ({ blogs, onChange, onSave,
       type: [],
       featured: false,
       draft: true,
+      resources: [],
       date: new Date().toISOString().split('T')[0]
     });
     setAddingNew(true);
@@ -400,11 +473,17 @@ export const BlogsAdmin: React.FC<BlogsAdminProps> = ({ blogs, onChange, onSave,
       return;
     }
 
+    // Filter out empty resources before saving
+    const cleanedResources = Array.isArray(tempBlog.resources)
+      ? tempBlog.resources.filter((r: any) => r.label?.trim() && r.url?.trim())
+      : [];
+    const blogToSave = { ...tempBlog, resources: cleanedResources };
+
     let updated: any[];
     if (addingNew) {
-      updated = [tempBlog, ...blogs];
+      updated = [blogToSave, ...blogs];
     } else {
-      updated = blogs.map(b => b.id === tempBlog.id ? tempBlog : b);
+      updated = blogs.map(b => b.id === tempBlog.id ? blogToSave : b);
     }
     onChange(updated);
     closeModal();
@@ -465,10 +544,45 @@ export const BlogsAdmin: React.FC<BlogsAdminProps> = ({ blogs, onChange, onSave,
         </div>
       )}
 
+      {/* Search Bar */}
+      <div className="px-4 mb-4 shrink-0 flex gap-2">
+        <div className="relative flex-1">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60" />
+          <input
+            type="text"
+            placeholder="Search blogs by title, category, tags, or content..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-12 py-2 rounded-xl border border-border/40 bg-background/60 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all text-foreground"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-xs font-bold transition-colors"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+        <button
+          type="button"
+          className="px-4 py-2 bg-primary/10 text-primary hover:bg-primary/20 transition-colors rounded-xl text-sm font-semibold flex items-center gap-1.5 border border-primary/20"
+        >
+          <Search size={15} /> Search
+        </button>
+      </div>
+
       {/* Grid of Blogs */}
       <div data-lenis-prevent="true" className="flex-1 overflow-y-auto px-4 pb-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {blogs.map(b => (
+          {filteredBlogs.length === 0 ? (
+            <div className="col-span-full py-16 text-center text-muted-foreground/50 italic border border-dashed border-border/30 rounded-2xl bg-muted/5 flex flex-col items-center justify-center gap-2">
+              <Search size={28} className="opacity-30 text-primary" />
+              <span className="text-sm font-semibold">No posts found</span>
+              <span className="text-xs text-muted-foreground/80 max-w-[280px]">We couldn't find any blogs matching "{searchQuery}". Try a different term.</span>
+            </div>
+          ) :
+            filteredBlogs.map(b => (
             <div key={b.id} className="group glass-card border border-border/50 rounded-xl p-4 flex flex-col hover:border-primary/40 transition-colors relative">
               <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button onClick={() => handleEdit(b)} className="p-1.5 bg-muted hover:bg-primary/10 hover:text-primary rounded text-muted-foreground transition-colors">
