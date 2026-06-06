@@ -1437,17 +1437,18 @@ blog:
       - label: "openbio "
         url: https://openbio.tech/
   - id: 12
-    title: FastAPI Questions
-    slug: fastapi-questions
+    title: FastAPI Questions and backend connections
+    slug: fastapi-questions-and-backend-connections
     readingTime: 1
     content: one min look
     category: Links
     type:
       - Questions
-    link: ""
+    link: https://chatgpt.com/c/6a2402e4-a114-8321-828a-4b4d557c4ba2
     date: 2026-06-05
     featured: false
     draft: false
     resources:
       - label: set1
         url: https://drive.google.com/drive/u/0/folders/17qeN5jTs2Vh5EyQWOk0NCNJIoJu2mG17
+    linkText: notes
