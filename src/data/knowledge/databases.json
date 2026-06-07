@@ -1,1 +1,53 @@
-[]
+[
+  {
+    "id": "postgresql",
+    "title": "PostgreSQL",
+    "primary_category": "Databases",
+    "aliases": ["Postgres", "PSQL"],
+    "secondary_tags": ["SQL", "Relational Database", "OLTP"],
+    "definition": "A powerful, open-source object-relational database system known for its robustness, ACID compliance, JSON support, and extensive extension ecosystem. The most popular advanced open-source SQL database.",
+    "why_used": "The go-to SQL database for ML projects: feature storage, experiment metadata, model registry data, and application data. pgvector extension adds native vector similarity search.",
+    "interview_point": "PostgreSQL for ML use cases: 1) Feature store — store computed features with metadata. 2) Experiment tracking metadata alongside MLflow. 3) pgvector — native vector similarity search with HNSW/IVF indexing. JSONB column type enables schema-flexible storage. Proper indexing (B-tree, GIN for JSONB) is critical for ML-scale queries.",
+    "advantages": ["ACID compliant", "Rich data types (JSONB, arrays, geometric)", "pgvector for vector search", "Excellent extension ecosystem", "Free and open source"],
+    "limitations": ["Vertical scaling (vs horizontal NoSQL)", "Complex joins on very large tables are slow"],
+    "use_cases": ["Feature storage", "ML metadata", "Application database", "Vector search via pgvector"],
+    "related_terms": ["pgvector", "SQLAlchemy", "Redis", "MongoDB"],
+    "real_world_example": "```python\nimport psycopg2\nimport pandas as pd\nfrom sqlalchemy import create_engine\n\n# SQLAlchemy for pandas integration\nengine = create_engine('postgresql://user:password@localhost:5432/mldb')\n\n# Load features from database\ndf = pd.read_sql(\"\"\"\n    SELECT user_id, age, income, spending_score, \n           credit_history_months, num_transactions\n    FROM user_features\n    WHERE updated_at > NOW() - INTERVAL '7 days'\n    AND is_active = true\n    ORDER BY user_id\n\"\"\", engine)\n\n# Write predictions back\npredictions_df.to_sql('model_predictions', engine, \n                      if_exists='append', index=False,\n                      method='multi')  # Batch insert\n\n# pgvector for semantic search\n# CREATE EXTENSION vector;\nengine.execute(\"\"\"\n    CREATE TABLE embeddings (\n        id SERIAL PRIMARY KEY,\n        text TEXT,\n        embedding vector(1536)  -- OpenAI embedding dim\n    );\n    CREATE INDEX ON embeddings USING hnsw (embedding vector_cosine_ops);\n\"\"\")\n```",
+    "difficulty_level": "Beginner",
+    "term_type": "Tool"
+  },
+  {
+    "id": "mongodb",
+    "title": "MongoDB",
+    "primary_category": "Databases",
+    "aliases": ["Mongo", "MongoDB Atlas"],
+    "secondary_tags": ["NoSQL", "Document Database", "Schema Flexible"],
+    "definition": "A NoSQL document database that stores data as BSON documents (binary JSON). Schema-flexible — documents in the same collection can have different fields. Horizontal scaling via sharding.",
+    "why_used": "Ideal for ML metadata storage, model configurations, and unstructured data where schema evolves frequently. Atlas (managed service) adds vector search and online archiving.",
+    "interview_point": "MongoDB vs SQL: Use MongoDB when: schema is flexible or evolving, data is document-like (configurations, logs), horizontal scaling is needed. Use SQL when: data has fixed schema with complex relationships and joins, ACID transactions are required, data integrity is critical. CAP theorem: MongoDB prioritizes CP (Consistency + Partition Tolerance) by default.",
+    "advantages": ["Flexible schema — no migrations needed", "Horizontal sharding for massive scale", "Rich query language", "Atlas Vector Search for semantic queries"],
+    "limitations": ["No joins (must embed or reference)", "Higher memory usage", "Complex transactions vs SQL"],
+    "use_cases": ["ML experiment configs", "Unstructured document storage", "Content management", "IoT sensor data"],
+    "related_terms": ["PostgreSQL", "Redis", "Elasticsearch"],
+    "real_world_example": "```python\nfrom pymongo import MongoClient\nfrom datetime import datetime\n\nclient = MongoClient('mongodb://localhost:27017/')\ndb = client['ml_platform']\n\n# Store ML experiment metadata\nexperiment = {\n    'name': 'fraud-detection-v3',\n    'timestamp': datetime.utcnow(),\n    'hyperparameters': {\n        'model': 'XGBClassifier',\n        'n_estimators': 500,\n        'learning_rate': 0.05,\n        'max_depth': 6\n    },\n    'metrics': {\n        'train_auc': 0.987,\n        'val_auc': 0.963,\n        'f1': 0.891\n    },\n    'feature_importance': {feat: imp for feat, imp in zip(features, importances)}\n}\n\nresult = db.experiments.insert_one(experiment)\nprint(f'Stored experiment: {result.inserted_id}')\n\n# Query best experiments\nbest = list(db.experiments.find(\n    {'metrics.val_auc': {'$gt': 0.95}},\n    sort=[('metrics.val_auc', -1)],\n    limit=5\n))\n```",
+    "difficulty_level": "Intermediate",
+    "term_type": "Tool"
+  },
+  {
+    "id": "redis",
+    "title": "Redis",
+    "primary_category": "Databases",
+    "aliases": ["Redis Cache", "Redis Database"],
+    "secondary_tags": ["NoSQL", "Cache", "In-Memory Database"],
+    "definition": "An in-memory data structure store used as database, cache, message broker, and streaming engine. Supports strings, hashes, lists, sets, sorted sets, bitmaps, and more. Sub-millisecond latency.",
+    "why_used": "The standard caching layer for ML inference systems. Cache model predictions for repeat queries, store feature vectors for low-latency serving, rate limit API calls.",
+    "interview_point": "Redis for ML systems: 1) Prediction Cache — cache model outputs for identical inputs (avoid repeated inference). 2) Feature Cache — store precomputed features for online serving (Redis Hash or String). 3) Rate Limiting — count API requests with TTL. 4) Session State — store conversation history for LLM chatbots. 5) Model serving — store model weights in Redis for shared access across workers.",
+    "advantages": ["Sub-millisecond latency", "Rich data structures (sorted sets, pub/sub)", "Atomic operations", "Persistence options (RDB, AOF)", "Clustering for scale"],
+    "limitations": ["Data must fit in RAM", "Not suited for complex queries or relationships"],
+    "use_cases": ["ML prediction caching", "Online feature serving", "LLM conversation history", "Rate limiting APIs"],
+    "related_terms": ["PostgreSQL", "MongoDB", "FastAPI"],
+    "real_world_example": "```python\nimport redis\nimport json\nimport hashlib\n\nr = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)\n\nclass CachedMLService:\n    def __init__(self, model, cache_ttl: int = 3600):\n        self.model = model\n        self.cache = r\n        self.ttl = cache_ttl\n    \n    def _cache_key(self, features: list) -> str:\n        feature_str = json.dumps(features, sort_keys=True)\n        return f'ml:pred:{hashlib.md5(feature_str.encode()).hexdigest()}'\n    \n    def predict(self, features: list) -> dict:\n        key = self._cache_key(features)\n        \n        # Check cache first\n        cached = self.cache.get(key)\n        if cached:\n            return {'prediction': json.loads(cached), 'source': 'cache'}\n        \n        # Model inference\n        pred = float(self.model.predict([features])[0])\n        prob = float(self.model.predict_proba([features])[0].max())\n        \n        result = {'prediction': pred, 'confidence': prob}\n        self.cache.setex(key, self.ttl, json.dumps(result))\n        return {**result, 'source': 'model'}\n```",
+    "difficulty_level": "Intermediate",
+    "term_type": "Tool"
+  }
+]

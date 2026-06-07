@@ -1,1 +1,53 @@
-[]
+[
+  {
+    "id": "aws_sagemaker",
+    "title": "AWS SageMaker",
+    "primary_category": "Cloud",
+    "aliases": ["SageMaker", "Amazon SageMaker"],
+    "secondary_tags": ["AWS", "ML Platform", "MLOps"],
+    "definition": "Amazon's fully managed ML platform providing end-to-end tools for building, training, and deploying ML models at scale. Includes SageMaker Studio, Training Jobs, Experiments, Pipelines, Model Monitor, and Endpoints.",
+    "why_used": "Most comprehensive managed ML platform on AWS. Removes infrastructure management, provides scalable GPU training, one-click deployment, and built-in model monitoring.",
+    "interview_point": "Key SageMaker concepts: Training Jobs (managed ML training on EC2), Endpoints (real-time inference), Batch Transform (offline inference on large datasets), Pipelines (MLOps automation), Feature Store (shared feature repository), and Clarify (bias and explainability). You pay only for compute used during training/inference.",
+    "advantages": ["Fully managed — no infrastructure management", "Scales from 1 GPU to thousands", "Built-in bias detection (Clarify)", "Feature Store for shared features", "Integrated experiment tracking"],
+    "limitations": ["Vendor lock-in (AWS ecosystem)", "Can be expensive at scale", "Complex pricing model"],
+    "use_cases": ["Large-scale model training", "Production ML inference endpoints", "MLOps pipelines"],
+    "related_terms": ["AWS EC2", "MLflow", "Docker", "Kubernetes"],
+    "real_world_example": "```python\nimport sagemaker\nfrom sagemaker.sklearn.estimator import SKLearn\nfrom sagemaker.model import Model\n\nsess = sagemaker.Session()\nrole = sagemaker.get_execution_role()\n\n# Train a scikit-learn model on SageMaker\nestimator = SKLearn(\n    entry_point='train.py',\n    framework_version='1.0-1',\n    instance_type='ml.m5.xlarge',\n    role=role,\n    hyperparameters={\n        'n-estimators': 200,\n        'max-depth': 10\n    }\n)\n\nestimator.fit({'train': 's3://my-bucket/train/', 'test': 's3://my-bucket/test/'})\n\n# Deploy to real-time endpoint\npredictor = estimator.deploy(\n    initial_instance_count=1,\n    instance_type='ml.t2.medium'\n)\n\n# Inference\nprediction = predictor.predict([[1.2, 3.4, 5.6]])\n\n# Cleanup\npredictor.delete_endpoint()\n```",
+    "difficulty_level": "Advanced",
+    "term_type": "Tool"
+  },
+  {
+    "id": "vertex_ai",
+    "title": "Vertex AI",
+    "primary_category": "Cloud",
+    "aliases": ["Google Vertex AI", "GCP Vertex"],
+    "secondary_tags": ["GCP", "ML Platform", "MLOps"],
+    "definition": "Google Cloud's unified ML platform combining the best of AutoML and custom training. Provides managed training, serving, pipelines, feature store, model registry, and Workbench (managed notebooks).",
+    "why_used": "Best-in-class managed ML platform for GCP users. Tight integration with BigQuery, Google's TPUs, and Gemini models. AutoML provides no-code model training for common tasks.",
+    "interview_point": "Vertex AI Pipelines uses Kubeflow Pipelines SDK to define ML workflows as DAGs of containerized components. Each component has defined inputs/outputs and can be cached. Vertex AI Model Monitoring automatically detects data drift in production predictions. Feature Store provides online (low latency) and offline (batch) feature serving.",
+    "advantages": ["Tight GCP/BigQuery integration", "TPU access for large-scale training", "Managed Pipelines with caching", "AutoML for rapid baseline models"],
+    "limitations": ["GCP vendor lock-in", "Complex pricing structure"],
+    "use_cases": ["BigQuery-powered ML pipelines", "Large-scale training on TPUs", "GCP-native MLOps"],
+    "related_terms": ["BigQuery", "TensorFlow", "MLflow", "Kubeflow"],
+    "real_world_example": "```python\nfrom google.cloud import aiplatform\nfrom google.cloud.aiplatform import pipeline_jobs\n\naiplatform.init(project='my-project', location='us-central1')\n\n# Custom training job\njob = aiplatform.CustomTrainingJob(\n    display_name='fraud-detection-training',\n    script_path='trainer/task.py',\n    container_uri='gcr.io/cloud-aiplatform/training/scikit-learn-cpu.0-23:latest',\n    requirements=['xgboost==1.6.0', 'pandas'],\n    model_serving_container_image_uri='gcr.io/cloud-aiplatform/prediction/sklearn-cpu.0-23:latest'\n)\n\nmodel = job.run(\n    dataset=dataset,\n    model_display_name='fraud-detector-v1',\n    machine_type='n1-standard-4',\n    args=['--n-estimators=200', '--max-depth=6']\n)\n\n# Deploy\nendpoint = model.deploy(\n    machine_type='n1-standard-2',\n    min_replica_count=1\n)\n```",
+    "difficulty_level": "Advanced",
+    "term_type": "Tool"
+  },
+  {
+    "id": "s3",
+    "title": "Amazon S3",
+    "primary_category": "Cloud",
+    "aliases": ["Simple Storage Service", "AWS S3"],
+    "secondary_tags": ["AWS", "Storage", "Data Lake"],
+    "definition": "Amazon's object storage service offering virtually unlimited, highly durable (99.999999999% — 11 nines) storage. Stores data as objects in buckets with a flat namespace. Standard storage for ML datasets, model artifacts, and training data.",
+    "why_used": "Universal storage backbone for ML pipelines. Training data, model weights, and inference outputs all flow through S3. Integrates with all AWS services and most ML tools.",
+    "interview_point": "S3 storage classes for ML cost optimization: Standard (frequent access training data), S3-IA (infrequent — older datasets), Glacier (archival — historical data). Use S3 Select to filter data server-side before downloading. S3 Transfer Acceleration for fast global uploads.",
+    "advantages": ["Virtually unlimited capacity", "11 nines durability", "Integrates with all AWS services", "Versioning, lifecycle policies", "Cost-effective tiered storage"],
+    "limitations": ["Not a filesystem (flat object namespace)", "High latency vs local disk", "Egress costs for downloading data"],
+    "use_cases": ["ML training dataset storage", "Model artifact repository", "Data lake for feature engineering"],
+    "related_terms": ["AWS SageMaker", "DVC", "PyArrow"],
+    "real_world_example": "```python\nimport boto3\nimport pandas as pd\nfrom io import BytesIO\nimport pickle\n\ns3 = boto3.client('s3')\n\n# Upload training data\ndef upload_df(df: pd.DataFrame, bucket: str, key: str):\n    buffer = BytesIO()\n    df.to_parquet(buffer, index=False)\n    s3.put_object(Bucket=bucket, Key=key, Body=buffer.getvalue())\n    print(f'Uploaded to s3://{bucket}/{key}')\n\n# Download and load\ndef load_df(bucket: str, key: str) -> pd.DataFrame:\n    obj = s3.get_object(Bucket=bucket, Key=key)\n    return pd.read_parquet(BytesIO(obj['Body'].read()))\n\n# Upload trained model\ndef save_model(model, bucket: str, key: str):\n    buffer = BytesIO()\n    pickle.dump(model, buffer)\n    s3.put_object(Bucket=bucket, Key=key, Body=buffer.getvalue())\n\n# Usage\nupload_df(train_df, 'my-ml-bucket', 'data/train/features.parquet')\nsave_model(trained_model, 'my-ml-bucket', 'models/fraud_detector_v2.pkl')\n```",
+    "difficulty_level": "Beginner",
+    "term_type": "Tool"
+  }
+]

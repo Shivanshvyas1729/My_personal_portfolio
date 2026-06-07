@@ -1,1 +1,53 @@
-[]
+[
+  {
+    "id": "algorithmic_bias",
+    "title": "Algorithmic Bias",
+    "primary_category": "Ethics",
+    "aliases": ["ML Bias", "AI Bias", "Model Bias"],
+    "secondary_tags": ["Bias", "Fairness", "Responsible AI"],
+    "definition": "Systematic and unfair discrimination in ML model outputs toward certain groups based on protected attributes like race, gender, age, or religion. Can result from biased training data, flawed feature selection, or objective function misalignment.",
+    "why_used": "Understanding and mitigating bias is essential for ethical AI. Biased models can cause real-world harm: discriminatory hiring, unfair credit decisions, or biased medical diagnoses.",
+    "interview_point": "Types of bias: 1) Historical Bias — data reflects past societal inequalities. 2) Representation Bias — minority groups underrepresented in training data. 3) Measurement Bias — protected attributes measured less accurately for some groups. 4) Aggregation Bias — one model applied to groups with different characteristics. Metrics: Demographic Parity, Equalized Odds, Individual Fairness.",
+    "advantages": ["N/A — bias is harmful and should be identified and mitigated"],
+    "limitations": ["Different fairness definitions are mathematically incompatible (Impossibility Theorem)"],
+    "use_cases": ["Credit scoring fairness audits", "Hiring algorithm bias detection", "Medical diagnosis equity analysis"],
+    "related_terms": ["Fairness", "SHAP", "Model Auditing", "Responsible AI"],
+    "real_world_example": "```python\nfrom fairlearn.metrics import MetricFrame, demographic_parity_difference\nfrom sklearn.metrics import accuracy_score\n\n# Compute fairness metrics\nmetric_frame = MetricFrame(\n    metrics={'accuracy': accuracy_score},\n    y_true=y_test,\n    y_pred=y_pred,\n    sensitive_features=X_test['gender']  # Protected attribute\n)\n\nprint('Accuracy by group:')\nprint(metric_frame.by_group)\n\n# Demographic Parity: P(pred=1|A=0) = P(pred=1|A=1)\ndpd = demographic_parity_difference(\n    y_true=y_test,\n    y_pred=y_pred,\n    sensitive_features=X_test['gender']\n)\nprint(f'Demographic Parity Difference: {dpd:.4f}')\n# 0 = perfectly fair; > 0.1 is concerning\n```",
+    "difficulty_level": "Intermediate",
+    "term_type": "Concept"
+  },
+  {
+    "id": "fairness",
+    "title": "AI Fairness",
+    "primary_category": "Ethics",
+    "aliases": ["Model Fairness", "Algorithmic Fairness"],
+    "secondary_tags": ["Fairness", "Responsible AI", "Bias Mitigation"],
+    "definition": "The principle that AI/ML systems should make decisions that are equitable across different demographic groups. Multiple mathematical definitions of fairness exist, and different definitions may be mutually exclusive.",
+    "why_used": "Regulators (EU AI Act), organizations, and society increasingly require AI systems to demonstrate fairness. Models that treat people differently based on protected attributes cause real harm.",
+    "interview_point": "Fairness impossibility: Demographic Parity (equal positive rates across groups), Equalized Odds (equal TPR and FPR across groups), and Predictive Parity (equal precision across groups) CANNOT all be satisfied simultaneously when base rates differ between groups (Chouldechova's Impossibility). You must choose which fairness metric to optimize for the specific use case.",
+    "advantages": ["Prevents systematic discrimination", "Improves model robustness", "Regulatory compliance (EU AI Act, ECOA)"],
+    "limitations": ["Different fairness definitions are mathematically incompatible", "Enforcing fairness may reduce overall accuracy"],
+    "use_cases": ["Credit scoring", "Hiring algorithms", "Recidivism prediction", "Medical resource allocation"],
+    "related_terms": ["Algorithmic Bias", "Fairlearn", "SHAP"],
+    "real_world_example": "```python\nfrom fairlearn.reductions import ExponentiatedGradient, DemographicParity\nfrom sklearn.linear_model import LogisticRegression\n\n# Fairness-constrained model training\nestimator = LogisticRegression(max_iter=1000)\nconstraint = DemographicParity()  # Choose your fairness definition\n\nmitigator = ExponentiatedGradient(estimator, constraints=constraint)\nmitigator.fit(X_train, y_train, sensitive_features=X_train['gender'])\n\ny_pred_fair = mitigator.predict(X_test)\n```",
+    "difficulty_level": "Advanced",
+    "term_type": "Concept"
+  },
+  {
+    "id": "responsible_ai",
+    "title": "Responsible AI",
+    "primary_category": "Ethics",
+    "aliases": ["Trustworthy AI", "Ethical AI"],
+    "secondary_tags": ["Responsible AI", "Governance", "Ethics"],
+    "definition": "A framework for developing and deploying AI systems that are fair, transparent, accountable, safe, and beneficial. Key pillars: Fairness, Reliability & Safety, Privacy & Security, Inclusiveness, Transparency, Accountability.",
+    "why_used": "As AI systems are deployed in high-stakes domains (healthcare, justice, finance), ensuring they behave ethically and responsibly is both a moral obligation and legal requirement.",
+    "interview_point": "EU AI Act (2024) classifies AI systems by risk: Prohibited (social scoring, biometric surveillance), High-Risk (CV, credit scoring, medical — requires conformity assessment), Limited Risk (chatbots — requires transparency), Minimal Risk. High-risk systems must document training data, enable human oversight, and provide explainability.",
+    "advantages": ["Prevents harm to individuals and society", "Regulatory compliance", "Builds public trust in AI"],
+    "limitations": ["Increases development complexity and cost", "Trade-offs between accuracy and fairness"],
+    "use_cases": ["Enterprise AI governance", "Regulatory compliance", "Public sector AI deployment"],
+    "related_terms": ["Fairness", "Transparency", "EU AI Act", "SHAP"],
+    "real_world_example": "```python\n# Responsible AI Checklist Implementation\nclass ResponsibleAIPipeline:\n    def audit(self, model, X_test, y_test, sensitive_features):\n        results = {}\n        \n        # 1. Performance audit\n        results['accuracy'] = accuracy_score(y_test, model.predict(X_test))\n        results['auc'] = roc_auc_score(y_test, model.predict_proba(X_test)[:,1])\n        \n        # 2. Fairness audit\n        from fairlearn.metrics import demographic_parity_difference\n        results['dpd'] = demographic_parity_difference(\n            y_test, model.predict(X_test), sensitive_features=sensitive_features\n        )\n        \n        # 3. Explainability\n        import shap\n        explainer = shap.TreeExplainer(model)\n        results['shap_values'] = explainer.shap_values(X_test[:100])\n        \n        return results\n```",
+    "difficulty_level": "Intermediate",
+    "term_type": "Concept"
+  }
+]

@@ -1,1 +1,54 @@
-[]
+[
+  {
+    "id": "gdpr",
+    "title": "GDPR",
+    "primary_category": "Privacy",
+    "aliases": ["General Data Protection Regulation", "EU GDPR"],
+    "secondary_tags": ["Compliance", "Data Protection", "Regulation"],
+    "definition": "The EU's comprehensive data protection regulation (effective May 2018) establishing rights for EU citizens regarding their personal data and obligations for organizations processing it. Key rights: access, rectification, erasure ('right to be forgotten'), portability, and objection to automated decisions.",
+    "why_used": "Any ML system processing EU citizen data must comply with GDPR. Violations carry fines of up to €20M or 4% of global annual turnover.",
+    "interview_point": "Key GDPR concepts for ML: 1) Right to explanation — users can request human review of automated decisions. 2) Data minimization — only collect data necessary for the stated purpose. 3) Purpose limitation — can't use data for purposes other than stated. 4) Pseudonymization — de-identify data where possible. Consent must be explicit, freely given, and revocable.",
+    "advantages": ["Establishes clear data processing rules", "Builds user trust"],
+    "limitations": ["Compliance adds significant development overhead", "Ambiguity in some AI-specific provisions"],
+    "use_cases": ["Any ML system processing EU citizen personal data", "Healthcare AI in Europe", "E-commerce recommendation systems"],
+    "related_terms": ["Anonymization", "PII Protection", "Data Encryption", "Right to Erasure"],
+    "real_world_example": "```python\n# GDPR-compliant ML data pipeline example\n\nimport hashlib\nimport pandas as pd\n\nclass GDPRCompliantProcessor:\n    \"\"\"\n    Data processor following GDPR principles:\n    - Data minimization: collect only what's needed\n    - Pseudonymization: replace PII with hashed identifiers\n    - Purpose limitation: document what each field is used for\n    \"\"\"\n    \n    def pseudonymize(self, df: pd.DataFrame, pii_cols: list) -> pd.DataFrame:\n        \"\"\"Replace PII with consistent hashed identifiers\"\"\"\n        df = df.copy()\n        for col in pii_cols:\n            df[col] = df[col].apply(\n                lambda x: hashlib.sha256(str(x).encode()).hexdigest()[:16]\n            )\n        return df\n    \n    def anonymize(self, df: pd.DataFrame, drop_cols: list) -> pd.DataFrame:\n        \"\"\"Fully remove identifying columns\"\"\"\n        return df.drop(columns=drop_cols, errors='ignore')\n    \n    def apply_data_minimization(self, df: pd.DataFrame, required_features: list) -> pd.DataFrame:\n        \"\"\"Keep only features needed for the ML task\"\"\"\n        return df[required_features]\n```",
+    "difficulty_level": "Intermediate",
+    "term_type": "Concept"
+  },
+  {
+    "id": "differential_privacy",
+    "title": "Differential Privacy",
+    "primary_category": "Privacy",
+    "aliases": ["DP", "Formal Privacy"],
+    "secondary_tags": ["Data Protection", "Privacy Preservation", "ML Privacy"],
+    "definition": "A mathematical framework that guarantees individual privacy by adding carefully calibrated random noise to data or model outputs. Ensures that the presence or absence of a single individual in the training dataset has minimal effect on the model's output.",
+    "why_used": "Provides formal, mathematical privacy guarantees unlike anonymization (which can be reversed). Used by Apple, Google, and Meta to collect aggregate statistics without compromising individual privacy.",
+    "interview_point": "ε-differential privacy: the privacy budget ε controls the privacy-accuracy tradeoff. Smaller ε = more privacy, less accuracy. Adding Laplace noise to query results (local DP) or during training (global DP). TensorFlow Privacy and OpenDP implement DP-SGD (adds noise to gradients during training).",
+    "formula": "P[M(D) ∈ S] ≤ e^ε * P[M(D') ∈ S] for all S and adjacent D, D'",
+    "advantages": ["Formal, mathematical privacy guarantee", "Protects against membership inference attacks", "Composable — DP pipelines have bounded privacy loss"],
+    "limitations": ["Accuracy-privacy tradeoff", "Implementation complexity", "Choosing ε value is non-trivial"],
+    "use_cases": ["Federated learning", "Healthcare data analysis", "Census data publication", "ML model training on sensitive data"],
+    "related_terms": ["GDPR", "Federated Learning", "Anonymization"],
+    "real_world_example": "```python\nimport tensorflow_privacy as tfp\nimport tensorflow as tf\n\n# DP-SGD: Train with differential privacy\n\n# Replace standard optimizer with DP optimizer\ndp_optimizer = tfp.DPKerasSGDOptimizer(\n    l2_norm_clip=1.0,          # Gradient clipping bound\n    noise_multiplier=1.1,       # Noise level (higher = more private)\n    num_microbatches=256,       # Process this many at once\n    learning_rate=0.01\n)\n\nmodel.compile(\n    optimizer=dp_optimizer,\n    loss=tf.keras.losses.CategoricalCrossentropy(reduction=tf.losses.Reduction.NONE),\n    metrics=['accuracy']\n)\n\n# Compute privacy budget after training\nepsilon = tfp.compute_dp_sgd_privacy(\n    n=len(X_train),\n    batch_size=256,\n    noise_multiplier=1.1,\n    epochs=10,\n    delta=1e-5\n)\nprint(f'Privacy budget: ε = {epsilon:.2f}')\n```",
+    "difficulty_level": "Advanced",
+    "term_type": "Concept"
+  },
+  {
+    "id": "pii_protection",
+    "title": "PII Protection",
+    "primary_category": "Privacy",
+    "aliases": ["PII", "Personally Identifiable Information"],
+    "secondary_tags": ["Data Protection", "Access Control"],
+    "definition": "Personally Identifiable Information (PII) is any data that can identify a specific individual. Protecting PII means preventing unauthorized access, ensuring appropriate use, and complying with regulations like GDPR and HIPAA.",
+    "why_used": "ML datasets frequently contain PII (names, emails, SSNs, medical records). Processing PII without proper protection violates regulations and exposes organizations to legal liability.",
+    "interview_point": "Types of PII in ML contexts: Direct identifiers (name, SSN, email), Quasi-identifiers (age + zip + gender can uniquely identify 87% of Americans — Sweeney 2000). Best practices: never store raw PII in model training data, use tokenization/hashing, implement data access controls, audit data lineage.",
+    "advantages": ["Legal compliance", "Protects individuals from identity theft and discrimination"],
+    "limitations": ["Anonymization can often be reversed with auxiliary data"],
+    "use_cases": ["Healthcare ML pipelines", "Financial ML systems", "Customer behavior modeling"],
+    "related_terms": ["GDPR", "HIPAA", "Anonymization", "Differential Privacy"],
+    "real_world_example": "```python\nimport pandas as pd\nimport re\nfrom presidio_analyzer import AnalyzerEngine\nfrom presidio_anonymizer import AnonymizerEngine\n\n# Microsoft Presidio for PII detection and anonymization\nanalyzer = AnalyzerEngine()\nanonymizer = AnonymizerEngine()\n\ndef detect_and_remove_pii(text: str) -> str:\n    \"\"\"Detect and anonymize PII in text data\"\"\"\n    results = analyzer.analyze(\n        text=text,\n        language='en',\n        entities=['PERSON', 'EMAIL_ADDRESS', 'PHONE_NUMBER', \n                  'CREDIT_CARD', 'US_SSN', 'LOCATION']\n    )\n    \n    anonymized = anonymizer.anonymize(\n        text=text,\n        analyzer_results=results\n    )\n    return anonymized.text\n\n# Apply to dataframe\ndf['clean_text'] = df['user_message'].apply(detect_and_remove_pii)\n```",
+    "difficulty_level": "Intermediate",
+    "term_type": "Concept"
+  }
+]

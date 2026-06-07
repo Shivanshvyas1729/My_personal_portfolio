@@ -1,1 +1,53 @@
-[]
+[
+  {
+    "id": "rest_api",
+    "title": "REST API",
+    "primary_category": "Software Engineering",
+    "aliases": ["RESTful API", "REST", "Representational State Transfer"],
+    "secondary_tags": ["APIs", "Architecture", "Web Services"],
+    "definition": "An architectural style for building web APIs using HTTP methods (GET, POST, PUT, PATCH, DELETE) with stateless communication. Resources are identified by URLs, and data is exchanged in JSON format.",
+    "why_used": "The standard for exposing ML models as web services. Simple, stateless, universally supported, and easily consumed by any client (web app, mobile, other services).",
+    "interview_point": "REST constraints: 1) Stateless — each request contains all info needed (no server-side sessions). 2) Uniform Interface — consistent URL patterns and HTTP methods. 3) Cacheable — responses indicate cacheability. HTTP methods: GET (read), POST (create), PUT (replace), PATCH (partial update), DELETE. Status codes: 200 OK, 201 Created, 400 Bad Request, 401 Unauthorized, 404 Not Found, 500 Server Error.",
+    "advantages": ["Universally supported and understood", "Stateless = scalable", "Simple to consume and test", "HTTP caching support"],
+    "limitations": ["Multiple round trips for complex data graphs", "Overfetching/underfetching (GraphQL solves this)", "No built-in real-time support"],
+    "use_cases": ["ML inference endpoints", "Microservice communication", "Mobile app backends"],
+    "related_terms": ["FastAPI", "GraphQL", "WebSockets", "gRPC"],
+    "real_world_example": "```python\nfrom fastapi import FastAPI, HTTPException, Depends\nfrom pydantic import BaseModel, Field\nfrom typing import Optional\nimport logging\n\napp = FastAPI(title='ML Service API', version='2.0.0')\n\nclass InferenceRequest(BaseModel):\n    features: list[float] = Field(..., min_length=1, description='Input feature vector')\n    model_version: Optional[str] = 'latest'\n\nclass InferenceResponse(BaseModel):\n    prediction: int\n    confidence: float\n    model_version: str\n    request_id: str\n\n@app.post('/v1/predict', response_model=InferenceResponse, status_code=200)\nasync def predict(request: InferenceRequest):\n    try:\n        result = model.predict([request.features])[0]\n        prob = model.predict_proba([request.features])[0].max()\n        return InferenceResponse(\n            prediction=int(result),\n            confidence=round(float(prob), 4),\n            model_version=model_version,\n            request_id=generate_uuid()\n        )\n    except Exception as e:\n        logging.error(f'Prediction failed: {e}')\n        raise HTTPException(status_code=500, detail='Model inference failed')\n```",
+    "difficulty_level": "Beginner",
+    "term_type": "Concept"
+  },
+  {
+    "id": "microservices",
+    "title": "Microservices",
+    "primary_category": "Software Engineering",
+    "aliases": ["Microservice Architecture", "Microservice Pattern"],
+    "secondary_tags": ["Architecture", "Scalability", "MLOps"],
+    "definition": "An architectural pattern where an application is broken into small, independently deployable services, each responsible for a specific business capability. Services communicate via APIs or message queues.",
+    "why_used": "In ML systems, microservices separate concerns: data ingestion, feature engineering, model inference, and monitoring can be independently scaled, updated, and deployed.",
+    "interview_point": "Microservices vs Monolith: Monolith is simpler to develop and debug but harder to scale. Microservices scale independently (scale inference without scaling training), enable polyglot (Python model service + Go API gateway), but introduce network complexity and operational overhead. Start monolithic, extract services when needed.",
+    "advantages": ["Independent scaling per service", "Independent deployment and updates", "Technology flexibility per service", "Fault isolation — one service failure doesn't crash all"],
+    "limitations": ["Network latency between services", "Distributed system complexity (service discovery, load balancing)", "Harder to debug across services"],
+    "use_cases": ["Separate ML model serving from training pipeline", "High-scale ML platforms", "Multi-model serving systems"],
+    "related_terms": ["Docker", "Kubernetes", "REST API", "Message Queue"],
+    "real_world_example": "```yaml\n# docker-compose.yml for ML microservices\nversion: '3.8'\nservices:\n  api-gateway:\n    build: ./gateway\n    ports: ['80:80']\n    depends_on: [inference-service, feature-service]\n  \n  feature-service:\n    build: ./feature_engineering\n    environment:\n      - REDIS_URL=redis://redis:6379\n    deploy:\n      replicas: 2\n  \n  inference-service:\n    build: ./model_serving\n    environment:\n      - MODEL_PATH=/models/prod_model.pkl\n    volumes:\n      - ./models:/models:ro\n    deploy:\n      replicas: 4  # Scale inference independently\n    resources:\n      reservations:\n        devices:\n          - driver: nvidia\n            count: 1\n            capabilities: [gpu]\n  \n  redis:\n    image: redis:7-alpine\n    # Feature cache for low-latency serving\n```",
+    "difficulty_level": "Advanced",
+    "term_type": "Concept"
+  },
+  {
+    "id": "design_patterns",
+    "title": "Design Patterns",
+    "primary_category": "Software Engineering",
+    "aliases": ["Software Design Patterns", "GoF Patterns"],
+    "secondary_tags": ["Design Patterns", "Architecture", "Best Practices"],
+    "definition": "Reusable solutions to commonly occurring problems in software design. Categorized as Creational (object creation), Structural (object composition), and Behavioral (object communication). From the Gang of Four book.",
+    "why_used": "Understanding design patterns enables writing clean, maintainable, and extensible ML systems. Patterns like Strategy (swappable models), Factory (model registry), and Observer (monitoring) are fundamental to ML engineering.",
+    "interview_point": "Key patterns in ML systems: 1) Strategy — swap different model implementations (sklearn, PyTorch) behind a common interface. 2) Factory — model registry that creates the right model class by name. 3) Repository — abstract data access layer. 4) Observer — trigger retraining when drift is detected. 5) Decorator — add logging/caching to model predictions.",
+    "advantages": ["Common vocabulary for system design discussions", "Proven solutions to common problems", "Improves code maintainability"],
+    "limitations": ["Overuse leads to unnecessary complexity", "Pattern choice can be non-obvious"],
+    "use_cases": ["ML system architecture", "Model serving infrastructure", "ML pipeline design"],
+    "related_terms": ["REST API", "Microservices", "Docker"],
+    "real_world_example": "```python\nfrom abc import ABC, abstractmethod\nfrom typing import Protocol\nimport numpy as np\n\n# Strategy Pattern: Swappable model interface\nclass ModelStrategy(Protocol):\n    def predict(self, X: np.ndarray) -> np.ndarray: ...\n    def predict_proba(self, X: np.ndarray) -> np.ndarray: ...\n\n# Factory Pattern: Model registry\nclass ModelFactory:\n    _registry = {}\n    \n    @classmethod\n    def register(cls, name: str):\n        def decorator(model_class):\n            cls._registry[name] = model_class\n            return model_class\n        return decorator\n    \n    @classmethod\n    def create(cls, name: str, **kwargs):\n        if name not in cls._registry:\n            raise ValueError(f'Unknown model: {name}')\n        return cls._registry[name](**kwargs)\n\n@ModelFactory.register('random_forest')\nclass RFModel:\n    def __init__(self, **kwargs):\n        from sklearn.ensemble import RandomForestClassifier\n        self.model = RandomForestClassifier(**kwargs)\n\n# Usage\nmodel = ModelFactory.create('random_forest', n_estimators=200)\n```",
+    "difficulty_level": "Intermediate",
+    "term_type": "Concept"
+  }
+]
