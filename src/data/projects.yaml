@@ -35,6 +35,10 @@ projects:
         url: https://link.excalidraw.com/p/readonly/nTbHqs6Z6NhUWvvaQ1Zq
     architecture: ""
     architectureImage: https://i.ibb.co/p6CzTSCX/9fed8422-4558-4568-ad5f-68f70186a6a9.jpg
+    features: []
+    model_inputs: []
+    evaluation_metrics:
+      - Accuracy
   - id: 4
     title: ☀️ Solar Panel Defect Detection System
     category:
