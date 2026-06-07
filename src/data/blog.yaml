@@ -2,7 +2,7 @@ blog:
   - id: 13
     title: "Exection Handling "
     content: |-
-      Q: Why do we use raise?
+      ## Q: Why do we use raise?
 
       A: The raise keyword is used to explicitly trigger an exception. It stops the normal flow of execution and transfers control to the nearest exception handler (except block). In FastAPI, it is commonly used with HTTPException to return error responses such as 404, 400, or 500.
 
@@ -10,7 +10,7 @@ blog:
 
       "raise is used to explicitly throw an exception. Without raise, the program may continue execution even after a critical failure, whereas raise stops the normal flow and allows the error to be handled by the caller or global exception handlers."
 
-      Q: why we convert image to **base 64** ?
+      ## Q: why we convert image to **base 64** ?
       We convert images to Base64 to encode raw binary image data into a safe ASCII text string, which allows you to transmit, embed, or store the image easily across text-based protocols without data corruption
 
       **Safe Transmission**: Web protocols like HTTP, JSON, and XML are designed for text. Raw binary data contains special characters that can break these formats. Base64 uses only 64 safe characters (A-Z, a-z, 0-9, +, /) to ensure text-safe delivery
