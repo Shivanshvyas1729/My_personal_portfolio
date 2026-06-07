@@ -9,6 +9,16 @@ blog:
       Without it 
 
       "raise is used to explicitly throw an exception. Without raise, the program may continue execution even after a critical failure, whereas raise stops the normal flow and allows the error to be handled by the caller or global exception handlers."
+
+      Q: why we convert image to **base 64** ?
+      We convert images to Base64 to encode raw binary image data into a safe ASCII text string, which allows you to transmit, embed, or store the image easily across text-based protocols without data corruption
+
+      **Safe Transmission**: Web protocols like HTTP, JSON, and XML are designed for text. Raw binary data contains special characters that can break these formats. Base64 uses only 64 safe characters (A-Z, a-z, 0-9, +, /) to ensure text-safe delivery
+
+      **API Compatibility** : Many REST APIs require payload data to be in strict JSON format. JSON cannot naturally handle binary image data, so converting the image to a Base64 string allows it to be sent inside a standard JSON key-value pair.
+      ### ***Trade-offs to Keep in Mind***
+      **Size Increase**: Base64 encoding increases the file data size by roughly 33% compared to the original binary file.
+      **Performance Impact**: It is ideal for small images or icons.
     category: Gernal
     type:
       - Exception Handling
