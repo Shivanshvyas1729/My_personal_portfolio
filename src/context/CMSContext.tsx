@@ -4,6 +4,8 @@ import { logger, AuditEntry } from "@/lib/logger";
 import { toast } from "sonner";
 import YAML from "yaml";
 import { githubConfig } from "../config";
+import { useAuth } from "@/hooks/useAuth";
+import { clearLocalImages } from "@/lib/localImageStore";
 
 interface CMSState {
   previewMode: boolean;
@@ -38,6 +40,9 @@ const CMSStateContext = createContext<CMSState | undefined>(undefined);
 const CMSActionsContext = createContext<CMSActions | undefined>(undefined);
 
 export const CMSProvider = ({ children }: { children: ReactNode }) => {
+  const { roles } = useAuth();
+  const isAdmin = roles.includes("admin") || roles.includes("editor");
+
   const [previewMode, setPreviewMode] = useState(false);
   const [safeMode, setSafeMode] = useState(false);
   const [cmsMode, setCmsMode] = useState<"local" | "github" | "unknown">("unknown");
@@ -87,30 +92,51 @@ export const CMSProvider = ({ children }: { children: ReactNode }) => {
     const savedForceLocal = localStorage.getItem("cms-force-local") === "true";
     if (savedForceLocal) setForceLocalMode(true);
 
-    try {
-      const savedPreview = sessionStorage.getItem("cms-preview-data");
-      const savedUndo = sessionStorage.getItem("cms-undo-stack");
-      const savedRedo = sessionStorage.getItem("cms-redo-stack");
-      
-      if (savedPreview) {
-        setPreviewData(JSON.parse(savedPreview));
+    if (isAdmin) {
+      try {
+        const savedPreview = sessionStorage.getItem("cms-preview-data");
+        const savedUndo = sessionStorage.getItem("cms-undo-stack");
+        const savedRedo = sessionStorage.getItem("cms-redo-stack");
+        
+        if (savedPreview) {
+          setPreviewData(JSON.parse(savedPreview));
+          logger.addLog({
+            action: "RECOVER_SESSION",
+            status: "success",
+            message: "[CRM-HISTORY] Recovered active preview session from temporary storage."
+          });
+        }
+        if (savedUndo) setUndoStack(JSON.parse(savedUndo));
+        if (savedRedo) setRedoStack(JSON.parse(savedRedo));
+      } catch (e: any) {
+        console.warn("Failed to load temporary history from sessionStorage", e);
         logger.addLog({
           action: "RECOVER_SESSION",
-          status: "success",
-          message: "[CRM-HISTORY] Recovered active preview session from temporary storage."
+          status: "error",
+          message: `[CRM-HISTORY] Failed to recover active history stacks: ${e.message}`
         });
       }
-      if (savedUndo) setUndoStack(JSON.parse(savedUndo));
-      if (savedRedo) setRedoStack(JSON.parse(savedRedo));
-    } catch (e: any) {
-      console.warn("Failed to load temporary history from sessionStorage", e);
-      logger.addLog({
-        action: "RECOVER_SESSION",
-        status: "error",
-        message: `[CRM-HISTORY] Failed to recover active history stacks: ${e.message}`
-      });
     }
-  }, []);
+  }, [isAdmin]);
+
+  // Automatically disable preview mode and clear preview session/data on logout
+  useEffect(() => {
+    if (!isAdmin) {
+      setPreviewMode(false);
+      setPreviewData(liveData);
+      setUndoStack([]);
+      setRedoStack([]);
+      
+      try {
+        sessionStorage.removeItem("cms-preview-data");
+        sessionStorage.removeItem("cms-undo-stack");
+        sessionStorage.removeItem("cms-redo-stack");
+        clearLocalImages();
+      } catch (err) {
+        console.warn("Failed to clear preview session storage on logout:", err);
+      }
+    }
+  }, [isAdmin, liveData]);
 
   useEffect(() => {
     localStorage.setItem("cms-force-local", String(forceLocalMode));

@@ -1,0 +1,166 @@
+[
+  {
+    "id": "accuracy",
+    "title": "Accuracy",
+    "primary_category": "Evaluation Metrics",
+    "aliases": [
+      "Classification Accuracy"
+    ],
+    "secondary_tags": [
+      "Classification",
+      "Basic Metric"
+    ],
+    "definition": "The ratio of correctly predicted observations to the total observations. It is the most intuitive performance measure.",
+    "why_used": "Provides a quick, overall sense of how often the model is correct when classes are perfectly balanced.",
+    "interview_point": "Accuracy is highly misleading on imbalanced datasets. For example, if 99% of transactions are legitimate, a model predicting 'legitimate' every time has 99% accuracy but fails to detect any fraud.",
+    "advantages": [
+      "Easy to explain to non-technical stakeholders",
+      "Calculated easily using a simple formula"
+    ],
+    "limitations": [
+      "Misleading for imbalanced classes",
+      "Does not distinguish between False Positives and False Negatives"
+    ],
+    "formula": "(TP + TN) / (TP + TN + FP + FN)",
+    "good_value": "Highly domain dependent, usually > 80% on balanced data",
+    "use_cases": [
+      "Balanced binary classification",
+      "General quick baseline checks"
+    ],
+    "real_world_example": "```python\nfrom sklearn.metrics import accuracy_score\n\n# y_true: Ground truth labels\n# y_pred: Model predictions\nacc = accuracy_score(y_true, y_pred)\nprint(f'Accuracy: {acc * 100:.2f}%')\n```",
+    "difficulty_level": "Beginner",
+    "term_type": "Metric"
+  },
+  {
+    "id": "precision",
+    "title": "Precision",
+    "primary_category": "Evaluation Metrics",
+    "aliases": [
+      "Positive Predictive Value",
+      "PPV"
+    ],
+    "secondary_tags": [
+      "Classification",
+      "Imbalanced Data"
+    ],
+    "definition": "The ratio of correctly predicted positive observations to the total predicted positive observations. It measures the accuracy of positive predictions.",
+    "why_used": "Used when the cost of a False Positive is very high. You want to be extremely confident when you predict a positive instance.",
+    "interview_point": "Focuses on the quality of your positive predictions. 'Out of all the emails we flagged as Spam, how many were actually Spam?'",
+    "advantages": [
+      "Crucial for scenarios with high False Positive penalties",
+      "Works well with imbalanced data"
+    ],
+    "limitations": [
+      "Ignores False Negatives completely",
+      "Can be artificially inflated by making very few positive predictions"
+    ],
+    "formula": "TP / (TP + FP)",
+    "good_value": "> 0.85 (Depends on strictness of FP penalty)",
+    "use_cases": [
+      "Email Spam Detection",
+      "YouTube Video Recommendations",
+      "Legal document retrieval"
+    ],
+    "real_world_example": "```python\nfrom sklearn.metrics import precision_score\n\n# Calculate precision\n# average='binary' (default), 'macro', 'micro', 'weighted' for multiclass\nprec = precision_score(y_true, y_pred, average='binary')\nprint(f'Precision: {prec:.4f}')\n```",
+    "difficulty_level": "Beginner",
+    "term_type": "Metric"
+  },
+  {
+    "id": "recall",
+    "title": "Recall",
+    "primary_category": "Evaluation Metrics",
+    "aliases": [
+      "Sensitivity",
+      "True Positive Rate",
+      "TPR"
+    ],
+    "secondary_tags": [
+      "Classification",
+      "Imbalanced Data"
+    ],
+    "definition": "The ratio of correctly predicted positive observations to the all observations in actual class. It measures the model's ability to find all positive samples.",
+    "why_used": "Used when the cost of a False Negative is very high. You want to capture as many actual positive instances as possible, even at the cost of false alarms.",
+    "interview_point": "Focuses on the quantity of actual positives found. 'Out of all the sick patients, how many did the model actually catch?'",
+    "advantages": [
+      "Crucial for medical and security applications",
+      "Focuses strictly on not missing positive cases"
+    ],
+    "limitations": [
+      "Ignores False Positives completely",
+      "Can reach 100% simply by predicting 'Positive' for everything"
+    ],
+    "formula": "TP / (TP + FN)",
+    "good_value": "> 0.90 for Medical diagnostics",
+    "use_cases": [
+      "Cancer detection",
+      "Fraud detection",
+      "Security threat scanning"
+    ],
+    "real_world_example": "```python\nfrom sklearn.metrics import recall_score\n\n# Calculate recall\nrec = recall_score(y_true, y_pred, average='binary')\nprint(f'Recall: {rec:.4f}')\n```",
+    "difficulty_level": "Beginner",
+    "term_type": "Metric"
+  },
+  {
+    "id": "f1_score",
+    "title": "F1 Score",
+    "primary_category": "Evaluation Metrics",
+    "aliases": [
+      "F-Measure",
+      "F-Score"
+    ],
+    "secondary_tags": [
+      "Classification",
+      "Imbalanced Data"
+    ],
+    "definition": "The harmonic mean of Precision and Recall. It provides a single score that balances both concerns.",
+    "why_used": "Used when you need a balance between Precision and Recall and there is an uneven class distribution (large number of actual negatives).",
+    "interview_point": "Why Harmonic Mean instead of Simple Average? The harmonic mean severely punishes extreme values. If Precision is 1.0 and Recall is 0.0, the average is 0.5, but the F1 score is 0, correctly indicating a failed model.",
+    "advantages": [
+      "Excellent for imbalanced datasets",
+      "Balances False Positives and False Negatives simultaneously"
+    ],
+    "limitations": [
+      "Harder to explain to business stakeholders than Accuracy",
+      "Treats Precision and Recall equally (unlike F-beta score)"
+    ],
+    "formula": "2 * (Precision * Recall) / (Precision + Recall)",
+    "good_value": "> 0.70 generally, > 0.90 for high-performing models",
+    "use_cases": [
+      "Information Retrieval",
+      "Imbalanced binary classification tasks"
+    ],
+    "real_world_example": "```python\nfrom sklearn.metrics import f1_score\n\n# Calculate F1\nf1 = f1_score(y_true, y_pred, average='weighted')\nprint(f'F1 Score: {f1:.4f}')\n```",
+    "difficulty_level": "Beginner",
+    "term_type": "Metric"
+  },
+  {
+    "id": "roc_auc",
+    "title": "ROC AUC",
+    "primary_category": "Evaluation Metrics",
+    "aliases": [
+      "Area Under the ROC Curve"
+    ],
+    "secondary_tags": [
+      "Classification",
+      "Threshold Independent"
+    ],
+    "definition": "Represents the degree or measure of separability. It tells how much the model is capable of distinguishing between classes across all possible probability thresholds.",
+    "why_used": "Provides an aggregate measure of performance independent of any specific classification threshold.",
+    "interview_point": "An AUC of 0.5 implies random guessing. An AUC of 1.0 implies perfect separability. AUC evaluates the *ranking* of probabilities rather than absolute values.",
+    "advantages": [
+      "Threshold invariant",
+      "Scale invariant (measures how well predictions are ranked)"
+    ],
+    "limitations": [
+      "Can be overly optimistic on highly imbalanced datasets (PR-AUC is preferred there)",
+      "Does not provide optimal thresholds natively"
+    ],
+    "use_cases": [
+      "Comparing multiple models' overall capacities",
+      "Medical diagnostics"
+    ],
+    "real_world_example": "```python\nfrom sklearn.metrics import roc_auc_score\n\n# NOTE: You MUST pass probabilities (predict_proba), not hard predictions\nprobs = model.predict_proba(X_test)[:, 1]\n\nauc = roc_auc_score(y_true, probs)\nprint(f'ROC AUC: {auc:.4f}')\n```",
+    "difficulty_level": "Intermediate",
+    "term_type": "Metric"
+  }
+]

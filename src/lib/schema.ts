@@ -194,25 +194,42 @@ export const ProjectSchema = z.object({
 
   // Data science / extended fields - all optional
   problem_statement: z.string().optional(),
+  business_problem: z.string().optional(),
   learning_outcomes: z.array(z.string()).optional(),
   architecture: z.string().optional(),
-  architectureImage: imageSchema.optional().nullable(), // nullable so YAML null/"" never blocks sync
+  architectureImage: imageSchema.optional().nullable(),
   resources: z.array(z.object({ label: z.string().optional(), url: z.string().optional() })).optional(),
   howItWorks: z.string().optional(),
   objectives: z.array(z.string()).optional(),
   success_criteria: z.array(z.string()).optional(),
   data_sources: z.array(z.string()).optional(),
+  data_volume: z.string().optional(),
+  class_distribution: z.string().optional(),
   target_variable: z.string().optional(),
   features: z.array(z.string()).optional(),
+  model_inputs: z.array(z.string()).optional(),
+  model_outputs: z.array(z.string()).optional(),
   preprocessing: z.array(z.string()).optional(),
+  feature_engineering: z.array(z.string()).optional(),
   modeling: z.array(z.string()).optional(),
+  hyperparameters: z.array(z.string()).optional(),
   evaluation_metrics: z.array(z.string()).optional(),
   validation_strategy: z.string().optional(),
   explainability: z.string().optional(),
+  training_environment: z.string().optional(),
+  inference_pipeline: z.string().optional(),
   deployment: z.string().optional(),
+  monitoring: z.string().optional(),
+  versioning: z.string().optional(),
   risks: z.array(z.string()).optional(),
   ethics: z.array(z.string()).optional(),
+  privacy: z.array(z.string()).optional(),
+  known_limitations: z.array(z.string()).optional(),
+  future_improvements: z.array(z.string()).optional(),
   open_resources: z.array(z.object({ label: z.string().optional(), url: z.string().optional() })).optional(),
+  
+  // Knowledge Overrides
+  knowledge_overrides: z.record(z.string(), z.any()).optional().default({}),
 }).passthrough();
 
 export const ProjectsArraySchema = z.array(ProjectSchema);

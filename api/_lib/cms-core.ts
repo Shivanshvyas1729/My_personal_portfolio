@@ -17,8 +17,12 @@ export const ALLOWED_CMS_FILES = [
   "src/data/blog.yaml"
 ];
 
+// Dynamically allow all json files inside src/data/knowledge/
 export function validateCmsFilePath(filePath: string): boolean {
   const normalized = filePath.replace(/\\/g, '/').toLowerCase();
+  if (normalized.startsWith("src/data/knowledge/") && normalized.endsWith(".json")) {
+    return true;
+  }
   return ALLOWED_CMS_FILES.some(allowed => allowed.toLowerCase() === normalized);
 }
 
@@ -120,8 +124,9 @@ export async function coreUpdateYamlSection(
   newData: any,
   providedSha: string | undefined,
   isSafeMode: boolean,
+  forceMode?: string
 ): Promise<CmsApiResult> {
-  const useLocalMode = getUseLocalMode();
+  const useLocalMode = forceMode === 'local' || getUseLocalMode();
   if (!validateCmsFilePath(filePath)) {
     logCms(`🚨 SECURITY: Blocked unauthorized write to: ${filePath}`);
     return { success: false, error: `Access denied: ${filePath} is not an authorized CMS data file`, code: 403, mode: useLocalMode ? "local" : "github" };
@@ -159,22 +164,46 @@ export async function coreUpdateYamlSection(
       const octokit = getOctokit();
       const token = process.env.GITHUB_TOKEN;
       logCms(`GITHUB MODE: Saving ${filePath} | token present: ${!!token} | role: ${role}`);
-      const fetched = await fetchFromGitHub(octokit, filePath);
-      sha = fetched.sha;
-      rawContent = fetched.content;
+      
+      try {
+        const fetched = await fetchFromGitHub(octokit, filePath);
+        sha = fetched.sha;
+        rawContent = fetched.content;
+      } catch (err: any) {
+        if (err.status === 404 || err.message === "Not Found" || err.message?.includes("404")) {
+          logCms(`File not found on GitHub, treating as create operation: ${filePath}`);
+          sha = "";
+          rawContent = filePath.endsWith(".json") ? "[]" : "";
+        } else {
+          throw err;
+        }
+      }
       
       // Conflict Detection (GitHub only)
-      if (providedSha && providedSha !== sha) {
+      if (providedSha && sha && providedSha !== sha) {
         return { success: false, error: "Conflict: SHA mismatch", code: 409, mode: "github", data: { latestSha: sha, latestContent: rawContent } };
       }
     }
 
-    // 4. Update YAML Document
-    const doc = yaml.parseDocument(rawContent);
-    if (doc.errors?.length) throw new Error("YAML Parsing Error");
-
-    safelyUpdateNode(doc, [sectionKey], newData);
-    const updatedContent = doc.toString({ lineWidth: -1 });
+    // 4. Update Document
+    let updatedContent = "";
+    if (filePath.endsWith(".json")) {
+      let docData = [];
+      try {
+        docData = JSON.parse(rawContent);
+      } catch (e) {
+        docData = [];
+      }
+      
+      // For JSON (knowledge base), newData is usually the whole array or an object
+      // If it's an array, just replace it entirely.
+      updatedContent = JSON.stringify(newData, null, 2);
+    } else {
+      const doc = yaml.parseDocument(rawContent);
+      if (doc.errors?.length) throw new Error("YAML Parsing Error");
+      safelyUpdateNode(doc, [sectionKey], newData);
+      updatedContent = doc.toString({ lineWidth: -1 });
+    }
 
     // 5. Safe Mode / Logging
     if (isSafeMode) {
@@ -209,7 +238,7 @@ export async function coreUpdateYamlSection(
           path: filePath,
           message: `feat: update ${sectionKey} content [skip ci]`,
           content: Buffer.from(updatedContent, "utf-8").toString("base64"),
-          sha,
+          ...(sha ? { sha } : {}),
           branch: getBranch(),
         });
         sha = (result.data as any).content.sha;
@@ -255,7 +284,7 @@ export async function coreGetLatestData(filePath: string): Promise<CmsApiResult>
       rawContent = fetched.content;
     }
 
-    const data = yaml.parse(rawContent);
+    const data = filePath.endsWith(".json") ? JSON.parse(rawContent || "[]") : yaml.parse(rawContent);
     return { 
       success: true, 
       mode: useLocalMode ? "local" : "github", 

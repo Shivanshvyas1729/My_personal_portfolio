@@ -72,25 +72,44 @@ export interface Project {
   howItWorks?: string;
   resources?: { label: string; url: string }[];
   problem_statement?: string;
+  business_problem?: string;
   learning_outcomes?: string[];
   architecture?: string;
   objectives?: string[];
   success_criteria?: string[];
   data_sources?: string[];
+  data_volume?: string;
+  class_distribution?: string;
   target_variable?: string;
   features?: string[];
+  model_inputs?: string[];
+  model_outputs?: string[];
   preprocessing?: string[];
+  feature_engineering?: string[];
   modeling?: string[];
+  hyperparameters?: string[];
   evaluation_metrics?: string[];
   validation_strategy?: string;
   explainability?: string;
+  training_environment?: string[];
   deployment?: string;
+  inference_pipeline?: string[];
+  monitoring?: string[];
+  versioning?: string[];
   risks?: string[];
   ethics?: string[];
+  privacy?: string[];
+  known_limitations?: string[];
+  future_improvements?: string[];
   open_resources?: { label: string; url: string }[];
+  knowledge_overrides?: Array<{
+    id: string;
+    [key: string]: any;
+  }>;
 }
 
 export interface Settings {
+  [key: string]: unknown;
   ropeLightColors?: string[];
   ropeLightSpeed?: number;
   ropeLightThickness?: number;

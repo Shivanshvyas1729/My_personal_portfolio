@@ -43,10 +43,10 @@ export const ArrayItemWrapper: React.FC<ArrayItemWrapperProps> = ({
       {/* Accordion Header */}
       <div 
         onClick={() => setIsExpanded(prev => !prev)}
-        className={`flex items-center justify-between p-3.5 cursor-pointer select-none transition-all ${
+        className={`flex items-center justify-between p-2.5 cursor-pointer select-none transition-all ${
           isExpanded 
-            ? 'bg-accent/5 border-l-4 border-accent/70 pl-2.5' 
-            : 'bg-muted/10 hover:bg-muted/20 pl-3.5'
+            ? 'bg-accent/5 border-l-4 border-accent/70 pl-1.5' 
+            : 'bg-muted/10 hover:bg-muted/20 pl-2.5'
         }`}
       >
         <div className="flex items-center gap-3 min-w-0 pr-12">
@@ -102,7 +102,7 @@ export const ArrayItemWrapper: React.FC<ArrayItemWrapperProps> = ({
 
       {/* Accordion Content */}
       {isExpanded && (
-        <div className={`p-4 border-t border-border/15 animate-in fade-in duration-200 ${isDark ? 'bg-black/35' : 'bg-slate-50/70'}`}>
+        <div className={`p-3 border-t border-border/15 animate-in fade-in duration-200 ${isDark ? 'bg-black/35' : 'bg-slate-50/70'}`}>
           {children}
         </div>
       )}

@@ -1,0 +1,143 @@
+[
+  {
+    "id": "logistic_regression",
+    "title": "Logistic Regression",
+    "primary_category": "Machine Learning",
+    "aliases": [
+      "LogReg",
+      "Logit Model"
+    ],
+    "secondary_tags": [
+      "Classification",
+      "Linear Model",
+      "Supervised Learning"
+    ],
+    "definition": "A statistical model that in its basic form uses a logistic function to model a binary dependent variable. It predicts the probability of an instance belonging to a specific class.",
+    "why_used": "It is extremely fast, highly interpretable, and serves as a fantastic baseline model for classification problems.",
+    "interview_point": "Even though it has 'regression' in its name, it is a classification algorithm. The output is a probability between 0 and 1, mapped via the Sigmoid function.",
+    "advantages": [
+      "Highly interpretable coefficients",
+      "Computationally efficient",
+      "Provides well-calibrated probabilities"
+    ],
+    "limitations": [
+      "Assumes linear relationship between independent variables and log-odds",
+      "Struggles with complex, non-linear boundaries",
+      "Vulnerable to multicollinearity"
+    ],
+    "use_cases": [
+      "Spam detection (Spam/Not Spam)",
+      "Customer churn prediction",
+      "Credit scoring (Approve/Reject)"
+    ],
+    "real_world_example": "```python\nfrom sklearn.linear_model import LogisticRegression\n\n# Initialize model with common parameters\nmodel = LogisticRegression(\n    penalty='l2',        # Regularization type ('l1', 'l2', 'elasticnet')\n    C=1.0,               # Inverse of regularization strength (smaller = stronger)\n    solver='lbfgs',      # Algorithm to use for optimization\n    max_iter=100         # Maximum number of iterations taken for the solvers to converge\n)\n\n# Train and predict\nmodel.fit(X_train, y_train)\npredictions = model.predict(X_test)\nprobabilities = model.predict_proba(X_test)[:, 1]\n```",
+    "difficulty_level": "Beginner",
+    "term_type": "Algorithm"
+  },
+  {
+    "id": "random_forest",
+    "title": "Random Forest",
+    "primary_category": "Machine Learning",
+    "aliases": [
+      "RF",
+      "Random Forests"
+    ],
+    "secondary_tags": [
+      "Ensemble",
+      "Bagging",
+      "Tree-based",
+      "Supervised Learning"
+    ],
+    "definition": "An ensemble learning method that operates by constructing a multitude of decision trees at training time and outputting the class that is the mode of the classes (classification) or mean prediction (regression) of the individual trees.",
+    "why_used": "Reduces the variance (overfitting) of a single decision tree by averaging multiple trees trained on different parts of the same training set (Bagging) and subsets of features.",
+    "interview_point": "Random Forest decorrelates trees by selecting a random subset of features at each split, ensuring that a single strong predictor doesn't dominate every tree.",
+    "advantages": [
+      "Robust to outliers and non-linear data",
+      "Requires very little data preprocessing",
+      "Provides feature importance metrics automatically"
+    ],
+    "limitations": [
+      "Can be slow to score on large datasets",
+      "Acts as a 'black box' making interpretability hard compared to a single tree",
+      "Requires more memory"
+    ],
+    "use_cases": [
+      "Fraud detection",
+      "Predicting patient readmission",
+      "Stock market prediction"
+    ],
+    "real_world_example": "```python\nfrom sklearn.ensemble import RandomForestClassifier\n\n# Initialize model\nrf_model = RandomForestClassifier(\n    n_estimators=100,      # Number of trees in the forest\n    max_depth=10,          # Maximum depth of the tree to prevent overfitting\n    min_samples_split=2,   # Minimum number of samples required to split an internal node\n    max_features='sqrt',   # Number of features to consider when looking for the best split\n    random_state=42        # For reproducibility\n)\n\nrf_model.fit(X_train, y_train)\npreds = rf_model.predict(X_test)\n```",
+    "difficulty_level": "Beginner",
+    "term_type": "Algorithm"
+  },
+  {
+    "id": "xgboost",
+    "title": "XGBoost",
+    "primary_category": "Machine Learning",
+    "aliases": [
+      "Extreme Gradient Boosting"
+    ],
+    "secondary_tags": [
+      "Ensemble",
+      "Boosting",
+      "Tree-based"
+    ],
+    "definition": "An optimized distributed gradient boosting library designed to be highly efficient, flexible and portable. It implements machine learning algorithms under the Gradient Boosting framework.",
+    "why_used": "It is widely considered the ultimate algorithmic weapon for structured/tabular data, frequently winning Kaggle competitions.",
+    "interview_point": "Unlike Random Forest which trains trees in parallel (Bagging), XGBoost trains trees sequentially (Boosting). Each new tree tries to correct the residual errors made by the previous trees.",
+    "advantages": [
+      "Extremely accurate on tabular data",
+      "Handles missing values internally",
+      "Supports parallel processing during tree building"
+    ],
+    "limitations": [
+      "Prone to overfitting if hyperparameters are not tuned properly",
+      "Harder to tune than Random Forest",
+      "Not ideal for unstructured data (images, text)"
+    ],
+    "use_cases": [
+      "Click-through rate (CTR) prediction",
+      "Dynamic pricing",
+      "Customer lifetime value (CLV) prediction"
+    ],
+    "real_world_example": "```python\nimport xgboost as xgb\n\n# Initialize model\nmodel = xgb.XGBClassifier(\n    n_estimators=200,      # Number of boosting rounds\n    learning_rate=0.05,    # Step size shrinkage (eta)\n    max_depth=6,           # Maximum tree depth\n    subsample=0.8,         # Subsample ratio of the training instances\n    colsample_bytree=0.8,  # Subsample ratio of columns when constructing each tree\n    objective='binary:logistic'\n)\n\nmodel.fit(X_train, y_train)\npreds = model.predict(X_test)\n```",
+    "difficulty_level": "Intermediate",
+    "term_type": "Algorithm"
+  },
+  {
+    "id": "svm",
+    "title": "Support Vector Machine",
+    "primary_category": "Machine Learning",
+    "aliases": [
+      "SVM",
+      "Support Vector Classifier",
+      "SVC"
+    ],
+    "secondary_tags": [
+      "Supervised Learning",
+      "Classification",
+      "Margin Classifier"
+    ],
+    "definition": "A powerful supervised algorithm that finds the hyperplane that best separates different classes by maximizing the margin between them.",
+    "why_used": "Highly effective in high-dimensional spaces and when the number of dimensions is greater than the number of samples.",
+    "interview_point": "The 'Kernel Trick' allows SVMs to solve non-linear problems by mapping inputs into high-dimensional feature spaces without actually computing the coordinates.",
+    "advantages": [
+      "Effective in high dimensional spaces",
+      "Memory efficient (uses a subset of training points)",
+      "Versatile (different kernel functions can be specified)"
+    ],
+    "limitations": [
+      "Does not scale well to large datasets (O(n^2) or worse)",
+      "Sensitive to noisy data and overlapping classes",
+      "No direct probabilistic interpretation"
+    ],
+    "use_cases": [
+      "Text categorization",
+      "Image classification",
+      "Bioinformatics (Protein classification)"
+    ],
+    "real_world_example": "```python\nfrom sklearn.svm import SVC\n\n# Initialize Support Vector Classifier\nsvm_model = SVC(\n    C=1.0,             # Regularization parameter (higher C = narrower margin, less violations)\n    kernel='rbf',      # Kernel type: 'linear', 'poly', 'rbf', 'sigmoid'\n    gamma='scale',     # Kernel coefficient\n    probability=True   # Enable to use predict_proba() later\n)\n\nsvm_model.fit(X_train, y_train)\npreds = svm_model.predict(X_test)\n```",
+    "difficulty_level": "Intermediate",
+    "term_type": "Algorithm"
+  }
+]

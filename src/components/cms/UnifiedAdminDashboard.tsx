@@ -10,8 +10,9 @@ import { DynamicForm } from './DynamicForm';
 import { ProjectsAdmin } from './ProjectsAdmin';
 import { BlogsAdmin } from './BlogsAdmin';
 import { DashboardPanel } from './DashboardPanel';
+import { KnowledgeMatrixAdmin } from './KnowledgeMatrixAdmin';
 import { PortfolioData, Project } from '@/data/portfolioData';
-import { ChevronDown, RefreshCw, AlertTriangle, ListRestart, ScrollText, Layout, User, Award, GraduationCap, RotateCcw, Save, Undo2, Github } from 'lucide-react';
+import { ChevronDown, RefreshCw, AlertTriangle, ListRestart, ScrollText, Layout, User, Award, GraduationCap, RotateCcw, Save, Undo2, Github, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
 import IntroTransition, { IntroStyle } from '@/components/portfolio/IntroTransition';
@@ -62,8 +63,8 @@ interface CommitLog {
 }
 
 interface ModuleNavigationProps {
-  activeTab: string;
-  setActiveTab: (tab: any) => void;
+  activeTab: 'portfolio' | 'projects' | 'blog' | 'knowledge' | 'settings' | 'history' | 'logs';
+  setActiveTab: (tab: 'portfolio' | 'projects' | 'blog' | 'knowledge' | 'settings' | 'history' | 'logs') => void;
   isMobile: boolean;
   auditLogs: { status: string }[];
 }
@@ -74,7 +75,7 @@ const ModuleNavigation = React.memo<ModuleNavigationProps>(({
   isMobile,
   auditLogs
 }) => {
-  const tabs = ['portfolio', 'projects', 'blog', 'history', 'settings', 'logs'] as const;
+  const tabs = ['portfolio', 'projects', 'blog', 'knowledge', 'history', 'settings', 'logs'] as const;
 
   return (
     <>
@@ -122,7 +123,7 @@ interface SectionGroupAccordionProps {
   isEditorOnly: boolean;
   localActiveSection: string;
   setLocalActiveSection: (sec: string) => void;
-  setActiveTab: (tab: any) => void;
+  setActiveTab: (tab: 'portfolio' | 'projects' | 'blog' | 'knowledge' | 'settings' | 'history' | 'logs') => void;
   openGroups: Record<string, boolean>;
   toggleGroup: (groupId: string) => void;
 }
@@ -206,7 +207,7 @@ interface MobileSectionSelectorProps {
   isEditorOnly: boolean;
   localActiveSection: string;
   setLocalActiveSection: (sec: string) => void;
-  setActiveTab: (tab: any) => void;
+  setActiveTab: (tab: 'portfolio' | 'projects' | 'blog' | 'knowledge' | 'settings' | 'history' | 'logs') => void;
 }
 
 const MobileSectionSelector = React.memo<MobileSectionSelectorProps>(({
@@ -255,9 +256,11 @@ interface FieldChange {
   to: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getChangesSummary = (live: any, preview: any): FieldChange[] => {
   const changes: FieldChange[] = [];
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const compare = (l: any, p: any, path: string) => {
     if (l === p) return;
 
@@ -310,6 +313,7 @@ const STYLE_PALETTE: Record<string, { bg: string; colors: string[]; icon: string
 };
 
 interface IntroPreviewCardProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   settings: Record<string, any>;
 }
 
@@ -496,7 +500,9 @@ const INTRO_STYLES: { key: IntroStyleKey; label: string; icon: string; desc: str
 ];
 
 interface IntroSettingsPanelProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   settings: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onUpdate: (updated: Record<string, any>) => void;
   children?: React.ReactNode;
 }
@@ -508,6 +514,7 @@ const IntroSettingsPanel: React.FC<IntroSettingsPanelProps> = ({ settings, onUpd
   const currentStyle: IntroStyleKey = (settings.introStyle as IntroStyleKey) || 'namaste';
   const handleComplete = useCallback(() => setIsPlaying(false), []);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const update = (key: string, value: any) => onUpdate({ ...settings, [key]: value });
 
   return (
@@ -749,7 +756,7 @@ export const UnifiedAdminDashboard = () => {
     ? (isSuperAdmin ? "⚡ Master Shivansh" : "Masterji")
     : null;
 
-  const [activeTab, setActiveTab] = useState<'portfolio' | 'projects' | 'blog' | 'settings' | 'history' | 'logs'>('portfolio');
+  const [activeTab, setActiveTab] = useState<'portfolio' | 'projects' | 'blog' | 'knowledge' | 'settings' | 'history' | 'logs'>('portfolio');
   const [localActiveSection, setLocalActiveSection] = useState<string>('hero');
   const [isMinimized, setIsMinimized] = useState(() => {
     if (typeof window !== "undefined") {
@@ -1172,6 +1179,12 @@ export const UnifiedAdminDashboard = () => {
               </div>
             )}
 
+            {activeTab === 'knowledge' && (
+              <div className="relative flex-1 overflow-hidden flex flex-col h-full w-full bg-background/50">
+                <KnowledgeMatrixAdmin />
+              </div>
+            )}
+
             {activeTab === 'history' && (
               <div className="flex-1 overflow-y-auto p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -1443,6 +1456,7 @@ export const UnifiedAdminDashboard = () => {
                       <div className="px-4 pb-4 border-t border-border/40 pt-4 animate-in fade-in duration-200">
                         {errorMsg && <div className="mb-4 bg-destructive/10 text-destructive border border-destructive/20 rounded-lg p-3 text-sm">{errorMsg}</div>}
                         <DynamicForm
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           schema={(SECTION_SCHEMAS['settings'] as any).omit({
                             introEnabled: true, introStyle: true, introPrimaryText: true,
                             introSubtitle: true, introTagline: true, introColors: true,
@@ -1512,7 +1526,7 @@ export const UnifiedAdminDashboard = () => {
                     <svg className="w-full h-16" overflow="visible">
                       <defs>
                         <linearGradient id="ropeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                          {(previewRopeLightSettings.colors).map((color: string, idx: number, arr: any[]) => (
+                          {(previewRopeLightSettings.colors).map((color: string, idx: number, arr: string[]) => (
                             <stop key={idx} offset={`${(idx / (arr.length - 1)) * 100}%`} stopColor={color} />
                           ))}
                         </linearGradient>

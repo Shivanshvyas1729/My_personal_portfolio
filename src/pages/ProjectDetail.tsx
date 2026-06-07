@@ -10,6 +10,26 @@ import Magnetic from "@/components/ui/Magnetic";
 import { motion } from "framer-motion";
 import { convertToRawGitHubUrl } from "@/components/cms/FormHelpers";
 import { ResourcesModal } from "@/components/portfolio/ResourcesModal";
+import { KnowledgeTooltip } from "@/components/portfolio/KnowledgeTooltip";
+import type { Project } from "@/data/portfolioData";
+
+const DEFAULT_ETHICS = [
+  "No personally identifiable information stored.",
+  "Dataset used according to license.",
+  "Access restricted to authorized users.",
+  "Data encrypted in transit and at rest.",
+  "Human review recommended for critical decisions.",
+  "Model limitations disclosed.",
+  "Bias monitoring recommended.",
+  "Responsible AI practices followed."
+];
+
+const formatKeyName = (key: string) => {
+  return key
+    .split("_")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
 
 const springTransition = {
   type: "spring",
@@ -62,6 +82,70 @@ const ProjectDetail = () => {
   }
 
   const hasMedia = project.media && project.media.length > 0;
+
+  const renderArraySection = (key: keyof Project, title?: string, icon?: React.ReactNode, extraClasses = "") => {
+    let data = project[key] as string[] | undefined;
+    
+    // Special ethics default logic
+    if (key === "ethics" && (!data || data.length === 0)) {
+      data = DEFAULT_ETHICS;
+    }
+
+    if (!data || !Array.isArray(data) || data.length === 0) return (
+      <div className={extraClasses}>
+        <h4 className="text-sm font-bold text-foreground mb-1">{title || formatKeyName(key as string)}</h4>
+        <p className="text-muted-foreground/50 italic text-sm">[Add {title ? title.toLowerCase() : formatKeyName(key as string).toLowerCase()} here]</p>
+      </div>
+    );
+
+    const sectionTitle = title || formatKeyName(key as string);
+    const overrides = project.knowledge_overrides || [];
+
+    return (
+      <div className={extraClasses}>
+        <h4 className="text-sm font-bold text-foreground mb-1 flex items-center gap-1.5">
+          {icon} {sectionTitle}
+        </h4>
+        <ul className="list-disc pl-5 text-muted-foreground text-sm space-y-1 no-text-effect">
+          {data.map((item, i) => {
+            const termOverrides = overrides.find((o) => o.id?.toLowerCase() === item.toLowerCase());
+
+            return (
+              <li key={i}>
+                <KnowledgeTooltip term={item} overrides={termOverrides} />
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    );
+  };
+
+  const renderTextSection = (key: keyof Project, title?: string) => {
+    const text = project[key] as string | undefined;
+    if (!text || typeof text !== "string") return (
+      <div>
+        <h4 className="text-sm font-bold text-foreground mb-1">{title || formatKeyName(key as string)}</h4>
+        <p className="text-muted-foreground/50 italic text-sm">[Add {title ? title.toLowerCase() : formatKeyName(key as string).toLowerCase()} here]</p>
+      </div>
+    );
+
+    const sectionTitle = title || formatKeyName(key as string);
+    const overrides = project.knowledge_overrides || [];
+    
+    const termOverrides = overrides.find((o) => o.id?.toLowerCase() === text.toLowerCase());
+    
+    const isTargetVar = key === "target_variable";
+
+    return (
+      <div>
+        <h4 className="text-sm font-bold text-foreground mb-1">{sectionTitle}</h4>
+        <p className="text-muted-foreground text-sm">
+          <KnowledgeTooltip term={text} overrides={termOverrides} isTargetVariable={isTargetVar} />
+        </p>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background w-full overflow-x-hidden flex flex-col relative">
@@ -249,157 +333,24 @@ const ProjectDetail = () => {
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
-              {/* Objectives */}
-              <div>
-                <h4 className="text-sm font-bold text-foreground mb-1">Objectives</h4>
-                {project.objectives && project.objectives.length > 0 ? (
-                  <ul className="list-disc pl-5 text-muted-foreground text-sm space-y-1">
-                    {project.objectives.map((item, i) => <li key={i}>{item}</li>)}
-                  </ul>
-                ) : (
-                  <p className="text-muted-foreground/50 italic text-sm">[Add objectives here]</p>
-                )}
-              </div>
-
-              {/* Success Criteria */}
-              <div>
-                <h4 className="text-sm font-bold text-foreground mb-1">Success Criteria</h4>
-                {project.success_criteria && project.success_criteria.length > 0 ? (
-                  <ul className="list-disc pl-5 text-muted-foreground text-sm space-y-1">
-                    {project.success_criteria.map((item, i) => <li key={i}>{item}</li>)}
-                  </ul>
-                ) : (
-                  <p className="text-muted-foreground/50 italic text-sm">[Add success criteria here]</p>
-                )}
-              </div>
-
-              {/* Data Sources */}
-              <div>
-                <h4 className="text-sm font-bold text-foreground mb-1">Data Sources</h4>
-                {project.data_sources && project.data_sources.length > 0 ? (
-                  <ul className="list-disc pl-5 text-muted-foreground text-sm space-y-1">
-                    {project.data_sources.map((item, i) => <li key={i}>{item}</li>)}
-                  </ul>
-                ) : (
-                  <p className="text-muted-foreground/50 italic text-sm">[Add data sources here]</p>
-                )}
-              </div>
-
-              {/* Target Variable */}
-              <div>
-                <h4 className="text-sm font-bold text-foreground mb-1">Target Variable</h4>
-                {project.target_variable ? (
-                  <p className="text-muted-foreground text-sm">{project.target_variable}</p>
-                ) : (
-                  <p className="text-muted-foreground/50 italic text-sm">[Add target variable here]</p>
-                )}
-              </div>
-
-              {/* Features */}
-              <div>
-                <h4 className="text-sm font-bold text-foreground mb-1">Features</h4>
-                {project.features && project.features.length > 0 ? (
-                  <ul className="list-disc pl-5 text-muted-foreground text-sm space-y-1">
-                    {project.features.map((item, i) => <li key={i}>{item}</li>)}
-                  </ul>
-                ) : (
-                  <p className="text-muted-foreground/50 italic text-sm">[Add features here]</p>
-                )}
-              </div>
-
-              {/* Preprocessing */}
-              <div>
-                <h4 className="text-sm font-bold text-foreground mb-1">Preprocessing</h4>
-                {project.preprocessing && project.preprocessing.length > 0 ? (
-                  <ul className="list-disc pl-5 text-muted-foreground text-sm space-y-1">
-                    {project.preprocessing.map((item, i) => <li key={i}>{item}</li>)}
-                  </ul>
-                ) : (
-                  <p className="text-muted-foreground/50 italic text-sm">[Add preprocessing steps here]</p>
-                )}
-              </div>
-
-              {/* Modeling */}
-              <div>
-                <h4 className="text-sm font-bold text-foreground mb-1">Modeling</h4>
-                {project.modeling && project.modeling.length > 0 ? (
-                  <ul className="list-disc pl-5 text-muted-foreground text-sm space-y-1">
-                    {project.modeling.map((item, i) => <li key={i}>{item}</li>)}
-                  </ul>
-                ) : (
-                  <p className="text-muted-foreground/50 italic text-sm">[Add modeling steps here]</p>
-                )}
-              </div>
-
-              {/* Evaluation Metrics */}
-              <div>
-                <h4 className="text-sm font-bold text-foreground mb-1">Evaluation Metrics</h4>
-                {project.evaluation_metrics && project.evaluation_metrics.length > 0 ? (
-                  <ul className="list-disc pl-5 text-muted-foreground text-sm space-y-1">
-                    {project.evaluation_metrics.map((item, i) => <li key={i}>{item}</li>)}
-                  </ul>
-                ) : (
-                  <p className="text-muted-foreground/50 italic text-sm">[Add evaluation metrics here]</p>
-                )}
-              </div>
-
-              {/* Validation Strategy */}
-              <div>
-                <h4 className="text-sm font-bold text-foreground mb-1">Validation Strategy</h4>
-                {project.validation_strategy ? (
-                  <p className="text-muted-foreground text-sm">{project.validation_strategy}</p>
-                ) : (
-                  <p className="text-muted-foreground/50 italic text-sm">[Add validation strategy here]</p>
-                )}
-              </div>
-
-              {/* Explainability */}
-              <div>
-                <h4 className="text-sm font-bold text-foreground mb-1">Explainability</h4>
-                {project.explainability ? (
-                  <p className="text-muted-foreground text-sm">{project.explainability}</p>
-                ) : (
-                  <p className="text-muted-foreground/50 italic text-sm">[Add explainability here]</p>
-                )}
-              </div>
-
-              {/* Deployment */}
-              <div>
-                <h4 className="text-sm font-bold text-foreground mb-1">Deployment</h4>
-                {project.deployment ? (
-                  <p className="text-muted-foreground text-sm">{project.deployment}</p>
-                ) : (
-                  <p className="text-muted-foreground/50 italic text-sm">[Add deployment details here]</p>
-                )}
-              </div>
+              {renderArraySection("objectives")}
+              {renderArraySection("success_criteria")}
+              {renderArraySection("data_sources")}
+              {renderTextSection("target_variable")}
+              {renderArraySection("features")}
+              {renderArraySection("preprocessing")}
+              {renderArraySection("modeling")}
+              {renderArraySection("evaluation_metrics")}
+              {renderTextSection("validation_strategy")}
+              {renderTextSection("explainability")}
+              {renderTextSection("deployment")}
             </div>
             
             <hr className="my-6 border-border" />
             
             <div className="grid md:grid-cols-2 gap-6">
-              {/* Risks */}
-              <div>
-                <h4 className="text-sm font-bold text-foreground mb-1">Risks & Mitigation</h4>
-                {project.risks && project.risks.length > 0 ? (
-                  <ul className="list-disc pl-5 text-muted-foreground text-sm space-y-1">
-                    {project.risks.map((item, i) => <li key={i}>{item}</li>)}
-                  </ul>
-                ) : (
-                  <p className="text-muted-foreground/50 italic text-sm">[Add risks and mitigations here]</p>
-                )}
-              </div>
-
-              {/* Ethics */}
-              <div>
-                <h4 className="text-sm font-bold text-foreground mb-1">Ethics & Privacy</h4>
-                {project.ethics && project.ethics.length > 0 ? (
-                  <ul className="list-disc pl-5 text-muted-foreground text-sm space-y-1">
-                    {project.ethics.map((item, i) => <li key={i}>{item}</li>)}
-                  </ul>
-                ) : (
-                  <p className="text-muted-foreground/50 italic text-sm">[Add ethics and privacy considerations here]</p>
-                )}
-              </div>
+              {renderArraySection("risks", "Risks & Mitigation")}
+              {renderArraySection("ethics", "Ethics & Privacy")}
             </div>
           </div>
 

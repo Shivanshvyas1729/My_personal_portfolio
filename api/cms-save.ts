@@ -8,7 +8,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(405).json({ message: "Method Not Allowed" });
     }
 
-    const { filePath, sectionKey, newData, providedSha, isSafeMode, role } = req.body;
+    const { filePath, sectionKey, newData, providedSha, isSafeMode, role, mode } = req.body;
 
     if (!filePath || !sectionKey || !newData) {
       return res.status(400).json({ 
@@ -24,7 +24,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       sectionKey,
       newData,
       providedSha,
-      !!isSafeMode
+      !!isSafeMode,
+      mode
     );
 
     return res.status(result.success ? 200 : (result.code || 500)).json(result);

@@ -6,7 +6,7 @@ interface DashboardPanelProps {
   children: React.ReactNode;
   isMinimized: boolean;
   setIsMinimized: React.Dispatch<React.SetStateAction<boolean>>;
-  activeTab: 'portfolio' | 'projects' | 'blog' | 'settings' | 'history' | 'logs';
+  activeTab: 'portfolio' | 'projects' | 'blog' | 'knowledge' | 'settings' | 'history' | 'logs';
   canUndo: boolean;
   canRedo: boolean;
   undo: () => void;
@@ -51,6 +51,7 @@ export const DashboardPanel: React.FC<DashboardPanelProps> = ({
   });
 
   const [showLimitReport, setShowLimitReport] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [limitData, setLimitData] = useState<any>(null);
   const [loadingLimit, setLoadingLimit] = useState(false);
   const [limitError, setLimitError] = useState("");
@@ -66,8 +67,8 @@ export const DashboardPanel: React.FC<DashboardPanelProps> = ({
       } else {
         setLimitError(result.error || "Failed to fetch");
       }
-    } catch (e: any) {
-      setLimitError(e.message || "Network Error");
+    } catch (e: unknown) {
+      setLimitError(e instanceof Error ? e.message : "Network Error");
     } finally {
       setLoadingLimit(false);
     }
@@ -476,7 +477,7 @@ export const DashboardPanel: React.FC<DashboardPanelProps> = ({
               </div>
               <div className="pt-2 border-t border-border/10 flex justify-between text-[9px] text-muted-foreground">
                 <span>Reset: {new Date(limitData.resources.core.reset * 1000).toLocaleTimeString()}</span>
-                <button onClick={fetchLimitData} className="text-primary hover:underline flex items-center gap-1 font-bold">
+                <button onClick={() => void fetchLimitData()} className="text-primary hover:underline flex items-center gap-1 font-bold">
                   <RefreshCw size={8} /> Refresh
                 </button>
               </div>

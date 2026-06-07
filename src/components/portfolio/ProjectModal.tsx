@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { Project } from "@/data/portfolioData";
 import { convertToRawGitHubUrl } from "@/components/cms/FormHelpers";
 import { Calendar, ExternalLink, Link as LinkIcon, BookOpen, Star, Lock, X, Play, ShieldAlert, HeartHandshake } from "lucide-react";
+import { KnowledgeTooltip } from "./KnowledgeTooltip";
 
 interface ProjectModalProps {
   project: Project | null;
@@ -43,6 +44,25 @@ const modalVariants = {
   },
 };
 
+const DEFAULT_ETHICS = [
+  "No personally identifiable information stored.",
+  "Dataset used according to license.",
+  "Access restricted to authorized users.",
+  "Data encrypted in transit and at rest.",
+  "Human review recommended for critical decisions.",
+  "Model limitations disclosed.",
+  "Bias monitoring recommended.",
+  "Responsible AI practices followed."
+];
+
+// Helper to format keys like "evaluation_metrics" to "Evaluation Metrics"
+const formatKeyName = (key: string) => {
+  return key
+    .split("_")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
 export function ProjectModal({ project, isOpen, onClose }: ProjectModalProps) {
   const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [activeMedia, setActiveMedia] = useState(0);
@@ -55,6 +75,64 @@ export function ProjectModal({ project, isOpen, onClose }: ProjectModalProps) {
   }, [project]);
 
   const hasMedia = activeProject?.media && activeProject.media.length > 0;
+
+  // Render a section that contains an array of strings with Knowledge Tooltips
+  const renderArraySection = (key: keyof Project, title?: string, icon?: React.ReactNode, extraClasses = "") => {
+    if (!activeProject) return null;
+    let data = activeProject[key] as string[] | undefined;
+    
+    // Special ethics default logic
+    if (key === "ethics" && (!data || data.length === 0)) {
+      data = DEFAULT_ETHICS;
+    }
+
+    if (!data || !Array.isArray(data) || data.length === 0) return null;
+
+    const sectionTitle = title || formatKeyName(key as string);
+    const overrides = activeProject.knowledge_overrides || [];
+
+    return (
+      <div className={`glass-card p-5 border border-border/40 rounded-xl bg-muted/10 ${extraClasses}`}>
+        <h4 className="font-heading font-bold text-foreground mb-3 text-sm flex items-center gap-1.5">
+          {icon} {sectionTitle}
+        </h4>
+        <ul className="list-disc pl-5 text-muted-foreground text-xs space-y-1.5 leading-relaxed">
+          {data.map((item, i) => {
+            const termOverrides = overrides.find(o => o.id.toLowerCase() === item.toLowerCase());
+
+            return (
+              <li key={i}>
+                <KnowledgeTooltip term={item} overrides={termOverrides} />
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    );
+  };
+
+  // Render a text section with Knowledge Tooltips
+  const renderTextSection = (key: keyof Project, title?: string) => {
+    if (!activeProject) return null;
+    const text = activeProject[key] as string | undefined;
+    if (!text || typeof text !== "string") return null;
+
+    const sectionTitle = title || formatKeyName(key as string);
+    const overrides = activeProject.knowledge_overrides || [];
+    
+    const termOverrides = overrides.find(o => o.id.toLowerCase() === text.toLowerCase());
+    
+    const isTargetVar = key === "target_variable";
+
+    return (
+      <div className="glass-card p-5 border border-border/40 rounded-xl bg-muted/10">
+        <h4 className="font-heading font-bold text-foreground mb-2 text-sm">{sectionTitle}</h4>
+        <p className="text-muted-foreground text-xs leading-relaxed">
+          <KnowledgeTooltip term={text} overrides={termOverrides} isTargetVariable={isTargetVar} />
+        </p>
+      </div>
+    );
+  };
 
   return (
     <AnimatePresence mode="wait">
@@ -70,19 +148,16 @@ export function ProjectModal({ project, isOpen, onClose }: ProjectModalProps) {
             className="fixed inset-0 bg-background/60 backdrop-blur-md cursor-pointer"
           />
 
-          {/* Modal Container — Full Page Mode */}
+          {/* Modal Container */}
           <motion.div
             initial="hidden"
             animate="visible"
             exit="exit"
             variants={modalVariants}
-            style={{
-              willChange: "transform, opacity, filter",
-              transform: "translate3d(0,0,0)",
-            }}
+            style={{ willChange: "transform, opacity, filter", transform: "translate3d(0,0,0)" }}
             className="relative w-full h-full flex flex-col p-0 gap-0 bg-background/95 backdrop-blur-3xl z-10"
           >
-            {/* Native App Style Top Title Bar Close Trigger */}
+            {/* Top Title Bar Close Trigger */}
             <button
               onClick={onClose}
               className="absolute top-6 right-6 md:right-10 p-2.5 rounded-full bg-muted/40 hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-all duration-300 z-50 cursor-pointer shadow-md border border-border/10 flex items-center justify-center"
@@ -118,22 +193,12 @@ export function ProjectModal({ project, isOpen, onClose }: ProjectModalProps) {
 
               <div className="flex flex-wrap gap-4 mt-6">
                 {activeProject.github && (
-                  <a
-                    href={activeProject.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-muted/40 hover:bg-muted/80 border border-border/50 text-sm font-medium transition-all duration-300"
-                  >
+                  <a href={activeProject.github} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-muted/40 hover:bg-muted/80 border border-border/50 text-sm font-medium transition-all duration-300">
                     GitHub Repository
                   </a>
                 )}
                 {activeProject.live && (
-                  <a
-                    href={activeProject.live}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-all duration-300"
-                  >
+                  <a href={activeProject.live} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-all duration-300">
                     <ExternalLink size={14} /> Live Demo
                   </a>
                 )}
@@ -142,40 +207,28 @@ export function ProjectModal({ project, isOpen, onClose }: ProjectModalProps) {
 
             {/* Scrollable Body */}
             <div data-lenis-prevent="true" className="flex-1 overflow-y-auto p-6 md:p-12 md:px-16 lg:px-24 leading-relaxed scrollbar-thin">
-              {/* Media Block & Overview Side-by-Side */}
               <div className={`grid gap-8 lg:gap-10 mb-10 ${hasMedia ? "lg:grid-cols-[1.2fr,1fr]" : ""}`}>
                 {/* Media Gallery */}
                 {hasMedia && (
                   <div className="space-y-4">
                     <div className="glass-card rounded-xl overflow-hidden aspect-video border border-border/40 relative">
                       {activeProject.media![activeMedia].type === "video" || (!activeProject.media![activeMedia].type && activeProject.media![activeMedia].url?.match(/\.(mp4|webm|ogg)$/i)) ? (
-                        <video
-                          src={convertToRawGitHubUrl(activeProject.media![activeMedia].url || '')}
-                          controls
-                          className="w-full h-full object-cover"
-                        />
+                        <video src={convertToRawGitHubUrl(activeProject.media![activeMedia].url || '')} controls className="w-full h-full object-cover" />
                       ) : (
-                        <img
-                          src={convertToRawGitHubUrl(activeProject.media![activeMedia].url || '')}
-                          alt={activeProject.media![activeMedia].caption || activeProject.title}
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={convertToRawGitHubUrl(activeProject.media![activeMedia].url || '')} alt={activeProject.media![activeMedia].caption || activeProject.title} className="w-full h-full object-cover" />
                       )}
                     </div>
                     {activeProject.media![activeMedia].caption && (
                       <p className="text-xs text-muted-foreground text-center italic">{activeProject.media![activeMedia].caption}</p>
                     )}
 
-                    {/* Thumbnails */}
                     {activeProject.media!.length > 1 && (
                       <div className="flex gap-2 overflow-x-auto pb-1">
                         {activeProject.media!.map((m, i) => (
                           <button
                             key={i}
                             onClick={() => setActiveMedia(i)}
-                            className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-300 ${
-                              i === activeMedia ? "border-primary scale-95" : "border-border/30 opacity-60 hover:opacity-100"
-                            }`}
+                            className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-300 ${i === activeMedia ? "border-primary scale-95" : "border-border/30 opacity-60 hover:opacity-100"}`}
                           >
                             {m.type === "video" || (!m.type && m.url?.match(/\.(mp4|webm|ogg)$/i)) ? (
                               <div className="w-full h-full bg-muted flex items-center justify-center">
@@ -205,121 +258,80 @@ export function ProjectModal({ project, isOpen, onClose }: ProjectModalProps) {
                     </div>
                   )}
 
+                  {activeProject.business_problem && (
+                    <div>
+                      <h3 className="text-xs uppercase tracking-widest font-bold text-primary mb-2">Business Problem</h3>
+                      <p className="text-muted-foreground text-sm leading-relaxed">{activeProject.business_problem}</p>
+                    </div>
+                  )}
+
                   <div>
                     <h3 className="text-xs uppercase tracking-widest font-bold text-primary mb-3">Core Tech Stack</h3>
                     <div className="flex flex-wrap gap-2">
-                      {activeProject.tech.map((t) => (
-                        <span key={t} className="px-3 py-1.5 rounded-lg bg-secondary text-secondary-foreground text-xs border border-border/40 font-medium">
-                          {t}
-                        </span>
-                      ))}
+                      {activeProject.tech.map((t) => {
+                        const overrides = activeProject.knowledge_overrides || [];
+                        const termOverrides = overrides.find(o => o.id.toLowerCase() === t.toLowerCase());
+                        return (
+                          <span key={t} className="px-3 py-1.5 rounded-lg bg-secondary text-secondary-foreground text-xs border border-border/40 font-medium">
+                            <KnowledgeTooltip term={t} overrides={termOverrides} />
+                          </span>
+                        );
+                      })}
                     </div>
                   </div>
+                  
+                  {activeProject.architectureImage && (
+                    <div className="pt-4">
+                      <h3 className="text-xs uppercase tracking-widest font-bold text-primary mb-3">Architecture</h3>
+                      <img src={convertToRawGitHubUrl(activeProject.architectureImage)} alt="Architecture" className="w-full object-contain rounded-xl border border-border/40 bg-background/50 p-2" />
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Extra Details Sections */}
-              <div className="space-y-8 mt-10">
-                {/* Outcomes and Impact */}
-                {activeProject.learning_outcomes && activeProject.learning_outcomes.length > 0 && (
-                  <div className="glass-card p-6 border border-border/50 rounded-xl bg-muted/10">
-                    <h3 className="text-lg font-heading font-semibold text-foreground mb-3">Key Learning Outcomes</h3>
-                    <ul className="list-disc pl-5 text-muted-foreground space-y-1.5 text-sm">
-                      {activeProject.learning_outcomes.map((item, i) => <li key={i}>{item}</li>)}
-                    </ul>
-                  </div>
-                )}
-
-                {/* High-Level Architecture */}
-                {(activeProject.architecture || activeProject.architectureImage) && (
-                  <div className="glass-card p-6 border border-border/50 rounded-xl bg-muted/10">
-                    <h3 className="text-lg font-heading font-semibold text-foreground mb-3">High-Level Architecture</h3>
-                    {activeProject.architecture && (
-                      <p className="text-muted-foreground text-sm leading-relaxed mb-4">{activeProject.architecture}</p>
-                    )}
-                    {activeProject.architectureImage && (
-                      <img 
-                        src={convertToRawGitHubUrl(activeProject.architectureImage)} 
-                        alt="High-level architectural workflow" 
-                        className="w-full max-h-[50vh] object-contain rounded-xl border border-border/40 bg-background/50 p-2 mx-auto" 
-                      />
-                    )}
-                  </div>
-                )}
-
-                {/* Core Parameters Matrices */}
-                <div className="grid md:grid-cols-2 gap-6">
-                  {/* Objectives */}
-                  {activeProject.objectives && activeProject.objectives.length > 0 && (
-                    <div className="glass-card p-5 border border-border/40 rounded-xl bg-muted/10">
-                      <h4 className="font-heading font-bold text-foreground mb-2 text-sm">Objectives & Scope</h4>
-                      <ul className="list-disc pl-5 text-muted-foreground text-xs space-y-1">
-                        {activeProject.objectives.map((item, i) => <li key={i}>{item}</li>)}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Success Criteria */}
-                  {activeProject.success_criteria && activeProject.success_criteria.length > 0 && (
-                    <div className="glass-card p-5 border border-border/40 rounded-xl bg-muted/10">
-                      <h4 className="font-heading font-bold text-foreground mb-2 text-sm">Success Criteria</h4>
-                      <ul className="list-disc pl-5 text-muted-foreground text-xs space-y-1">
-                        {activeProject.success_criteria.map((item, i) => <li key={i}>{item}</li>)}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Data Sources */}
-                  {activeProject.data_sources && activeProject.data_sources.length > 0 && (
-                    <div className="glass-card p-5 border border-border/40 rounded-xl bg-muted/10">
-                      <h4 className="font-heading font-bold text-foreground mb-2 text-sm">Data Sources</h4>
-                      <ul className="list-disc pl-5 text-muted-foreground text-xs space-y-1">
-                        {activeProject.data_sources.map((item, i) => <li key={i}>{item}</li>)}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Preprocessing */}
-                  {activeProject.preprocessing && activeProject.preprocessing.length > 0 && (
-                    <div className="glass-card p-5 border border-border/40 rounded-xl bg-muted/10">
-                      <h4 className="font-heading font-bold text-foreground mb-2 text-sm">Preprocessing Steps</h4>
-                      <ul className="list-disc pl-5 text-muted-foreground text-xs space-y-1">
-                        {activeProject.preprocessing.map((item, i) => <li key={i}>{item}</li>)}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Explainability */}
-                  {activeProject.explainability && (
-                    <div className="glass-card p-5 border border-border/40 rounded-xl bg-muted/10 md:col-span-2">
-                      <h4 className="font-heading font-bold text-foreground mb-2 text-sm">Explainability & Transparency</h4>
-                      <p className="text-muted-foreground text-xs leading-relaxed">{activeProject.explainability}</p>
-                    </div>
-                  )}
-
-                  {/* Risks */}
-                  {activeProject.risks && activeProject.risks.length > 0 && (
-                    <div className="glass-card p-5 border border-destructive/20 rounded-xl bg-destructive/5 md:col-span-2">
-                      <h4 className="font-heading font-bold text-destructive mb-2 text-sm flex items-center gap-1.5">
-                        <ShieldAlert size={14} /> Risks & Mitigation Strategy
-                      </h4>
-                      <ul className="list-disc pl-5 text-muted-foreground text-xs space-y-1">
-                        {activeProject.risks.map((item, i) => <li key={i}>{item}</li>)}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Ethics */}
-                  {activeProject.ethics && activeProject.ethics.length > 0 && (
-                    <div className="glass-card p-5 border border-primary/20 rounded-xl bg-primary/5 md:col-span-2">
-                      <h4 className="font-heading font-bold text-primary mb-2 text-sm flex items-center gap-1.5">
-                        <HeartHandshake size={14} /> Ethics & Privacy Framework
-                      </h4>
-                      <ul className="list-disc pl-5 text-muted-foreground text-xs space-y-1">
-                        {activeProject.ethics.map((item, i) => <li key={i}>{item}</li>)}
-                      </ul>
-                    </div>
-                  )}
+              {/* Dynamic Matrices (V3 Auto Rendering) */}
+              <div className="space-y-6 mt-10">
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-4 border-b border-border/40 pb-2">Technical Implementation</h3>
+                
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {/* Business & Data */}
+                  {renderArraySection("objectives", "Objectives & Scope")}
+                  {renderArraySection("success_criteria")}
+                  {renderArraySection("data_sources")}
+                  {renderTextSection("data_volume")}
+                  {renderTextSection("class_distribution")}
+                  {renderTextSection("target_variable")}
+                  
+                  {/* Features & Modeling */}
+                  {renderArraySection("features")}
+                  {renderArraySection("model_inputs")}
+                  {renderArraySection("model_outputs")}
+                  {renderArraySection("preprocessing")}
+                  {renderArraySection("feature_engineering")}
+                  {renderArraySection("modeling")}
+                  {renderArraySection("hyperparameters")}
+                  
+                  {/* Evaluation & Explainability */}
+                  {renderArraySection("evaluation_metrics")}
+                  {renderTextSection("validation_strategy")}
+                  {renderTextSection("explainability")}
+                  
+                  {/* MLOps & Deployment */}
+                  {renderTextSection("training_environment")}
+                  {renderTextSection("inference_pipeline")}
+                  {renderTextSection("deployment")}
+                  {renderTextSection("monitoring")}
+                  {renderTextSection("versioning")}
+                  
+                  {/* Risks & Ethics */}
+                  {renderArraySection("risks", undefined, <ShieldAlert size={14} className="text-destructive" />, "border-destructive/30 bg-destructive/5")}
+                  {renderArraySection("ethics", "Ethics & Privacy Framework", <HeartHandshake size={14} className="text-primary" />, "border-primary/30 bg-primary/5 md:col-span-2")}
+                  {renderArraySection("privacy")}
+                  
+                  {/* Future */}
+                  {renderArraySection("known_limitations")}
+                  {renderArraySection("future_improvements")}
+                  {renderArraySection("learning_outcomes", "Key Learning Outcomes")}
                 </div>
 
                 {/* Resources list */}
@@ -328,15 +340,9 @@ export function ProjectModal({ project, isOpen, onClose }: ProjectModalProps) {
                     <h3 className="text-lg font-heading font-semibold flex items-center gap-2 mb-4">
                       <BookOpen size={18} className="text-primary" /> Open Resources & Attachments
                     </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {activeProject.open_resources.map((res: any, idx: number) => (
-                        <a 
-                          key={idx} 
-                          href={res.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="flex justify-between items-center p-4 rounded-xl border border-border/50 bg-muted/20 hover:bg-muted hover:border-primary/50 transition-all duration-300 group"
-                        >
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {activeProject.open_resources.map((res: { label: string; url: string }, idx: number) => (
+                        <a key={idx} href={res.url} target="_blank" rel="noopener noreferrer" className="flex justify-between items-center p-4 rounded-xl border border-border/50 bg-muted/20 hover:bg-muted hover:border-primary/50 transition-all duration-300 group">
                           <span className="flex items-center gap-3 font-medium text-xs">
                             <LinkIcon size={14} className="text-muted-foreground group-hover:text-primary transition-colors" />
                             {res.label}

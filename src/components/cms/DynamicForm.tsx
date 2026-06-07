@@ -20,6 +20,21 @@ import { ArrayItemWrapper } from './ArrayItemWrapper';
 import { SettingsAccordionContainer } from './SettingsAccordionContainer';
 import { ImageCropperModal } from './ImageCropperModal';
 import { useCloudinary } from '../../hooks/useCloudinary';
+import { KnowledgeAutocomplete } from './KnowledgeAutocomplete';
+import { KnowledgeCategory } from '@/data/knowledge/categories';
+
+const FIELD_CATEGORY_MAP: Record<string, KnowledgeCategory[]> = {
+  evaluation_metrics: ["Evaluation Metrics"],
+  modeling: ["Machine Learning", "Deep Learning", "Computer Vision", "Natural Language Processing", "Generative AI", "RAG", "Agents"],
+  features: ["Feature Engineering"],
+  preprocessing: ["Preprocessing"],
+  validation_strategy: ["Validation"],
+  explainability: ["Explainability"],
+  deployment: ["Deployment", "MLOps", "Cloud", "DevOps"],
+  risks: ["Risks"],
+  ethics: ["Ethics", "Privacy"],
+  data_sources: ["Databases", "Vector Databases"]
+};
 
 interface DynamicFormProps {
   schema: z.ZodTypeAny;
@@ -685,44 +700,157 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
           );
         })()}
 
-        {keys.filter(key => {
-          const isMediaObj = keys.includes('secureUrl') || keys.includes('url') || path[path.length - 1] === 'profileImage' || path[path.length - 1] === 'architectureImage';
-          
-          if (key === 'url' && keys.includes('secureUrl')) {
-             if (currentData['url'] && !currentData['secureUrl']) return true;
-             return false;
+        {(() => {
+          const renderFieldWrapper = (key: string) => {
+            const isMediaObj = keys.includes('secureUrl') || keys.includes('url') || path[path.length - 1] === 'profileImage' || path[path.length - 1] === 'architectureImage';
+            
+            if (key === 'url' && keys.includes('secureUrl')) {
+               if (currentData['url'] && !currentData['secureUrl']) return (
+                 <div key={key} className="space-y-1.5">
+                   <label className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-wider block">{formatLabel(key)}</label>
+                   <DynamicForm schema={shape[key]} data={currentData[key]} path={[...path, key]} parentData={currentData} onChange={(newVal) => onChange({ ...currentData, [key]: newVal })} />
+                 </div>
+               );
+               return null;
+            }
+
+            if (isMediaObj && mediaInputMode === 'upload') {
+              if (key === 'secureUrl' || key === 'url' || key === 'publicId' || key === 'resourceType') return null;
+            }
+            if (key === 'publicId' || key === 'resourceType') {
+              if (!currentData[key]) return null;
+            }
+
+            return (
+              <div key={key} className="space-y-1.5">
+                <label className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-wider block">
+                  {formatLabel(key)}
+                </label>
+                {key === 'themeFontFamily' && (
+                  <div className="bg-primary/5 border border-primary/10 rounded-lg p-2.5 text-[10px] text-muted-foreground/90 leading-relaxed max-w-lg mt-0.5 mb-1.5">
+                    <strong className="text-primary flex items-center gap-1 mb-0.5 font-bold">💡 Google Fonts Integrator:</strong>
+                    Type any standard Google Font family name (for example: <span className="font-semibold text-foreground">Space Grotesk</span>, <span className="font-semibold text-foreground">Outfit</span>, <span className="font-semibold text-foreground">Poppins</span>, or <span className="font-semibold text-foreground">Inter</span>) to dynamically load and skin the site typography in real-time.
+                  </div>
+                )}
+                <DynamicForm
+                  schema={shape[key]}
+                  data={currentData[key]}
+                  path={[...path, key]}
+                  parentData={currentData}
+                  onChange={(newVal) => onChange({ ...currentData, [key]: newVal })}
+                />
+              </div>
+            );
+          };
+
+          // Project Form Grouping Logic
+          const isProjectForm = path.length === 0 && keys.includes('github') && keys.includes('tech');
+          if (isProjectForm) {
+            const groups = [
+              {
+                id: 'basic-info',
+                title: 'Basic Info',
+                keys: ['id', 'title', 'slug', 'category', 'description', 'tech', 'github', 'live', 'featured', 'impact']
+              },
+              {
+                id: 'content-media',
+                title: 'Content & Media',
+                keys: ['media', 'architectureImage', 'howItWorks', 'resources', 'open_resources']
+              },
+              {
+                id: 'problem-objectives',
+                title: 'Problem & Objectives',
+                keys: ['problem_statement', 'business_problem', 'objectives', 'success_criteria', 'learning_outcomes']
+              },
+              {
+                id: 'data-details',
+                title: 'Data & Features',
+                keys: ['data_sources', 'data_volume', 'class_distribution', 'target_variable', 'features']
+              },
+              {
+                id: 'modeling-ml',
+                title: 'Modeling & Pipeline',
+                keys: ['preprocessing', 'feature_engineering', 'model_inputs', 'model_outputs', 'modeling', 'hyperparameters', 'evaluation_metrics', 'validation_strategy', 'explainability']
+              },
+              {
+                id: 'deployment-mlops',
+                title: 'Deployment & Architecture',
+                keys: ['training_environment', 'inference_pipeline', 'deployment', 'monitoring', 'versioning', 'architecture']
+              },
+              {
+                id: 'governance',
+                title: 'Governance (Risks & Ethics)',
+                keys: ['risks', 'ethics', 'privacy', 'known_limitations', 'future_improvements']
+              },
+              {
+                id: 'advanced',
+                title: 'Advanced / Overrides',
+                keys: ['knowledge_overrides']
+              }
+            ];
+
+            return (
+              <div className="space-y-4">
+                {groups.map(group => {
+                  const groupKeys = keys.filter(k => group.keys.includes(k));
+                  if (groupKeys.length === 0) return null;
+                  return (
+                    <details key={group.id} className="group/details bg-background border border-border/30 rounded-xl overflow-hidden shadow-sm" open={group.id === 'basic-info'}>
+                      <summary className="p-4 cursor-pointer bg-muted/5 hover:bg-muted/10 transition-colors font-bold text-sm text-foreground flex items-center justify-between select-none border-b border-transparent group-open/details:border-border/30">
+                        {group.title}
+                        <div className="text-muted-foreground group-open/details:rotate-180 transition-transform">▼</div>
+                      </summary>
+                      <div className="p-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {groupKeys.map(key => {
+                          const unwrappedField = unwrapSchema(shape[key]);
+                          // Arrays, Objects, or known long text fields should take full width
+                          const isFullWidth = 
+                            unwrappedField instanceof z.ZodArray || 
+                            unwrappedField instanceof z.ZodObject || 
+                            ['description', 'problem_statement', 'business_problem', 'howItWorks', 'markdown_content', 'architecture', 'knowledge_overrides', 'architectureImage'].includes(key);
+
+                          return (
+                            <div key={key} className={isFullWidth ? "md:col-span-2" : "col-span-1"}>
+                              {renderFieldWrapper(key)}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </details>
+                  );
+                })}
+                {/* Any remaining keys not in groups */}
+                {(() => {
+                  const groupedKeys = new Set(groups.flatMap(g => g.keys));
+                  const remainingKeys = keys.filter(k => !groupedKeys.has(k) && !['knowledge_overrides'].includes(k));
+                  if (remainingKeys.length === 0) return null;
+                  return (
+                    <details className="group/details bg-background border border-border/30 rounded-xl overflow-hidden shadow-sm">
+                      <summary className="p-4 cursor-pointer bg-muted/5 hover:bg-muted/10 transition-colors font-bold text-sm text-foreground flex items-center justify-between select-none border-b border-transparent group-open/details:border-border/30">
+                        Other Fields
+                        <div className="text-muted-foreground group-open/details:rotate-180 transition-transform">▼</div>
+                      </summary>
+                      <div className="p-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {remainingKeys.map(key => {
+                          const unwrappedField = unwrapSchema(shape[key]);
+                          const isFullWidth = unwrappedField instanceof z.ZodArray || unwrappedField instanceof z.ZodObject;
+                          return (
+                            <div key={key} className={isFullWidth ? "md:col-span-2" : "col-span-1"}>
+                              {renderFieldWrapper(key)}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </details>
+                  );
+                })()}
+              </div>
+            );
           }
 
-          if (isMediaObj && mediaInputMode === 'upload') {
-            if (key === 'secureUrl' || key === 'url' || key === 'publicId' || key === 'resourceType') {
-              return false;
-            }
-          }
-          // Hide internal Cloudinary fields if they are empty (i.e. user provided a manual external URL)
-          if (key === 'publicId' || key === 'resourceType') {
-            return !!currentData[key];
-          }
-          return true;
-        }).map((key: string) => (
-          <div key={key} className="space-y-1.5">
-            <label className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-wider block">
-              {formatLabel(key)}
-            </label>
-            {key === 'themeFontFamily' && (
-              <div className="bg-primary/5 border border-primary/10 rounded-lg p-2.5 text-[10px] text-muted-foreground/90 leading-relaxed max-w-lg mt-0.5 mb-1.5">
-                <strong className="text-primary flex items-center gap-1 mb-0.5 font-bold">💡 Google Fonts Integrator:</strong>
-                Type any standard Google Font family name (for example: <span className="font-semibold text-foreground">Space Grotesk</span>, <span className="font-semibold text-foreground">Outfit</span>, <span className="font-semibold text-foreground">Poppins</span>, or <span className="font-semibold text-foreground">Inter</span>) to dynamically load and skin the site typography in real-time.
-              </div>
-            )}
-            <DynamicForm
-              schema={shape[key]}
-              data={currentData[key]}
-              path={[...path, key]}
-              parentData={currentData}
-              onChange={(newVal) => onChange({ ...currentData, [key]: newVal })}
-            />
-          </div>
-        ))}
+          // Default fallback rendering
+          return keys.map((key: string) => renderFieldWrapper(key));
+        })()}
       </div>
     );
   }
@@ -738,9 +866,9 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
     const suggestions = supportsSuggestions && previewData ? getSuggestionsForField(path, previewData, true) : [];
 
     return (
-      <div className="bg-muted/5 border border-border/20 rounded-xl p-3.5 space-y-3.5 shadow-sm">
+      <div className="bg-muted/5 border border-border/20 rounded-lg p-2.5 space-y-2 shadow-sm">
         {currentArray.length > 0 ? (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {currentArray.map((item, index) => (
               <ArrayItemWrapper
                 key={index}
@@ -1099,25 +1227,41 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
             />
           </div>
         ) : (
-          <div className="flex items-center gap-1.5">
-            <input
-              type={isUrlField || isMediaUrl ? "url" : "text"}
-              value={localValue}
-              onChange={(e) => {
-                const val = e.target.value;
-                if (isImage || isMediaUrl) {
-                  const converted = convertToRawGitHubUrl(val);
-                  setLocalValue(converted);
-                  onChange(converted);
-                } else {
-                  setLocalValue(val);
-                }
-              }}
-              onBlur={handleBlur}
-              onKeyDown={(e) => { if (e.key === 'Enter') handleBlur(); }}
-              className="flex-1 bg-background border border-border/30 rounded-lg p-2.5 text-sm focus:outline-none focus:border-primary/50 text-foreground min-w-0 transition-colors"
-              placeholder={fieldKey === 'themeFontFamily' ? "e.g. Space Grotesk, Outfit, Poppins, Inter" : (isUrlField || isMediaUrl ? "https://..." : "Value...")}
-            />
+          <div className="flex items-center gap-1.5 w-full">
+            {(isUrlField || isMediaUrl || fieldKey === 'themeFontFamily' || fieldKeyLower === 'category' || path.length === 1) ? (
+              <input
+                type={isUrlField || isMediaUrl ? "url" : "text"}
+                value={localValue}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (isImage || isMediaUrl) {
+                    const converted = convertToRawGitHubUrl(val);
+                    setLocalValue(converted);
+                    onChange(converted);
+                  } else {
+                    setLocalValue(val);
+                  }
+                }}
+                onBlur={handleBlur}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleBlur(); }}
+                className="flex-1 bg-background border border-border/30 rounded-lg p-2.5 text-sm focus:outline-none focus:border-primary/50 text-foreground min-w-0 transition-colors"
+                placeholder={fieldKey === 'themeFontFamily' ? "e.g. Space Grotesk, Outfit, Poppins, Inter" : (isUrlField || isMediaUrl ? "https://..." : "Value...")}
+              />
+            ) : (
+              <div className="flex-1 min-w-0">
+                <KnowledgeAutocomplete 
+                  value={localValue}
+                  onChange={(val) => setLocalValue(val)}
+                  onSelect={(val) => {
+                    setLocalValue(val);
+                    onChange(val);
+                  }}
+                  onBlur={handleBlur}
+                  placeholder="Type to search Knowledge Matrix..."
+                  allowedCategories={FIELD_CATEGORY_MAP[fieldKey as string]}
+                />
+              </div>
+            )}
             {isClickable && (
               <a
                 href={data.trim()}
