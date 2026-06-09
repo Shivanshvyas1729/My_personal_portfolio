@@ -1610,6 +1610,7 @@ blog:
     date: 2026-05-19T00:00:00.000Z
     slug: pandas-data-combining-functions-purpose-key-parameters
     readingTime: 1
+    excerpt: concat vs join vs merge
   - id: 5
     title: type of Cloud storage based on  By Architecture
     slug: type-of-cloud-storage-based-on-by-architecture
