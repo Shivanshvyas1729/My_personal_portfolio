@@ -10,8 +10,9 @@ import Magnetic from "@/components/ui/Magnetic";
 import { motion } from "framer-motion";
 import { convertToRawGitHubUrl } from "@/components/cms/FormHelpers";
 import { ResourcesModal } from "@/components/portfolio/ResourcesModal";
-import { KnowledgeTooltip } from "@/components/portfolio/KnowledgeTooltip";
+import { KnowledgeTooltip, renderTextWithLinks } from "@/components/portfolio/KnowledgeTooltip";
 import type { Project } from "@/data/portfolioData";
+import { ErrorBoundary } from "../components/cms/ErrorBoundary";
 
 const DEFAULT_ETHICS = [
   "No personally identifiable information stored.",
@@ -140,7 +141,7 @@ const ProjectDetail = () => {
     return (
       <div>
         <h4 className="text-sm font-bold text-foreground mb-1">{sectionTitle}</h4>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-muted-foreground text-sm no-text-effect">
           <KnowledgeTooltip term={text} overrides={termOverrides} isTargetVariable={isTargetVar} />
         </p>
       </div>
@@ -155,7 +156,8 @@ const ProjectDetail = () => {
         image={project.media?.[0]?.url} 
       />
       <Navbar />
-      <motion.div
+      <ErrorBoundary fallbackTitle="Failed to render project details">
+        <motion.div
         initial="hidden"
         animate="visible"
         exit="exit"
@@ -166,7 +168,7 @@ const ProjectDetail = () => {
         }}
         className="section-padding pt-28"
       >
-        <div className="w-full max-w-[1600px] mx-auto px-6 md:px-12 lg:px-16 xl:px-24">
+        <div className="w-full max-w-[1600px] mx-auto px-6 md:px-12 lg:px-16 xl:px-24 no-text-effect">
           <Link to="/projects" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors">
             <ArrowLeft size={16} /> Back to Projects
           </Link>
@@ -185,13 +187,13 @@ const ProjectDetail = () => {
               <h1 className="text-3xl md:text-4xl font-heading font-bold mt-3 mb-4">{project.title}</h1>
               <div className="mb-6">
                 <h2 className="text-sm font-medium text-primary mb-1">Overview</h2>
-                <p className="text-muted-foreground text-base md:text-lg leading-relaxed">{project.description}</p>
+                <p className="text-muted-foreground text-base md:text-lg leading-relaxed">{renderTextWithLinks(project.description)}</p>
               </div>
 
               <div className="mb-6">
                 <h2 className="text-sm font-medium text-primary mb-1">Problem Statement</h2>
                 {project.problem_statement ? (
-                  <p className="text-muted-foreground text-base md:text-lg leading-relaxed">{project.problem_statement}</p>
+                  <p className="text-muted-foreground text-base md:text-lg leading-relaxed">{renderTextWithLinks(project.problem_statement)}</p>
                 ) : (
                   <p className="text-muted-foreground/50 italic text-sm">[Add your problem statement here]</p>
                 )}
@@ -279,7 +281,7 @@ const ProjectDetail = () => {
             <h3 className="text-lg font-medium text-primary mb-3">What You Will Learn</h3>
             {project.learning_outcomes && project.learning_outcomes.length > 0 ? (
               <ul className="list-disc pl-5 text-muted-foreground space-y-1">
-                {project.learning_outcomes.map((item, i) => <li key={i}>{item}</li>)}
+                {project.learning_outcomes.map((item, i) => <li key={i}>{renderTextWithLinks(item)}</li>)}
               </ul>
             ) : (
               <ul className="list-disc pl-5 text-muted-foreground/50 italic space-y-1">
@@ -292,7 +294,7 @@ const ProjectDetail = () => {
           {project.impact && (
             <div className="glass-card p-4 md:p-6 mb-6">
               <h3 className="text-lg font-medium text-primary mb-2">Impact</h3>
-              <p className="text-foreground">⚡ {project.impact}</p>
+              <p className="text-foreground">⚡ {renderTextWithLinks(project.impact)}</p>
             </div>
           )}
 
@@ -300,7 +302,7 @@ const ProjectDetail = () => {
           <div className="glass-card p-4 md:p-6 mb-6">
             <h3 className="text-lg font-medium text-primary mb-3">High-Level Architecture</h3>
             {project.architecture ? (
-              <p className="text-muted-foreground leading-relaxed mb-4">{project.architecture}</p>
+              <p className="text-muted-foreground leading-relaxed mb-4">{renderTextWithLinks(project.architecture)}</p>
             ) : (
               <p className="text-muted-foreground/50 italic mb-4">[Add architecture description here]</p>
             )}
@@ -370,7 +372,8 @@ const ProjectDetail = () => {
             )}
           </div>
         </div>
-      </motion.div>
+        </motion.div>
+      </ErrorBoundary>
       <Footer />
     </div>
   );

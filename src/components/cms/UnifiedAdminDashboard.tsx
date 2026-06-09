@@ -12,6 +12,7 @@ import { BlogsAdmin } from './BlogsAdmin';
 import { DashboardPanel } from './DashboardPanel';
 import { KnowledgeMatrixAdmin } from './KnowledgeMatrixAdmin';
 import { PortfolioData, Project } from '@/data/portfolioData';
+import { ErrorBoundary } from './ErrorBoundary';
 import { ChevronDown, RefreshCw, AlertTriangle, ListRestart, ScrollText, Layout, User, Award, GraduationCap, RotateCcw, Save, Undo2, Github, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
@@ -1080,7 +1081,8 @@ export const UnifiedAdminDashboard = () => {
 
           {/* MAIN EDITING WORKSPACE */}
           <div className="flex-1 flex flex-col bg-background/40 relative h-full overflow-hidden">
-            {activeTab === 'portfolio' && (
+            <ErrorBoundary fallbackTitle="CMS Workspace encountered a rendering crash">
+              {activeTab === 'portfolio' && (
               <>
                 {/* Left Side: Form Editor & Controls */}
                 <div className="flex-1 flex flex-col overflow-hidden h-full bg-background/25">
@@ -1660,10 +1662,12 @@ export const UnifiedAdminDashboard = () => {
                           </div>
                           <div className="text-foreground/80">{log.message}</div>
                           {log.metadata && (
-                            <details className="mt-1.5" open={log.metadata?.type === 'validation_error'}>
+                            <details className="mt-1.5" open={log.metadata?.type === 'validation_error' || log.metadata?.type === 'syntax_error'}>
                               <summary className="text-[9px] cursor-pointer text-primary/60 hover:text-primary select-none">
                                 {log.metadata?.type === 'validation_error'
-                                  ? `▼ ${log.metadata.errorCount} validation issue(s) — click to collapse`
+                                  ? `▼ ${log.metadata.errorCount || log.metadata.errors?.length || 0} validation issue(s) — click to collapse`
+                                  : log.metadata?.type === 'syntax_error'
+                                  ? `▼ JSON Syntax Error — click to collapse`
                                   : '▶ View Metadata'}
                               </summary>
 
@@ -1673,17 +1677,20 @@ export const UnifiedAdminDashboard = () => {
                                   {/* Header row */}
                                   <div className="flex items-center gap-2 px-3 py-2 border-b border-red-500/20 bg-red-500/10">
                                     <span className="text-[9px] font-black text-red-500 uppercase tracking-wider">Section:</span>
-                                    <span className="text-[9px] text-foreground font-mono font-bold">{log.metadata.section}</span>
-                                    <span className="ml-auto text-[9px] text-red-400/70 font-mono">{log.metadata.file}</span>
+                                    <span className="text-[9px] text-foreground font-mono font-bold">{log.metadata.section || 'N/A'}</span>
+                                    {log.metadata.source && (
+                                      <span className="text-[9px] text-muted-foreground/60 font-mono">({log.metadata.source})</span>
+                                    )}
+                                    <span className="ml-auto text-[9px] text-red-400/70 font-mono">{log.metadata.file || ''}</span>
                                   </div>
                                   {/* Error rows */}
                                   <div className="divide-y divide-red-500/10">
                                     {log.metadata.errors?.map((err: { field: string; message: string }, i: number) => (
                                       <div key={i} className="flex items-start gap-2 px-3 py-1.5">
                                         <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 mt-1.5" />
-                                        <div className="flex-1 min-w-0">
-                                          <span className="text-[9px] font-black text-red-400 font-mono break-all">{err.field}</span>
-                                          <span className="text-[9px] text-muted-foreground ml-1.5">— {err.message}</span>
+                                        <div className="flex-1 min-w-0 text-[10px]">
+                                          <span className="text-[10px] font-bold text-red-400 font-mono break-all">{err.field}</span>
+                                          <span className="text-[10px] text-muted-foreground ml-1.5">— {err.message}</span>
                                         </div>
                                       </div>
                                     ))}
@@ -1694,6 +1701,50 @@ export const UnifiedAdminDashboard = () => {
                                       <p className="text-[9px] text-muted-foreground/70">💡 {log.metadata.tip}</p>
                                     </div>
                                   )}
+                                </div>
+                              ) : log.metadata?.type === 'syntax_error' ? (
+                                <div className="mt-2 rounded-lg border border-red-500/20 bg-red-500/5 overflow-hidden">
+                                  {/* Header row */}
+                                  <div className="flex items-center gap-2 px-3 py-2 border-b border-red-500/20 bg-red-500/10">
+                                    <span className="text-[9px] font-black text-red-500 uppercase tracking-wider">JSON Syntax Error:</span>
+                                    <span className="text-[9px] text-foreground font-mono font-bold">{log.metadata.source ? `Source: ${log.metadata.source}` : 'Syntax Error'}</span>
+                                  </div>
+                                  {/* Error details */}
+                                  <div className="p-3 space-y-2">
+                                    <p className="text-[10px] text-red-400 font-mono leading-relaxed font-semibold">{log.metadata.error}</p>
+                                    {log.metadata.textSnippet && (
+                                      <div className="mt-2">
+                                        <span className="text-[9px] text-muted-foreground/60 font-semibold block mb-1">Pasted/Edited JSON snippet:</span>
+                                        <pre className="text-[9px] p-2 bg-black/40 border border-border/20 rounded-md overflow-x-auto text-muted-foreground/90 select-text whitespace-pre-wrap leading-relaxed max-h-36 font-mono scrollbar-thin">
+                                          {log.metadata.textSnippet}
+                                        </pre>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ) : log.metadata?.errorStack || log.metadata?.componentStack ? (
+                                <div className="mt-2 rounded-lg border border-destructive/20 bg-destructive/5 overflow-hidden text-left font-mono text-[9px] text-muted-foreground leading-normal">
+                                  <div className="flex items-center gap-2 px-3 py-2 border-b border-destructive/20 bg-destructive/10">
+                                    <span className="text-[9px] font-black text-destructive uppercase tracking-wider">Crash Trace:</span>
+                                    <span className="text-[9px] text-foreground font-bold">{log.metadata.errorName || 'Error'}</span>
+                                  </div>
+                                  <div className="p-3 whitespace-pre-wrap overflow-x-auto max-h-56 select-text space-y-2.5">
+                                    {log.metadata.errorMessage && (
+                                      <div className="text-foreground font-semibold text-[10px]">{log.metadata.errorMessage}</div>
+                                    )}
+                                    {log.metadata.errorStack && (
+                                      <div>
+                                        <span className="text-foreground/80 font-bold block mb-1">Stack Trace:</span>
+                                        {log.metadata.errorStack}
+                                      </div>
+                                    )}
+                                    {log.metadata.componentStack && (
+                                      <div>
+                                        <span className="text-foreground/80 font-bold block mb-1">Component Stack:</span>
+                                        {log.metadata.componentStack}
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
                               ) : (
                                 /* Fallback: raw JSON for other metadata types */
@@ -1710,6 +1761,7 @@ export const UnifiedAdminDashboard = () => {
                 </div>
               </div>
             )}
+            </ErrorBoundary>
           </div>
         </div>
       )}

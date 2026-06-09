@@ -3,7 +3,9 @@ import { Project } from '@/data/portfolioData';
 import { Plus, Edit3, Trash2, X, Github, ExternalLink, Star, RefreshCw, BookOpen, Copy, AlertCircle, CheckCircle2, Info, Search } from 'lucide-react';
 import { DynamicForm } from './DynamicForm';
 import { ProjectSchema } from '@/lib/schema';
+const ProjectFormSchema = ProjectSchema.omit({ title: true, description: true });
 import { useCMSState } from '@/context/CMSContext';
+import { logger } from '@/lib/logger';
 
 // Required fields and their friendly names (for validation log)
 const REQUIRED_FIELDS: Record<string, string> = {
@@ -197,15 +199,61 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
 
   const isFieldInvalid = (field: string) => touched.has(field) && !!validationErrors[field];
   const isFormValid = Object.keys(validationErrors).filter(k => REQUIRED_FIELDS[k]).length === 0;
+  const isSaveDisabled = !isFormValid || (editorMode === 'code' && !!codeError);
+
+  const lastLoggedValueRef = React.useRef("");
+
+  const logCodeValidation = (val: string, source: 'paste' | 'blur') => {
+    if (!val.trim()) return;
+    if (source === 'blur' && lastLoggedValueRef.current === val) return;
+    
+    lastLoggedValueRef.current = val;
+    
+    try {
+      const parsed = JSON.parse(val);
+      const result = ProjectSchema.safeParse(parsed);
+      if (!result.success) {
+        logger.addLog({
+          action: source === 'paste' ? "CODE_PASTE_VALIDATION_ERROR" : "CODE_EDIT_VALIDATION_ERROR",
+          status: "error",
+          message: `Project code validation failed: ${result.error.errors.length} required/format issue(s) found.`,
+          metadata: {
+            type: "validation_error",
+            section: "projects",
+            source,
+            errorCount: result.error.errors.length,
+            errors: result.error.errors.map(err => ({
+              field: err.path.join('.'),
+              message: err.message
+            }))
+          }
+        });
+      } else {
+        logger.addLog({
+          action: source === 'paste' ? "CODE_PASTE_SUCCESS" : "CODE_EDIT_SUCCESS",
+          status: "success",
+          message: `Successfully validated project code: "${parsed.title || 'Untitled'}"`
+        });
+      }
+    } catch (err: any) {
+      logger.addLog({
+        action: source === 'paste' ? "CODE_PASTE_JSON_ERROR" : "CODE_EDIT_JSON_ERROR",
+        status: "error",
+        message: `Failed to parse project JSON: ${err.message}`,
+        metadata: {
+          type: "syntax_error",
+          source,
+          error: err.message,
+          textSnippet: val.slice(0, 500)
+        }
+      });
+    }
+  };
 
   const handleCodeChange = (val: string) => {
     setCodeValue(val);
     try {
       const parsed = JSON.parse(val);
-      if (!parsed.title || !parsed.description) {
-        setCodeError("Title and Description are required in your project code.");
-        return;
-      }
       setTempProject(parsed);
       setCodeError("");
     } catch (e: any) {
@@ -218,6 +266,7 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
   const handleEdit = (project: Project) => {
     setTempProject({ ...project });
     setEditingId(project.id);
+    lastLoggedValueRef.current = "";
   };
 
   const handleAddNew = () => {
@@ -299,11 +348,22 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
       ]
     });
     setAddingNew(true);
+    lastLoggedValueRef.current = "";
   };
 
   const saveEdit = () => {
     if (editorMode === 'code' && codeError) {
-      // Show code error inline — no alert
+      logger.addLog({
+        action: "VALIDATION_ERROR",
+        status: "error",
+        message: `Failed to apply JSON code changes: ${codeError}`,
+        metadata: {
+          type: "syntax_error",
+          source: "save_apply",
+          error: codeError,
+          textSnippet: codeValue.slice(0, 500)
+        }
+      });
       setShowValidationLog(true);
       return;
     }
@@ -318,6 +378,20 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
     if (!result.success) {
       const requiredErrors = result.error.errors.filter(e => REQUIRED_FIELDS[e.path[0]]);
       if (requiredErrors.length > 0) {
+        logger.addLog({
+          action: "VALIDATION_ERROR",
+          status: "error",
+          message: `Failed validation: ${requiredErrors.length} required field(s) missing or invalid.`,
+          metadata: {
+            type: "validation_error",
+            section: "projects",
+            errorCount: result.error.errors.length,
+            errors: result.error.errors.map(e => ({
+              field: e.path.join('.'),
+              message: e.message
+            }))
+          }
+        });
         setShowValidationLog(true);
         return;
       }
@@ -357,6 +431,7 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
     setValidationErrors({});
     setTouched(new Set());
     setShowValidationLog(false);
+    lastLoggedValueRef.current = "";
   };
 
   const isModalOpen = editingId !== null || addingNew;
@@ -511,11 +586,14 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
              <div className="flex border-b border-border/50 bg-muted/10 shrink-0">
                <button 
                  type="button"
+                 disabled={editorMode === 'code' && !!codeError}
+                 title={editorMode === 'code' && codeError ? "Please fix JSON syntax errors before switching back to the form" : ""}
                  onClick={() => setEditorMode('form')}
                  className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider transition-colors
                    ${editorMode === 'form' 
                      ? 'border-b-2 border-primary text-primary bg-primary/5' 
-                     : 'text-muted-foreground hover:bg-muted/30'}`}
+                     : 'text-muted-foreground hover:bg-muted/30'}
+                   ${editorMode === 'code' && codeError ? 'opacity-50 cursor-not-allowed' : ''}`}
                >
                  Standard Form
                </button>
@@ -720,11 +798,10 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
 
                     {/* Rest of form — all optional fields */}
                     <DynamicForm 
-                      schema={ProjectSchema} 
+                      schema={ProjectFormSchema} 
                       data={tempProject} 
                       onChange={data => {
-                        // Keep title/description from dedicated inputs
-                        setTempProject(prev => ({...data, title: (prev as any).title, description: (prev as any).description}));
+                        setTempProject(prev => ({...data, title: prev.title, description: prev.description}));
                       }} 
                     />
                   </>
@@ -750,6 +827,13 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
                     <textarea
                       value={codeValue}
                       onChange={(e) => handleCodeChange(e.target.value)}
+                      onPaste={(e) => {
+                        const pastedText = e.clipboardData.getData('text');
+                        logCodeValidation(pastedText, 'paste');
+                      }}
+                      onBlur={(e) => {
+                        logCodeValidation(e.target.value, 'blur');
+                      }}
                       className="flex-1 w-full min-h-[320px] font-mono text-[11px] p-4 bg-muted/30 border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all text-foreground resize-none leading-relaxed"
                       placeholder="Paste or edit project JSON code here..."
                     />
@@ -785,10 +869,10 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
                  </button>
                  <button
                    onClick={saveEdit}
-                   disabled={!isFormValid}
-                   title={!isFormValid ? 'Fill required fields first' : 'Apply changes to preview'}
+                   disabled={isSaveDisabled}
+                   title={editorMode === 'code' && codeError ? 'Please fix JSON syntax errors first' : (!isFormValid ? 'Fill required fields first' : 'Apply changes to preview')}
                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                     isFormValid
+                     !isSaveDisabled
                        ? 'bg-primary/20 text-primary hover:bg-primary/30'
                        : 'bg-muted/40 text-muted-foreground/50 cursor-not-allowed'
                    }`}
@@ -801,10 +885,10 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
                        const updated = saveEdit();
                        if (updated) setTimeout(() => onSave(updated), 0);
                      }}
-                     disabled={!isFormValid}
-                     title={!isFormValid ? 'Fill required fields first' : 'Save to local file'}
+                     disabled={isSaveDisabled}
+                     title={editorMode === 'code' && codeError ? 'Please fix JSON syntax errors first' : (!isFormValid ? 'Fill required fields first' : 'Save to local file')}
                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-lg ${
-                       isFormValid
+                       !isSaveDisabled
                          ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                          : 'bg-muted/50 text-muted-foreground/50 cursor-not-allowed'
                      }`}
@@ -817,10 +901,10 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
                        const updated = saveEdit();
                        if (updated) setTimeout(() => onSave(updated), 0);
                      }}
-                     disabled={!isFormValid}
-                     title={!isFormValid ? 'Fill required fields first' : 'Sync to GitHub'}
+                     disabled={isSaveDisabled}
+                     title={editorMode === 'code' && codeError ? 'Please fix JSON syntax errors first' : (!isFormValid ? 'Fill required fields first' : 'Sync to GitHub')}
                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-lg ${
-                       isFormValid
+                       !isSaveDisabled
                          ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                          : 'bg-muted/50 text-muted-foreground/50 cursor-not-allowed'
                      }`}

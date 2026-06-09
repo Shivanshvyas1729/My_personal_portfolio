@@ -109,7 +109,7 @@ export function convertToRawGitHubUrl(url: string): string {
 };
 
 // ─── Fully unwrap nested Zod types ───────────────────────────────────────────
-export function unwrapSchema(schema: z.ZodTypeAny): z.ZodTypeAny {
+export function unwrapSchema(schema: z.ZodTypeAny, data?: any): z.ZodTypeAny {
   let s = schema;
   while (
     s instanceof z.ZodOptional ||
@@ -119,7 +119,25 @@ export function unwrapSchema(schema: z.ZodTypeAny): z.ZodTypeAny {
   ) {
     if (s instanceof z.ZodUnion) {
       const options = s._def.options;
-      const objectOption = options.find((opt: any) => unwrapSchema(opt) instanceof z.ZodObject);
+      if (data !== undefined && data !== null) {
+        if (typeof data === 'string') {
+          const stringOption = options.find((opt: any) => {
+            const unwrappedOpt = unwrapSchema(opt, data);
+            return unwrappedOpt instanceof z.ZodString || unwrappedOpt instanceof z.ZodEnum;
+          });
+          if (stringOption) {
+            s = stringOption;
+            continue;
+          }
+        } else if (typeof data === 'object') {
+          const objectOption = options.find((opt: any) => unwrapSchema(opt, data) instanceof z.ZodObject);
+          if (objectOption) {
+            s = objectOption;
+            continue;
+          }
+        }
+      }
+      const objectOption = options.find((opt: any) => unwrapSchema(opt, data) instanceof z.ZodObject);
       s = objectOption || options[0];
     } else {
       s = s._def.innerType;

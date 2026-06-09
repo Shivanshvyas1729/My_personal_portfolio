@@ -432,6 +432,11 @@ To guarantee complete platform compatibility for forks, the backend authenticati
 - **Optional Admin Username Validation:** If a user forks the website and configures both `ADMIN_USERNAME` and `ADMIN_PASSWORD` in their environment variables, password-only requests submitted via the unlock modal will *still* successfully log in, preventing accidental lockouts due to missing fields.
 - **Environment Variable Trimming:** Automatic trimming of carriage returns (`\r`) and leading/trailing whitespace across the `ADMIN_PASSWORD` and `ADMIN_USERNAME` variables to eliminate platform-specific parsing issues.
 
+### 🛡️ Real-Time Code Validation & Advanced Audit Logging
+To facilitate quick debugging and ensure data integrity:
+- **Immediate Paste/Edit Analysis:** The project raw JSON code editor automatically validates input on-the-fly during pasting or when clicking out of the field (blur).
+- **Zod Validation Failure Highlighting:** Logs validation failures with details of the specific fields that failed validation (e.g. missing required fields or formatting mismatches), displaying them in an interactive validation panel.
+- **Syntax Error Code Snippet Viewer:** If a JSON syntax error occurs, the Audit Logs panel highlights the exact syntax error message alongside a scrollable formatted view of the corrupted JSON code snippet for quick correction.
 
 ### 📸 Direct Cloudinary Media Pipeline
 The drag-and-drop media framework inside the dashboard uses a seamless, zero-backend integration directly with Cloudinary:

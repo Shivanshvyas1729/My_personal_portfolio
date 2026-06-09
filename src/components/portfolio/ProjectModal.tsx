@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { Project } from "@/data/portfolioData";
 import { convertToRawGitHubUrl } from "@/components/cms/FormHelpers";
 import { Calendar, ExternalLink, Link as LinkIcon, BookOpen, Star, Lock, X, Play, ShieldAlert, HeartHandshake } from "lucide-react";
-import { KnowledgeTooltip } from "./KnowledgeTooltip";
+import { KnowledgeTooltip, renderTextWithLinks } from "./KnowledgeTooltip";
 
 interface ProjectModalProps {
   project: Project | null;
@@ -127,7 +127,7 @@ export function ProjectModal({ project, isOpen, onClose }: ProjectModalProps) {
     return (
       <div className="glass-card p-5 border border-border/40 rounded-xl bg-muted/10">
         <h4 className="font-heading font-bold text-foreground mb-2 text-sm">{sectionTitle}</h4>
-        <p className="text-muted-foreground text-xs leading-relaxed">
+        <p className="text-muted-foreground text-xs leading-relaxed no-text-effect">
           <KnowledgeTooltip term={text} overrides={termOverrides} isTargetVariable={isTargetVar} />
         </p>
       </div>
@@ -206,7 +206,7 @@ export function ProjectModal({ project, isOpen, onClose }: ProjectModalProps) {
             </div>
 
             {/* Scrollable Body */}
-            <div data-lenis-prevent="true" className="flex-1 overflow-y-auto p-6 md:p-12 md:px-16 lg:px-24 leading-relaxed scrollbar-thin">
+            <div data-lenis-prevent="true" className="flex-1 overflow-y-auto p-6 md:p-12 md:px-16 lg:px-24 leading-relaxed scrollbar-thin no-text-effect">
               <div className={`grid gap-8 lg:gap-10 mb-10 ${hasMedia ? "lg:grid-cols-[1.2fr,1fr]" : ""}`}>
                 {/* Media Gallery */}
                 {hasMedia && (
@@ -248,20 +248,20 @@ export function ProjectModal({ project, isOpen, onClose }: ProjectModalProps) {
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-xs uppercase tracking-widest font-bold text-primary mb-2">Overview</h3>
-                    <p className="text-muted-foreground text-base leading-relaxed">{activeProject.description}</p>
+                    <p className="text-muted-foreground text-base leading-relaxed">{renderTextWithLinks(activeProject.description)}</p>
                   </div>
 
                   {activeProject.problem_statement && (
                     <div>
                       <h3 className="text-xs uppercase tracking-widest font-bold text-primary mb-2">Problem Statement</h3>
-                      <p className="text-muted-foreground text-sm leading-relaxed">{activeProject.problem_statement}</p>
+                      <p className="text-muted-foreground text-sm leading-relaxed">{renderTextWithLinks(activeProject.problem_statement)}</p>
                     </div>
                   )}
 
                   {activeProject.business_problem && (
                     <div>
                       <h3 className="text-xs uppercase tracking-widest font-bold text-primary mb-2">Business Problem</h3>
-                      <p className="text-muted-foreground text-sm leading-relaxed">{activeProject.business_problem}</p>
+                      <p className="text-muted-foreground text-sm leading-relaxed">{renderTextWithLinks(activeProject.business_problem)}</p>
                     </div>
                   )}
 

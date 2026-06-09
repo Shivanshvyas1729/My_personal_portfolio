@@ -66,13 +66,13 @@ const GlobalTextEffector = () => {
       }
       
       /* Hover Targets */
-      h1:not(.gradient-text):not(.no-text-effect *):hover,
-      h2:not(.gradient-text):not(.no-text-effect *):hover,
-      h3:not(.gradient-text):not(.no-text-effect *):hover,
-      p:not(.gradient-text):not(.no-text-effect *):hover,
-      span:not(.gradient-text):not(.no-text-effect *):hover,
-      a:not(.gradient-text):not(.no-text-effect *):hover,
-      button:not(.gradient-text):not(.no-text-effect *):hover {
+      h1:not(.gradient-text):not(.no-text-effect):not(.no-text-effect *):hover,
+      h2:not(.gradient-text):not(.no-text-effect):not(.no-text-effect *):hover,
+      h3:not(.gradient-text):not(.no-text-effect):not(.no-text-effect *):hover,
+      p:not(.gradient-text):not(.no-text-effect):not(.no-text-effect *):hover,
+      span:not(.gradient-text):not(.no-text-effect):not(.no-text-effect *):hover,
+      a:not(.gradient-text):not(.no-text-effect):not(.no-text-effect *):hover,
+      button:not(.gradient-text):not(.no-text-effect):not(.no-text-effect *):hover {
         ${textHoverStyles}
         transform: translateZ(0);
       }

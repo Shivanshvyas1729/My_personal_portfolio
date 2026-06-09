@@ -43,56 +43,56 @@ export const ArrayItemWrapper: React.FC<ArrayItemWrapperProps> = ({
       {/* Accordion Header */}
       <div 
         onClick={() => setIsExpanded(prev => !prev)}
-        className={`flex items-center justify-between p-2.5 cursor-pointer select-none transition-all ${
+        className={`flex items-center justify-between py-3.5 px-4.5 cursor-pointer select-none transition-all ${
           isExpanded 
-            ? 'bg-accent/5 border-l-4 border-accent/70 pl-1.5' 
-            : 'bg-muted/10 hover:bg-muted/20 pl-2.5'
+            ? 'bg-accent/5 border-l-4 border-accent/70 pl-3.5' 
+            : 'bg-muted/15 hover:bg-muted/25 pl-4.5'
         }`}
       >
         <div className="flex items-center gap-3 min-w-0 pr-12">
-          <span className={`text-[10px] font-mono font-bold tracking-wide uppercase shrink-0 ${
-            isExpanded ? 'text-accent font-extrabold' : 'text-muted-foreground/80'
+          <span className={`text-[10.5px] font-mono font-black tracking-wide uppercase shrink-0 ${
+            isExpanded ? 'text-accent' : 'text-muted-foreground/90'
           }`}>
             Item {index + 1}
           </span>
           {!isExpanded && previewText && (
-            <span className="text-xs text-muted-foreground font-medium truncate italic opacity-85">
-              — {previewText.length > 55 ? `${previewText.slice(0, 55)}...` : previewText}
+            <span className="text-xs text-muted-foreground font-medium truncate italic opacity-90">
+              — {previewText.length > 75 ? `${previewText.slice(0, 75)}...` : previewText}
             </span>
           )}
         </div>
         
-        <div className="flex items-center gap-1.5 shrink-0" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
           {onMoveUp && (
             <button
               type="button"
               onClick={onMoveUp}
-              className="text-muted-foreground hover:text-foreground p-1 rounded hover:bg-muted/40 transition-colors cursor-pointer"
+              className="text-muted-foreground hover:text-foreground p-1.5 rounded hover:bg-muted/40 transition-colors cursor-pointer"
               title="Move Up"
             >
-              <ArrowUp size={13} />
+              <ArrowUp size={14} />
             </button>
           )}
           {onMoveDown && (
             <button
               type="button"
               onClick={onMoveDown}
-              className="text-muted-foreground hover:text-foreground p-1 rounded hover:bg-muted/40 transition-colors cursor-pointer"
+              className="text-muted-foreground hover:text-foreground p-1.5 rounded hover:bg-muted/40 transition-colors cursor-pointer"
               title="Move Down"
             >
-              <ArrowDown size={13} />
+              <ArrowDown size={14} />
             </button>
           )}
           <button
             type="button"
             onClick={onRemove}
-            className="text-muted-foreground hover:text-destructive p-1 rounded hover:bg-muted/40 transition-colors cursor-pointer"
+            className="text-muted-foreground hover:text-destructive p-1.5 rounded hover:bg-muted/40 transition-colors cursor-pointer"
             title="Remove Item"
           >
-            <Trash2 size={13} />
+            <Trash2 size={14} />
           </button>
           
-          <div className="w-5 h-5 flex items-center justify-center text-muted-foreground/60 ml-1">
+          <div className="w-5 h-5 flex items-center justify-center text-muted-foreground/60 ml-1.5">
             <span className={`text-[10px] transform transition-transform duration-200 ${isExpanded ? 'rotate-180 text-accent font-bold' : ''}`}>
               ▼
             </span>
@@ -102,7 +102,7 @@ export const ArrayItemWrapper: React.FC<ArrayItemWrapperProps> = ({
 
       {/* Accordion Content */}
       {isExpanded && (
-        <div className={`p-3 border-t border-border/15 animate-in fade-in duration-200 ${isDark ? 'bg-black/35' : 'bg-slate-50/70'}`}>
+        <div className={`p-4 md:p-5 border-t border-border/15 animate-in fade-in duration-200 ${isDark ? 'bg-black/35' : 'bg-slate-50/70'}`}>
           {children}
         </div>
       )}

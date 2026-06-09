@@ -228,8 +228,11 @@ export const ProjectSchema = z.object({
   future_improvements: z.array(z.string()).optional(),
   open_resources: z.array(z.object({ label: z.string().optional(), url: z.string().optional() })).optional(),
   
-  // Knowledge Overrides
-  knowledge_overrides: z.record(z.string(), z.any()).optional().default({}),
+  knowledge_overrides: z.array(
+    z.object({
+      id: z.string().min(1, "Override Term ID is required")
+    }).passthrough()
+  ).optional().default([]),
 }).passthrough();
 
 export const ProjectsArraySchema = z.array(ProjectSchema);

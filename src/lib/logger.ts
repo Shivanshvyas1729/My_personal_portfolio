@@ -16,6 +16,39 @@ class AuditLogger {
   private listeners: LogListener[] = [];
   private readonly MAX_LOGS = 100;
 
+  constructor() {
+    if (typeof window !== "undefined") {
+      window.addEventListener("error", (event) => {
+        if (event.message?.includes("ResizeObserver loop")) return;
+        this.addLog({
+          action: "UNCAUGHT_ERROR",
+          status: "error",
+          message: event.message || "Uncaught runtime exception occurred.",
+          metadata: {
+            filename: event.filename,
+            lineno: event.lineno,
+            colno: event.colno,
+            errorStack: event.error?.stack || null,
+            errorMessage: event.error?.message || event.message
+          }
+        });
+      });
+
+      window.addEventListener("unhandledrejection", (event) => {
+        const error = event.reason;
+        this.addLog({
+          action: "UNHANDLED_REJECTION",
+          status: "error",
+          message: error?.message || "Unhandled Promise rejection occurred.",
+          metadata: {
+            errorStack: error?.stack || null,
+            errorMessage: error?.message || String(error)
+          }
+        });
+      });
+    }
+  }
+
   private notify() {
     this.listeners.forEach(l => l([...this.logs]));
   }
