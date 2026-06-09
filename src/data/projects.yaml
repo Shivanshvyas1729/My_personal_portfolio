@@ -7,6 +7,7 @@ projects:
       - Computer Vision
       - Explainable AI (XAI)
       - Medical Imaging
+    domain: Healthcare
     description: Thyroid cancer cases are increasing worldwide, but in many rural and remote areas, expert doctors and diagnostic facilities are not easily available. Traditional diagnosis mainly depends on ultrasound imaging and specialist interpretation, which can be expensive, time-consuming, and inaccessible in low-resource regions. Many existing AI models focus only on achieving high accuracy, but they often require high computational power and complex hardware. Such systems are difficult to deploy in rural healthcare centers where resources are limited. Therefore, there is a need for a lightweight, cost-effective, and explainable AI-based system that can assist doctors and healthcare workers in detecting thyroid cancer efficiently.
     tech:
       - Python
@@ -131,9 +132,15 @@ projects:
     featured: true
     domain: "⚡ Renewable Energy"
     impact: Improves efficiency of solar panel maintenance by enabling quick and automated defect detection, reducing manual inspection effort and supporting scalable renewable energy operations.
-    resources:
-      - label: Architecture PDF
-        url: https://drive.google.com/drive/folders/1zYdh2-eu6yUfUA4IYokQsziallVQXCGr
+    problem_statement: Manual inspection of solar panels is slow, labor-intensive, and expensive, especially for large solar farms. Environmental conditions such as dust, bird droppings, snow accumulation, electrical faults, and physical damage can significantly reduce energy production efficiency. There is a need for an automated computer vision system capable of identifying defects quickly and accurately to support maintenance teams and maximize renewable energy output.
+    learning_outcomes:
+      - Implemented transfer learning using EfficientNet-B0 for image classification.
+      - Built a complete computer vision pipeline using PyTorch.
+      - Worked with real-world renewable energy datasets.
+      - Developed an interactive Streamlit deployment.
+      - Implemented confidence score and Top-3 prediction visualization.
+      - Applied image preprocessing and model inference techniques.
+    architecture: Users upload solar panel images through a Streamlit interface. Images are preprocessed and passed to a pretrained EfficientNet-B0 model. The model extracts deep visual features and classifies the image into one of six defect categories. Prediction probabilities are generated and displayed alongside the predicted class and confidence score.
     architectureImage: https://backend.krishnaik.in/media/project_architecture_diagrams/Gemini_Generated_Image_vwro75vwro75vwro_UvMo1qV.jpg
     problem_statement: Manual inspection of solar panels across large solar farms is time-consuming, error-prone, and costly. Defects such as dust accumulation, bird droppings, physical cracks, and electrical damage significantly reduce energy output if left undetected. There is a need for an automated, scalable, and accurate computer vision system that can classify panel defects from images and enable proactive maintenance to maximise renewable energy generation efficiency.
     learning_outcomes:
