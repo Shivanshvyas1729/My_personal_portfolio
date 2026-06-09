@@ -2,43 +2,111 @@
 projects:
   - id: 5
     title: Cancer Detection with Explainable AI
-    category: []
-    description: |-
-      Thyroid cancer cases are increasing worldwide, but in many rural and remote areas, expert doctors and diagnostic facilities are not easily available. Traditional diagnosis mainly depends on ultrasound imaging and specialist interpretation, which can be expensive, time-consuming, and inaccessible in low-resource regions.
-
-      Many existing AI models focus only on achieving high accuracy, but they often require high computational power and complex hardware. Such systems are difficult to deploy in rural healthcare centers where resources are limited.
-
-      Therefore, there is a need for a lightweight, cost-effective, and explainable AI-based system that can assist doctors and healthcare workers in detecting thyroid cancer efficiently.
-    tech: []
-    github: ""
-    live: ""
-    featured: false
+    category:
+      - Deep Learning
+      - Computer Vision
+      - Explainable AI (XAI)
+      - Medical Imaging
+    description: Thyroid cancer cases are increasing worldwide, but in many rural and remote areas, expert doctors and diagnostic facilities are not easily available. Traditional diagnosis mainly depends on ultrasound imaging and specialist interpretation, which can be expensive, time-consuming, and inaccessible in low-resource regions. Many existing AI models focus only on achieving high accuracy, but they often require high computational power and complex hardware. Such systems are difficult to deploy in rural healthcare centers where resources are limited. Therefore, there is a need for a lightweight, cost-effective, and explainable AI-based system that can assist doctors and healthcare workers in detecting thyroid cancer efficiently.
+    tech:
+      - Python
+      - TensorFlow
+      - FastAPI
+      - Streamlit
+      - HTML5
+      - CSS3
+      - JavaScript
+      - Hugging Face Hub
+    github: https://github.com/Shivanshvyas1729/Cancer_Detection_with_xai
+    live: https://cancerdetectionwithxai.streamlit.app/
+    featured: true
     media:
       - url: https://i.ibb.co/0j93F19k/719086-750.jpg
         type: image
       - url: https://i.ibb.co/PZDrx9Qn/df08103d-28d6-4be4-9257-b27ff3322dc3.jpg
       - url: https://i.ibb.co/XZp3XZgC/fibo-arch.png
-    problem_statement: Thyroid Cancer is a disease in which harmful or abnormal cells grow in the thyroid gland located in the neck. The thyroid gland controls important body functions such as metabolism, energy balance, heart rate, and hormone production. If thyroid cancer is not detected at an early stage, it can spread to nearby organs and become life-threatening.
-    data_sources:
-      - https://www.kaggle.com/datasets/diveshzz/thyroid-cancer-classification-ultrasound-dataset/data
+    problem_statement: Thyroid Cancer is a disease in which harmful or abnormal cells grow in the thyroid gland located in the neck. The thyroid gland controls important body functions such as metabolism, energy balance, heart rate, and hormone production. If thyroid cancer is not detected at an early stage, it can spread to nearby organs and become life-threatening. Manual diagnostic evaluation of thyroid ultrasound images is time-consuming, subjective, and dependent on specialist expertise. Furthermore, black-box AI systems lack transparency, creating a need for lightweight explainable computer-aided diagnostic systems that can support healthcare professionals in low-resource and rural environments.
+    learning_outcomes:
+      - Designed Fibonacci-Net, a custom lightweight CNN using Fibonacci filter growth and depthwise separable convolutions.
+      - Implemented Fibonacci filter progression (21 → 34 → 55 → 89 → 144 → 233 → 377) for efficient feature extraction.
+      - Developed a custom Avg2MaxPooling layer combining average and max pooling.
+      - Integrated Grad-CAM explainability heatmaps for transparent AI predictions.
+      - Built REST APIs using FastAPI for scalable model serving.
+      - Developed an interactive Streamlit dashboard for real-time inference.
+      - Implemented automated diagnostic report generation using python-docx.
+    architecture: The system follows a client-server architecture. Users upload thyroid ultrasound images through a FastAPI frontend or Streamlit dashboard. Images are preprocessed and passed to a custom lightweight CNN called Fibonacci-Net. The model predicts benign or malignant thyroid nodules and generates Grad-CAM heatmaps for explainability. Results and visual explanations are displayed to the user and packaged into downloadable diagnostic reports. The architecture is designed to remain lightweight and suitable for deployment in low-resource healthcare environments.
+    architectureImage: https://i.ibb.co/p6CzTSCX/9fed8422-4558-4568-ad5f-68f70186a6a9.jpg
     resources:
       - url: https://excalidraw.com/#json=ZBBfaXHadM-TQNDIhaRKw,69m8_fH4TKqm7AQq-mMfTw
         label: excalidraw
       - label: whole drive link
         url: https://drive.google.com/drive/folders/1Kp7T_7QMJO2OW4agrAtCmV5CsKz7uUjQ
-      - label: "research "
+      - label: research
         url: https://drive.google.com/drive/u/0/folders/1WeKzWkeb7GvV_xYDwJLzbdd-kXy29vov
-    open_resources:
-      - url: https://drive.google.com/drive/u/0/folders/1WeKzWkeb7GvV_xYDwJLzbdd-kXy29vov
-        label: "Research "
-      - label: depth wise convolution layer
-        url: https://link.excalidraw.com/p/readonly/nTbHqs6Z6NhUWvvaQ1Zq
-    architecture: ""
-    architectureImage: https://i.ibb.co/p6CzTSCX/9fed8422-4558-4568-ad5f-68f70186a6a9.jpg
-    features: []
-    model_inputs: []
+    howItWorks: 1. The user uploads a thyroid ultrasound image through the FastAPI web interface or Streamlit dashboard. 2. The image is converted to RGB format, resized to 224×224 pixels, and normalized. 3. The custom Fibonacci-Net CNN processes the image and predicts whether the thyroid nodule is benign or malignant. 4. Grad-CAM generates a heatmap highlighting the image regions that influenced the prediction. 5. Results are displayed with visual explanations through the web interface. 6. A downloadable diagnostic report containing the prediction and explainability visualization is generated.
+    objectives:
+      - Develop a lightweight thyroid cancer detection system suitable for low-resource healthcare environments.
+      - Provide explainable AI predictions using Grad-CAM visualizations.
+      - Assist doctors and healthcare workers during preliminary thyroid cancer screening.
+      - Reduce dependency on specialist interpretation in rural and remote regions.
+      - Enable fast, cost-effective, and accessible diagnostic assistance.
+    success_criteria:
+      - Achieve high classification accuracy on thyroid ultrasound images.
+      - Generate Grad-CAM visualizations in real time.
+      - Provide downloadable diagnostic reports.
+      - Maintain low computational requirements suitable for rural healthcare deployment.
+      - Deliver explainable predictions that can support clinical decision-making.
+    data_sources:
+      - https://www.kaggle.com/datasets/diveshzz/thyroid-cancer-classification-ultrasound-dataset/data
+    target_variable: Nodule Malignancy Class (0 = Benign, 1 = Malignant)
+    features:
+      - Thyroid Nodule Classification
+      - Custom Fibonacci-Net CNN
+      - Grad-CAM Explainable AI
+      - Automated Diagnostic Report Generation
+      - FastAPI REST API
+      - Interactive Streamlit Dashboard
+      - Real-Time Inference
+      - Low-Resource Deployment Support
+    model_inputs:
+      - Thyroid Ultrasound Images (224×224 RGB)
+    preprocessing:
+      - RGB conversion
+      - Image resizing to 224×224 pixels
+      - Pixel normalization to the range [0,1]
+      - Batch dimension expansion for inference
+    modeling:
+      - Custom Fibonacci-Net CNN Architecture
+      - Fibonacci Filter Progression (21 → 34 → 55 → 89 → 144 → 233 → 377)
+      - Depthwise Separable Convolutions
+      - Avg2MaxPooling Custom Layer
+      - Binary Cross Entropy Loss
+      - Adam Optimizer
     evaluation_metrics:
       - Accuracy
+      - ROC-AUC
+      - Binary Cross-Entropy Loss
+      - Inference Latency
+    validation_strategy: 80-10-10 stratified train-validation-test split
+    explainability: Grad-CAM (Gradient-weighted Class Activation Mapping) heatmaps generated from the final convolutional layer to highlight image regions responsible for model predictions and improve transparency.
+    deployment: FastAPI backend and Streamlit dashboard deployment with model weights hosted on Hugging Face Hub. The solution is optimized for lightweight inference and deployment in low-resource healthcare environments.
+    risks:
+      - Class imbalance may lead to model overfitting.
+      - Ultrasound image quality variations can affect prediction accuracy.
+      - Noise and scanner variability may impact model performance.
+      - False predictions may occur in challenging imaging conditions.
+      - The system should not be used as a replacement for professional medical diagnosis.
+    ethics:
+      - Dataset consists of anonymized medical images.
+      - Designed as a Clinical Decision Support (CDS) system rather than a diagnostic replacement.
+      - Grad-CAM visualizations improve transparency and interpretability.
+      - Supports healthcare professionals but does not replace clinical expertise.
+      - Final medical decisions should always be validated by qualified healthcare professionals.
+    open_resources:
+      - url: https://drive.google.com/drive/u/0/folders/1WeKzWkeb7GvV_xYDwJLzbdd-kXy29vov
+        label: Research
+      - label: depth wise convolution layer
+        url: https://link.excalidraw.com/p/readonly/nTbHqs6Z6NhUWvvaQ1Zq
   - id: 4
     title: ☀️ Solar Panel Defect Detection System
     category:
