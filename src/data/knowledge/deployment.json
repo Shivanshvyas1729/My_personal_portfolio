@@ -117,5 +117,22 @@
     "real_world_example": "```python\nimport requests\nimport time\n\nstart = time.perf_counter()\nresponse = requests.get('https://api.yourservice.com/health')\nresponse_time = (time.perf_counter() - start) * 1000\nprint(f'API Response Latency: {response_time:.2f} ms')\n# Or using requests built-in elapsed duration:\nprint(f'Server elapsed time: {response.elapsed.total_seconds() * 1000:.2f} ms')\n```",
     "difficulty_level": "Intermediate",
     "term_type": "Metric"
+  },
+  {
+    "id": "real_time_inference",
+    "title": "Real-Time Inference",
+    "primary_category": "Deployment",
+    "aliases": ["Real-Time Inference", "Online Inference", "Real-time Inference", "Real-Time"],
+    "secondary_tags": ["Deployment", "Performance", "ML Serving"],
+    "definition": "The process of generating model predictions on-demand as new input data arrives, requiring low latency (usually under 100ms) to support interactive user interfaces.",
+    "why_used": "Necessary for live applications like chatbot responses, real-time medical screening, fraud detection, and autocomplete utilities.",
+    "interview_point": "Real-Time (Online) vs Batch Inference: Online inference processes requests individually as they arrive, optimized for low latency. Batch inference runs periodically on large volumes of data, optimized for high throughput. Real-time serving requires load balancing, auto-scaling, and often model optimization (e.g. TensorRT, ONNX).",
+    "advantages": ["Immediate feedback for users", "Handles dynamic inputs dynamically"],
+    "limitations": ["Higher server infrastructure cost", "Must handle spikes in traffic concurrency"],
+    "use_cases": ["FastAPI prediction endpoints", "Autonomous vehicle controls", "Fraud screening APIs"],
+    "related_terms": ["Inference Latency", "Throughput", "Batch Inference"],
+    "real_world_example": "```python\n# FastAPI endpoint for real-time user request inference\n@app.post('/predict')\ndef predict(data: InputData):\n    return {'prediction': model.predict(data.values)}\n```",
+    "difficulty_level": "Intermediate",
+    "term_type": "Technique"
   }
 ]

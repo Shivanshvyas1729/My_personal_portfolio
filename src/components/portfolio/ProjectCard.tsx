@@ -119,6 +119,11 @@ const ProjectCard = ({ project, index, disableInViewAnimation = false, onClick }
           <h3 className="font-heading font-semibold text-foreground text-lg group-hover:text-primary transition-colors line-clamp-1">
             {project.title}
           </h3>
+          {project.domain && (
+            <span className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20">
+              {project.domain}
+            </span>
+          )}
         </div>
         <p className="text-muted-foreground text-sm mb-4 line-clamp-3 min-h-[60px] flex-1">{project.description}</p>
 

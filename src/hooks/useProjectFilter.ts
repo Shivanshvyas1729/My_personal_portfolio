@@ -5,103 +5,162 @@ import type { Project } from "@/data/portfolioData";
 export const useProjectFilter = (projects: Project[]) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlCategory = searchParams.get("category");
-  
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const urlDomain = searchParams.get("domain");
 
-  // Sync state with URL params on mount
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [selectedDomain, setSelectedDomain] = useState<string>("All");
+
+  // Sync state with URL params on mount / URL change
   useEffect(() => {
-    if (urlCategory) {
-      setSelectedCategory(urlCategory);
-    } else {
-      setSelectedCategory("All");
-    }
-  }, [urlCategory]);
+    setSelectedCategory(urlCategory || "All");
+    setSelectedDomain(urlDomain || "All");
+  }, [urlCategory, urlDomain]);
 
   const handleSetCategory = (category: string) => {
     setSelectedCategory(category);
+    setSelectedDomain("All"); // reset domain when category changes
+    const next = new URLSearchParams(searchParams);
     if (category === "All") {
-      searchParams.delete("category");
+      next.delete("category");
     } else {
-      searchParams.set("category", category);
+      next.set("category", category);
     }
-    setSearchParams(searchParams);
+    next.delete("domain");
+    setSearchParams(next);
   };
 
+  const handleSetDomain = (domain: string) => {
+    setSelectedDomain(domain);
+    setSelectedCategory("All"); // reset category when domain changes
+    const next = new URLSearchParams(searchParams);
+    if (domain === "All") {
+      next.delete("domain");
+    } else {
+      next.set("domain", domain);
+    }
+    next.delete("category");
+    setSearchParams(next);
+  };
+
+  // ── Unique categories (from p.category[]) ────────────────────────────────
   const categories = useMemo(() => {
-    // 1. Extract, dedupe and normalize categories safely
-    const rawCategories = projects.flatMap(p => 
+    const raw = projects.flatMap(p =>
       Array.isArray(p.category) ? p.category : []
     );
-    
-    const validCategories = rawCategories
-      .filter(c => typeof c === 'string' && c.trim().length > 0)
+
+    const valid = raw
+      .filter(c => typeof c === "string" && c.trim().length > 0)
       .map(c => c.trim());
 
-    // Dedupe while preserving display casing (takes first seen casing)
     const uniqueMap = new Map<string, string>();
-    validCategories.forEach(c => {
-      const normalized = c.toLowerCase();
-      if (!uniqueMap.has(normalized)) {
-        uniqueMap.set(normalized, c);
-      }
+    valid.forEach(c => {
+      const key = c.toLowerCase();
+      if (!uniqueMap.has(key)) uniqueMap.set(key, c);
     });
 
     const unique = Array.from(uniqueMap.values());
 
-    // 2. Sort categories (Priority + Alphabetical)
     const priority = ["Generative AI", "Machine Learning"];
-    
     unique.sort((a, b) => {
-      const idxA = priority.findIndex(p => p.toLowerCase() === a.toLowerCase());
-      const idxB = priority.findIndex(p => p.toLowerCase() === b.toLowerCase());
-      
-      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-      if (idxA !== -1) return -1;
-      if (idxB !== -1) return 1;
-      
+      const ia = priority.findIndex(p => p.toLowerCase() === a.toLowerCase());
+      const ib = priority.findIndex(p => p.toLowerCase() === b.toLowerCase());
+      if (ia !== -1 && ib !== -1) return ia - ib;
+      if (ia !== -1) return -1;
+      if (ib !== -1) return 1;
       return a.localeCompare(b);
     });
 
     return ["All", ...unique];
   }, [projects]);
 
+  // ── Unique domains (from optional p.domain) ───────────────────────────────
+  // Only projects that have a non-empty domain string contribute here.
+  const domains = useMemo(() => {
+    const raw = projects
+      .map(p => p.domain)
+      .filter((d): d is string => typeof d === "string" && d.trim().length > 0)
+      .map(d => d.trim());
+
+    const uniqueMap = new Map<string, string>();
+    raw.forEach(d => {
+      const key = d.toLowerCase();
+      if (!uniqueMap.has(key)) uniqueMap.set(key, d);
+    });
+
+    const unique = Array.from(uniqueMap.values()).sort((a, b) =>
+      a.localeCompare(b)
+    );
+
+    // Return empty list if no project has a domain — UI can hide the section
+    return unique.length > 0 ? ["All", ...unique] : [];
+  }, [projects]);
+
+  // ── Category counts ───────────────────────────────────────────────────────
   const counts = useMemo(() => {
     const map: Record<string, number> = { All: projects.length };
-    
-    categories.forEach(c => {
-      if (c !== "All") map[c] = 0;
-    });
+    categories.forEach(c => { if (c !== "All") map[c] = 0; });
 
     projects.forEach(p => {
       if (!Array.isArray(p.category)) return;
-      const pCatsNormalized = p.category.map(c => c.trim().toLowerCase());
-      
+      const normalized = p.category.map(c => c.trim().toLowerCase());
       categories.forEach(c => {
-        if (c !== "All" && pCatsNormalized.includes(c.toLowerCase())) {
-          map[c]++;
-        }
+        if (c !== "All" && normalized.includes(c.toLowerCase())) map[c]++;
       });
     });
 
     return map;
   }, [categories, projects]);
 
-  const filteredProjects = useMemo(() => {
-    if (selectedCategory.toLowerCase() === "all") return projects;
-    
-    const normalizedTarget = selectedCategory.trim().toLowerCase();
-    
-    return projects.filter(p => {
-      if (!Array.isArray(p.category)) return false;
-      return p.category.some(c => c.trim().toLowerCase() === normalizedTarget);
+  // ── Domain counts (only for projects that have domain set) ────────────────
+  const domainCounts = useMemo(() => {
+    const map: Record<string, number> = { All: projects.length };
+    domains.forEach(d => { if (d !== "All") map[d] = 0; });
+
+    projects.forEach(p => {
+      if (!p.domain || typeof p.domain !== "string") return;
+      const normalized = p.domain.trim().toLowerCase();
+      domains.forEach(d => {
+        if (d !== "All" && d.toLowerCase() === normalized) map[d]++;
+      });
     });
-  }, [projects, selectedCategory]);
+
+    return map;
+  }, [domains, projects]);
+
+  // ── Filtered projects (category XOR domain) ───────────────────────────────
+  const filteredProjects = useMemo(() => {
+    let result = projects;
+
+    if (selectedCategory.toLowerCase() !== "all") {
+      const target = selectedCategory.trim().toLowerCase();
+      result = result.filter(
+        p =>
+          Array.isArray(p.category) &&
+          p.category.some(c => c.trim().toLowerCase() === target)
+      );
+    }
+
+    if (selectedDomain.toLowerCase() !== "all") {
+      const target = selectedDomain.trim().toLowerCase();
+      result = result.filter(
+        p =>
+          typeof p.domain === "string" &&
+          p.domain.trim().toLowerCase() === target
+      );
+    }
+
+    return result;
+  }, [projects, selectedCategory, selectedDomain]);
 
   return {
     categories,
+    domains,           // empty [] if no project has a domain — UI hides section
     selectedCategory,
+    selectedDomain,
     setSelectedCategory: handleSetCategory,
+    setSelectedDomain: handleSetDomain,
     filteredProjects,
-    counts
+    counts,
+    domainCounts,
   };
 };

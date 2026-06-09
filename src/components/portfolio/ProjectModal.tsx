@@ -180,6 +180,11 @@ export function ProjectModal({ project, isOpen, onClose }: ProjectModalProps) {
                     {activeProject.category}
                   </span>
                 )}
+                {activeProject.domain && (
+                  <span className="text-xs font-semibold px-3 py-1.5 rounded-md bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                    {activeProject.domain}
+                  </span>
+                )}
                 {activeProject.impact && (
                   <span className="text-xs font-medium px-3 py-1.5 rounded-md bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
                     ⚡ {activeProject.impact}

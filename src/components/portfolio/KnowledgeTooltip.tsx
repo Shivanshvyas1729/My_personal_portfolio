@@ -56,23 +56,10 @@ export const KnowledgeTooltip: React.FC<KnowledgeTooltipProps> = ({ term, overri
   // Fetch from global knowledge base (O(1))
   const globalKnowledge = getKnowledge(term);
 
-  // Special Target Variable Rule
-  if (isTargetVariable) {
-    if (!overrides?.definition && !overrides?.real_world_example && !overrides?.why_used) {
-      // If project context is missing, only show generic definition, no tooltip
-      return <span>{renderTextWithLinks(term)}</span>;
-    }
-  }
-
-  // If no knowledge and no overrides exist, just render normal text
-  if (!globalKnowledge && !overrides && !isTargetVariable) {
-    return <span>{renderTextWithLinks(term)}</span>;
-  }
-
-  // Merge knowledge intelligently
+  // Merge knowledge intelligently (safe even if globalKnowledge is null)
   const knowledge = { ...globalKnowledge, ...overrides } as KnowledgeDefinition;
 
-  // Handle positioning and mobile detection
+  // Handle positioning and mobile detection — must be declared before any early returns
   const updatePosition = useCallback(() => {
     setIsMobile(window.innerWidth < 768);
     
@@ -132,6 +119,20 @@ export const KnowledgeTooltip: React.FC<KnowledgeTooltipProps> = ({ term, overri
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
+
+  // --- Early exits AFTER all hooks ---
+
+  // Special Target Variable Rule: no tooltip if project context is missing
+  if (isTargetVariable) {
+    if (!overrides?.definition && !overrides?.real_world_example && !overrides?.why_used) {
+      return <span>{renderTextWithLinks(term)}</span>;
+    }
+  }
+
+  // If no knowledge and no overrides exist, just render normal text
+  if (!globalKnowledge && !overrides && !isTargetVariable) {
+    return <span>{renderTextWithLinks(term)}</span>;
+  }
 
   const handleToggle = (e?: React.MouseEvent) => {
     if (e) {

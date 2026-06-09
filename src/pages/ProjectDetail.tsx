@@ -276,9 +276,9 @@ const ProjectDetail = () => {
             )}
           </div>
 
-          {/* What You Will Learn */}
+          {/* My Learning in this Project */}
           <div className="glass-card p-4 md:p-6 mb-6">
-            <h3 className="text-lg font-medium text-primary mb-3">What You Will Learn</h3>
+            <h3 className="text-lg font-medium text-primary mb-3">My Learning in this Project</h3>
             {project.learning_outcomes && project.learning_outcomes.length > 0 ? (
               <ul className="list-disc pl-5 text-muted-foreground space-y-1">
                 {project.learning_outcomes.map((item, i) => <li key={i}>{renderTextWithLinks(item)}</li>)}

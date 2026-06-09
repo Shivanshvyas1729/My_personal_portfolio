@@ -460,5 +460,41 @@
     "real_world_example": "```python\nfrom ragas import evaluate\nfrom ragas.metrics import faithfulness, answer_relevancy, context_recall\nfrom datasets import Dataset\n\n# Prepare evaluation data\ndata = Dataset.from_dict({\n    'question': ['What is BERT?'],\n    'answer': ['BERT is a transformer model by Google for NLP tasks'],\n    'contexts': [['BERT was created by Google and uses transformers for NLP']],\n    'ground_truth': ['BERT is a transformer model by Google']\n})\n\nresults = evaluate(data, metrics=[faithfulness, answer_relevancy, context_recall])\nprint(results)\n```",
     "difficulty_level": "Advanced",
     "term_type": "Metric"
+  },
+  {
+    "id": "confidence_score",
+    "title": "Confidence Score",
+    "primary_category": "Evaluation Metrics",
+    "aliases": ["Confidence Score", "Prediction Confidence", "Confidence Score Prediction", "Model Confidence", "Softmax Confidence"],
+    "secondary_tags": ["Classification", "Probabilistic Output", "Model Calibration"],
+    "definition": "A numerical value (typically between 0 and 1, expressed as a percentage) representing how certain a model is about its predicted class. In classification models, confidence scores are the raw softmax output probabilities assigned to each class.",
+    "why_used": "Confidence scores allow downstream systems and human reviewers to act on model certainty — high-confidence predictions can be auto-accepted, while low-confidence ones can be flagged for manual review, improving overall system reliability.",
+    "interview_point": "A high softmax confidence score does NOT necessarily mean the model is correct or well-calibrated. Models can be overconfident (high softmax probability on wrong predictions). Use calibration techniques like Temperature Scaling or Platt Scaling to align confidence with actual accuracy. Calibration is measured using Expected Calibration Error (ECE).",
+    "advantages": ["Enables uncertainty-aware decision making", "Can trigger human-in-the-loop for low-confidence cases", "Directly interpretable as a probability"],
+    "limitations": ["Softmax overconfidence: scores near 1.0 may still be wrong", "Not inherently calibrated — calibration evaluation needed", "Sensitive to temperature during softmax computation"],
+    "formula": "confidence = max(softmax(logits)) = max(eᶻᵢ / Σeᶻⱼ)",
+    "use_cases": ["Solar panel defect detection inference UI", "Medical AI diagnosis assistance", "Content moderation systems", "Fraud detection threshold triggering"],
+    "related_terms": ["Top-3 Prediction Probability", "Accuracy", "Calibration", "Softmax"],
+    "real_world_example": "```python\nimport torch\nimport torch.nn.functional as F\n\nmodel.eval()\nwith torch.no_grad():\n    logits = model(image_batch)            # Raw logits: (batch, num_classes)\n    probs = F.softmax(logits, dim=1)       # Softmax probabilities\n    confidence, predicted = probs.max(dim=1)  # Highest probability per sample\n\nprint(f'Predicted class: {predicted.item()}')\nprint(f'Confidence: {confidence.item() * 100:.1f}%')\n\n# Flag low confidence for human review\nif confidence.item() < 0.6:\n    print('⚠️ Low confidence — flagged for manual inspection')\n```",
+    "difficulty_level": "Intermediate",
+    "term_type": "Metric"
+  },
+  {
+    "id": "top3_prediction_probability",
+    "title": "Top-3 Prediction Probability",
+    "primary_category": "Evaluation Metrics",
+    "aliases": ["Top-3 Prediction Probability", "Top-3 Prediction", "Top-3 Accuracy", "Top-K Accuracy", "Top-3 Predictions", "Top-3 Prediction Analysis"],
+    "secondary_tags": ["Classification", "Multi-class", "Probabilistic Output"],
+    "definition": "A metric and display technique that shows the three highest-probability class predictions and their corresponding softmax confidence scores for a given input. The model is considered correct under Top-3 Accuracy if the true label appears in the top 3 predicted classes.",
+    "why_used": "In multi-class classification with many similar categories, the correct label is often the 2nd or 3rd most likely class. Top-3 predictions give users actionable context beyond the single top prediction and reveal model uncertainty across close competitors.",
+    "interview_point": "Top-K Accuracy is strictly more lenient than Top-1. For ImageNet (1000 classes), Top-1 accuracy is ~77% and Top-5 accuracy ~93% for modern models. In deployment, showing Top-3 predictions with confidence scores is a UX pattern that improves user trust while maintaining full model transparency.",
+    "advantages": ["Reveals model uncertainty and competing hypotheses", "Higher apparent accuracy than Top-1 alone", "Improves UX in inference applications", "Useful for classes with high visual similarity"],
+    "limitations": ["Does not increase true Top-1 accuracy", "Can cause user confusion if all three predictions have similar scores", "Not suitable when exactly one answer is required"],
+    "formula": "Top-3 Accuracy = P(true label ∈ top-3 predictions)   |   top3 = argtop3(softmax(logits))",
+    "use_cases": ["Solar panel defect classification interface", "Medical diagnosis assistance showing differential diagnoses", "Product recommendation systems"],
+    "related_terms": ["Confidence Score", "Accuracy", "Classification Accuracy", "Softmax"],
+    "real_world_example": "```python\nimport torch\nimport torch.nn.functional as F\n\nCLASS_NAMES = ['Bird Drop', 'Clean', 'Dust', 'Electrical Damage', 'Physical Damage', 'Snow']\n\nmodel.eval()\nwith torch.no_grad():\n    logits = model(image_batch)              # (1, 6)\n    probs = F.softmax(logits, dim=1)         # (1, 6) probabilities\n    top3_probs, top3_indices = probs.topk(3, dim=1)  # Top-3\n\n# Display results\nprint('Top-3 Predictions:')\nfor i in range(3):\n    cls = CLASS_NAMES[top3_indices[0][i].item()]\n    conf = top3_probs[0][i].item() * 100\n    print(f'  #{i+1}: {cls} — {conf:.1f}%')\n\n# Output:\n# #1: Dust — 72.3%\n# #2: Physical Damage — 15.1%\n# #3: Clean — 8.4%\n```",
+    "difficulty_level": "Intermediate",
+    "term_type": "Metric"
   }
 ]

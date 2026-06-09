@@ -129,5 +129,39 @@
     "real_world_example": "```python\nimport numpy as np\nfrom sklearn.preprocessing import PowerTransformer\n\n# Simple log transform (must be > 0)\ndf['price_log'] = np.log1p(df['price'])  # log(1+x) handles zeros\n\n# Box-Cox (automatically finds best exponent, requires > 0)\npt = PowerTransformer(method='box-cox')\nX_transformed = pt.fit_transform(X)\n\n# Yeo-Johnson (handles negative values too)\npt_yj = PowerTransformer(method='yeo-johnson')\nX_transformed = pt_yj.fit_transform(X)\n```",
     "difficulty_level": "Beginner",
     "term_type": "Technique"
+  },
+  {
+    "id": "pil_image_loading",
+    "title": "Image loading using PIL",
+    "primary_category": "Preprocessing",
+    "aliases": ["Image loading using PIL", "PIL Image Loading", "PIL.Image.open", "Pillow Image Loading", "PIL", "Pillow"],
+    "secondary_tags": ["Image Preprocessing", "Computer Vision", "Python Imaging Library"],
+    "definition": "The process of reading image files from disk using the Python Imaging Library (PIL/Pillow) and loading them into memory as PIL Image objects. PIL supports JPEG, PNG, BMP, TIFF, and many other formats and serves as the standard image I/O library for Python-based ML pipelines.",
+    "why_used": "PIL provides a simple, format-agnostic API for image loading, mode conversion (RGB, RGBA, Grayscale), and basic transformations. It integrates natively with PyTorch's Torchvision transforms, which expect PIL Image objects as input.",
+    "interview_point": "PIL.Image.open() is lazy — it does not fully load the image into memory until you call .load() or perform an operation. Always convert to RGB mode explicitly with .convert('RGB') before model inference to handle PNG (RGBA) and grayscale images consistently.",
+    "advantages": ["Supports all major image formats", "Lazy loading is memory efficient", "Seamless integration with Torchvision transforms", "Simple API for mode conversion and resizing"],
+    "limitations": ["Slower than OpenCV for large-scale batch processing", "In-memory only — not suitable for streaming large datasets", "Limited GPU acceleration"],
+    "use_cases": ["Loading images for PyTorch/TensorFlow pipelines", "Medical image preprocessing", "Defect detection system input"],
+    "related_terms": ["Image resizing", "RGB conversion", "Tensor conversion", "Pixel normalization"],
+    "real_world_example": "```python\nfrom PIL import Image\nimport torchvision.transforms as transforms\n\n# Load and convert to RGB (handles PNG, JPEG, etc.)\nimage = Image.open('solar_panel.jpg').convert('RGB')\nprint(f'Size: {image.size}')   # (width, height) e.g. (1024, 768)\nprint(f'Mode: {image.mode}')   # 'RGB'\n\n# Chain with Torchvision transforms\ntransform = transforms.Compose([\n    transforms.Resize((224, 224)),\n    transforms.ToTensor(),           # PIL → Tensor, scales [0,255] → [0.0,1.0]\n    transforms.Normalize(\n        mean=[0.485, 0.456, 0.406],\n        std=[0.229, 0.224, 0.225]\n    )\n])\n\ntensor = transform(image)  # Shape: (3, 224, 224)\n```",
+    "difficulty_level": "Beginner",
+    "term_type": "Technique"
+  },
+  {
+    "id": "tensor_conversion",
+    "title": "Tensor conversion",
+    "primary_category": "Preprocessing",
+    "aliases": ["Tensor conversion", "ToTensor", "Image to Tensor", "transforms.ToTensor", "Tensor Conversion"],
+    "secondary_tags": ["Image Preprocessing", "PyTorch", "Computer Vision"],
+    "definition": "The process of converting a PIL Image or NumPy array into a PyTorch tensor. Torchvision's transforms.ToTensor() converts a PIL Image (H × W × C, uint8, [0,255]) to a float32 tensor of shape (C × H × W) with values in [0.0, 1.0].",
+    "why_used": "PyTorch models require tensor inputs. The channel-first layout (C, H, W) matches PyTorch's expected format for convolutions. The [0,1] scaling prepares the data for subsequent normalization to ImageNet statistics.",
+    "interview_point": "transforms.ToTensor() performs two operations: 1) Transposes axes from (H, W, C) to (C, H, W), and 2) Scales uint8 values [0, 255] to float32 [0.0, 1.0]. If your image is already a float array in [0,1], use transforms.ToTensor() carefully — it may still divide by 255 unexpectedly. Use torch.from_numpy() for NumPy arrays already in the right format.",
+    "advantages": ["Seamlessly integrates PIL images into PyTorch pipelines", "Automatic channel reordering (HWC → CHW)", "Scales pixel values to [0,1] ready for normalization"],
+    "limitations": ["Only works on uint8 PIL images or NumPy arrays — float arrays need manual handling", "No GPU acceleration during preprocessing"],
+    "use_cases": ["Converting camera or disk images for CNN inference", "PyTorch Dataset __getitem__ method", "Real-time image classification pipelines"],
+    "related_terms": ["Image loading using PIL", "Image resizing", "Pixel normalization", "Batch Normalization"],
+    "real_world_example": "```python\nimport torchvision.transforms as transforms\nimport torch\n\n# Standard pipeline: PIL → Tensor → Normalized Tensor\ntransform = transforms.Compose([\n    transforms.Resize((224, 224)),\n    transforms.ToTensor(),             # (H,W,C) uint8 [0,255] → (C,H,W) float [0,1]\n    transforms.Normalize(              # Normalize to ImageNet statistics\n        mean=[0.485, 0.456, 0.406],   # Per-channel mean\n        std=[0.229, 0.224, 0.225]     # Per-channel std\n    )\n])\n\n# Add batch dimension for single-image inference\ntensor = transform(pil_image)         # Shape: (3, 224, 224)\nbatch = tensor.unsqueeze(0)           # Shape: (1, 3, 224, 224)\n\n# Verify\nprint(f'Dtype: {batch.dtype}')        # torch.float32\nprint(f'Shape: {batch.shape}')        # torch.Size([1, 3, 224, 224])\nprint(f'Value range: [{batch.min():.3f}, {batch.max():.3f}]')\n```",
+    "difficulty_level": "Beginner",
+    "term_type": "Technique"
   }
 ]

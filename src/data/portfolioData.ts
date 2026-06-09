@@ -67,6 +67,7 @@ export interface Project {
   live: string;
   featured: boolean;
   impact: string;
+  domain?: string;
   architectureImage?: string;
   media?: ProjectMedia[];
   howItWorks?: string;

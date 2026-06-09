@@ -20,6 +20,7 @@ projects:
     github: https://github.com/Shivanshvyas1729/Cancer_Detection_with_xai
     live: https://cancerdetectionwithxai.streamlit.app/
     featured: true
+    domain: "🏥 Healthcare"
     media:
       - url: https://i.ibb.co/0j93F19k/719086-750.jpg
         type: image
@@ -112,7 +113,8 @@ projects:
     category:
       - Deep Learning
       - Computer Vision
-    description: An AI-powered solar panel defect detection system using transfer learning with EfficientNet-B0. The model leverages pretrained weights to achieve high accuracy with limited data, enabling fast and reliable classification of defects like dust, bird drops, and physical damage through an interactive Streamlit web app.
+      - Renewable Energy
+    description: An AI-powered solar panel defect detection system built using transfer learning with EfficientNet-B0. The solution automatically classifies solar panel images into multiple defect categories such as dust, bird drops, electrical damage, physical damage, and snow coverage. Deployed through an interactive Streamlit web application, the system enables fast, accurate, and scalable defect inspection, reducing the need for manual monitoring and improving solar farm maintenance efficiency.
     media:
       - type: image
         url: https://i.ibb.co/fdj291HQ/Gemini-Generated-Image-14r8ms14r8ms14r8.png
@@ -127,22 +129,113 @@ projects:
     github: https://github.com/Shivanshvyas1729/solar_panel_defect_detection
     live: https://solarpaneldefectdetection.streamlit.app/
     featured: true
+    domain: "⚡ Renewable Energy"
     impact: Improves efficiency of solar panel maintenance by enabling quick and automated defect detection, reducing manual inspection effort and supporting scalable renewable energy operations.
     resources:
       - label: Architecture PDF
         url: https://drive.google.com/drive/folders/1zYdh2-eu6yUfUA4IYokQsziallVQXCGr
     architectureImage: https://backend.krishnaik.in/media/project_architecture_diagrams/Gemini_Generated_Image_vwro75vwro75vwro_UvMo1qV.jpg
+    problem_statement: Manual inspection of solar panels across large solar farms is time-consuming, error-prone, and costly. Defects such as dust accumulation, bird droppings, physical cracks, and electrical damage significantly reduce energy output if left undetected. There is a need for an automated, scalable, and accurate computer vision system that can classify panel defects from images and enable proactive maintenance to maximise renewable energy generation efficiency.
+    learning_outcomes:
+      - Applied EfficientNet-B0 transfer learning for multi-class image classification with limited labelled data.
+      - Built a custom classification head on top of a pretrained CNN backbone using PyTorch.
+      - Implemented Torchvision transforms for data augmentation and preprocessing.
+      - Developed an interactive Streamlit web application for real-time defect inference.
+      - Gained experience deploying deep learning models on Streamlit Community Cloud.
+      - Understood trade-offs between model accuracy, inference speed, and deployment constraints.
+    architecture: The system is a single-page Streamlit application. A user uploads a solar panel image, which is preprocessed using PIL and Torchvision transforms before being passed to a fine-tuned EfficientNet-B0 classification model. The model outputs a defect class with Top-3 prediction probabilities and confidence scores. Pretrained ImageNet weights are loaded via Torchvision, and the custom classification head is trained on the solar panel defect dataset.
+    objectives:
+      - Build an accurate multi-class solar panel defect classifier using transfer learning.
+      - Classify 6 defect categories — dust, bird drops, electrical damage, physical damage, snow coverage, and clean panels.
+      - Deploy an interactive web application for real-time defect detection.
+      - Minimize training data requirements by leveraging pretrained EfficientNet-B0 weights.
+      - Provide Top-3 class predictions with confidence scores for each inference.
+    success_criteria:
+      - Achieve high classification accuracy across all 6 defect categories.
+      - Generate Top-3 prediction probabilities for each uploaded image.
+      - Successfully deploy a responsive Streamlit web app for real-time inference.
+      - Enable fast inference suitable for field-use inspection workflows.
+    data_sources:
+      - Kaggle Solar Panel Defect Dataset (bird drop, dust, electrical damage, physical damage, snow, clean)
+    target_variable: Solar Panel Defect Class (6 categories — Bird Drop, Dust, Electrical Damage, Physical Damage, Snow, Clean)
+    features:
+      - Bird-drop Detection
+      - Dust Detection
+      - Electrical Damage Detection
+      - Physical Damage Detection
+      - Snow Coverage Detection
+      - Clean Panel Classification
+      - Top-3 Prediction Analysis
+      - Confidence Score Visualization
+    model_inputs:
+      - Solar panel images (224×224 RGB)
+    model_outputs:
+      - Defect class label
+      - Top-3 class probabilities with confidence scores
+    preprocessing:
+      - Image loading using PIL
+      - Image resizing for EfficientNet-B0
+      - Tensor conversion using Torchvision transforms
+      - Pixel normalization
+      - Batch dimension creation for inference
+    modeling:
+      - Pretrained EfficientNet-B0 Backbone
+      - Custom Classification Head
+      - Batch Normalization Layer
+      - Fully Connected Linear Layer
+      - ReLU Activation
+      - Dropout Regularization
+      - Output Classification Layer
+      - CrossEntropyLoss
+      - Adam Optimizer
+    evaluation_metrics:
+      - Classification Accuracy
+      - Prediction Confidence Score
+      - Top-3 Prediction Probability
+    validation_strategy: Train-validation-test split with stratified sampling across all 6 defect classes
+    explainability: Top-3 class predictions with confidence percentages are displayed for each inference, providing transparency into the model's decision-making process and alternative classifications.
+    training_environment:
+      - Python 3.x local environment
+      - PyTorch with CUDA support for GPU-accelerated training
+      - Torchvision for pretrained model access and transforms
+    deployment: Streamlit Community Cloud deployment with model weights bundled into the repository. The app loads pretrained EfficientNet-B0 weights at startup and performs real-time inference on user-uploaded images.
+    monitoring:
+      - Confidence score thresholding to flag low-certainty predictions
+      - Streamlit interface displays all Top-3 predictions for human review
+    risks:
+      - Model performance may degrade for images with lighting conditions not represented in training data.
+      - Overlapping defect types (e.g., dust + bird drops) may confuse single-label classification.
+      - Deployment on Streamlit Community Cloud has resource constraints limiting batch inference.
+    ethics:
+      - Dataset used in accordance with Kaggle terms of service.
+      - No personally identifiable information involved.
+      - Model predictions should be reviewed by qualified technicians before maintenance action.
+      - Responsible AI practices followed throughout development.
+    known_limitations:
+      - Single-label classification cannot handle images with multiple simultaneous defect types.
+      - Model has not been validated on real-world solar farm imagery from diverse geographic regions.
+      - No real-time video stream or drone integration is currently supported.
+    future_improvements:
+      - Implement multi-label classification to detect multiple co-occurring defects.
+      - Integrate Grad-CAM visualizations to highlight defect regions in images.
+      - Extend deployment to edge devices for on-site solar farm inspection.
+      - Collect more diverse real-world training data across different climates and solar panel types.
+    open_resources:
+      - label: Streamlit App
+        url: https://solarpaneldefectdetection.streamlit.app/
+      - label: GitHub Repository
+        url: https://github.com/Shivanshvyas1729/solar_panel_defect_detection
   - id: 3
     title: 🌦 Thunderstorm Forecasting System
     category:
       - Machine Learning
+      - Weather Forecasting
       - Python
-    description: Machine learning-based system for real-time thunderstorm prediction using atmospheric indices, featuring a FastAPI backend and interactive Streamlit interface.
+    description: A machine learning-based system for real-time thunderstorm prediction using atmospheric instability indices. The system leverages ensemble ML models trained on meteorological data to classify thunderstorm occurrence, deployed through a FastAPI backend and an interactive Streamlit interface for real-time forecasting.
     media:
       - type: image
         url: https://www.reconnectwithnature.org/getContentAsset/a2de823c-a1ae-491e-a47b-f373af403d4e/dfc3d011-8f63-43f6-9ed8-4b444333a1d0/Thunderstorm-lightning-strike-shutterstock-1.jpg?language=en-US
     tech:
-      - Weather Prediction
       - Python
       - Scikit-learn
       - FastAPI
@@ -153,17 +246,99 @@ projects:
     github: https://github.com/Shivanshvyas1729/Thunderstrom_forcast
     live: https://thunderstromforcast.streamlit.app/
     featured: true
-    impact: Real-time thunderstorm prediction with optimized ML model and interactive UI
+    domain: "🌤️ Meteorology"
+    impact: Real-time thunderstorm prediction with optimized ML model and interactive UI, enabling early weather warnings for safety and operational planning.
     resources:
       - url: https://excalidraw.com/#json=9Nw6RepmXxt43Pa_0WrYS,pVW7PrOSRwuehccI2tgGmA
-        label: excaldraw.
+        label: System Architecture (Excalidraw)
+    problem_statement: Traditional thunderstorm forecasting depends on complex Numerical Weather Prediction (NWP) models that require significant computational resources and expert meteorological knowledge. There is a growing demand for lightweight, data-driven ML models that can predict thunderstorm occurrence using atmospheric instability indices, enabling real-time forecasting accessible through web-based interfaces.
+    learning_outcomes:
+      - Trained and evaluated multiple Scikit-learn classification models on meteorological data.
+      - Handled class imbalance using SMOTE oversampling from the Imbalanced-learn library.
+      - Built a RESTful prediction API using FastAPI for scalable model serving.
+      - Developed a real-time Streamlit dashboard for meteorological data input and forecast display.
+      - Gained hands-on experience with atmospheric instability indices such as CAPE, K-Index, and Lifted Index.
+      - Learned feature engineering techniques for tabular meteorological datasets.
+    architecture: The user enters atmospheric measurements (CAPE, K-Index, Lifted Index, etc.) into the Streamlit web interface. The inputs are serialised and sent as a POST request to the FastAPI prediction endpoint. The trained Scikit-learn classifier processes the features and returns a thunderstorm probability prediction, which is displayed to the user in the Streamlit dashboard.
+    objectives:
+      - Build a binary classification model to predict thunderstorm occurrence from atmospheric indices.
+      - Address class imbalance in the meteorological dataset using oversampling techniques.
+      - Develop and deploy a RESTful FastAPI backend for real-time prediction serving.
+      - Create an interactive Streamlit interface for meteorological data input and result visualization.
+    success_criteria:
+      - Achieve strong classification performance on the thunderstorm prediction task.
+      - Successfully handle class imbalance to avoid biased predictions.
+      - Deploy a responsive API and UI capable of real-time inference.
+    data_sources:
+      - Meteorological atmospheric instability index dataset (CAPE, K-Index, Lifted Index, Dew Point Depression, etc.)
+    target_variable: Thunderstorm Occurrence (0 = No Thunderstorm, 1 = Thunderstorm)
+    features:
+      - CAPE (Convective Available Potential Energy)
+      - K-Index (Thunderstorm Instability Index)
+      - Lifted Index (Atmospheric Stability Index)
+      - Dew Point Depression
+      - Relative Humidity
+      - Temperature at Various Pressure Levels
+      - Wind Shear Indices
+    model_inputs:
+      - Atmospheric instability indices (CAPE, K-Index, Lifted Index, Dew Point, Humidity)
+    model_outputs:
+      - Binary thunderstorm occurrence prediction (0 = No Thunderstorm, 1 = Thunderstorm)
+      - Prediction confidence probability
+    preprocessing:
+      - Missing value imputation with median strategy
+      - Feature scaling using StandardScaler
+      - SMOTE oversampling to address class imbalance
+      - Train-test splitting with stratified sampling
+    feature_engineering:
+      - Atmospheric instability index calculation from raw meteorological measurements
+      - Interaction terms between CAPE and Lifted Index for improved separability
+    modeling:
+      - Random Forest Classifier
+      - Gradient Boosting Classifier
+      - Logistic Regression (baseline)
+      - Cross-validation for model selection
+      - Hyperparameter tuning using GridSearchCV
+    evaluation_metrics:
+      - Accuracy
+      - Precision
+      - Recall
+      - F1-Score
+      - ROC-AUC Score
+    validation_strategy: Stratified K-Fold cross-validation to ensure balanced class representation across all folds, followed by final evaluation on a held-out test set.
+    explainability: Feature importance scores from the Random Forest classifier indicate which atmospheric instability indices are most predictive of thunderstorm occurrence, offering meteorological interpretability to domain experts.
+    training_environment:
+      - Python 3.x local environment with Scikit-learn and Imbalanced-learn
+    deployment: FastAPI backend serving the trained Scikit-learn model as a REST API, with a Streamlit frontend deployed on Streamlit Community Cloud for real-time user interaction.
+    risks:
+      - Model trained on a specific geographic region may not generalise to other climate zones.
+      - Extreme weather events outside the training distribution may produce unreliable predictions.
+      - Real-time data ingestion is not currently integrated; users must manually input atmospheric values.
+    ethics:
+      - Predictions are intended as decision-support tools and should not replace certified meteorological warnings.
+      - No personally identifiable information is collected or stored.
+      - Model limitations are disclosed clearly in the application interface.
+    known_limitations:
+      - Manual input of atmospheric indices limits automation for real-time operational use.
+      - The model does not currently integrate live meteorological API data feeds.
+      - Binary classification does not capture storm severity or location.
+    future_improvements:
+      - Integrate live weather API data (e.g., OpenWeatherMap) for automated real-time inference.
+      - Extend model to predict storm severity levels beyond binary classification.
+      - Add geographic location-based forecasting using spatial features.
+      - Implement time-series models (LSTM) for temporal forecasting.
+    open_resources:
+      - label: System Architecture
+        url: https://excalidraw.com/#json=9Nw6RepmXxt43Pa_0WrYS,pVW7PrOSRwuehccI2tgGmA
+      - label: GitHub Repository
+        url: https://github.com/Shivanshvyas1729/Thunderstrom_forcast
   - id: 2
     title: 🥤 Drink Quality Prediction System
     category:
       - Machine Learning
       - MLOps
       - Python
-    description: End-to-end machine learning pipeline for predicting drink quality with automated CI/CD deployment using Docker and AWS.
+    description: An end-to-end machine learning pipeline for predicting beverage quality using physicochemical properties. The system features automated CI/CD deployment with Docker containerization on AWS EC2 via AWS ECR and GitHub Actions, demonstrating production-grade MLOps practices with a fully automated build, test, and deploy workflow.
     media:
       - type: image
         url: https://labelyourdata.com/cms/wp-content/uploads/2023/10/machine-learning-for-wine-quality-prediction_1.jpg
@@ -180,7 +355,8 @@ projects:
     github: https://github.com/Shivanshvyas1729/drink_quality_prediction
     live: https://drinkqualityprediction.streamlit.app/
     featured: true
-    impact: Automated ML pipeline with production-ready CI/CD deployment
+    domain: "🍶 Food & Beverage"
+    impact: Automated ML pipeline with production-ready CI/CD deployment, demonstrating end-to-end MLOps from data ingestion to containerised cloud deployment.
   - id: 1
     title: 🎧 Automated YouTube Mixtape Creation
     category:
@@ -199,6 +375,7 @@ projects:
     github: https://github.com/Shivanshvyas1729/Automated-YouTube-Mixtape-Creation1/tree/main
     live: https://automated-youtube-mixtape-creation.streamlit.app/
     featured: true
+    domain: "🎵 Media & Entertainment"
     impact: Zero manual editing
     resources:
       - label: Architecture PDF

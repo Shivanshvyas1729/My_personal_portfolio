@@ -11,7 +11,13 @@ import { useCMSData } from "@/context/CMSContext";
 
 const AllProjects = () => {
   const cmsProjects = useCMSData(d => d.projects) || initialData.projects;
-  const { categories, selectedCategory, setSelectedCategory, filteredProjects, counts } = useProjectFilter(cmsProjects);
+  const {
+    categories, domains,
+    selectedCategory, selectedDomain,
+    setSelectedCategory, setSelectedDomain,
+    filteredProjects,
+    counts, domainCounts,
+  } = useProjectFilter(cmsProjects);
   const [searchQuery, setSearchQuery] = useState("");
 
   const finalFilteredProjects = useMemo(() => {
@@ -22,7 +28,8 @@ const AllProjects = () => {
       const descMatch = p.description?.toLowerCase().includes(query);
       const techMatch = Array.isArray(p.tech) && p.tech.some((t: string) => t.toLowerCase().includes(query));
       const categoryMatch = Array.isArray(p.category) && p.category.some((c: string) => c.toLowerCase().includes(query));
-      return titleMatch || descMatch || techMatch || categoryMatch;
+      const domainMatch = typeof p.domain === "string" && p.domain.toLowerCase().includes(query);
+      return titleMatch || descMatch || techMatch || categoryMatch || domainMatch;
     });
   }, [filteredProjects, searchQuery]);
 
@@ -36,7 +43,7 @@ const AllProjects = () => {
             <h1 className="text-4xl md:text-5xl font-heading font-bold mb-4">
               All <span className="gradient-text">Projects</span>
             </h1>
-            <p className="text-muted-foreground">Browse all my work by category.</p>
+            <p className="text-muted-foreground">Browse all my work by category or domain.</p>
           </div>
 
           <div className="flex flex-col md:flex-row gap-8 lg:gap-12">
@@ -65,22 +72,23 @@ const AllProjects = () => {
                   )}
                 </div>
 
-                <h3 className="text-sm font-heading font-semibold mb-4 text-foreground uppercase tracking-wider">Categories</h3>
-                <div className="flex flex-col gap-2">
+                {/* ── Category Filter ── */}
+                <h3 className="text-sm font-heading font-semibold mb-3 text-foreground uppercase tracking-wider">Categories</h3>
+                <div className="flex flex-col gap-1.5 mb-6">
                   {categories.map((cat) => (
                     <button
                       key={cat}
                       onClick={() => setSelectedCategory(cat)}
                       className={`flex items-center justify-between w-full px-4 py-2.5 rounded-lg text-sm transition-all duration-300 border ${
-                        selectedCategory === cat
+                        selectedCategory === cat && selectedDomain === "All"
                           ? "bg-primary/15 text-primary border-primary/30 shadow-sm shadow-primary/20 font-semibold"
                           : "border-transparent text-muted-foreground hover:bg-secondary/10 hover:text-foreground"
                       }`}
                     >
                       <span className="font-medium">{cat}</span>
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
-                        selectedCategory === cat 
-                          ? "bg-primary/20 text-primary" 
+                        selectedCategory === cat && selectedDomain === "All"
+                          ? "bg-primary/20 text-primary"
                           : "bg-secondary/20 text-secondary-foreground"
                       }`}>
                         {counts[cat] || 0}
@@ -88,6 +96,35 @@ const AllProjects = () => {
                     </button>
                   ))}
                 </div>
+
+                {/* ── Domain Filter (only shown when ≥1 project has a domain) ── */}
+                {domains.length > 0 && (
+                  <>
+                    <h3 className="text-sm font-heading font-semibold mb-3 text-foreground uppercase tracking-wider">Domain</h3>
+                    <div className="flex flex-col gap-1.5">
+                      {domains.map((dom) => (
+                        <button
+                          key={dom}
+                          onClick={() => setSelectedDomain(dom)}
+                          className={`flex items-center justify-between w-full px-4 py-2.5 rounded-lg text-sm transition-all duration-300 border ${
+                            selectedDomain === dom
+                              ? "bg-amber-500/15 text-amber-500 border-amber-500/30 shadow-sm shadow-amber-500/10 font-semibold"
+                              : "border-transparent text-muted-foreground hover:bg-amber-500/5 hover:text-foreground"
+                          }`}
+                        >
+                          <span className="font-medium">{dom}</span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${
+                            selectedDomain === dom
+                              ? "bg-amber-500/20 text-amber-500"
+                              : "bg-secondary/20 text-secondary-foreground"
+                          }`}>
+                            {domainCounts[dom] || 0}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             </aside>
 
@@ -95,7 +132,11 @@ const AllProjects = () => {
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-heading font-semibold text-foreground">
-                  {selectedCategory === "All" ? "All Projects" : `${selectedCategory} Projects`}
+                  {selectedDomain !== "All"
+                    ? `${selectedDomain} Projects`
+                    : selectedCategory === "All"
+                      ? "All Projects"
+                      : `${selectedCategory} Projects`}
                 </h2>
                 <span className="text-sm font-medium text-secondary-foreground bg-secondary px-3 py-1 rounded-full border border-border/50">
                   Showing {finalFilteredProjects.length} result{finalFilteredProjects.length !== 1 ? 's' : ''}
