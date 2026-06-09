@@ -1637,6 +1637,7 @@ blog:
     date: 2026-05-09T00:00:00.000Z
     featured: false
     draft: false
+    excerpt: "some info about cloud type "
   - id: 4
     title: MY LIFE
     slug: my-life
