@@ -269,6 +269,7 @@ blog:
     featured: false
     draft: false
     date: 2026-06-05
+    excerpt: basic questions about exp handling
   - id: 10
     title: all secret prompt and flow
     content: https://github.com/Shivanshvyas1729/Cancer_Detection_with_xai#appendix-master-prompt--dynamic-ai-document-generator
