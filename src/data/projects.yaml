@@ -112,7 +112,8 @@ projects:
     category:
       - Deep Learning
       - Computer Vision
-    description: An AI-powered solar panel defect detection system using transfer learning with EfficientNet-B0. The model leverages pretrained weights to achieve high accuracy with limited data, enabling fast and reliable classification of defects like dust, bird drops, and physical damage through an interactive Streamlit web app.
+    domain: ⚡ Renewable Energy
+    description: An AI-powered solar panel defect detection system using transfer learning with EfficientNet-B0. The model leverages pretrained weights to achieve high accuracy with limited data, enabling fast and reliable classification of defects such as dust accumulation, bird droppings, electrical faults, physical damage, and snow coverage through an interactive Streamlit web application.
     media:
       - type: image
         url: https://i.ibb.co/fdj291HQ/Gemini-Generated-Image-14r8ms14r8ms14r8.png
@@ -128,10 +129,110 @@ projects:
     live: https://solarpaneldefectdetection.streamlit.app/
     featured: true
     impact: Improves efficiency of solar panel maintenance by enabling quick and automated defect detection, reducing manual inspection effort and supporting scalable renewable energy operations.
-    resources:
-      - label: Architecture PDF
-        url: https://drive.google.com/drive/folders/1zYdh2-eu6yUfUA4IYokQsziallVQXCGr
+    problem_statement: Manual inspection of solar panels is slow, labor-intensive, and expensive, especially for large solar farms. Environmental conditions such as dust, bird droppings, snow accumulation, electrical faults, and physical damage can significantly reduce energy production efficiency. There is a need for an automated computer vision system capable of identifying defects quickly and accurately to support maintenance teams and maximize renewable energy output.
+    learning_outcomes:
+      - Implemented transfer learning using EfficientNet-B0 for image classification.
+      - Built a complete computer vision pipeline using PyTorch.
+      - Worked with real-world renewable energy datasets.
+      - Developed an interactive Streamlit deployment.
+      - Implemented confidence score and Top-3 prediction visualization.
+      - Applied image preprocessing and model inference techniques.
+    architecture: Users upload solar panel images through a Streamlit interface. Images are preprocessed and passed to a pretrained EfficientNet-B0 model. The model extracts deep visual features and classifies the image into one of six defect categories. Prediction probabilities are generated and displayed alongside the predicted class and confidence score.
     architectureImage: https://backend.krishnaik.in/media/project_architecture_diagrams/Gemini_Generated_Image_vwro75vwro75vwro_UvMo1qV.jpg
+    resources:
+      - label: Resource Files and Source Code
+        url: https://drive.google.com/drive/folders/1zYdh2-eu6yUfUA4IYokQsziallVQXCGr?usp=sharing
+    open_resources:
+      - label: Dataset
+        url: https://www.kaggle.com/datasets/pythonafroz/solar-panel-images
+    howItWorks: 1. User uploads a solar panel image. 2. The image is preprocessed and resized. 3. EfficientNet-B0 extracts visual features. 4. The classifier predicts the defect category. 5. Softmax probabilities are calculated. 6. The predicted class, confidence score, and Top-3 predictions are displayed.
+    objectives:
+      - Automate solar panel defect detection using deep learning.
+      - Reduce manual inspection effort and maintenance costs.
+      - Provide fast and reliable defect classification.
+      - Enable deployment through an accessible web interface.
+    success_criteria:
+      - Accurately classify six solar panel defect categories.
+      - Provide real-time predictions through Streamlit.
+      - Display confidence scores and Top-3 predictions.
+      - Achieve approximately 80% validation accuracy.
+    data_sources:
+      - https://www.kaggle.com/datasets/pythonafroz/solar-panel-images
+    data_volume: 875 labeled solar panel images across 6 classes.
+    class_distribution: "Bird-drop: 192, Clean: 194, Dusty: 191, Electrical-damage: 104, Physical-Damage: 70, Snow-Covered: 124."
+    target_variable: Solar Panel Defect Category
+    features:
+      - Solar Panel Defect Classification
+      - Confidence Score Prediction
+      - Top-3 Prediction Display
+      - Interactive Streamlit Interface
+      - Transfer Learning with EfficientNet-B0
+      - Real-Time Image Inference
+    feature_engineering:
+      - Image resizing
+      - Image normalization
+      - Tensor conversion
+      - Transfer learning feature extraction
+    model_inputs:
+      - Solar Panel RGB Images
+    model_outputs:
+      - Predicted defect class
+      - Confidence score
+      - Top-3 predictions with probabilities
+    preprocessing:
+      - Image loading using PIL
+      - RGB conversion
+      - Image resizing
+      - Tensor conversion
+      - Normalization
+    modeling:
+      - EfficientNet-B0
+      - Batch Normalization
+      - Linear Layer
+      - ReLU Activation
+      - Dropout Layer
+      - Output Classification Layer
+      - CrossEntropyLoss
+      - Adam Optimizer
+    hyperparameters:
+      - "Epochs: 15-20"
+      - "Optimizer: Adam"
+      - "Loss Function: CrossEntropyLoss"
+      - "Architecture: EfficientNet-B0"
+    evaluation_metrics:
+      - Accuracy
+      - Confidence Score
+      - Top-3 Prediction Probability
+    validation_strategy: 80/10/10 Train-Validation-Test Split.
+    explainability: The application displays confidence scores and Top-3 prediction probabilities for model outputs.
+    training_environment: Local machine using Python, PyTorch and Torchvision.
+    deployment: Deployed as a Streamlit web application for browser-based real-time solar panel defect classification.
+    inference_pipeline: User uploads an image → preprocessing → EfficientNet-B0 inference → probability calculation → predicted class, confidence score, and Top-3 predictions displayed.
+    monitoring: Validation accuracy tracking during training along with confidence score and Top-3 prediction display during inference.
+    versioning: GitHub repository used for source control and model checkpoints saved during training.
+    risks:
+      - Class imbalance between defect categories.
+      - Performance may decrease on unseen environmental conditions.
+      - Image quality variations can affect prediction accuracy.
+      - Limited dataset size may impact generalization.
+    ethics:
+      - Uses publicly available image datasets.
+      - Designed to assist maintenance teams rather than replace human inspection.
+      - Supports sustainable renewable energy operations.
+    privacy:
+      - No personal information is collected.
+      - No user-identifiable data is stored.
+      - Images are used solely for prediction.
+    known_limitations:
+      - Limited dataset size (875 images).
+      - Single-image classification only.
+      - Cannot localize defect regions.
+      - Performance may vary on unseen panel types.
+    future_improvements:
+      - Grad-CAM visualization for defect localization.
+      - Cloud deployment on AWS.
+      - Mobile-friendly user interface.
+      - Inference optimization for faster predictions.
   - id: 3
     title: 🌦 Thunderstorm Forecasting System
     category:
