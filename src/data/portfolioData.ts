@@ -80,7 +80,7 @@ export interface Project {
   success_criteria?: string[];
   data_sources?: string[];
   data_volume?: string;
-  class_distribution?: string;
+  class_distribution?: string | string[] | Record<string, string | number>;
   target_variable?: string;
   features?: string[];
   model_inputs?: string[];
@@ -92,11 +92,11 @@ export interface Project {
   evaluation_metrics?: string[];
   validation_strategy?: string;
   explainability?: string;
-  training_environment?: string[];
+  training_environment?: string | string[];
   deployment?: string;
-  inference_pipeline?: string[];
-  monitoring?: string[];
-  versioning?: string[];
+  inference_pipeline?: string | string[];
+  monitoring?: string | string[];
+  versioning?: string | string[];
   risks?: string[];
   ethics?: string[];
   privacy?: string[];

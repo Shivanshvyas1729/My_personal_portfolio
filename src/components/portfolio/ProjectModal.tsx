@@ -134,6 +134,82 @@ export function ProjectModal({ project, isOpen, onClose }: ProjectModalProps) {
     );
   };
 
+  // Render a flexible section that handles strings, arrays, or objects
+  const renderFlexibleSection = (key: keyof Project, title?: string, icon?: React.ReactNode, extraClasses = "") => {
+    if (!activeProject) return null;
+    const value = activeProject[key];
+    if (value === undefined || value === null) return null;
+
+    const sectionTitle = title || formatKeyName(key as string);
+    const overrides = activeProject.knowledge_overrides || [];
+    const isTargetVar = key === "target_variable";
+
+    // Scenario 1: Array of strings
+    if (Array.isArray(value)) {
+      if (value.length === 0) return null;
+      return (
+        <div className={`glass-card p-5 border border-border/40 rounded-xl bg-muted/10 ${extraClasses}`}>
+          <h4 className="font-heading font-bold text-foreground mb-3 text-sm flex items-center gap-1.5">
+            {icon} {sectionTitle}
+          </h4>
+          <ul className="list-disc pl-5 text-muted-foreground text-xs space-y-1.5 leading-relaxed">
+            {value.map((item, i) => {
+              if (typeof item !== "string") return null;
+              const termOverrides = overrides.find(o => o.id.toLowerCase() === item.toLowerCase());
+              return (
+                <li key={i}>
+                  <KnowledgeTooltip term={item} overrides={termOverrides} />
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      );
+    }
+
+    // Scenario 2: Object (dictionary/record)
+    if (typeof value === "object") {
+      const entries = Object.entries(value);
+      if (entries.length === 0) return null;
+      return (
+        <div className={`glass-card p-5 border border-border/40 rounded-xl bg-muted/10 ${extraClasses}`}>
+          <h4 className="font-heading font-bold text-foreground mb-3 text-sm flex items-center gap-1.5">
+            {icon} {sectionTitle}
+          </h4>
+          <ul className="list-disc pl-5 text-muted-foreground text-xs space-y-1.5 leading-relaxed">
+            {entries.map(([k, v], i) => {
+              const itemText = `${k}: ${v}`;
+              const termOverrides = overrides.find(o => o.id.toLowerCase() === itemText.toLowerCase());
+              return (
+                <li key={i}>
+                  <KnowledgeTooltip term={itemText} overrides={termOverrides} />
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      );
+    }
+
+    // Scenario 3: String
+    if (typeof value === "string") {
+      if (value.trim().length === 0) return null;
+      const termOverrides = overrides.find(o => o.id.toLowerCase() === value.toLowerCase());
+      return (
+        <div className={`glass-card p-5 border border-border/40 rounded-xl bg-muted/10 ${extraClasses}`}>
+          <h4 className="font-heading font-bold text-foreground mb-2 text-sm flex items-center gap-1.5">
+            {icon} {sectionTitle}
+          </h4>
+          <p className="text-muted-foreground text-xs leading-relaxed no-text-effect">
+            <KnowledgeTooltip term={value} overrides={termOverrides} isTargetVariable={isTargetVar} />
+          </p>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <AnimatePresence mode="wait">
       {isOpen && activeProject && (
@@ -304,7 +380,7 @@ export function ProjectModal({ project, isOpen, onClose }: ProjectModalProps) {
                   {renderArraySection("success_criteria")}
                   {renderArraySection("data_sources")}
                   {renderTextSection("data_volume")}
-                  {renderTextSection("class_distribution")}
+                  {renderFlexibleSection("class_distribution")}
                   {renderTextSection("target_variable")}
                   
                   {/* Features & Modeling */}
@@ -322,11 +398,11 @@ export function ProjectModal({ project, isOpen, onClose }: ProjectModalProps) {
                   {renderTextSection("explainability")}
                   
                   {/* MLOps & Deployment */}
-                  {renderTextSection("training_environment")}
-                  {renderTextSection("inference_pipeline")}
+                  {renderFlexibleSection("training_environment")}
+                  {renderFlexibleSection("inference_pipeline")}
                   {renderTextSection("deployment")}
-                  {renderTextSection("monitoring")}
-                  {renderTextSection("versioning")}
+                  {renderFlexibleSection("monitoring")}
+                  {renderFlexibleSection("versioning")}
                   
                   {/* Risks & Ethics */}
                   {renderArraySection("risks", undefined, <ShieldAlert size={14} className="text-destructive" />, "border-destructive/30 bg-destructive/5")}
