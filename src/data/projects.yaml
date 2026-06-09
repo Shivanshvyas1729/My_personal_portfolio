@@ -113,7 +113,7 @@ projects:
     category:
       - Deep Learning
       - Computer Vision
-    domain: ⚡ Renewable Energy
+    domain: Renewable Energy
     description: An AI-powered solar panel defect detection system using transfer learning with EfficientNet-B0. The model leverages pretrained weights to achieve high accuracy with limited data, enabling fast and reliable classification of defects such as dust accumulation, bird droppings, electrical faults, physical damage, and snow coverage through an interactive Streamlit web application.
     media:
       - type: image
