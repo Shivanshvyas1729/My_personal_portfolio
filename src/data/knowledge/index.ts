@@ -43,7 +43,7 @@ export const allDefinitions: Partial<KnowledgeDefinition>[] = [
   ...cloud,
   ...databases,
   ...vectorDatabases,
-];
+] as unknown as Partial<KnowledgeDefinition>[];
 
 export const globalKnowledgeMap = new Map<string, KnowledgeDefinition>();
 export const aliasLookupMap = new Map<string, string>();
@@ -77,6 +77,16 @@ export const getKnowledge = (term: string): KnowledgeDefinition | undefined => {
   const directId = aliasLookupMap.get(normalized);
   if (directId) {
     return globalKnowledgeMap.get(directId);
+  }
+
+  // 1.5 Clean match (ignore hyphens, underscores, spaces)
+  const cleanTerm = normalized.replace(/[-_\s]/g, '');
+  if (cleanTerm) {
+    for (const [alias, id] of aliasLookupMap.entries()) {
+      if (alias.replace(/[-_\s]/g, '') === cleanTerm) {
+        return globalKnowledgeMap.get(id);
+      }
+    }
   }
 
   // 2. Fallback fuzzy search (e.g. if string has extra words like "Accuracy (Validation)")
