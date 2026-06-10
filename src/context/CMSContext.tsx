@@ -220,8 +220,8 @@ export const CMSProvider = ({ children }: { children: ReactNode }) => {
         setCmsMode("github");
         
         const RAW_BASE = githubConfig.getRawBaseUrl();
-        // 5-minute cache-busting interval balances instant sync with aggressive browser caching
-        const cacheBuster = Math.floor(Date.now() / 300000); 
+        // Use Date.now() for instant sync of updates on refresh without waiting 5 minutes
+        const cacheBuster = Date.now(); 
 
         const [portRes, projRes, blogRes] = await Promise.all([
           fetch(`${RAW_BASE}/portfolio.yaml?t=${cacheBuster}`),
