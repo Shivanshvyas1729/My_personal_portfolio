@@ -93,8 +93,8 @@ export function getPreviewUrl(url: any): string {
 }
 
 // Helper to convert GitHub blob URLs and relative upload paths to raw.githubusercontent.com direct image URLs
-export function convertToRawGitHubUrl(url: string): string {
-  if (!url) return url;
+export function convertToRawGitHubUrl(url: any): string {
+  if (typeof url !== 'string') return '';
   
   const trimmed = url.trim();
 
@@ -106,7 +106,7 @@ export function convertToRawGitHubUrl(url: string): string {
     return `https://raw.githubusercontent.com/${owner}/${repo}/refs/heads/${branch}/${path}`;
   }
   return url;
-};
+}
 
 // ─── Fully unwrap nested Zod types ───────────────────────────────────────────
 export function unwrapSchema(schema: z.ZodTypeAny, data?: any): z.ZodTypeAny {
@@ -127,6 +127,12 @@ export function unwrapSchema(schema: z.ZodTypeAny, data?: any): z.ZodTypeAny {
           });
           if (stringOption) {
             s = stringOption;
+            continue;
+          }
+        } else if (Array.isArray(data)) {
+          const arrayOption = options.find((opt: any) => unwrapSchema(opt, data) instanceof z.ZodArray);
+          if (arrayOption) {
+            s = arrayOption;
             continue;
           }
         } else if (typeof data === 'object') {
