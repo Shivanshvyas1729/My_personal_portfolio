@@ -82,7 +82,7 @@ const AllProjects = () => {
                       className={`flex items-center justify-between w-full px-4 py-2.5 rounded-lg text-sm transition-all duration-300 border ${
                         selectedCategory === cat && selectedDomain === "All"
                           ? "bg-primary/15 text-primary border-primary/30 shadow-sm shadow-primary/20 font-semibold"
-                          : "border-transparent text-muted-foreground hover:bg-secondary/10 hover:text-foreground"
+                          : "border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:border-border/30"
                       }`}
                     >
                       <span className="font-medium">{cat}</span>
@@ -109,7 +109,7 @@ const AllProjects = () => {
                           className={`flex items-center justify-between w-full px-4 py-2.5 rounded-lg text-sm transition-all duration-300 border ${
                             selectedDomain === dom
                               ? "bg-amber-500/15 text-amber-500 border-amber-500/30 shadow-sm shadow-amber-500/10 font-semibold"
-                              : "border-transparent text-muted-foreground hover:bg-amber-500/5 hover:text-foreground"
+                              : "border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:border-border/30"
                           }`}
                         >
                           <span className="font-medium">{dom}</span>

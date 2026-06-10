@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { 
-  getKnowledge, 
-  searchKnowledge, 
-  getKnowledgeWithOverrides, 
-  allDefinitions
-} from './index';
-import { Project } from '../portfolioData';
+   getKnowledge, 
+   searchKnowledge, 
+   getKnowledgeWithOverrides, 
+   allDefinitions
+} from './index.js';
+import { Project } from '../portfolioData.js';
 
 describe('Knowledge Matrix Data Layer', () => {
   it('loads definitions successfully', () => {

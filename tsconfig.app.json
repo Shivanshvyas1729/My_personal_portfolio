@@ -38,6 +38,11 @@
     "dist",
     ".netlify",
     ".vercel",
-    ".cache"
+    ".cache",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/*.spec.ts",
+    "src/**/*.spec.tsx",
+    "src/test/setup.ts"
   ]
 }

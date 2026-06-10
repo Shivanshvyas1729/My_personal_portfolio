@@ -66,7 +66,7 @@ const ProjectCard = ({ project, index, disableInViewAnimation = false, onClick }
       viewport={{ once: true }}
       transition={disableInViewAnimation ? { duration: 0.2 } : { delay: index * 0.1, duration: 0.5 }}
       whileHover={{
-        boxShadow: "0 30px 60px -15px hsla(var(--primary), 0.25)"
+        boxShadow: "0 30px 60px -15px hsl(var(--primary) / 0.25)"
       }}
       onClick={handleCardClick}
       style={{ transition: "background-color 0.3s, border-color 0.3s, box-shadow 0.3s" }}
@@ -126,6 +126,17 @@ const ProjectCard = ({ project, index, disableInViewAnimation = false, onClick }
           )}
         </div>
         <p className="text-muted-foreground text-sm mb-4 line-clamp-3 min-h-[60px] flex-1">{project.description}</p>
+
+        {project.metrics && Object.keys(project.metrics).length > 0 && (
+          <div className="grid grid-cols-3 gap-2 p-2.5 rounded-lg bg-secondary/35 border border-border/30 mb-4 text-left shadow-inner">
+            {Object.entries(project.metrics).slice(0, 3).map(([key, val]) => (
+              <div key={key} className="flex flex-col min-w-0">
+                <span className="text-[8px] text-muted-foreground uppercase font-bold tracking-wide truncate mb-0.5" title={key}>{key}</span>
+                <span className="text-xs font-bold text-primary font-mono truncate">{val}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {project.impact && (
           <p className="text-xs text-accent mb-4 italic line-clamp-1">⚡ {project.impact}</p>

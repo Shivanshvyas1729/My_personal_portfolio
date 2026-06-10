@@ -24,7 +24,7 @@ const SCHEMA_EXAMPLE_JSON = `{
   "category": ["Deep Learning", "Computer Vision"],
   "// category": "AI/ML sub-field tags used for filtering on the All Projects page",
 
-  "domain": "⚡ Renewable Energy",
+  "domain": "🏥 Healthcare",
   "// domain": "OPTIONAL — Real-world industry sector. Adds a separate Domain filter. Examples: '🏥 Healthcare', '⚡ Renewable Energy', '🌤️ Meteorology', '🍶 Food & Beverage', '🎵 Media & Entertainment'. Remove this field entirely if not applicable.",
 
   "description": "An AI-powered solar panel defect detection system using transfer learning with EfficientNet-B0.",
@@ -159,6 +159,15 @@ const SCHEMA_EXAMPLE_JSON = `{
     "Mean Inference Latency (ms/image on CPU)"
   ],
   "// evaluation_metrics": "Metrics used to evaluate model quality and operational performance",
+
+  "metrics": {
+    "Test Accuracy": "96.2%",
+    "ROC-AUC": "0.985",
+    "Model Size": "14.5 MB",
+    "Dataset Size": "3,654 images",
+    "Avg Inference Time": "45ms"
+  },
+  "// metrics": "Highlighted key-value metrics and statistics displayed as a summary grid in the details view",
 
   "validation_strategy": "Stratified 70/15/15 train-validation-test split with random_seed=42. Early stopping on validation loss.",
   "// validation_strategy": "How data is split and how overfitting is prevented during training",
@@ -385,6 +394,7 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
       github: "https://github.com/...",
       live: "https://...",
       featured: false,
+      domain: "🏥 Healthcare",
       media: [
         {
           type: "image",
@@ -433,6 +443,13 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
         "Weighted F1-Score (Primary metric due to class skew)",
         "Macro Recall (Secondary metric to ensure high detection sensitivity)"
       ],
+      metrics: {
+        "Test Accuracy": "96.2%",
+        "ROC-AUC": "0.985",
+        "Model Size": "14.5 MB",
+        "Dataset Size": "3,654 images",
+        "Avg Inference Time": "45ms"
+      },
       validation_strategy: "5-Fold stratified cross-validation split across localized images",
       explainability: "Integrated Grad-CAM heatmaps showing exact visual pixels triggering defect predictions",
       deployment: "Deployed as a Streamlit server connected to an AWS ECS Fargate container instance",

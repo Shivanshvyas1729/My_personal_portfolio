@@ -181,6 +181,8 @@ export const ProjectSchema = z.object({
   live: z.string().optional().default(""),
   featured: z.boolean().optional().default(false),
   impact: z.string().optional(),
+  domain: z.string().optional(),
+  metrics: z.record(z.union([z.string(), z.number()])).optional(),
 
   // Media: type is a dropdown chooser, url and caption are optional
   media: z.array(z.object({

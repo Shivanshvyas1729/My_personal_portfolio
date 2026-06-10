@@ -1,25 +1,25 @@
-import { KnowledgeDefinition, KnowledgeCategory } from "./categories";
+import { KnowledgeDefinition, KnowledgeCategory } from "./categories.js";
 
-import evaluationMetrics from "./evaluation-metrics.json";
-import machineLearning from "./machine-learning.json";
-import deepLearning from "./deep-learning.json";
-import computerVision from "./computer-vision.json";
-import nlp from "./nlp.json";
-import llmRag from "./llm-rag.json";
-import agents from "./agents.json";
-import preprocessing from "./preprocessing.json";
-import featureEngineering from "./feature-engineering.json";
-import validation from "./validation.json";
-import explainability from "./explainability.json";
-import deployment from "./deployment.json";
-import mlops from "./mlops.json";
-import risks from "./risks.json";
-import ethics from "./ethics.json";
-import privacy from "./privacy.json";
-import softwareEngineering from "./software-engineering.json";
-import cloud from "./cloud.json";
-import databases from "./databases.json";
-import vectorDatabases from "./vector-databases.json";
+import evaluationMetrics from "./evaluation-metrics.json" with { type: "json" };
+import machineLearning from "./machine-learning.json" with { type: "json" };
+import deepLearning from "./deep-learning.json" with { type: "json" };
+import computerVision from "./computer-vision.json" with { type: "json" };
+import nlp from "./nlp.json" with { type: "json" };
+import llmRag from "./llm-rag.json" with { type: "json" };
+import agents from "./agents.json" with { type: "json" };
+import preprocessing from "./preprocessing.json" with { type: "json" };
+import featureEngineering from "./feature-engineering.json" with { type: "json" };
+import validation from "./validation.json" with { type: "json" };
+import explainability from "./explainability.json" with { type: "json" };
+import deployment from "./deployment.json" with { type: "json" };
+import mlops from "./mlops.json" with { type: "json" };
+import risks from "./risks.json" with { type: "json" };
+import ethics from "./ethics.json" with { type: "json" };
+import privacy from "./privacy.json" with { type: "json" };
+import softwareEngineering from "./software-engineering.json" with { type: "json" };
+import cloud from "./cloud.json" with { type: "json" };
+import databases from "./databases.json" with { type: "json" };
+import vectorDatabases from "./vector-databases.json" with { type: "json" };
 
 // Aggregate all definitions
 export const allDefinitions: Partial<KnowledgeDefinition>[] = [

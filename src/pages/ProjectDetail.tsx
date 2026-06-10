@@ -111,13 +111,65 @@ const ProjectDetail = () => {
           {data.map((item, i) => {
             const termOverrides = overrides.find((o) => o.id?.toLowerCase() === item.toLowerCase());
 
+            // Check if there is an obtained value in metrics
+            let obtainedVal = "";
+            if (key === "evaluation_metrics" && project.metrics) {
+              const exactVal = project.metrics[item];
+              if (exactVal !== undefined) {
+                obtainedVal = String(exactVal);
+              } else {
+                const lowerItem = item.toLowerCase().trim();
+                const foundKey = Object.keys(project.metrics).find(k => {
+                  const lowerK = k.toLowerCase().trim();
+                  return lowerK === lowerItem || lowerK.includes(lowerItem) || lowerItem.includes(lowerK);
+                });
+                if (foundKey) {
+                  obtainedVal = String(project.metrics[foundKey]);
+                }
+              }
+            }
+
             return (
               <li key={i}>
-                <KnowledgeTooltip term={item} overrides={termOverrides} />
+                <span className="font-semibold text-foreground/95">
+                  <KnowledgeTooltip term={item} overrides={termOverrides} />
+                </span>
+                {obtainedVal && (
+                  <span className="ml-1.5 text-primary font-mono font-bold">
+                    — {obtainedVal}
+                  </span>
+                )}
               </li>
             );
           })}
         </ul>
+      </div>
+    );
+  };
+
+  // Render metrics grid if available
+  const renderMetricsSection = () => {
+    if (!project || !project.metrics) return null;
+    const entries = Object.entries(project.metrics);
+    if (entries.length === 0) return null;
+
+    return (
+      <div className="p-5 border border-border/40 rounded-xl bg-muted/10 md:col-span-2">
+        <h4 className="font-heading font-bold text-foreground mb-4 text-sm flex items-center gap-1.5">
+          📊 Performance Metrics & Stats
+        </h4>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {entries.map(([label, val]) => (
+            <div key={label} className="p-3.5 rounded-lg bg-background/40 border border-border/20 flex flex-col justify-between">
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1 leading-snug">
+                {label}
+              </span>
+              <span className="text-lg font-bold text-primary font-mono leading-none">
+                {val}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     );
   };
@@ -183,8 +235,23 @@ const ProjectDetail = () => {
                     {cat.trim()}
                   </span>
                 ))}
+                {project.domain && (
+                  <span className="text-xs text-amber-500 bg-amber-500/10 px-2.5 py-0.5 rounded-full font-medium shadow-sm border border-amber-500/20">
+                    {project.domain}
+                  </span>
+                )}
               </div>
               <h1 className="text-3xl md:text-4xl font-heading font-bold mt-3 mb-4">{project.title}</h1>
+              {project.metrics && Object.keys(project.metrics).length > 0 && (
+                <div className="flex flex-wrap gap-x-6 gap-y-3 mb-6 p-4 rounded-xl bg-secondary/25 border border-border/40 backdrop-blur-md w-fit">
+                  {Object.entries(project.metrics).map(([key, val]) => (
+                    <div key={key} className="flex flex-col min-w-[100px]">
+                      <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-0.5">{key}</span>
+                      <span className="text-base font-bold text-primary font-mono">{val}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
               <div className="mb-6">
                 <h2 className="text-sm font-medium text-primary mb-1">Overview</h2>
                 <p className="text-muted-foreground text-base md:text-lg leading-relaxed">{renderTextWithLinks(project.description)}</p>
@@ -342,6 +409,7 @@ const ProjectDetail = () => {
               {renderArraySection("features")}
               {renderArraySection("preprocessing")}
               {renderArraySection("modeling")}
+              {renderMetricsSection()}
               {renderArraySection("evaluation_metrics")}
               {renderTextSection("validation_strategy")}
               {renderTextSection("explainability")}

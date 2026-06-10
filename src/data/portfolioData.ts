@@ -103,6 +103,7 @@ export interface Project {
   known_limitations?: string[];
   future_improvements?: string[];
   open_resources?: { label: string; url: string }[];
+  metrics?: Record<string, string | number>;
   knowledge_overrides?: Array<{
     id: string;
     [key: string]: any;

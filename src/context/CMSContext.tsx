@@ -7,6 +7,70 @@ import { githubConfig } from "../config";
 import { useAuth } from "@/hooks/useAuth";
 import { clearLocalImages } from "@/lib/localImageStore";
 
+const sanitizeProjects = (projects: any[]): any[] => {
+  if (!Array.isArray(projects)) return [];
+  const domainNames = [
+    "healthcare", "renewable energy", "meteorology", "food & beverage", "media & entertainment",
+    "🏥 healthcare", "⚡ renewable energy", "🌤️ meteorology", "🍶 food & beverage", "🎵 media & entertainment",
+    "weather forecasting", "🌦 thunderstorm forecasting system"
+  ];
+  
+  const domainStandardMap: Record<string, string> = {
+    "healthcare": "🏥 Healthcare",
+    "🏥 healthcare": "🏥 Healthcare",
+    "renewable energy": "⚡ Renewable Energy",
+    "⚡ renewable energy": "⚡ Renewable Energy",
+    "meteorology": "🌤️ Meteorology",
+    "🌤️ meteorology": "🌤️ Meteorology",
+    "weather forecasting": "🌤️ Meteorology",
+    "food & beverage": "🍶 Food & Beverage",
+    "🍶 food & beverage": "🍶 Food & Beverage",
+    "media & entertainment": "🎵 Media & Entertainment",
+    "🎵 media & entertainment": "🎵 Media & Entertainment"
+  };
+
+  return projects.map(p => {
+    let domain = p.domain || "";
+    let categories = Array.isArray(p.category) ? p.category : [];
+    
+    // Find if any category is actually a domain
+    const domainFromCat = categories.find((c: any) => 
+      typeof c === 'string' && domainNames.includes(c.toLowerCase().trim())
+    );
+    
+    if (domainFromCat && !domain) {
+      const standard = domainStandardMap[domainFromCat.toLowerCase().trim()];
+      domain = standard || domainFromCat;
+    }
+    
+    // Filter out domain-like categories
+    categories = categories.filter((c: any) => 
+      typeof c === 'string' && !domainNames.includes(c.toLowerCase().trim())
+    );
+
+    // Standardize domain emoji if it's a known domain
+    const trimmedDomainLower = typeof domain === 'string' ? domain.trim().toLowerCase() : "";
+    if (domainStandardMap[trimmedDomainLower]) {
+      domain = domainStandardMap[trimmedDomainLower];
+    }
+    
+    return {
+      ...p,
+      domain,
+      category: categories
+    };
+  });
+};
+
+const sanitizePortfolioData = (data: any): any => {
+  if (!data) return data;
+  return {
+    ...data,
+    projects: sanitizeProjects(data.projects)
+  };
+};
+
+
 interface CMSState {
   previewMode: boolean;
   safeMode: boolean;
@@ -52,13 +116,13 @@ export const CMSProvider = ({ children }: { children: ReactNode }) => {
       try {
         const cached = localStorage.getItem("cms-cached-portfolio-data");
         if (cached) {
-          return JSON.parse(cached);
+          return sanitizePortfolioData(JSON.parse(cached));
         }
       } catch (e) {
         console.warn("Failed to parse cached portfolio data", e);
       }
     }
-    return initialPortfolioData;
+    return sanitizePortfolioData(initialPortfolioData);
   });
 
   const [previewData, setPreviewData] = useState<PortfolioData>(() => {
@@ -66,13 +130,13 @@ export const CMSProvider = ({ children }: { children: ReactNode }) => {
       try {
         const cached = localStorage.getItem("cms-cached-portfolio-data");
         if (cached) {
-          return JSON.parse(cached);
+          return sanitizePortfolioData(JSON.parse(cached));
         }
       } catch (e) {
         console.warn("Failed to parse cached portfolio data", e);
       }
     }
-    return initialPortfolioData;
+    return sanitizePortfolioData(initialPortfolioData);
   });
   const [activeSection, setActiveSection] = useState<string | null>(null);
   
@@ -249,18 +313,19 @@ export const CMSProvider = ({ children }: { children: ReactNode }) => {
       if (projDataResult) combinedData = { ...combinedData, projects: projDataResult };
       if (blogDataResult) combinedData = { ...combinedData, blog: blogDataResult };
 
-      setLiveData(combinedData);
+      const sanitizedCombinedData = sanitizePortfolioData(combinedData);
+      setLiveData(sanitizedCombinedData);
       
       // Update local storage cache to prevent asynchronous layout flash on future loads
       try {
-        localStorage.setItem("cms-cached-portfolio-data", JSON.stringify(combinedData));
+        localStorage.setItem("cms-cached-portfolio-data", JSON.stringify(sanitizedCombinedData));
       } catch (err) {
         console.warn("Failed to save portfolio data to local storage cache", err);
       }
 
       // If we don't have active local edits in sessionStorage, sync previewData
       if (!sessionStorage.getItem("cms-preview-data")) {
-        setPreviewData(combinedData);
+        setPreviewData(sanitizedCombinedData);
       }
       
       logger.addLog({ 
@@ -290,10 +355,10 @@ export const CMSProvider = ({ children }: { children: ReactNode }) => {
 
       pushToUndo(prev);
 
-      const next = {
+      const next = sanitizePortfolioData({
         ...prev,
         [section]: data
-      } as PortfolioData;
+      }) as PortfolioData;
 
       try {
         sessionStorage.setItem("cms-preview-data", JSON.stringify(next));
@@ -313,10 +378,10 @@ export const CMSProvider = ({ children }: { children: ReactNode }) => {
 
   const updateLiveSection = useCallback((section: string, data: any) => {
     setLiveData(prev => {
-      const next = {
+      const next = sanitizePortfolioData({
         ...prev,
         [section]: data
-      } as PortfolioData;
+      }) as PortfolioData;
       
       try {
         localStorage.setItem("cms-cached-portfolio-data", JSON.stringify(next));
@@ -327,10 +392,10 @@ export const CMSProvider = ({ children }: { children: ReactNode }) => {
       return next;
     });
     // Also sync previewData so the CRM panel stays consistent
-    setPreviewData(prev => ({
+    setPreviewData(prev => sanitizePortfolioData({
       ...prev,
       [section]: data
-    } as PortfolioData));
+    }) as PortfolioData);
   }, []);
 
   const updateNestedField = useCallback((path: string, value: any) => {
@@ -350,13 +415,14 @@ export const CMSProvider = ({ children }: { children: ReactNode }) => {
       
       current[keys[keys.length - 1]] = value;
       
+      const sanitized = sanitizePortfolioData(next);
       try {
-        sessionStorage.setItem("cms-preview-data", JSON.stringify(next));
+        sessionStorage.setItem("cms-preview-data", JSON.stringify(sanitized));
       } catch (err) {
         console.warn("Failed to save preview data to session storage", err);
       }
 
-      return next;
+      return sanitized;
     });
   }, [pushToUndo]);
 

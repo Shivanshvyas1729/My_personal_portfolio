@@ -26,7 +26,7 @@ const Experience = () => {
                   whileHover={{ 
                     scale: 1.04, 
                     y: -5,
-                    boxShadow: "0 20px 40px -15px hsla(var(--primary), 0.2)"
+                    boxShadow: "0 20px 40px -15px hsl(var(--primary) / 0.2)"
                   }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
                   style={{ transition: "background-color 0.3s, border-color 0.3s" }}

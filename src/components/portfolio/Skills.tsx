@@ -190,9 +190,9 @@ const TiltCard = ({
           className="absolute inset-0 pointer-events-none rounded-2xl z-0 transition-opacity duration-500"
           style={{
             opacity: isActive ? 1 : 0,
-            boxShadow: `0 35px 80px -15px hsla(var(--primary), 0.35), 
-                        0 0 50px -5px hsla(var(--accent), 0.2),
-                        0 0 20px hsla(var(--primary), 0.05)`,
+            boxShadow: `0 35px 80px -15px hsl(var(--primary) / 0.35), 
+                        0 0 50px -5px hsl(var(--accent) / 0.2),
+                        0 0 20px hsl(var(--primary) / 0.05)`,
           }}
         />
 
@@ -201,7 +201,7 @@ const TiltCard = ({
           className="absolute inset-0 pointer-events-none transition-opacity duration-300 rounded-2xl z-10"
           style={{
             opacity: isActive ? 1 : 0,
-            background: `radial-gradient(circle 280px at ${mousePos.x}% ${mousePos.y}%, hsla(var(--primary), 0.15), hsla(var(--accent), 0.08), transparent)`,
+            background: `radial-gradient(circle 280px at ${mousePos.x}% ${mousePos.y}%, hsl(var(--primary) / 0.15), hsl(var(--accent) / 0.08), transparent)`,
           }}
         />
 
@@ -212,9 +212,9 @@ const TiltCard = ({
             opacity: isActive ? 0.65 : 0,
             background: `linear-gradient(135deg, 
               rgba(255, 255, 255, 0.15) 0%, 
-              hsla(var(--primary), 0.03) 40%, 
-              hsla(var(--accent), 0.1) 70%, 
-              hsla(var(--primary), 0.1) 100%)`,
+              hsl(var(--primary) / 0.03) 40%, 
+              hsl(var(--accent) / 0.1) 70%, 
+              hsl(var(--primary) / 0.1) 100%)`,
             mixBlendMode: "overlay",
           }}
         />
@@ -235,10 +235,10 @@ const TiltCard = ({
                 key={item}
                 whileHover={{ 
                   scale: 1.12, 
-                  backgroundColor: "hsla(var(--primary), 0.25)",
-                  borderColor: "hsla(var(--primary), 0.5)",
+                  backgroundColor: "hsl(var(--primary) / 0.25)",
+                  borderColor: "hsl(var(--primary) / 0.5)",
                   color: "hsl(var(--accent))",
-                  boxShadow: "0 0 15px hsla(var(--primary), 0.15)"
+                  boxShadow: "0 0 15px hsl(var(--primary) / 0.15)"
                 }}
                 transition={{ type: "spring", stiffness: 350, damping: 10 }}
                 className="px-3.5 py-1.5 rounded-xl bg-primary/5 dark:bg-primary/10 text-primary dark:text-primary text-[12px] md:text-[13px] font-bold border border-primary/10 dark:border-primary/20 transition-all duration-350 whitespace-nowrap shadow-sm hover:shadow-primary/5 cursor-none no-text-effect"

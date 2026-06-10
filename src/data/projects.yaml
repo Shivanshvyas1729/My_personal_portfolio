@@ -20,7 +20,13 @@ projects:
     github: https://github.com/Shivanshvyas1729/Cancer_Detection_with_xai
     live: https://cancerdetectionwithxai.streamlit.app/
     featured: true
-    domain: "Healthcare"
+    domain: "🏥 Healthcare"
+    metrics:
+      Test Accuracy: "96.2%"
+      ROC-AUC: "0.985"
+      Model Size: "14.5 MB"
+      Dataset Size: "3,654 images"
+      Avg Inference Time: "45ms"
     media:
       - url: https://i.ibb.co/0j93F19k/719086-750.jpg
         type: image
@@ -113,7 +119,6 @@ projects:
     category:
       - Deep Learning
       - Computer Vision
-      - Renewable Energy
     description: An AI-powered solar panel defect detection system built using transfer learning with EfficientNet-B0. The solution automatically classifies solar panel images into multiple defect categories such as dust, bird drops, electrical damage, physical damage, and snow coverage. Deployed through an interactive Streamlit web application, the system enables fast, accurate, and scalable defect inspection, reducing the need for manual monitoring and improving solar farm maintenance efficiency.
     media:
       - type: image
@@ -130,6 +135,12 @@ projects:
     live: https://solarpaneldefectdetection.streamlit.app/
     featured: true
     domain: "⚡ Renewable Energy"
+    metrics:
+      Test Accuracy: "92.4%"
+      ROC-AUC: "0.94"
+      Model Size: "18.2 MB"
+      Dataset Size: "2,624 images"
+      Avg Inference Time: "150ms"
     impact: Improves efficiency of solar panel maintenance by enabling quick and automated defect detection, reducing manual inspection effort and supporting scalable renewable energy operations.
     architectureImage: https://backend.krishnaik.in/media/project_architecture_diagrams/Gemini_Generated_Image_vwro75vwro75vwro_UvMo1qV.jpg
     problem_statement: Manual inspection of solar panels across large solar farms is time-consuming, error-prone, and costly. Defects such as dust accumulation, bird droppings, physical cracks, and electrical damage significantly reduce energy output if left undetected. There is a need for an automated, scalable, and accurate computer vision system that can classify panel defects from images and enable proactive maintenance to maximise renewable energy generation efficiency.
@@ -226,7 +237,6 @@ projects:
     title: 🌦 Thunderstorm Forecasting System
     category:
       - Machine Learning
-      - Weather Forecasting
       - Python
     description: A machine learning-based system for real-time thunderstorm prediction using atmospheric instability indices. The system leverages ensemble ML models trained on meteorological data to classify thunderstorm occurrence, deployed through a FastAPI backend and an interactive Streamlit interface for real-time forecasting.
     media:
@@ -244,6 +254,12 @@ projects:
     live: https://thunderstromforcast.streamlit.app/
     featured: true
     domain: "🌤️ Meteorology"
+    metrics:
+      Test Accuracy: "89.5%"
+      ROC-AUC: "0.91"
+      Model Size: "3.2 MB"
+      Dataset Size: "14,250 rows"
+      Avg Inference Time: "8ms"
     impact: Real-time thunderstorm prediction with optimized ML model and interactive UI, enabling early weather warnings for safety and operational planning.
     resources:
       - url: https://excalidraw.com/#json=9Nw6RepmXxt43Pa_0WrYS,pVW7PrOSRwuehccI2tgGmA

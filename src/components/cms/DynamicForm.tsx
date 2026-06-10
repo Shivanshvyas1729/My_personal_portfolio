@@ -284,7 +284,7 @@ const StringField: React.FC<StringFieldProps> = ({
   parentData
 }) => {
   const fieldKey = path[path.length - 1] || '';
-  const supportsSuggestions = ['category', 'tech', 'techStack', 'featured', 'all', 'items', 'type'].includes(fieldKey);
+  const supportsSuggestions = ['category', 'domain', 'tech', 'techStack', 'featured', 'all', 'items', 'type'].includes(fieldKey);
   const suggestions = supportsSuggestions && previewData ? getSuggestionsForField(path, previewData, false) : [];
   const fieldKeyLower = fieldKey.toLowerCase();
 
@@ -604,6 +604,7 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
   } catch (e) {}
 
   const [showSuggestions, setShowSuggestions] = React.useState(false);
+  const [activeSubTab, setActiveSubTab] = React.useState<'general' | 'specs'>('general');
   const [mediaInputMode, setMediaInputMode] = React.useState<'upload' | 'link'>(() => {
     if (typeof data === 'string') {
       if (data && !data.includes('res.cloudinary.com')) return 'link';
@@ -1072,6 +1073,118 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
               if (!currentData[key]) return null;
             }
 
+            if (key === 'evaluation_metrics') {
+              const currentMetrics = Array.isArray(currentData.evaluation_metrics) ? currentData.evaluation_metrics : [];
+              const metricsValues = currentData.metrics || {};
+
+              return (
+                <div key={key} className="space-y-3 bg-muted/5 border border-border/35 rounded-xl p-4 md:col-span-2">
+                  <div className="flex items-center justify-between border-b border-border/10 pb-2 mb-1.5">
+                    <label className="text-[10px] font-bold text-muted-foreground/85 uppercase tracking-wider block">
+                      📋 Evaluation Metrics & Obtained Values
+                    </label>
+                  </div>
+                  <div className="space-y-2.5">
+                    {currentMetrics.map((met, idx) => {
+                      const val = metricsValues[met] !== undefined ? String(metricsValues[met]) : "";
+                      return (
+                        <div key={idx} className="flex gap-2 items-center animate-in fade-in duration-100">
+                          <div className="flex-1 min-w-0">
+                            <KnowledgeAutocomplete
+                              value={met}
+                              onChange={(val) => {
+                                const a = [...currentMetrics];
+                                a[idx] = val;
+                                const updatedValues = { ...metricsValues };
+                                if (met && updatedValues[met] !== undefined) {
+                                  const temp = updatedValues[met];
+                                  delete updatedValues[met];
+                                  if (val) updatedValues[val] = temp;
+                                }
+                                onChange({
+                                  ...currentData,
+                                  evaluation_metrics: a,
+                                  metrics: updatedValues
+                                });
+                              }}
+                              onSelect={(val) => {
+                                const a = [...currentMetrics];
+                                a[idx] = val;
+                                const updatedValues = { ...metricsValues };
+                                if (met && updatedValues[met] !== undefined) {
+                                  const temp = updatedValues[met];
+                                  delete updatedValues[met];
+                                  if (val) updatedValues[val] = temp;
+                                }
+                                onChange({
+                                  ...currentData,
+                                  evaluation_metrics: a,
+                                  metrics: updatedValues
+                                });
+                              }}
+                              placeholder="Metric Name (e.g. Accuracy)"
+                              allowedCategories={FIELD_CATEGORY_MAP['evaluation_metrics']}
+                            />
+                          </div>
+                          <span className="text-muted-foreground/50 text-xs">➔</span>
+                          <input
+                            type="text"
+                            value={val}
+                            onChange={(e) => {
+                              const newVal = e.target.value;
+                              const updatedValues = { ...metricsValues };
+                              if (met) {
+                                updatedValues[met] = newVal;
+                              }
+                              onChange({
+                                ...currentData,
+                                metrics: updatedValues
+                              });
+                            }}
+                            className="w-1/3 bg-background border border-border/40 rounded-lg p-2 text-xs text-foreground font-mono font-semibold h-9"
+                            placeholder="Value (e.g. 96.5%)"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const a = [...currentMetrics];
+                              a.splice(idx, 1);
+                              const updatedValues = { ...metricsValues };
+                              if (met) {
+                                delete updatedValues[met];
+                              }
+                              onChange({
+                                ...currentData,
+                                evaluation_metrics: a,
+                                metrics: updatedValues
+                              });
+                            }}
+                            className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-lg transition-colors cursor-pointer"
+                            title="Remove Metric"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const a = [...currentMetrics, ""];
+                      onChange({
+                        ...currentData,
+                        evaluation_metrics: a
+                      });
+                    }}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors px-3 py-1.5 rounded-lg bg-primary/5 hover:bg-primary/10 border border-primary/20 w-fit cursor-pointer"
+                  >
+                    <Plus size={14} /> Add Metric
+                  </button>
+                </div>
+              );
+            }
+
             return (
               <div key={key} className="space-y-1.5">
                 <label className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-wider block">
@@ -1097,104 +1210,261 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
           // Project Form Grouping Logic
           const isProjectForm = path.length === 0 && keys.includes('github') && keys.includes('tech');
           if (isProjectForm) {
-            const groups = [
+            const generalKeys = ['id', 'title', 'slug', 'category', 'domain', 'description', 'tech', 'github', 'live', 'featured', 'impact', 'media'];
+            
+            const specGroups = [
               {
-                id: 'basic-info',
-                title: 'Basic Info',
-                keys: ['id', 'title', 'slug', 'category', 'description', 'tech', 'github', 'live', 'featured', 'impact']
-              },
-              {
-                id: 'content-media',
-                title: 'Content & Media',
-                keys: ['media', 'architectureImage', 'howItWorks', 'resources', 'open_resources']
-              },
-              {
-                id: 'problem-objectives',
-                title: 'Problem & Objectives',
-                keys: ['problem_statement', 'business_problem', 'objectives', 'success_criteria', 'learning_outcomes']
+                id: 'objectives-scope',
+                title: '🎯 Objectives & Scope',
+                desc: 'Define the core problem statement, business objectives, and project success criteria.',
+                keys: ['problem_statement', 'business_problem', 'objectives', 'success_criteria']
               },
               {
                 id: 'data-details',
-                title: 'Data & Features',
+                title: '📊 Data & Features',
+                desc: 'Specify your data sources, data volume, class distribution, target variables, and core features.',
                 keys: ['data_sources', 'data_volume', 'class_distribution', 'target_variable', 'features']
               },
               {
                 id: 'modeling-ml',
-                title: 'Modeling & Pipeline',
-                keys: ['preprocessing', 'feature_engineering', 'model_inputs', 'model_outputs', 'modeling', 'hyperparameters', 'evaluation_metrics', 'validation_strategy', 'explainability']
+                title: '🧠 Preprocessing & Modeling',
+                desc: 'Define model inputs/outputs, preprocessing steps, feature engineering, modeling architecture, and hyperparameters.',
+                keys: ['howItWorks', 'preprocessing', 'feature_engineering', 'model_inputs', 'model_outputs', 'modeling', 'hyperparameters']
               },
               {
-                id: 'deployment-mlops',
-                title: 'Deployment & Architecture',
-                keys: ['training_environment', 'inference_pipeline', 'deployment', 'monitoring', 'versioning', 'architecture']
+                id: 'evaluation-mlops',
+                title: '📈 Evaluation & MLOps',
+                desc: 'Manage model validation strategy, explainability tools (Grad-CAM, etc.), evaluation metrics, and runtime performance stats.',
+                keys: ['evaluation_metrics', 'metrics', 'validation_strategy', 'explainability']
               },
               {
-                id: 'governance',
-                title: 'Governance (Risks & Ethics)',
-                keys: ['risks', 'ethics', 'privacy', 'known_limitations', 'future_improvements']
+                id: 'deployment-architecture',
+                title: '🚀 Deployment & Architecture',
+                desc: 'Configure development/training environments, inference pipelines, monitoring, versioning, and architecture diagram.',
+                keys: ['training_environment', 'inference_pipeline', 'deployment', 'monitoring', 'versioning', 'architecture', 'architectureImage']
               },
               {
-                id: 'advanced',
-                title: 'Advanced / Overrides',
-                keys: ['knowledge_overrides']
+                id: 'governance-future',
+                title: '🛡️ Governance & Future',
+                desc: 'Document risks and mitigation, ethics and privacy, known limitations, and future improvements.',
+                keys: ['risks', 'ethics', 'privacy', 'known_limitations', 'future_improvements', 'learning_outcomes', 'resources', 'open_resources', 'knowledge_overrides']
               }
             ];
 
-            return (
-              <div className="space-y-4">
-                {groups.map(group => {
-                  const groupKeys = keys.filter(k => group.keys.includes(k));
-                  if (groupKeys.length === 0) return null;
-                  return (
-                    <details key={group.id} className="group/details bg-background border border-border/30 rounded-xl overflow-hidden shadow-sm" open={group.id === 'basic-info'}>
-                      <summary className="p-4 cursor-pointer bg-muted/5 hover:bg-muted/10 transition-colors font-bold text-sm text-foreground flex items-center justify-between select-none border-b border-transparent group-open/details:border-border/30">
-                        {group.title}
-                        <div className="text-muted-foreground group-open/details:rotate-180 transition-transform">▼</div>
-                      </summary>
-                      <div className="p-3 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-7">
-                        {groupKeys.map(key => {
-                          const unwrappedField = unwrapSchema(shape[key], currentData[key]);
-                          // Arrays, Objects, or known long text fields should take full width
-                          const isFullWidth = 
-                            unwrappedField instanceof z.ZodArray || 
-                            unwrappedField instanceof z.ZodObject || 
-                            ['description', 'problem_statement', 'business_problem', 'howItWorks', 'markdown_content', 'architecture', 'knowledge_overrides', 'architectureImage'].includes(key);
+            const renderField = (k: string) => {
+              if (k === 'metrics') return null;
+              
+              if (k === 'evaluation_metrics') {
+                const currentMetrics = Array.isArray(currentData.evaluation_metrics) ? currentData.evaluation_metrics : [];
+                const metricsValues = currentData.metrics || {};
+                
+                const handleMetricNameChange = (idx: number, newName: string) => {
+                  const a = [...currentMetrics];
+                  const oldName = a[idx];
+                  a[idx] = newName;
+                  
+                  const updatedValues = { ...metricsValues };
+                  if (oldName && updatedValues[oldName] !== undefined) {
+                    const val = updatedValues[oldName];
+                    delete updatedValues[oldName];
+                    if (newName) updatedValues[newName] = val;
+                  } else if (newName && updatedValues[newName] === undefined) {
+                    updatedValues[newName] = "";
+                  }
+                  
+                  onChange({
+                    ...currentData,
+                    evaluation_metrics: a,
+                    metrics: updatedValues
+                  });
+                };
+                
+                const handleMetricValueChange = (name: string, value: string) => {
+                  const updatedValues = { ...metricsValues };
+                  if (name) {
+                    updatedValues[name] = value;
+                  }
+                  onChange({
+                    ...currentData,
+                    metrics: updatedValues
+                  });
+                };
+                
+                const handleRemoveMetric = (idx: number) => {
+                  const a = [...currentMetrics];
+                  const name = a[idx];
+                  a.splice(idx, 1);
+                  
+                  const updatedValues = { ...metricsValues };
+                  if (name) {
+                    delete updatedValues[name];
+                  }
+                  
+                  onChange({
+                    ...currentData,
+                    evaluation_metrics: a,
+                    metrics: updatedValues
+                  });
+                };
+                
+                const handleAddMetric = (name: string = "") => {
+                  const a = [...currentMetrics];
+                  if (name && a.includes(name)) {
+                    toast.warning(`Metric "${name}" is already added.`);
+                    return;
+                  }
+                  a.push(name);
+                  
+                  const updatedValues = { ...metricsValues };
+                  if (name) {
+                    updatedValues[name] = "";
+                  }
+                  
+                  onChange({
+                    ...currentData,
+                    evaluation_metrics: a,
+                    metrics: updatedValues
+                  });
+                };
 
-                          return (
-                            <div key={key} className={isFullWidth ? "md:col-span-2" : "col-span-1"}>
-                              {renderFieldWrapper(key)}
+                const recommendations = [
+                  "Test Accuracy",
+                  "ROC-AUC",
+                  "Model Size",
+                  "Dataset Size",
+                  "Avg Inference Time"
+                ];
+
+                return (
+                  <div className="space-y-4 bg-muted/5 border border-border/30 rounded-xl p-4 w-full">
+                    <div className="space-y-2.5">
+                      {currentMetrics.map((met, idx) => {
+                        const val = metricsValues[met] !== undefined ? String(metricsValues[met]) : "";
+                        return (
+                          <div key={idx} className="flex gap-3 items-center animate-in fade-in duration-100">
+                            <div className="flex-1 min-w-0">
+                              <KnowledgeAutocomplete
+                                value={met}
+                                onChange={(newName) => handleMetricNameChange(idx, newName)}
+                                onSelect={(newName) => handleMetricNameChange(idx, newName)}
+                                placeholder="Metric Name (e.g. Test Accuracy)"
+                                allowedCategories={FIELD_CATEGORY_MAP['evaluation_metrics']}
+                              />
                             </div>
-                          );
-                        })}
-                      </div>
-                    </details>
-                  );
-                })}
-                {/* Any remaining keys not in groups */}
-                {(() => {
-                  const groupedKeys = new Set(groups.flatMap(g => g.keys));
-                  const remainingKeys = keys.filter(k => !groupedKeys.has(k) && !['knowledge_overrides'].includes(k));
-                  if (remainingKeys.length === 0) return null;
-                  return (
-                    <details className="group/details bg-background border border-border/30 rounded-xl overflow-hidden shadow-sm">
-                      <summary className="p-4 cursor-pointer bg-muted/5 hover:bg-muted/10 transition-colors font-bold text-sm text-foreground flex items-center justify-between select-none border-b border-transparent group-open/details:border-border/30">
-                        Other Fields
-                        <div className="text-muted-foreground group-open/details:rotate-180 transition-transform">▼</div>
-                      </summary>
-                      <div className="p-3 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-7">
-                        {remainingKeys.map(key => {
-                          const unwrappedField = unwrapSchema(shape[key], currentData[key]);
-                          const isFullWidth = unwrappedField instanceof z.ZodArray || unwrappedField instanceof z.ZodObject;
-                          return (
-                            <div key={key} className={isFullWidth ? "md:col-span-2" : "col-span-1"}>
-                              {renderFieldWrapper(key)}
+                            <span className="text-muted-foreground/40 text-xs">➔</span>
+                            <div className="w-1/3">
+                              <input
+                                type="text"
+                                value={val}
+                                onChange={(e) => handleMetricValueChange(met, e.target.value)}
+                                className="w-full bg-background border border-border/40 rounded-lg p-2 text-xs text-foreground font-mono font-semibold h-9 focus:outline-none focus:border-primary/50"
+                                placeholder="Value (e.g. 96.2% - optional)"
+                              />
                             </div>
-                          );
-                        })}
-                      </div>
-                    </details>
-                  );
-                })()}
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveMetric(idx)}
+                              className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-lg transition-colors cursor-pointer shrink-0"
+                              title="Remove Metric"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => handleAddMetric("")}
+                        className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors px-3 py-1.5 rounded-lg bg-primary/5 hover:bg-primary/10 border border-primary/20 w-fit cursor-pointer"
+                      >
+                        <Plus size={14} /> Add Custom Metric
+                      </button>
+
+                      {recommendations.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
+                          <span className="font-semibold select-none mr-0.5">Recommendations:</span>
+                          {recommendations.map((rec) => {
+                            const isAdded = currentMetrics.includes(rec);
+                            return (
+                              <button
+                                key={rec}
+                                type="button"
+                                disabled={isAdded}
+                                onClick={() => handleAddMetric(rec)}
+                                className={`px-2 py-0.5 rounded border text-[10px] transition-all cursor-pointer select-none font-medium ${
+                                  isAdded
+                                    ? 'bg-muted/10 border-border/10 text-muted-foreground/30 cursor-not-allowed opacity-50'
+                                    : 'bg-primary/5 hover:bg-primary/15 border-primary/20 hover:border-primary/45 text-primary'
+                                }`}
+                              >
+                                {rec}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
+                <DynamicForm
+                  schema={shape[k]}
+                  data={currentData[k]}
+                  path={[...path, k]}
+                  parentData={currentData}
+                  onChange={(newVal) => onChange({ ...currentData, [k]: newVal })}
+                />
+              );
+            };
+
+            return (
+              <div className="space-y-6">
+                {/* Tabs Header */}
+                <div className="flex gap-2 border-b border-border/10 pb-3">
+                  <button
+                    type="button"
+                    onClick={() => setActiveSubTab('general')}
+                    className={`px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
+                      activeSubTab === 'general'
+                        ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
+                        : 'bg-muted/30 text-muted-foreground hover:bg-muted/65 hover:text-foreground'
+                    }`}
+                  >
+                    📂 General Info & Media
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveSubTab('specs')}
+                    className={`px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
+                      activeSubTab === 'specs'
+                        ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
+                        : 'bg-muted/30 text-muted-foreground hover:bg-muted/65 hover:text-foreground'
+                    }`}
+                  >
+                    🛠️ Technical Specifications
+                  </button>
+                </div>
+
+                {/* Tab Contents */}
+                {activeSubTab === 'general' ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {generalKeys.map((key) => renderFieldWrapper(key))}
+                  </div>
+                ) : (
+                  <SettingsAccordionContainer
+                    groups={specGroups}
+                    shape={shape}
+                    currentData={currentData}
+                    path={path}
+                    onChange={onChange}
+                    renderField={renderField}
+                  />
+                )}
               </div>
             );
           }
@@ -1213,8 +1483,100 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
     
     // Check suggestions support
     const fieldKey = path[path.length - 1] || '';
-    const supportsSuggestions = ['category', 'tech', 'techStack', 'featured', 'all', 'items', 'type'].includes(fieldKey);
+    const supportsSuggestions = ['category', 'domain', 'tech', 'techStack', 'featured', 'all', 'items', 'type'].includes(fieldKey);
     const suggestions = supportsSuggestions && previewData ? getSuggestionsForField(path, previewData, true) : [];
+
+    const isSimpleStringArray = unwrapSchema(itemSchema) instanceof z.ZodString;
+
+    if (isSimpleStringArray) {
+      return (
+        <div className="flex flex-col gap-2.5 w-full animate-in fade-in duration-100">
+          <div className="flex flex-wrap gap-2 items-center bg-muted/5 border border-border/20 rounded-xl p-3 shadow-sm w-full">
+            {currentArray.map((item, index) => (
+              <div key={index} className="flex items-center gap-1 bg-background border border-border/30 rounded-lg pl-2.5 pr-1 py-1 text-xs hover:border-primary/30 transition-all select-none">
+                <span className="font-semibold select-none text-muted-foreground/50 text-[10px] mr-0.5">#{index + 1}</span>
+                <input
+                  type="text"
+                  value={String(item)}
+                  onChange={(e) => {
+                    const a = [...currentArray];
+                    a[index] = e.target.value;
+                    onChange(a);
+                  }}
+                  className="bg-transparent border-none focus:outline-none text-foreground font-semibold py-0.5"
+                  style={{ width: `${Math.max(60, String(item).length * 7 + 10)}px` }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const a = [...currentArray];
+                    a.splice(index, 1);
+                    onChange(a);
+                  }}
+                  className="p-0.5 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-md transition-colors cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => {
+                onChange([...currentArray, ""]);
+              }}
+              className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-primary bg-primary/10 border border-primary/20 hover:bg-primary/20 rounded-lg transition-all cursor-pointer"
+            >
+              + Add
+            </button>
+
+            {supportsSuggestions && suggestions.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowSuggestions(!showSuggestions)}
+                className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-accent bg-accent/10 border border-accent/20 hover:bg-accent/20 rounded-lg transition-all select-none cursor-pointer"
+              >
+                💡 {showSuggestions ? "Hide Options" : "Show Suggestions"}
+              </button>
+            )}
+          </div>
+
+          <div className={`grid transition-all duration-300 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] ${
+            showSuggestions && suggestions.length > 0 ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+          }`}>
+            <div className="overflow-hidden">
+              <div className="bg-black/35 rounded-lg p-3 border border-border/20 space-y-2">
+                <span className="text-[10px] font-bold text-muted-foreground/85 uppercase tracking-wider block">
+                  Used Previously:
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {suggestions.map(sug => {
+                    const alreadyAdded = currentArray.some((x: any) => String(x).toLowerCase().trim() === sug.toLowerCase().trim());
+                    return (
+                      <button
+                        key={sug}
+                        type="button"
+                        disabled={alreadyAdded}
+                        onClick={() => {
+                          onChange([...currentArray, sug]);
+                          toast.success(`Added option: ${sug}`);
+                        }}
+                        className={`px-2.5 py-1 rounded-md text-[10px] font-bold border transition-all select-none ${
+                          alreadyAdded
+                            ? 'bg-muted/15 border-border/10 text-muted-foreground/45 cursor-not-allowed opacity-50 shadow-inner'
+                            : 'bg-primary/5 hover:bg-primary/15 border-primary/25 hover:border-primary/50 text-primary cursor-pointer'
+                        }`}
+                      >
+                        {sug}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     if (currentArray.length === 0) {
       return (
@@ -1497,6 +1859,75 @@ export const DynamicForm: React.FC<DynamicFormProps> = React.memo(({ schema, dat
         </span>
         <input type="checkbox" checked={!!data} onChange={(e) => onChange(e.target.checked)} className="hidden" />
       </label>
+    );
+  }
+
+  // ── ZodRecord → Styled Dictionary Editor ──────────────────────────────────────
+  if (unwrapped instanceof z.ZodRecord) {
+    const currentObj = (data && typeof data === 'object') ? data : {};
+    const entries = Object.entries(currentObj);
+
+    return (
+      <div className="bg-muted/5 border border-border/20 rounded-xl p-4 space-y-3 shadow-sm animate-in fade-in duration-100">
+        <div className="space-y-2.5">
+          {entries.map(([k, v], idx) => (
+            <div key={idx} className="flex gap-2 items-center">
+              <input
+                type="text"
+                value={k}
+                onChange={(e) => {
+                  const newKey = e.target.value;
+                  if (newKey === k) return;
+                  const copy = { ...currentObj };
+                  delete copy[k];
+                  copy[newKey] = v;
+                  onChange(copy);
+                }}
+                className="flex-1 bg-background border border-border/30 rounded-lg p-2 text-xs focus:outline-none focus:border-primary/50 text-foreground font-semibold"
+                placeholder="Metric Name (e.g. Test Accuracy)"
+              />
+              <span className="text-muted-foreground/50 text-xs">➔</span>
+              <input
+                type="text"
+                value={String(v)}
+                onChange={(e) => {
+                  const copy = { ...currentObj };
+                  copy[k] = e.target.value;
+                  onChange(copy);
+                }}
+                className="flex-1 bg-background border border-border/30 rounded-lg p-2 text-xs focus:outline-none focus:border-primary/50 text-foreground font-mono font-medium"
+                placeholder="Value (e.g. 96.2%)"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const copy = { ...currentObj };
+                  delete copy[k];
+                  onChange(copy);
+                }}
+                className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded transition-colors"
+                title="Remove metric"
+              >
+                <Trash2 size={13} />
+              </button>
+            </div>
+          ))}
+        </div>
+        
+        <button
+          type="button"
+          onClick={() => {
+            const copy = { ...currentObj };
+            let i = 1;
+            while (copy[`New Metric ${i}`] !== undefined) i++;
+            copy[`New Metric ${i}`] = "";
+            onChange(copy);
+          }}
+          className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors px-3 py-1.5 rounded-lg bg-primary/5 hover:bg-primary/10 border border-primary/20 w-fit"
+        >
+          <Plus size={14} /> Add Metric Value
+        </button>
+      </div>
     );
   }
 

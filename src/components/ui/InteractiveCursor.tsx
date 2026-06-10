@@ -35,14 +35,18 @@ const InteractiveCursor = () => {
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (!target) return;
-      const cursorStyle = window.getComputedStyle(target).cursor;
       const isInteractive = 
         target.tagName === 'A' || 
         target.tagName === 'BUTTON' || 
+        target.tagName === 'INPUT' ||
+        target.tagName === 'SELECT' ||
+        target.tagName === 'TEXTAREA' ||
         target.closest('a') || 
         target.closest('button') ||
-        cursorStyle === 'pointer' ||
-        cursorStyle === 'none';
+        target.closest('[role="button"]') ||
+        target.closest('.cursor-pointer') ||
+        target.closest('.cursor-grab') ||
+        target.closest('.cursor-grabbing');
       
       setIsHovering(!!isInteractive);
     };
@@ -74,7 +78,7 @@ const InteractiveCursor = () => {
           width: isHovering ? 60 : 30,
           height: isHovering ? 60 : 30,
           borderColor: isHovering ? "hsl(var(--primary))" : "rgba(255, 255, 255, 0.2)",
-          backgroundColor: isHovering ? "hsl(var(--primary) / 0.05)" : "transparent",
+          backgroundColor: "transparent",
         }}
         className="fixed top-0 left-0 border rounded-full transition-colors duration-300"
       />

@@ -152,9 +152,9 @@ const ServiceCard = ({
           className="absolute inset-0 pointer-events-none rounded-2xl z-0 transition-opacity duration-500"
           style={{
             opacity: isHovered ? 1 : 0,
-            boxShadow: `0 30px 70px -15px hsla(var(--primary), 0.3),
-                        0 0 40px -5px hsla(var(--accent), 0.18),
-                        0 0 16px hsla(var(--primary), 0.04)`,
+            boxShadow: `0 30px 70px -15px hsl(var(--primary) / 0.3),
+                        0 0 40px -5px hsl(var(--accent) / 0.18),
+                        0 0 16px hsl(var(--primary) / 0.04)`,
           }}
         />
 
@@ -163,7 +163,7 @@ const ServiceCard = ({
           className="absolute inset-0 pointer-events-none transition-opacity duration-300 rounded-2xl z-10"
           style={{
             opacity: isHovered ? 1 : 0,
-            background: `radial-gradient(circle 220px at ${mousePos.x}% ${mousePos.y}%, hsla(var(--primary), 0.13), hsla(var(--accent), 0.06), transparent)`,
+            background: `radial-gradient(circle 220px at ${mousePos.x}% ${mousePos.y}%, hsl(var(--primary) / 0.13), hsl(var(--accent) / 0.06), transparent)`,
           }}
         />
 
@@ -174,9 +174,9 @@ const ServiceCard = ({
             opacity: isHovered ? 0.55 : 0,
             background: `linear-gradient(135deg,
               rgba(255, 255, 255, 0.12) 0%,
-              hsla(var(--primary), 0.02) 40%,
-              hsla(var(--accent), 0.08) 70%,
-              hsla(var(--primary), 0.08) 100%)`,
+              hsl(var(--primary) / 0.02) 40%,
+              hsl(var(--accent) / 0.08) 70%,
+              hsl(var(--primary) / 0.08) 100%)`,
             mixBlendMode: "overlay",
           }}
         />

@@ -175,13 +175,23 @@ export const getSuggestionsForField = (path: string[], previewData: any, isArray
   const suggestions = new Set<string>();
 
   // 1. PROJECT OR BLOG CATEGORIES (COMPLETELY SEPARATED)
+  const domainNames = [
+    "healthcare", "renewable energy", "meteorology", "food & beverage", "media & entertainment",
+    "🏥 healthcare", "⚡ renewable energy", "🌤️ meteorology", "🍶 food & beverage", "🎵 media & entertainment",
+    "weather forecasting", "🌦 thunderstorm forecasting system"
+  ];
+
   if (fieldName === 'category') {
     if (isArray) {
       // PROJECT CATEGORIES ONLY (Project category is an array)
       const projects = previewData?.projects || [];
       for (const p of projects) {
         if (Array.isArray(p.category)) {
-          p.category.forEach((c: any) => c && suggestions.add(String(c).trim()));
+          p.category.forEach((c: any) => {
+            if (c && typeof c === 'string' && !domainNames.includes(c.toLowerCase().trim())) {
+              suggestions.add(String(c).trim());
+            }
+          });
         }
       }
       if (suggestions.size === 0) {
@@ -199,6 +209,18 @@ export const getSuggestionsForField = (path: string[], previewData: any, isArray
         ['Thoughts', 'Notes', 'Books', 'Links', 'General'].forEach(s => suggestions.add(s));
       }
     }
+  }
+
+  // 1b. PROJECT DOMAINS (SEPARATE TAXONOMY)
+  if (fieldName === 'domain') {
+    const projects = previewData?.projects || [];
+    for (const p of projects) {
+      if (typeof p.domain === 'string' && p.domain) {
+        suggestions.add(p.domain.trim());
+      }
+    }
+    // Pre-populate with standard industry domains
+    ['🏥 Healthcare', '⚡ Renewable Energy', '🌤️ Meteorology', '🍶 Food & Beverage', '🎵 Media & Entertainment'].forEach(s => suggestions.add(s));
   }
 
   // 2. TECH STACK (for 'tech' inside project, 'featured' or 'all' inside techStack, etc.)
