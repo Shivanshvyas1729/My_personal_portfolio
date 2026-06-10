@@ -1,7 +1,7 @@
 # region PROJECTS
 projects:
   - id: 5
-    title: Cancer Detection with Explainable AI
+    title: Lightweight CNN with Explainable AI (Image Classification)
     category:
       - Deep Learning
       - Computer Vision
@@ -13,20 +13,12 @@ projects:
       - TensorFlow
       - FastAPI
       - Streamlit
-      - HTML5
-      - CSS3
-      - JavaScript
+      - Grad-CAM
       - Hugging Face Hub
     github: https://github.com/Shivanshvyas1729/Cancer_Detection_with_xai
     live: https://cancerdetectionwithxai.streamlit.app/
     featured: true
-    domain: "🏥 Healthcare"
-    metrics:
-      Test Accuracy: "96.2%"
-      ROC-AUC: "0.985"
-      Model Size: "14.5 MB"
-      Dataset Size: "3,654 images"
-      Avg Inference Time: "45ms"
+    domain: "Healthcare"
     media:
       - url: https://i.ibb.co/0j93F19k/719086-750.jpg
         type: image
@@ -34,7 +26,9 @@ projects:
       - url: https://i.ibb.co/XZp3XZgC/fibo-arch.png
     problem_statement: Thyroid Cancer is a disease in which harmful or abnormal cells grow in the thyroid gland located in the neck. The thyroid gland controls important body functions such as metabolism, energy balance, heart rate, and hormone production. If thyroid cancer is not detected at an early stage, it can spread to nearby organs and become life-threatening. Manual diagnostic evaluation of thyroid ultrasound images is time-consuming, subjective, and dependent on specialist expertise. Furthermore, black-box AI systems lack transparency, creating a need for lightweight explainable computer-aided diagnostic systems that can support healthcare professionals in low-resource and rural environments.
     learning_outcomes:
-      - Designed Fibonacci-Net, a custom lightweight CNN using Fibonacci filter growth and depthwise separable convolutions.
+      - Designed Fibonacci-Net, a custom lightweight CNN using Fibonacci filter progression, depthwise separable convolutions, and a custom Avg2MaxPooling layer for high-precision image classification.
+      - Trained and evaluated the model on a complex image dataset of 3,115 samples, achieving a ROC-AUC score of 0.915 while maintaining a highly efficient 18.48 MB model footprint.
+      - Integrated Grad-CAM explainability and deployed the solution through FastAPI APIs and a Streamlit dashboard for real-time inference and automated report generation.
       - Implemented Fibonacci filter progression (21 → 34 → 55 → 89 → 144 → 233 → 377) for efficient feature extraction.
       - Developed a custom Avg2MaxPooling layer combining average and max pooling.
       - Integrated Grad-CAM explainability heatmaps for transparent AI predictions.
@@ -114,49 +108,43 @@ projects:
         label: Research
       - label: depth wise convolution layer
         url: https://link.excalidraw.com/p/readonly/nTbHqs6Z6NhUWvvaQ1Zq
+    metrics:
+      Accuracy: "90.2%"
+      ROC-AUC: "0.915"
+      Model Size: "18.48 MB"
+      Dataset Size: "3,115 images"
   - id: 4
-    title: ☀️ Solar Panel Defect Detection System
+    title: Automated Defect Detection System (Computer Vision)
     category:
       - Deep Learning
       - Computer Vision
-    description: An AI-powered solar panel defect detection system built using transfer learning with EfficientNet-B0. The solution automatically classifies solar panel images into multiple defect categories such as dust, bird drops, electrical damage, physical damage, and snow coverage. Deployed through an interactive Streamlit web application, the system enables fast, accurate, and scalable defect inspection, reducing the need for manual monitoring and improving solar farm maintenance efficiency.
+    description: An AI-powered solar panel defect detection system built using transfer learning with ResNet50. The solution automatically classifies solar panel images into multiple defect categories such as dust, bird drops, electrical damage, physical damage, and snow coverage. Deployed through an interactive Streamlit web application, the system enables fast, accurate, and scalable defect inspection, reducing the need for manual monitoring and improving solar farm maintenance efficiency.
     media:
       - type: image
         url: https://i.ibb.co/fdj291HQ/Gemini-Generated-Image-14r8ms14r8ms14r8.png
     tech:
       - Python
-      - PyTorch
-      - Torchvision
+      - TensorFlow
+      - ResNet50
       - Streamlit
-      - NumPy
-      - PIL
-      - Transfer Learning
+      - Computer Vision
     github: https://github.com/Shivanshvyas1729/solar_panel_defect_detection
     live: https://solarpaneldefectdetection.streamlit.app/
     featured: true
     domain: "⚡ Renewable Energy"
-    metrics:
-      Test Accuracy: "92.4%"
-      ROC-AUC: "0.94"
-      Model Size: "18.2 MB"
-      Dataset Size: "2,624 images"
-      Avg Inference Time: "150ms"
     impact: Improves efficiency of solar panel maintenance by enabling quick and automated defect detection, reducing manual inspection effort and supporting scalable renewable energy operations.
     architectureImage: https://backend.krishnaik.in/media/project_architecture_diagrams/Gemini_Generated_Image_vwro75vwro75vwro_UvMo1qV.jpg
     problem_statement: Manual inspection of solar panels across large solar farms is time-consuming, error-prone, and costly. Defects such as dust accumulation, bird droppings, physical cracks, and electrical damage significantly reduce energy output if left undetected. There is a need for an automated, scalable, and accurate computer vision system that can classify panel defects from images and enable proactive maintenance to maximise renewable energy generation efficiency.
     learning_outcomes:
-      - Applied EfficientNet-B0 transfer learning for multi-class image classification with limited labelled data.
-      - Built a custom classification head on top of a pretrained CNN backbone using PyTorch.
-      - Implemented Torchvision transforms for data augmentation and preprocessing.
-      - Developed an interactive Streamlit web application for real-time defect inference.
-      - Gained experience deploying deep learning models on Streamlit Community Cloud.
-      - Understood trade-offs between model accuracy, inference speed, and deployment constraints.
-    architecture: The system is a single-page Streamlit application. A user uploads a solar panel image, which is preprocessed using PIL and Torchvision transforms before being passed to a fine-tuned EfficientNet-B0 classification model. The model outputs a defect class with Top-3 prediction probabilities and confidence scores. Pretrained ImageNet weights are loaded via Torchvision, and the custom classification head is trained on the solar panel defect dataset.
+      - Developed a multi-class computer vision system for automated industrial inspection across six defect categories.
+      - Fine-tuned a pretrained ResNet50 model on a specialized image dataset, achieving 81.4% validation accuracy.
+      - Built and deployed a Streamlit application providing real-time defect classification, Top-3 prediction analysis, and confidence score visualization.
+    architecture: The system is a single-page Streamlit application. A user uploads a solar panel image, which is preprocessed before being passed to a fine-tuned ResNet50 classification model. The model outputs a defect class with Top-3 prediction probabilities and confidence scores. Pretrained ImageNet weights are loaded via TensorFlow/Keras, and the custom classification head is trained on the solar panel defect dataset.
     objectives:
       - Build an accurate multi-class solar panel defect classifier using transfer learning.
       - Classify 6 defect categories — dust, bird drops, electrical damage, physical damage, snow coverage, and clean panels.
       - Deploy an interactive web application for real-time defect detection.
-      - Minimize training data requirements by leveraging pretrained EfficientNet-B0 weights.
+      - Minimize training data requirements by leveraging pretrained ResNet50 weights.
       - Provide Top-3 class predictions with confidence scores for each inference.
     success_criteria:
       - Achieve high classification accuracy across all 6 defect categories.
@@ -182,19 +170,18 @@ projects:
       - Top-3 class probabilities with confidence scores
     preprocessing:
       - Image loading using PIL
-      - Image resizing for EfficientNet-B0
-      - Tensor conversion using Torchvision transforms
+      - Image resizing for ResNet50
+      - Tensor conversion
       - Pixel normalization
       - Batch dimension creation for inference
     modeling:
-      - Pretrained EfficientNet-B0 Backbone
+      - Pretrained ResNet50 Backbone
       - Custom Classification Head
-      - Batch Normalization Layer
-      - Fully Connected Linear Layer
+      - Fully Connected Dense Layer
       - ReLU Activation
       - Dropout Regularization
       - Output Classification Layer
-      - CrossEntropyLoss
+      - Categorical Cross Entropy Loss
       - Adam Optimizer
     evaluation_metrics:
       - Classification Accuracy
@@ -204,9 +191,8 @@ projects:
     explainability: Top-3 class predictions with confidence percentages are displayed for each inference, providing transparency into the model's decision-making process and alternative classifications.
     training_environment:
       - Python 3.x local environment
-      - PyTorch with CUDA support for GPU-accelerated training
-      - Torchvision for pretrained model access and transforms
-    deployment: Streamlit Community Cloud deployment with model weights bundled into the repository. The app loads pretrained EfficientNet-B0 weights at startup and performs real-time inference on user-uploaded images.
+      - TensorFlow with GPU support for accelerated training
+    deployment: Streamlit Community Cloud deployment with model weights bundled into the repository. The app loads pretrained ResNet50 weights at startup and performs real-time inference on user-uploaded images.
     monitoring:
       - Confidence score thresholding to flag low-certainty predictions
       - Streamlit interface displays all Top-3 predictions for human review
@@ -214,6 +200,7 @@ projects:
       - Model performance may degrade for images with lighting conditions not represented in training data.
       - Overlapping defect types (e.g., dust + bird drops) may confuse single-label classification.
       - Deployment on Streamlit Community Cloud has resource constraints limiting batch inference.
+      - The system should not be used as a replacement for professional medical diagnosis.
     ethics:
       - Dataset used in accordance with Kaggle terms of service.
       - No personally identifiable information involved.
@@ -233,6 +220,8 @@ projects:
         url: https://solarpaneldefectdetection.streamlit.app/
       - label: GitHub Repository
         url: https://github.com/Shivanshvyas1729/solar_panel_defect_detection
+    metrics:
+      Validation Accuracy: "81.4%"
   - id: 3
     title: 🌦 Thunderstorm Forecasting System
     category:
@@ -254,12 +243,6 @@ projects:
     live: https://thunderstromforcast.streamlit.app/
     featured: true
     domain: "🌤️ Meteorology"
-    metrics:
-      Test Accuracy: "89.5%"
-      ROC-AUC: "0.91"
-      Model Size: "3.2 MB"
-      Dataset Size: "14,250 rows"
-      Avg Inference Time: "8ms"
     impact: Real-time thunderstorm prediction with optimized ML model and interactive UI, enabling early weather warnings for safety and operational planning.
     resources:
       - url: https://excalidraw.com/#json=9Nw6RepmXxt43Pa_0WrYS,pVW7PrOSRwuehccI2tgGmA
@@ -368,7 +351,7 @@ projects:
     github: https://github.com/Shivanshvyas1729/drink_quality_prediction
     live: https://drinkqualityprediction.streamlit.app/
     featured: true
-    domain: "🍶 Food & Beverage"
+    domain: 🍶 Food & Beverage
     impact: Automated ML pipeline with production-ready CI/CD deployment, demonstrating end-to-end MLOps from data ingestion to containerised cloud deployment.
   - id: 1
     title: 🎧 Automated YouTube Mixtape Creation
@@ -388,7 +371,7 @@ projects:
     github: https://github.com/Shivanshvyas1729/Automated-YouTube-Mixtape-Creation1/tree/main
     live: https://automated-youtube-mixtape-creation.streamlit.app/
     featured: true
-    domain: "🎵 Media & Entertainment"
+    domain: 🎵 Media & Entertainment
     impact: Zero manual editing
     resources:
       - label: Architecture PDF
