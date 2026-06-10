@@ -20,7 +20,7 @@ projects:
     github: https://github.com/Shivanshvyas1729/Cancer_Detection_with_xai
     live: https://cancerdetectionwithxai.streamlit.app/
     featured: true
-    domain: "Healthcare"
+    domain: 🏥 Healthcare
     media:
       - url: https://i.ibb.co/0j93F19k/719086-750.jpg
         type: image
@@ -108,12 +108,13 @@ projects:
         label: Research
       - label: depth wise convolution layer
         url: https://link.excalidraw.com/p/readonly/nTbHqs6Z6NhUWvvaQ1Zq
+    metrics:
+      Accuracy: 90.2%
   - id: 4
     title: ☀️ Solar Panel Defect Detection System
     category:
       - Deep Learning
       - Computer Vision
-      - Renewable Energy
     description: An AI-powered solar panel defect detection system built using transfer learning with EfficientNet-B0. The solution automatically classifies solar panel images into multiple defect categories such as dust, bird drops, electrical damage, physical damage, and snow coverage. Deployed through an interactive Streamlit web application, the system enables fast, accurate, and scalable defect inspection, reducing the need for manual monitoring and improving solar farm maintenance efficiency.
     media:
       - type: image
@@ -129,7 +130,7 @@ projects:
     github: https://github.com/Shivanshvyas1729/solar_panel_defect_detection
     live: https://solarpaneldefectdetection.streamlit.app/
     featured: true
-    domain: "⚡ Renewable Energy"
+    domain: ⚡ Renewable Energy
     impact: Improves efficiency of solar panel maintenance by enabling quick and automated defect detection, reducing manual inspection effort and supporting scalable renewable energy operations.
     architectureImage: https://backend.krishnaik.in/media/project_architecture_diagrams/Gemini_Generated_Image_vwro75vwro75vwro_UvMo1qV.jpg
     problem_statement: Manual inspection of solar panels across large solar farms is time-consuming, error-prone, and costly. Defects such as dust accumulation, bird droppings, physical cracks, and electrical damage significantly reduce energy output if left undetected. There is a need for an automated, scalable, and accurate computer vision system that can classify panel defects from images and enable proactive maintenance to maximise renewable energy generation efficiency.
@@ -226,7 +227,6 @@ projects:
     title: 🌦 Thunderstorm Forecasting System
     category:
       - Machine Learning
-      - Weather Forecasting
       - Python
     description: A machine learning-based system for real-time thunderstorm prediction using atmospheric instability indices. The system leverages ensemble ML models trained on meteorological data to classify thunderstorm occurrence, deployed through a FastAPI backend and an interactive Streamlit interface for real-time forecasting.
     media:
@@ -243,7 +243,7 @@ projects:
     github: https://github.com/Shivanshvyas1729/Thunderstrom_forcast
     live: https://thunderstromforcast.streamlit.app/
     featured: true
-    domain: "🌤️ Meteorology"
+    domain: 🌤️ Meteorology
     impact: Real-time thunderstorm prediction with optimized ML model and interactive UI, enabling early weather warnings for safety and operational planning.
     resources:
       - url: https://excalidraw.com/#json=9Nw6RepmXxt43Pa_0WrYS,pVW7PrOSRwuehccI2tgGmA
@@ -352,7 +352,7 @@ projects:
     github: https://github.com/Shivanshvyas1729/drink_quality_prediction
     live: https://drinkqualityprediction.streamlit.app/
     featured: true
-    domain: "🍶 Food & Beverage"
+    domain: 🍶 Food & Beverage
     impact: Automated ML pipeline with production-ready CI/CD deployment, demonstrating end-to-end MLOps from data ingestion to containerised cloud deployment.
   - id: 1
     title: 🎧 Automated YouTube Mixtape Creation
@@ -372,7 +372,7 @@ projects:
     github: https://github.com/Shivanshvyas1729/Automated-YouTube-Mixtape-Creation1/tree/main
     live: https://automated-youtube-mixtape-creation.streamlit.app/
     featured: true
-    domain: "🎵 Media & Entertainment"
+    domain: 🎵 Media & Entertainment
     impact: Zero manual editing
     resources:
       - label: Architecture PDF
