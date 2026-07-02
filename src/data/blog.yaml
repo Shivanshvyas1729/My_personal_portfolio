@@ -737,6 +737,9 @@ blog:
       - Better handling of class imbalance and edge-sensitive features
       - Improved feature reuse without extremely deep architectures
       - Reduced memory usage compared to standard CNNs
+    link: https://github.com/Shivanshvyas1729/pydantic_notes/blob/main/fibonaacinet.md
+    linkText: give a better read
+    resources: []
   - id: 7
     title: Pandas Data Combining Functions — Purpose & Key Parameters
     content: |
