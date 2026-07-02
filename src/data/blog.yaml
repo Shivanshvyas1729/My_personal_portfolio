@@ -4,6 +4,8 @@ blog:
     content: |-
       # Python Virtual Environment Setup Methods
 
+      This guide lists several popular ways to create and manage Python virtual environments.
+
       ## Quick Comparison
 
       | Method | Best For | Cross-Platform |
@@ -23,7 +25,6 @@ blog:
     slug: different-techniques-to-create-virtual-enviroment
     link: https://github.com/Shivanshvyas1729/pydantic_notes/blob/main/create_env.md
     linkText: full notes
-    excerpt: this shows the diffrent tricks to make  virtual env.
   - id: 14
     title: YOLO codes
     content: |-
