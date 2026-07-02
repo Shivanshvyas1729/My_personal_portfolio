@@ -1,4 +1,18 @@
 blog:
+  - id: 16
+    title: Creating AWS keys
+    content: How to Get AWS Credentials and Create an S3 Bucket
+    category: AWS
+    type:
+      - Cloud
+    featured: false
+    draft: false
+    resources: []
+    date: 2026-07-02
+    slug: creating-aws-keys
+    excerpt: how to create different key it is shown there for aws
+    link: https://github.com/Shivanshvyas1729/pydantic_notes/blob/main/aws_keys%20kese%20bana%20a.md
+    linkText: Click me
   - id: 15
     title: different techniques to create virtual enviroment
     content: |-
