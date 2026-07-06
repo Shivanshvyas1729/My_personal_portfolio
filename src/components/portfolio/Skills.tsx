@@ -231,20 +231,12 @@ const TiltCard = ({
 
           <div className="flex flex-wrap gap-2.5 mt-auto" style={{ transform: "translateZ(40px)" }}>
             {(cat.items || []).map((item: string) => (
-              <motion.span
+              <span
                 key={item}
-                whileHover={{ 
-                  scale: 1.12, 
-                  backgroundColor: "hsl(var(--primary) / 0.25)",
-                  borderColor: "hsl(var(--primary) / 0.5)",
-                  color: "hsl(var(--accent))",
-                  boxShadow: "0 0 15px hsl(var(--primary) / 0.15)"
-                }}
-                transition={{ type: "spring", stiffness: 350, damping: 10 }}
-                className="px-3.5 py-1.5 rounded-xl bg-primary/5 dark:bg-primary/10 text-primary dark:text-primary text-[12px] md:text-[13px] font-bold border border-primary/10 dark:border-primary/20 transition-all duration-350 whitespace-nowrap shadow-sm hover:shadow-primary/5 cursor-none no-text-effect"
+                className="px-3.5 py-1.5 rounded-xl bg-primary/5 dark:bg-primary/10 text-primary dark:text-primary text-[12px] md:text-[13px] font-bold border border-primary/10 dark:border-primary/20 whitespace-nowrap shadow-sm cursor-none no-text-effect transition-all duration-300 hover:scale-[1.12] hover:bg-primary/25 hover:border-primary/50 hover:text-accent hover:shadow-[0_0_15px_hsl(var(--primary)/0.15)]"
               >
                 {item}
-              </motion.span>
+              </span>
             ))}
           </div>
         </div>

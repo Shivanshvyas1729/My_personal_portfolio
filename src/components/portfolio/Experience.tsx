@@ -23,14 +23,8 @@ const Experience = () => {
             {(experience || []).map((exp, i) => (
               <AnimatedSection key={i} delay={i * 0.1}>
                 <motion.div 
-                  whileHover={{ 
-                    scale: 1.04, 
-                    y: -5,
-                    boxShadow: "0 20px 40px -15px hsl(var(--primary) / 0.2)"
-                  }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  style={{ transition: "background-color 0.3s, border-color 0.3s" }}
-                  className="glass-card-hover p-6 h-full cursor-pointer"
+                  style={{ transition: "all 0.4s cubic-bezier(0.25, 1, 0.5, 1)" }}
+                  className="glass-card-hover p-6 h-full cursor-pointer hover:scale-[1.04] hover:-translate-y-1"
                 >
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">

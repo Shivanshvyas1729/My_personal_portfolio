@@ -65,11 +65,8 @@ const ProjectCard = ({ project, index, disableInViewAnimation = false, onClick }
       whileInView={disableInViewAnimation ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={disableInViewAnimation ? { duration: 0.2 } : { delay: index * 0.1, duration: 0.5 }}
-      whileHover={{
-        boxShadow: "0 30px 60px -15px hsl(var(--primary) / 0.25)"
-      }}
       onClick={handleCardClick}
-      style={{ transition: "background-color 0.3s, border-color 0.3s, box-shadow 0.3s" }}
+      style={{ transition: "background-color 0.3s, border-color 0.3s, box-shadow 0.5s" }}
       className={
         disableInViewAnimation
           ? "glass-card-hover flex flex-col h-full group overflow-hidden cursor-grab active:cursor-grabbing"
