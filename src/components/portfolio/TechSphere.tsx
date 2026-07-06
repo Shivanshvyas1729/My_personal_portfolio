@@ -446,7 +446,7 @@ const TechSphere = () => {
                       className="group relative h-24 sm:h-28 bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-primary/10 hover:border-primary/50 transition-all duration-500 hover:-translate-y-1.5 overflow-hidden shadow-sm"
                     >
                       <div className="absolute top-0 right-0 w-12 h-12 bg-primary/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <div className="relative z-10 w-9 h-9 rounded-xl bg-slate-900 border border-white/5 flex items-center justify-center text-primary group-hover:scale-110 group-hover:text-white group-hover:bg-primary transition-all duration-300">
+                      <div className="relative z-10 w-9 h-9 rounded-xl bg-muted dark:bg-slate-900 border border-border/40 dark:border-white/5 flex items-center justify-center text-primary group-hover:scale-110 group-hover:text-white group-hover:bg-primary transition-all duration-300">
                         {getTechIcon(tech)}
                       </div>
                       <span className="relative z-10 text-[11px] sm:text-xs font-semibold text-muted-foreground group-hover:text-foreground tracking-wide text-center transition-colors">
