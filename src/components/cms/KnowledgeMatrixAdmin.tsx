@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { z } from "zod";
 import { DynamicForm } from "./DynamicForm";
 import { useCMSState } from "@/context/CMSContext";
-import { RefreshCw, Save, Database, Plus, Trash2, Edit3, X, CheckCircle2 } from "lucide-react";
+import { RefreshCw, Save, Database, Plus, Trash2, Edit3, X, CheckCircle2, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 import { KnowledgeDefinition, KNOWLEDGE_CATEGORIES, KnowledgeCategory } from "@/data/knowledge/categories";
 import { KnowledgeTooltip } from "../portfolio/KnowledgeTooltip";
@@ -63,6 +63,7 @@ export const KnowledgeMatrixAdmin = () => {
   
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [tempDef, setTempDef] = useState<Partial<KnowledgeDefinition>>({});
+  const [showGuide, setShowGuide] = useState(false);
   
   const mode = (forceLocalMode || cmsMode === 'local') ? 'local' : 'github';
 
@@ -214,6 +215,12 @@ export const KnowledgeMatrixAdmin = () => {
           </div>
           <div className="flex gap-3">
             <button
+              onClick={() => setShowGuide(true)}
+              className="px-3 py-1.5 rounded-lg border border-border/50 bg-background text-xs font-semibold hover:bg-muted transition-colors flex items-center gap-1.5"
+            >
+              <HelpCircle size={14} /> Read Guide
+            </button>
+            <button
               onClick={() => loadDomainData(activeDomain, true)}
               disabled={isLoading || isSaving}
               className="px-3 py-1.5 rounded-lg border border-border/50 bg-background text-xs font-semibold hover:bg-muted transition-colors flex items-center gap-1.5"
@@ -308,6 +315,68 @@ export const KnowledgeMatrixAdmin = () => {
           )}
         </div>
       </div>
+
+      {/* Guide Modal */}
+      {showGuide && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-card border border-border/50 rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+            <div className="p-5 border-b border-border/30 flex items-center justify-between shrink-0 bg-primary/5">
+              <div className="flex items-center gap-2">
+                <Database className="text-primary" size={20} />
+                <h3 className="font-bold text-lg text-foreground">Knowledge Matrix Guide</h3>
+              </div>
+              <button 
+                onClick={() => setShowGuide(false)} 
+                className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto space-y-5 text-sm leading-relaxed text-muted-foreground">
+              <div>
+                <h4 className="font-bold text-foreground text-sm mb-1.5">🧠 What is the Knowledge Matrix?</h4>
+                <p>
+                  The Knowledge Matrix is a centralized database of technical definitions, concept cards, algorithms, metrics, and software engineering terms. It serves as an interactive glossary across your portfolio.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-foreground text-sm mb-1.5">⚡ How is this data used?</h4>
+                <p>
+                  The portfolio website automatically scans all project descriptions, success criteria, learning outcomes, and blog posts. If it finds a keyword that matches any term's <strong>ID</strong>, <strong>Title</strong>, or <strong>Aliases</strong>, it automatically highlights it and shows a beautiful <strong>educational tooltip</strong> when hovered.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-foreground text-sm mb-1.5">⚙️ How to manage definitions:</h4>
+                <ul className="list-disc pl-5 space-y-1 mt-1">
+                  <li><strong>Add New:</strong> Click the "Add New Definition" button to add a term to the current category.</li>
+                  <li><strong>Save:</strong> Click "Push to GitHub" (or "Save Local" in local mode) to persist all modifications.</li>
+                  <li><strong>Aliases:</strong> Provide synonyms to match the term in different grammatical contexts (e.g., matching "accuracy" and "accuracies").</li>
+                  <li><strong>Project Overrides:</strong> If a specific project requires a more customized definition of a term, you can override it directly in the Projects Admin panel by matching the term's ID.</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-foreground text-sm mb-1.5">📂 Data Storage:</h4>
+                <p>
+                  Each knowledge domain is stored as an independent JSON array file inside the <code className="bg-muted px-1.5 py-0.5 rounded text-primary text-xs">src/data/knowledge/</code> directory. Keeping them separated prevents git conflicts and enables fast, target-based loads.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-border/30 bg-muted/20 flex justify-end shrink-0">
+              <button 
+                onClick={() => setShowGuide(false)} 
+                className="px-5 py-2 bg-primary text-primary-foreground font-bold rounded-xl shadow-md hover:bg-primary/90 transition-all text-xs"
+              >
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
