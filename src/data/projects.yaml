@@ -1,7 +1,7 @@
 # region PROJECTS
 projects:
   - id: 5
-    title: Lightweight CNN with Explainable AI (Image Classification)
+    title: Cancer Detection with explainable AI
     category:
       - Deep Learning
       - Computer Vision
@@ -18,7 +18,7 @@ projects:
     github: https://github.com/Shivanshvyas1729/Cancer_Detection_with_xai
     live: https://cancerdetectionwithxai.streamlit.app/
     featured: true
-    domain: "Healthcare"
+    domain: Healthcare
     media:
       - url: https://i.ibb.co/0j93F19k/719086-750.jpg
         type: image
@@ -109,10 +109,10 @@ projects:
       - label: depth wise convolution layer
         url: https://link.excalidraw.com/p/readonly/nTbHqs6Z6NhUWvvaQ1Zq
     metrics:
-      Accuracy: "90.2%"
+      Accuracy: 90.2%
       ROC-AUC: "0.915"
-      Model Size: "18.48 MB"
-      Dataset Size: "3,115 images"
+      Model Size: 18.48 MB
+      Dataset Size: 3,115 images
   - id: 4
     title: Automated Defect Detection System (Computer Vision)
     category:
@@ -131,7 +131,7 @@ projects:
     github: https://github.com/Shivanshvyas1729/solar_panel_defect_detection
     live: https://solarpaneldefectdetection.streamlit.app/
     featured: true
-    domain: "⚡ Renewable Energy"
+    domain: ⚡ Renewable Energy
     impact: Improves efficiency of solar panel maintenance by enabling quick and automated defect detection, reducing manual inspection effort and supporting scalable renewable energy operations.
     architectureImage: https://backend.krishnaik.in/media/project_architecture_diagrams/Gemini_Generated_Image_vwro75vwro75vwro_UvMo1qV.jpg
     problem_statement: Manual inspection of solar panels across large solar farms is time-consuming, error-prone, and costly. Defects such as dust accumulation, bird droppings, physical cracks, and electrical damage significantly reduce energy output if left undetected. There is a need for an automated, scalable, and accurate computer vision system that can classify panel defects from images and enable proactive maintenance to maximise renewable energy generation efficiency.
@@ -221,7 +221,7 @@ projects:
       - label: GitHub Repository
         url: https://github.com/Shivanshvyas1729/solar_panel_defect_detection
     metrics:
-      Validation Accuracy: "81.4%"
+      Validation Accuracy: 81.4%
   - id: 3
     title: 🌦 Thunderstorm Forecasting System
     category:
@@ -242,7 +242,7 @@ projects:
     github: https://github.com/Shivanshvyas1729/Thunderstrom_forcast
     live: https://thunderstromforcast.streamlit.app/
     featured: true
-    domain: "🌤️ Meteorology"
+    domain: 🌤️ Meteorology
     impact: Real-time thunderstorm prediction with optimized ML model and interactive UI, enabling early weather warnings for safety and operational planning.
     resources:
       - url: https://excalidraw.com/#json=9Nw6RepmXxt43Pa_0WrYS,pVW7PrOSRwuehccI2tgGmA
