@@ -245,12 +245,31 @@ Try asking:
 👉 "Tell me about your skills" 🚀`;
 };
 
+import { getRAGResponse } from "./ragService";
+
 // ============================================================
 // MAIN ENTRY POINT  ← UI calls only this, nothing else changes
-// Priority: Backend API → Fallback to Mock AI
+// Priority: RAG Chatbot (YAML & PDF Context) → Local Chatbot (Gemini / Mock AI fallback)
 // ============================================================
 export const getChatResponse = async (message: string): Promise<string> => {
+  try {
+    // 1. Try RAG first
+    const ragResponse = await getRAGResponse(message);
+    if (ragResponse !== null) {
+      return ragResponse;
+    }
+  } catch (err: any) {
+    if (err.message && err.message.includes("No vector database found")) {
+      logger.warn("ChatService", "RAG vector database is missing. Alerting user.");
+      return "⚠️ No vector database found. Please run the `build_knowledge_base.ipynb` Jupyter notebook to compile and embed your projects, configurations, and resume PDFs before using the RAG chatbot.";
+    }
+    logger.error("ChatService", "RAG pipeline encountered an error. Falling back seamlessly to local chatbot.", err);
+  }
+
+  // 2. Fallback to existing local chatbot: callBackend (directly hits Gemini with whole context)
   const backendResponse = await callBackend(message);
   if (backendResponse !== null) return backendResponse;
+
+  // 3. Last fallback: mockAI (pre-built local keyword responses)
   return mockAI(message);
 };
