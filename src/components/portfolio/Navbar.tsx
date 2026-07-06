@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, FileText, Sun, Moon, ChevronDown, ExternalLink, Palette } from "lucide-react";
+import { Menu, X, FileText, Sun, Moon, ChevronDown, ExternalLink, Palette, Brain } from "lucide-react";
 import { portfolioData as initialData } from "@/data/portfolioData";
 import { useCMSData, useCMSActions } from "@/context/CMSContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "@/hooks/useTheme";
+import { KnowledgeModal } from "./KnowledgeModal";
 
 const THEMES = [
   {
@@ -151,6 +152,7 @@ const Navbar = () => {
   const [activeSection, setActiveSection] = useState("home");
   const [resumeDropdownOpen, setResumeDropdownOpen] = useState(false);
   const [mobileResumeOpen, setMobileResumeOpen] = useState(false);
+  const [knowledgeOpen, setKnowledgeOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, setTheme } = useTheme();
@@ -263,6 +265,14 @@ const Navbar = () => {
               {link.label}
             </button>
           ))}
+          <button
+            onClick={() => setKnowledgeOpen(true)}
+            className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-1.5 rounded-lg border border-primary/40 text-primary hover:bg-primary/10 hover:border-primary transition-all duration-200"
+          >
+            <Brain size={14} />
+            Knowledge Matrix
+          </button>
+
           {resumeUrl && (
             <div className="relative">
               {visibleCategories.length > 0 ? (
@@ -424,10 +434,23 @@ const Navbar = () => {
                   )}
                 </div>
               )}
+
+              <button
+                onClick={() => {
+                  setMobileOpen(false);
+                  setKnowledgeOpen(true);
+                }}
+                className="w-full flex items-center gap-2 py-2 px-3 rounded-lg text-sm font-medium text-primary hover:bg-primary/10 transition-colors text-left"
+              >
+                <Brain size={14} />
+                Knowledge Matrix
+              </button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      <KnowledgeModal isOpen={knowledgeOpen} onClose={() => setKnowledgeOpen(false)} />
     </motion.nav>
   );
 };
