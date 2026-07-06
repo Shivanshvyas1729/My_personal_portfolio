@@ -58,18 +58,33 @@ export const KnowledgeMatrixAdmin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   
+  // In-memory cache for loaded domains
+  const [domainCache, setDomainCache] = useState<Record<string, KnowledgeDefinition[]>>({});
+  
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [tempDef, setTempDef] = useState<Partial<KnowledgeDefinition>>({});
   
   const mode = (forceLocalMode || cmsMode === 'local') ? 'local' : 'github';
 
-  const loadDomainData = async (domain: typeof KNOWLEDGE_DOMAINS[0]) => {
+  const updateData = (newData: KnowledgeDefinition[]) => {
+    setData(newData);
+    setDomainCache(prev => ({ ...prev, [activeDomain.id]: newData }));
+  };
+
+  const loadDomainData = async (domain: typeof KNOWLEDGE_DOMAINS[0], forceReload = false) => {
+    if (!forceReload && domainCache[domain.id]) {
+      setData(domainCache[domain.id]);
+      return;
+    }
+
     setIsLoading(true);
     try {
       const res = await fetch(`/api/cms-knowledge?filePath=${encodeURIComponent(domain.file)}&mode=${mode}`);
       if (!res.ok) throw new Error("Failed to fetch");
       const json = await res.json();
-      setData(Array.isArray(json) ? json : []);
+      const loadedData = Array.isArray(json) ? json : [];
+      setData(loadedData);
+      setDomainCache(prev => ({ ...prev, [domain.id]: loadedData }));
     } catch (e: unknown) {
       toast.error(`Could not load ${domain.title}. It might be empty or missing.`);
       setData([]);
@@ -145,7 +160,7 @@ export const KnowledgeMatrixAdmin = () => {
       newData.push(tempDef as KnowledgeDefinition);
     }
 
-    setData(newData);
+    updateData(newData);
     setEditingIndex(null);
     toast.success("Definition updated locally. Don't forget to save!");
   };
@@ -154,7 +169,7 @@ export const KnowledgeMatrixAdmin = () => {
     if (window.confirm("Are you sure you want to delete this definition?")) {
       const newData = [...data];
       newData.splice(idx, 1);
-      setData(newData);
+      updateData(newData);
       toast.success("Deleted. Don't forget to save.");
     }
   };
@@ -199,7 +214,7 @@ export const KnowledgeMatrixAdmin = () => {
           </div>
           <div className="flex gap-3">
             <button
-              onClick={() => loadDomainData(activeDomain)}
+              onClick={() => loadDomainData(activeDomain, true)}
               disabled={isLoading || isSaving}
               className="px-3 py-1.5 rounded-lg border border-border/50 bg-background text-xs font-semibold hover:bg-muted transition-colors flex items-center gap-1.5"
             >
