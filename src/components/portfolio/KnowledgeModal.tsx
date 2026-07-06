@@ -55,9 +55,56 @@ export function KnowledgeModal({ isOpen, onClose }: KnowledgeModalProps) {
     }
   };
 
+  const renderFormattedText = (text?: string) => {
+    if (!text) return null;
+    
+    // Check if it is a code block (delimited by ```)
+    if (text.includes("```")) {
+      const parts = text.split("```");
+      return (
+        <div className="space-y-3 my-2 text-xs">
+          {parts.map((part, index) => {
+            if (index % 2 === 1) {
+              // Code block
+              const lines = part.split("\n");
+              // Skip first line if it represents code language
+              const codeLines = ["python", "javascript", "typescript", "json", "html", "css", "bash", "pytorch"].includes(lines[0].trim().toLowerCase())
+                ? lines.slice(1)
+                : lines;
+              return (
+                <pre key={index} className="text-[11px] font-mono text-primary bg-background/80 border border-primary/20 rounded-xl p-4 shadow-sm overflow-x-auto leading-relaxed whitespace-pre select-all">
+                  <code>{codeLines.join("\n").trim()}</code>
+                </pre>
+              );
+            }
+            // Normal text
+            if (!part.trim()) return null;
+            return (
+              <p key={index} className="leading-relaxed text-muted-foreground whitespace-pre-line">
+                {part.trim()}
+              </p>
+            );
+          })}
+        </div>
+      );
+    }
+
+    // Standard text - check for custom quotes, strip outer double-quotes, replace literal newlines
+    let processedText = text.trim();
+    if (processedText.startsWith('"') && processedText.endsWith('"')) {
+      processedText = processedText.slice(1, -1).trim();
+    }
+    
+    return (
+      <p className="leading-relaxed text-muted-foreground whitespace-pre-line">
+        {processedText}
+      </p>
+    );
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-4xl w-[95vw] h-[85vh] p-0 overflow-hidden flex flex-col gap-0 border-border/50 bg-background/95 backdrop-blur-2xl">
+      <DialogContent className="no-text-effect w-screen h-screen max-w-none max-h-none p-0 overflow-hidden flex flex-col gap-0 border-none bg-background">
         <DialogHeader className="p-5 border-b border-border/40 shrink-0 bg-muted/5">
           <div className="flex items-center gap-2">
             <Brain className="w-5 h-5 text-primary" />
@@ -199,9 +246,9 @@ export function KnowledgeModal({ isOpen, onClose }: KnowledgeModalProps) {
                     <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
                       <BookOpen size={11} className="text-primary" /> Core Definition
                     </h4>
-                    <p className="text-xs leading-relaxed text-foreground bg-background/60 border border-border/20 rounded-xl p-3.5 shadow-sm">
-                      {selectedTerm.definition}
-                    </p>
+                    <div className="text-xs leading-relaxed text-foreground bg-background/60 border border-border/20 rounded-xl p-3.5 shadow-sm">
+                      {renderFormattedText(selectedTerm.definition)}
+                    </div>
                   </div>
 
                   {/* Formula */}
@@ -222,9 +269,9 @@ export function KnowledgeModal({ isOpen, onClose }: KnowledgeModalProps) {
                       <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
                         <Brain size={11} className="text-primary" /> Why is this used?
                       </h4>
-                      <p className="text-xs leading-relaxed text-muted-foreground">
-                        {selectedTerm.why_used}
-                      </p>
+                      <div className="bg-background/40 border border-border/10 rounded-xl p-3.5 shadow-sm">
+                        {renderFormattedText(selectedTerm.why_used)}
+                      </div>
                     </div>
                   )}
 
@@ -234,9 +281,9 @@ export function KnowledgeModal({ isOpen, onClose }: KnowledgeModalProps) {
                       <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
                         <GraduationCap size={11} className="text-primary" /> Real-World Analogy
                       </h4>
-                      <p className="text-xs leading-relaxed text-muted-foreground italic bg-primary/5 border border-primary/10 rounded-xl p-3">
-                        "{selectedTerm.real_world_example}"
-                      </p>
+                      <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 shadow-sm">
+                        {renderFormattedText(selectedTerm.real_world_example)}
+                      </div>
                     </div>
                   )}
 

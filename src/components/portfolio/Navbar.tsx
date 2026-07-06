@@ -251,12 +251,12 @@ const Navbar = () => {
           <span className="text-foreground">.</span>
         </button>
 
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden lg:flex items-center gap-4 xl:gap-8">
           {navLinks.map((link) => (
             <button
               key={link.href}
               onClick={() => handleClick(link.href)}
-              className={`text-sm font-medium transition-colors duration-200 ${
+              className={`text-xs xl:text-sm font-medium transition-colors duration-200 ${
                 activeSection === link.href.replace("#", "")
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
@@ -267,10 +267,11 @@ const Navbar = () => {
           ))}
           <button
             onClick={() => setKnowledgeOpen(true)}
-            className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-1.5 rounded-lg border border-primary/40 text-primary hover:bg-primary/10 hover:border-primary transition-all duration-200"
+            className="inline-flex items-center gap-1.5 text-xs xl:text-sm font-medium px-2.5 py-1.5 xl:px-4 rounded-lg border border-primary/40 text-primary hover:bg-primary/10 hover:border-primary transition-all duration-200 shrink-0"
           >
             <Brain size={14} />
-            Knowledge Matrix
+            <span className="hidden xl:inline">Knowledge Matrix</span>
+            <span className="xl:hidden">Knowledge</span>
           </button>
 
           {resumeUrl && (
@@ -279,7 +280,7 @@ const Navbar = () => {
                 <>
                   <button
                     onClick={toggleResumeDropdown}
-                    className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-1.5 rounded-lg border border-primary/40 text-primary hover:bg-primary/10 hover:border-primary transition-all duration-200"
+                    className="inline-flex items-center gap-1.5 text-xs xl:text-sm font-medium px-2.5 py-1.5 xl:px-4 rounded-lg border border-primary/40 text-primary hover:bg-primary/10 hover:border-primary transition-all duration-200 shrink-0"
                   >
                     <FileText size={14} />
                     Resume
@@ -316,7 +317,7 @@ const Navbar = () => {
                   href={resumeUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-1.5 rounded-lg border border-primary/40 text-primary hover:bg-primary/10 hover:border-primary transition-all duration-200"
+                  className="inline-flex items-center gap-1.5 text-xs xl:text-sm font-medium px-2.5 py-1.5 xl:px-4 rounded-lg border border-primary/40 text-primary hover:bg-primary/10 hover:border-primary transition-all duration-200 shrink-0"
                 >
                   <FileText size={14} />
                   Resume
@@ -339,7 +340,7 @@ const Navbar = () => {
           </button>
         </div>
 
-        <div className="md:hidden flex items-center gap-2">
+        <div className="lg:hidden flex items-center gap-2">
           <button
             onClick={() => setTheme(isDark ? "light" : "dark")}
             className="p-2 rounded-full text-foreground/70 hover:text-foreground hover:bg-muted transition-all no-text-effect flex items-center justify-center border border-border/50"
@@ -365,7 +366,7 @@ const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-card/95 border border-border/30 mt-2 mx-4 rounded-xl overflow-hidden transform-gpu relative z-10 shadow-2xl backdrop-blur-none"
+            className="lg:hidden bg-card/95 border border-border/30 mt-2 mx-4 rounded-xl overflow-hidden transform-gpu relative z-10 shadow-2xl backdrop-blur-none"
           >
             <div className="flex flex-col gap-1 p-4">
               {navLinks.map((link) => (
