@@ -42,12 +42,14 @@ interface KnowledgeTooltipProps {
   term: string;
   overrides?: Partial<KnowledgeDefinition>;
   isTargetVariable?: boolean;
+  triggerElement?: React.ReactNode;
 }
 
-export const KnowledgeTooltip: React.FC<KnowledgeTooltipProps> = ({ term, overrides, isTargetVariable }) => {
+export const KnowledgeTooltip: React.FC<KnowledgeTooltipProps> = ({ term, overrides, isTargetVariable, triggerElement }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
+  const [size, setSize] = useState({ width: 900, height: 500 });
   const [hasPositioned, setHasPositioned] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -59,7 +61,7 @@ export const KnowledgeTooltip: React.FC<KnowledgeTooltipProps> = ({ term, overri
   // Merge knowledge intelligently (safe even if globalKnowledge is null)
   const knowledge = { ...globalKnowledge, ...overrides } as KnowledgeDefinition;
 
-  // Handle positioning and mobile detection — must be declared before any early returns
+  // Handle positioning and mobile detection
   const updatePosition = useCallback(() => {
     setIsMobile(window.innerWidth < 768);
     
@@ -76,9 +78,40 @@ export const KnowledgeTooltip: React.FC<KnowledgeTooltipProps> = ({ term, overri
       if (newLeft < 16) newLeft = 16;
 
       setPosition({ top: newTop, left: newLeft });
+      setSize({ width: tooltipWidth, height: tooltipHeight });
       setHasPositioned(true);
     }
   }, [isOpen, isMobile, hasPositioned]);
+
+  const startResizing = (mouseDownEvent: React.MouseEvent) => {
+    mouseDownEvent.preventDefault();
+    mouseDownEvent.stopPropagation();
+    
+    const startWidth = size.width;
+    const startHeight = size.height;
+    const startX = mouseDownEvent.clientX;
+    const startY = mouseDownEvent.clientY;
+    
+    // Add page-level resize cursor and disable user text selection during resize
+    document.body.style.cursor = "se-resize";
+    document.body.style.userSelect = "none";
+    
+    const doDrag = (mouseMoveEvent: MouseEvent) => {
+      const newWidth = Math.max(300, Math.min(window.innerWidth - 32, startWidth + (mouseMoveEvent.clientX - startX)));
+      const newHeight = Math.max(200, Math.min(window.innerHeight - 32, startHeight + (mouseMoveEvent.clientY - startY)));
+      setSize({ width: newWidth, height: newHeight });
+    };
+    
+    const stopDrag = () => {
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener('mousemove', doDrag);
+      window.removeEventListener('mouseup', stopDrag);
+    };
+    
+    window.addEventListener('mousemove', doDrag);
+    window.addEventListener('mouseup', stopDrag);
+  };
 
   useEffect(() => {
     updatePosition();
@@ -381,10 +414,10 @@ export const KnowledgeTooltip: React.FC<KnowledgeTooltipProps> = ({ term, overri
           top: position.top,
           left: position.left,
           zIndex: 99999,
-          width: 'min(900px, calc(100vw - 32px))',
+          width: `${size.width}px`,
+          height: `${size.height}px`,
           minWidth: '300px',
           minHeight: '200px',
-          resize: 'both',
           overflow: 'hidden'
         }}
         className={`glass-card bg-background/95 backdrop-blur-xl border border-primary/20 shadow-2xl flex flex-col pointer-events-auto ${
@@ -433,14 +466,27 @@ export const KnowledgeTooltip: React.FC<KnowledgeTooltipProps> = ({ term, overri
             )}
           </div>
         </div>
-
+ 
         {/* Scrollable Content */}
         <div 
-          className="p-5 overflow-y-auto scrollbar-thin flex-1 overscroll-contain" 
-          style={{ maxHeight: isMobile ? 'calc(90vh - 80px)' : '60vh' }}
+          className="p-5 overflow-y-auto scrollbar-thin flex-1 overscroll-contain select-text" 
+          style={isMobile ? { maxHeight: 'calc(90vh - 80px)' } : { height: `calc(${size.height}px - 64px)` }}
         >
           {content}
         </div>
+
+        {!isMobile && (
+          <div 
+            className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize flex items-end justify-end p-0.5 select-none z-50 text-muted-foreground/30 hover:text-primary transition-colors"
+            onMouseDown={startResizing}
+          >
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
+              <path d="M10,0 L0,10 L10,10 Z" opacity="0.3" />
+              <line x1="4" y1="10" x2="10" y2="4" stroke="currentColor" strokeWidth="1" />
+              <line x1="7" y1="10" x2="10" y2="7" stroke="currentColor" strokeWidth="1" />
+            </svg>
+          </div>
+        )}
       </motion.div>
       
       {/* Mobile Backdrop overlay */}
@@ -456,6 +502,21 @@ export const KnowledgeTooltip: React.FC<KnowledgeTooltipProps> = ({ term, overri
     </AnimatePresence>,
     document.body
   ) : null;
+ 
+  if (triggerElement) {
+    return (
+      <>
+        <div 
+          onClick={handleToggle}
+          ref={triggerRef as any}
+          className="inline-block cursor-pointer"
+        >
+          {triggerElement}
+        </div>
+        {tooltipModal}
+      </>
+    );
+  }
 
   return (
     <>

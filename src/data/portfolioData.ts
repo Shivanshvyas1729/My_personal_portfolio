@@ -155,6 +155,9 @@ export interface Settings {
   themeFontFamily?: string;
   customCursorEnabled?: boolean;
   edgeLightsEnabled?: boolean;
+  smoothScrollEnabled?: boolean;
+  chatbotWorkMode?: 'offline' | 'online' | 'auto';
+  chatbotMaxTokens?: number;
 
   // Intro / Transition Settings
   introEnabled?: boolean;

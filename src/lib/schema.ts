@@ -144,6 +144,12 @@ export const GlobalSettingsSchema = z.object({
   themeFontFamily: z.string().optional(),
   customCursorEnabled: z.boolean().optional(),
   edgeLightsEnabled: z.boolean().optional(),
+  smoothScrollEnabled: z.boolean().optional(),
+  chatbotWorkMode: z.enum(['offline', 'online', 'auto']).optional(),
+  chatbotMaxTokens: z.number().min(1).max(4000).optional(),
+  chatbotModel: z.string().optional(),
+  chatbotBaseUrl: z.string().optional(),
+  chatbotApiKey: z.string().optional(),
 
   // ─── Intro / Transition Settings ───
   introEnabled: z.boolean().optional(),

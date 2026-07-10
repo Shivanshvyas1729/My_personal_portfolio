@@ -46,6 +46,9 @@ settings:
   themeAccentColor: "#c084fc"
   themeFontFamily: "Poppins"
   customCursorEnabled: false
+  smoothScrollEnabled: true
+  chatbotWorkMode: "auto"
+  chatbotMaxTokens: 800
 
   # Intro / Transition
   introEnabled: true

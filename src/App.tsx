@@ -18,6 +18,7 @@ import IntroTransition from "./components/portfolio/IntroTransition";
 import ChatAssistant from "./components/portfolio/ChatAssistant";
 import { AdminAuth } from "./components/blog/AdminAuth";
 import { AnimatePresence, motion } from "framer-motion";
+import Lenis from "lenis";
 
 // Lazy — only load when navigated to (reduces initial bundle ~40%)
 const Index = lazy(() => import("./pages/Index.tsx"));
@@ -73,7 +74,26 @@ function AppShell() {
     };
   }, [cursorEnabled]);
 
+  const smoothScrollEnabled = settings?.smoothScrollEnabled !== false;
 
+  useEffect(() => {
+    if (!smoothScrollEnabled) return;
+
+    const lenis = new Lenis({
+      duration: 1.2,
+      smoothWheel: true,
+    });
+
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+    };
+  }, [smoothScrollEnabled]);
 
   useEffect(() => {
     if (!settings) return;

@@ -251,25 +251,47 @@ import { getRAGResponse } from "./ragService";
 // MAIN ENTRY POINT  ← UI calls only this, nothing else changes
 // Priority: RAG Chatbot (YAML & PDF Context) → Local Chatbot (Gemini / Mock AI fallback)
 // ============================================================
-export const getChatResponse = async (message: string): Promise<string> => {
+export const getChatResponse = async (
+  message: string,
+  chatbotWorkMode?: 'offline' | 'online' | 'auto',
+  chatbotMaxTokens?: number
+): Promise<string> => {
+  const mode = chatbotWorkMode || 'auto';
+
+  // 1. Offline Mode: Go straight to local backend/mock
+  if (mode === 'offline') {
+    logger.info("ChatService", "Offline mode active. Bypassing RAG database.");
+    const backendResponse = await callBackend(message);
+    if (backendResponse !== null) return backendResponse;
+    return mockAI(message);
+  }
+
+  // 2. Online / Auto Modes: Try RAG first
   try {
-    // 1. Try RAG first
-    const ragResponse = await getRAGResponse(message);
+    const ragResponse = await getRAGResponse(message, chatbotMaxTokens);
     if (ragResponse !== null) {
       return ragResponse;
     }
   } catch (err: any) {
-    if (err.message && err.message.includes("No vector database found")) {
-      logger.warn("ChatService", "RAG vector database is missing. Alerting user.");
-      return "⚠️ No vector database found. Please run the `build_knowledge_base.ipynb` Jupyter notebook to compile and embed your projects, configurations, and resume PDFs before using the RAG chatbot.";
+    if (err.message && err.message.includes("No FAISS vector database found")) {
+      logger.warn("ChatService", "RAG FAISS vector database is missing.");
+      if (mode === 'online') {
+        return "⚠️ No FAISS vector database found. Please run the `build_knowledge_base.ipynb` Jupyter notebook to compile and embed your portfolio data before using the RAG chatbot.";
+      }
     }
-    logger.error("ChatService", "RAG pipeline encountered an error. Falling back seamlessly to local chatbot.", err);
+    logger.error("ChatService", "RAG pipeline encountered an error.", err);
+
+    // If online-only, do NOT fall back to local model
+    if (mode === 'online') {
+      return "⚠️ Chatbot is configured to work in Online-Only mode, but the RAG completion service is currently unavailable.";
+    }
   }
 
-  // 2. Fallback to existing local chatbot: callBackend (directly hits Gemini with whole context)
+  // 3. Auto Mode fallback: call local backend Gemini/Mock
+  logger.info("ChatService", "Falling back to local chatbot model.");
   const backendResponse = await callBackend(message);
   if (backendResponse !== null) return backendResponse;
 
-  // 3. Last fallback: mockAI (pre-built local keyword responses)
+  // Last fallback: mock responses
   return mockAI(message);
 };

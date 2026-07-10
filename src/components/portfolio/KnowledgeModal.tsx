@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Search, Database, BookOpen, Brain, Terminal, ChevronRight, HelpCircle, GraduationCap, Code2, Layers, CheckCircle2, X } from "lucide-react";
+import { Search, Database, BookOpen, Brain, Terminal, ChevronRight, HelpCircle, GraduationCap, Code2, Layers, CheckCircle2, X, Info, Link2, ExternalLink } from "lucide-react";
 import { allDefinitions } from "@/data/knowledge/index";
 import { KnowledgeDefinition } from "@/data/knowledge/categories";
+import { KnowledgeTooltip } from "./KnowledgeTooltip";
 
 interface KnowledgeModalProps {
   isOpen: boolean;
@@ -22,6 +23,44 @@ export function KnowledgeModal({ isOpen, onClose }: KnowledgeModalProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedTerm, setSelectedTerm] = useState<KnowledgeDefinition | null>(null);
+  const [rightPanelWidth, setRightPanelWidth] = useState(420);
+  const [isResizing, setIsResizing] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(true);
+
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth >= 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const startResizing = (mouseDownEvent: React.MouseEvent) => {
+    mouseDownEvent.preventDefault();
+    setIsResizing(true);
+
+    const startWidth = rightPanelWidth;
+    const startX = mouseDownEvent.clientX;
+
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+
+    const doDrag = (mouseMoveEvent: MouseEvent) => {
+      const diffX = mouseMoveEvent.clientX - startX;
+      const newWidth = Math.max(300, Math.min(800, startWidth - diffX));
+      setRightPanelWidth(newWidth);
+    };
+
+    const stopDrag = () => {
+      setIsResizing(false);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      window.removeEventListener("mousemove", doDrag);
+      window.removeEventListener("mouseup", stopDrag);
+    };
+
+    window.addEventListener("mousemove", doDrag);
+    window.addEventListener("mouseup", stopDrag);
+  };
 
   // Search logic
   const filteredDefinitions = (allDefinitions as KnowledgeDefinition[]).filter((def) => {
@@ -217,8 +256,27 @@ export function KnowledgeModal({ isOpen, onClose }: KnowledgeModalProps) {
             </div>
           </div>
 
+          {/* Resizable Divider */}
+          {selectedTerm && (
+            <div
+              className={`hidden md:block w-1 hover:w-1.5 bg-border/40 hover:bg-primary/60 cursor-col-resize transition-all duration-150 relative select-none shrink-0 ${
+                isResizing ? 'bg-primary/80 w-1.5' : ''
+              }`}
+              onMouseDown={startResizing}
+            >
+              {/* Visual grab handle indicator */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-8 rounded-full border border-border bg-background flex flex-col gap-0.5 items-center justify-center pointer-events-none opacity-80 shadow-sm">
+                <span className="w-0.5 h-2 bg-muted-foreground/60 rounded-full" />
+                <span className="w-0.5 h-2 bg-muted-foreground/60 rounded-full" />
+              </div>
+            </div>
+          )}
+
           {/* Right Panel: Detailed view of selected concept */}
-          <div className={`w-full md:w-[420px] border-t md:border-t-0 md:border-l border-border/30 shrink-0 flex flex-col bg-muted/5 min-h-0 ${selectedTerm ? 'flex' : 'hidden md:flex items-center justify-center p-6 text-center'}`}>
+          <div 
+            style={isDesktop ? { width: `${rightPanelWidth}px` } : {}}
+            className={`w-full border-t md:border-t-0 md:border-l border-border/30 shrink-0 flex flex-col bg-muted/5 min-h-0 ${selectedTerm ? 'flex' : 'hidden md:flex items-center justify-center p-6 text-center'}`}
+          >
             {selectedTerm ? (
               <div className="flex-1 flex flex-col min-h-0">
                 {/* Detail Header */}
@@ -231,16 +289,27 @@ export function KnowledgeModal({ isOpen, onClose }: KnowledgeModalProps) {
                       {selectedTerm.title}
                     </h3>
                   </div>
-                  <button 
-                    onClick={() => setSelectedTerm(null)} 
-                    className="md:hidden text-xs text-primary font-bold px-2.5 py-1.5 bg-primary/10 rounded-lg hover:bg-primary/20 transition-all"
-                  >
-                    Back to List
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <KnowledgeTooltip
+                      term={selectedTerm.title}
+                      overrides={selectedTerm}
+                      triggerElement={
+                        <button className="text-xs text-primary font-bold px-2.5 py-1.5 bg-primary/10 rounded-lg hover:bg-primary/20 transition-all flex items-center gap-1 select-none">
+                          <Info size={12} /> More Info
+                        </button>
+                      }
+                    />
+                    <button 
+                      onClick={() => setSelectedTerm(null)} 
+                      className="md:hidden text-xs text-primary font-bold px-2.5 py-1.5 bg-primary/10 rounded-lg hover:bg-primary/20 transition-all"
+                    >
+                      Back to List
+                    </button>
+                  </div>
                 </div>
-
+ 
                 {/* Detail Body */}
-                <div className="flex-1 overflow-y-auto p-5 space-y-5">
+                <div className="flex-1 overflow-y-auto p-5 space-y-5 select-text">
                   {/* Definition */}
                   <div className="space-y-1.5">
                     <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
@@ -250,19 +319,29 @@ export function KnowledgeModal({ isOpen, onClose }: KnowledgeModalProps) {
                       {renderFormattedText(selectedTerm.definition)}
                     </div>
                   </div>
-
-                  {/* Formula */}
-                  {selectedTerm.formula && (
-                    <div className="space-y-1.5">
-                      <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
-                        <Terminal size={11} className="text-primary" /> Mathematical Formula
-                      </h4>
-                      <code className="block text-[11px] font-mono text-primary bg-background/60 border border-primary/10 rounded-xl p-3 shadow-sm select-all">
-                        {selectedTerm.formula}
-                      </code>
+ 
+                  {/* Formula / Good Value */}
+                  {(selectedTerm.formula || selectedTerm.good_value) && (
+                    <div className="flex flex-col gap-3.5 p-4 rounded-xl bg-muted/40 border border-border/50 shadow-sm">
+                      {selectedTerm.formula && (
+                        <div className="flex-1">
+                          <span className="block text-[9px] font-black uppercase text-muted-foreground/70 tracking-wider mb-1.5 select-none">Mathematical Formula</span>
+                          <div className="flex items-center justify-center p-3 rounded-lg bg-primary/5 border border-primary/15 font-mono text-xs text-primary font-bold text-center leading-relaxed tracking-wide select-all shadow-inner overflow-x-auto min-h-[46px] scrollbar-thin">
+                            {selectedTerm.formula}
+                          </div>
+                        </div>
+                      )}
+                      {selectedTerm.good_value && (
+                        <div className="flex-1">
+                          <span className="block text-[9px] font-black uppercase text-muted-foreground/70 tracking-wider mb-1.5 select-none">Ideal Range / Metric Goal</span>
+                          <div className="flex items-center justify-center p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/15 font-bold text-xs text-emerald-500 text-center select-all shadow-inner min-h-[46px]">
+                            {selectedTerm.good_value}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
-
+ 
                   {/* Why We Use It */}
                   {selectedTerm.why_used && (
                     <div className="space-y-1.5">
@@ -274,7 +353,7 @@ export function KnowledgeModal({ isOpen, onClose }: KnowledgeModalProps) {
                       </div>
                     </div>
                   )}
-
+ 
                   {/* Real-World Analogy */}
                   {selectedTerm.real_world_example && (
                     <div className="space-y-1.5">
@@ -286,7 +365,7 @@ export function KnowledgeModal({ isOpen, onClose }: KnowledgeModalProps) {
                       </div>
                     </div>
                   )}
-
+ 
                   {/* Interview Point */}
                   {selectedTerm.interview_point && (
                     <div className="space-y-1.5">
@@ -299,7 +378,7 @@ export function KnowledgeModal({ isOpen, onClose }: KnowledgeModalProps) {
                       </div>
                     </div>
                   )}
-
+ 
                   {/* Advantages & Limitations */}
                   {((selectedTerm.advantages && selectedTerm.advantages.length > 0) || 
                     (selectedTerm.limitations && selectedTerm.limitations.length > 0)) && (
@@ -329,6 +408,38 @@ export function KnowledgeModal({ isOpen, onClose }: KnowledgeModalProps) {
                           </ul>
                         </div>
                       )}
+                    </div>
+                  )}
+
+                  {/* Use Cases */}
+                  {selectedTerm.use_cases && selectedTerm.use_cases.length > 0 && (
+                    <div className="space-y-1.5">
+                      <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+                        <ExternalLink size={11} className="text-primary" /> Common Use Cases
+                      </h4>
+                      <div className="flex flex-wrap gap-1.5">
+                        {selectedTerm.use_cases.map((uc, i) => (
+                          <span key={i} className="text-[10px] bg-secondary text-secondary-foreground border border-border/40 px-2.5 py-1 rounded-full font-medium">
+                            {uc}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Related Terms */}
+                  {selectedTerm.related_terms && selectedTerm.related_terms.length > 0 && (
+                    <div className="space-y-1.5">
+                      <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+                        <Link2 size={11} className="text-primary" /> Related Terms
+                      </h4>
+                      <div className="flex flex-wrap gap-1.5">
+                        {selectedTerm.related_terms.map((rt, i) => (
+                          <span key={i} className="text-[10px] bg-muted/60 text-muted-foreground border border-border/40 px-2.5 py-1 rounded-full font-medium">
+                            {rt}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

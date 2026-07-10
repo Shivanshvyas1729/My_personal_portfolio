@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useCMSData } from "@/context/CMSContext";
 import { MessageSquare, X, Send, Bot, User, Loader2, ExternalLink, Trash2 } from "lucide-react";
 import { getChatResponse } from "@/services/chatService";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
@@ -66,6 +67,7 @@ const renderContent = (text: string) => {
 };
 
 const ChatAssistant = () => {
+  const settings = useCMSData(d => d.settings);
   const [isOpen, setIsOpen] = useState(false);
   const initialMessage: Message = { role: "bot", content: "Hi! I'm an AI assistant for this portfolio. Ask me about projects, skills, experience, or anything else!" };
   const [messages, setMessages] = useState<Message[]>([initialMessage]);
@@ -188,7 +190,7 @@ const ChatAssistant = () => {
     setInput("");
     setIsTyping(true);
     try {
-      const response = await getChatResponse(text);
+      const response = await getChatResponse(text, settings?.chatbotWorkMode, settings?.chatbotMaxTokens);
       setMessages(prev => [...prev, { role: "bot", content: response }]);
     } catch {
       setMessages(prev => [...prev, { role: "bot", content: "Sorry, I'm having trouble right now. Please try again." }]);

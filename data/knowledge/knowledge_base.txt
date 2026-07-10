@@ -1,0 +1,1208 @@
+=== CONTENT SOURCE: PORTFOLIO PROFILE ===
+about:
+  certifications:
+  - Data Science with Generative AI – PW Skills
+  - Advanced Data Science Programs – Krish Naik
+  - Machine Learning Learning Plan Certification – Amazon Web Services
+  - Open Source Conference (OSSC 2025) Participation – The Linux Foundation
+  - Bharatiya Antariksh Hackathon 2025 – Certificate of Acknowledgement by Indian
+    Space Research Organisation
+  description: Final-year B.Tech CS (IoT) student at MLVIT, focused on developing
+    impactful end-to-end solutions. Associated with TILS Edu, currently advancing
+    in AI/ML through PW Skills Data Science and mentorship from Krish Naik. Continuously
+    learning and open to constructive feedback
+  marqueeTexts:
+  - WE BUILD AI SYSTEMS
+  - WE CREATE INTELLIGENT PRODUCTS
+  - WE AUTOMATE REAL WORLD PROBLEMS
+education:
+- degree: B.Tech in Computer Science (iot)
+  description: Specializing in Data Science & AI Engineering
+  institution: MLV Textile & Engineering College, Bhilwara
+  year: 2023 – 2027
+- degree: Data Science with Generative AI
+  description: Focused on ML & GenAI
+  institution: PW Skills (Online)
+  year: Oct 2024 – Jan 2026
+hero:
+  ctas:
+  - label: View Projects
+    link: '#projects'
+  - label: Contact Me
+    link: '#contact'
+  description: I specialize in designing and deploying intelligent systems...
+  headline:
+  - Building Scalable
+  - AI Systems
+  - That Create
+  - Real Impact....
+home:
+  featuredProjectsCount: 4
+personal:
+  email: shivanshvyas1729@gmail.com
+  github: https://github.com/Shivanshvyas1729
+  linkedin: https://linkedin.com/in/shivanshvyas
+  location: Bhilwara, Rajasthan, India
+  name: Shivansh Vyas
+  phone: +91 6377099494
+  profileImage:
+    position: center
+    publicId: image_7_xrrid7
+    resourceType: image
+    secureUrl: https://res.cloudinary.com/dnw73uesc/image/upload/v1779443469/image_7_xrrid7.webp
+    type: url
+    value: https://local.image/img_1779366595711_208.webp#filename=Gemini_Generated_Image_9jfuyy9jfuyy9jfu_1779366595711.webp
+  title: Data Scientist | AI Engineer
+resume:
+  categories:
+  - name: Data Science
+    url: https://shorturl.at/rlKAY
+    visible: true
+  url: https://shorturl.at/rlKAY
+services:
+- description: End-to-end intelligent systems
+  icon: Brain
+  title: AI & ML Solutions
+- description: Analysis, modeling, visualization
+  icon: BarChart3
+  title: Data Science Projects
+- description: RAG, chatbots, LLM apps
+  icon: Sparkles
+  title: Generative AI Apps
+- description: AI-driven workflows
+  icon: Zap
+  title: Intelligent Automation
+settings:
+  customCursorEnabled: false
+  introDuration: 4000
+  introEnabled: true
+  introPrimaryText: नमस्ते
+  introStyle: namaste
+  introSubtitle: Namaste
+  introTagline: Welcome to my universe..
+  ropeLightColorDark: '#a1620744'
+  ropeLightColorLight: '#fde68a44'
+  ropeLightColors:
+  - '#eab30866'
+  - '#67e8f966'
+  - '#6366f166'
+  - '#a855f766'
+  ropeLightColorsDark:
+  - '#ffffff'
+  ropeLightColorsLight:
+  - '#D4AF37'
+  - '#4F46E5'
+  - ''
+  - '#FFFFFF'
+  ropeLightGlowIntensity: 3
+  ropeLightGlowIntensityDark: 3
+  ropeLightGlowIntensityLight: 4
+  ropeLightSpeed: 12
+  ropeLightSpeedDark: 2.1
+  ropeLightSpeedLight: 6.1
+  ropeLightThickness: 1.5
+  ropeLightThicknessDark: 1.5
+  ropeLightThicknessLight: 2.5
+  sharpLightColorsDark:
+  - '#FFD700'
+  - '#93C5FD'
+  - '#67E8F9'
+  - '#FFFFFF'
+  sharpLightColorsLight:
+  - '#FFB703'
+  - '#3B82F6'
+  - '#06B6D4'
+  - ''
+  sharpLightSpeedDark: 7.1
+  sharpLightSpeedLight: 4.1
+  sharpLightThickness: 1.5
+  sharpLightThicknessDark: 1.5
+  sharpLightThicknessLight: 1.5
+  smoothScrollEnabled: true
+  textAnimationSpeed: 4s
+  textGlowIntensity: 1.3
+  textHoverColors:
+  - '#22d3ee'
+  - '#fbbf24'
+  - '#6366f1'
+  - '#8b5cf6'
+  textTransitionSpeed: 0.8s
+  themeAccentColor: '#c084fc'
+  themeBackgroundColor: '#030712'
+  themeFontFamily: Poppins
+  themePrimaryColor: '#6366f1'
+skills:
+  categories:
+  - items:
+    - Machine Learning
+    - Deep Learning
+    - NLP
+    - Computer Vision
+    - Data Analysis
+    title: Core AI/ML
+  - items:
+    - Generative AI
+    - Agentic AI
+    - RAG
+    title: Advanced AI
+  - items:
+    - Docker
+    - Flask
+    - FastAPI
+    - Git
+    - Github
+    title: Tools & Infra
+stats:
+  experienceCount: 1
+  projectsCount: 6
+techStack:
+  all:
+  - Python
+  - Pandas
+  - NumPy
+  - Scikit-learn
+  - TensorFlow
+  - PyTorch
+  - LangChain
+  - MLflow
+  - FastAPI
+  - Streamlit
+  - Docker
+  - MySQL
+  - MongoDB
+  - Git
+  - GitHub
+  - AWS
+  connections:
+  - - Python
+    - PyTorch
+  - - PyTorch
+    - TensorFlow
+  - - TensorFlow
+    - Scikit-learn
+  - - LangChain
+    - FastAPI
+  - - FastAPI
+    - Docker
+  featured:
+  - Python
+  - Scikit-learn
+  - TensorFlow
+  - PyTorch
+  - LangChain
+  - Docker
+  - FastAPI
+  - Streamlit
+  - Mlflow
+  - RAG
+
+
+=== CONTENT SOURCE: PROJECTS AND TECH STACK ===
+projects:
+- architecture: The system follows a client-server architecture. Users upload thyroid
+    ultrasound images through a FastAPI frontend or Streamlit dashboard. Images are
+    preprocessed and passed to a custom lightweight CNN called Fibonacci-Net. The
+    model predicts benign or malignant thyroid nodules and generates Grad-CAM heatmaps
+    for explainability. Results and visual explanations are displayed to the user
+    and packaged into downloadable diagnostic reports. The architecture is designed
+    to remain lightweight and suitable for deployment in low-resource healthcare environments.
+  architectureImage: https://i.ibb.co/p6CzTSCX/9fed8422-4558-4568-ad5f-68f70186a6a9.jpg
+  category:
+  - Deep Learning
+  - Computer Vision
+  - Explainable AI (XAI)
+  data_sources:
+  - https://www.kaggle.com/datasets/diveshzz/thyroid-cancer-classification-ultrasound-dataset/data
+  deployment: FastAPI backend and Streamlit dashboard deployment with model weights
+    hosted on Hugging Face Hub. The solution is optimized for lightweight inference
+    and deployment in low-resource healthcare environments.
+  description: Thyroid cancer cases are increasing worldwide, but in many rural and
+    remote areas, expert doctors and diagnostic facilities are not easily available.
+    Traditional diagnosis mainly depends on ultrasound imaging and specialist interpretation,
+    which can be expensive, time-consuming, and inaccessible in low-resource regions.
+    Many existing AI models focus only on achieving high accuracy, but they often
+    require high computational power and complex hardware. Such systems are difficult
+    to deploy in rural healthcare centers where resources are limited. Therefore,
+    there is a need for a lightweight, cost-effective, and explainable AI-based system
+    that can assist doctors and healthcare workers in detecting thyroid cancer efficiently.
+  domain: Healthcare
+  ethics:
+  - Dataset consists of anonymized medical images.
+  - Designed as a Clinical Decision Support (CDS) system rather than a diagnostic
+    replacement.
+  - Grad-CAM visualizations improve transparency and interpretability.
+  - Supports healthcare professionals but does not replace clinical expertise.
+  - Final medical decisions should always be validated by qualified healthcare professionals.
+  evaluation_metrics:
+  - Accuracy
+  - ROC-AUC
+  - Binary Cross-Entropy Loss
+  - Inference Latency
+  explainability: Grad-CAM (Gradient-weighted Class Activation Mapping) heatmaps generated
+    from the final convolutional layer to highlight image regions responsible for
+    model predictions and improve transparency.
+  featured: true
+  features:
+  - Thyroid Nodule Classification
+  - Custom Fibonacci-Net CNN
+  - Grad-CAM Explainable AI
+  - Automated Diagnostic Report Generation
+  - FastAPI REST API
+  - Interactive Streamlit Dashboard
+  - Real-Time Inference
+  - Low-Resource Deployment Support
+  github: https://github.com/Shivanshvyas1729/Cancer_Detection_with_xai
+  howItWorks: 1. The user uploads a thyroid ultrasound image through the FastAPI web
+    interface or Streamlit dashboard. 2. The image is converted to RGB format, resized
+    to 224×224 pixels, and normalized. 3. The custom Fibonacci-Net CNN processes the
+    image and predicts whether the thyroid nodule is benign or malignant. 4. Grad-CAM
+    generates a heatmap highlighting the image regions that influenced the prediction.
+    5. Results are displayed with visual explanations through the web interface. 6.
+    A downloadable diagnostic report containing the prediction and explainability
+    visualization is generated.
+  id: 5
+  learning_outcomes:
+  - Designed Fibonacci-Net, a custom lightweight CNN using Fibonacci filter progression,
+    depthwise separable convolutions, and a custom Avg2MaxPooling layer for high-precision
+    image classification.
+  - Trained and evaluated the model on a complex image dataset of 3,115 samples, achieving
+    a ROC-AUC score of 0.915 while maintaining a highly efficient 18.48 MB model footprint.
+  - Integrated Grad-CAM explainability and deployed the solution through FastAPI APIs
+    and a Streamlit dashboard for real-time inference and automated report generation.
+  - Implemented Fibonacci filter progression (21 → 34 → 55 → 89 → 144 → 233 → 377)
+    for efficient feature extraction.
+  - Developed a custom Avg2MaxPooling layer combining average and max pooling.
+  - Integrated Grad-CAM explainability heatmaps for transparent AI predictions.
+  - Built REST APIs using FastAPI for scalable model serving.
+  - Developed an interactive Streamlit dashboard for real-time inference.
+  - Implemented automated diagnostic report generation using python-docx.
+  live: https://cancerdetectionwithxai.streamlit.app/
+  media:
+  - type: image
+    url: https://i.ibb.co/0j93F19k/719086-750.jpg
+  - url: https://i.ibb.co/PZDrx9Qn/df08103d-28d6-4be4-9257-b27ff3322dc3.jpg
+  - url: https://i.ibb.co/XZp3XZgC/fibo-arch.png
+  metrics:
+    Accuracy: 90.2%
+    Dataset Size: 3,115 images
+    Model Size: 18.48 MB
+    ROC-AUC: '0.915'
+  model_inputs:
+  - Thyroid Ultrasound Images (224×224 RGB)
+  modeling:
+  - Custom Fibonacci-Net CNN Architecture
+  - Fibonacci Filter Progression (21 → 34 → 55 → 89 → 144 → 233 → 377)
+  - Depthwise Separable Convolutions
+  - Avg2MaxPooling Custom Layer
+  - Binary Cross Entropy Loss
+  - Adam Optimizer
+  objectives:
+  - Develop a lightweight thyroid cancer detection system suitable for low-resource
+    healthcare environments.
+  - Provide explainable AI predictions using Grad-CAM visualizations.
+  - Assist doctors and healthcare workers during preliminary thyroid cancer screening.
+  - Reduce dependency on specialist interpretation in rural and remote regions.
+  - Enable fast, cost-effective, and accessible diagnostic assistance.
+  open_resources:
+  - label: Research
+    url: https://drive.google.com/drive/u/0/folders/1WeKzWkeb7GvV_xYDwJLzbdd-kXy29vov
+  - label: depth wise convolution layer
+    url: https://link.excalidraw.com/p/readonly/nTbHqs6Z6NhUWvvaQ1Zq
+  preprocessing:
+  - RGB conversion
+  - Image resizing to 224×224 pixels
+  - Pixel normalization to the range [0,1]
+  - Batch dimension expansion for inference
+  problem_statement: Thyroid Cancer is a disease in which harmful or abnormal cells
+    grow in the thyroid gland located in the neck. The thyroid gland controls important
+    body functions such as metabolism, energy balance, heart rate, and hormone production.
+    If thyroid cancer is not detected at an early stage, it can spread to nearby organs
+    and become life-threatening. Manual diagnostic evaluation of thyroid ultrasound
+    images is time-consuming, subjective, and dependent on specialist expertise. Furthermore,
+    black-box AI systems lack transparency, creating a need for lightweight explainable
+    computer-aided diagnostic systems that can support healthcare professionals in
+    low-resource and rural environments.
+  resources:
+  - label: excalidraw
+    url: https://excalidraw.com/#json=ZBBfaXHadM-TQNDIhaRKw,69m8_fH4TKqm7AQq-mMfTw
+  - label: whole drive link
+    url: https://drive.google.com/drive/folders/1Kp7T_7QMJO2OW4agrAtCmV5CsKz7uUjQ
+  - label: research
+    url: https://drive.google.com/drive/u/0/folders/1WeKzWkeb7GvV_xYDwJLzbdd-kXy29vov
+  risks:
+  - Class imbalance may lead to model overfitting.
+  - Ultrasound image quality variations can affect prediction accuracy.
+  - Noise and scanner variability may impact model performance.
+  - False predictions may occur in challenging imaging conditions.
+  - The system should not be used as a replacement for professional medical diagnosis.
+  success_criteria:
+  - Achieve high classification accuracy on thyroid ultrasound images.
+  - Generate Grad-CAM visualizations in real time.
+  - Provide downloadable diagnostic reports.
+  - Maintain low computational requirements suitable for rural healthcare deployment.
+  - Deliver explainable predictions that can support clinical decision-making.
+  target_variable: Nodule Malignancy Class (0 = Benign, 1 = Malignant)
+  tech:
+  - Python
+  - TensorFlow
+  - FastAPI
+  - Streamlit
+  - Grad-CAM
+  - Hugging Face Hub
+  title: Cancer Detection with explainable AI
+  validation_strategy: 80-10-10 stratified train-validation-test split
+- architecture: The system is a single-page Streamlit application. A user uploads
+    a solar panel image, which is preprocessed before being passed to a fine-tuned
+    ResNet50 classification model. The model outputs a defect class with Top-3 prediction
+    probabilities and confidence scores. Pretrained ImageNet weights are loaded via
+    TensorFlow/Keras, and the custom classification head is trained on the solar panel
+    defect dataset.
+  architectureImage: https://backend.krishnaik.in/media/project_architecture_diagrams/Gemini_Generated_Image_vwro75vwro75vwro_UvMo1qV.jpg
+  category:
+  - Deep Learning
+  - Computer Vision
+  data_sources:
+  - Kaggle Solar Panel Defect Dataset (bird drop, dust, electrical damage, physical
+    damage, snow, clean)
+  deployment: Streamlit Community Cloud deployment with model weights bundled into
+    the repository. The app loads pretrained ResNet50 weights at startup and performs
+    real-time inference on user-uploaded images.
+  description: An AI-powered solar panel defect detection system built using transfer
+    learning with ResNet50. The solution automatically classifies solar panel images
+    into multiple defect categories such as dust, bird drops, electrical damage, physical
+    damage, and snow coverage. Deployed through an interactive Streamlit web application,
+    the system enables fast, accurate, and scalable defect inspection, reducing the
+    need for manual monitoring and improving solar farm maintenance efficiency.
+  domain: ⚡ Renewable Energy
+  ethics:
+  - Dataset used in accordance with Kaggle terms of service.
+  - No personally identifiable information involved.
+  - Model predictions should be reviewed by qualified technicians before maintenance
+    action.
+  - Responsible AI practices followed throughout development.
+  evaluation_metrics:
+  - Classification Accuracy
+  - Prediction Confidence Score
+  - Top-3 Prediction Probability
+  explainability: Top-3 class predictions with confidence percentages are displayed
+    for each inference, providing transparency into the model's decision-making process
+    and alternative classifications.
+  featured: true
+  features:
+  - Bird-drop Detection
+  - Dust Detection
+  - Electrical Damage Detection
+  - Physical Damage Detection
+  - Snow Coverage Detection
+  - Clean Panel Classification
+  - Top-3 Prediction Analysis
+  - Confidence Score Visualization
+  future_improvements:
+  - Implement multi-label classification to detect multiple co-occurring defects.
+  - Integrate Grad-CAM visualizations to highlight defect regions in images.
+  - Extend deployment to edge devices for on-site solar farm inspection.
+  - Collect more diverse real-world training data across different climates and solar
+    panel types.
+  github: https://github.com/Shivanshvyas1729/solar_panel_defect_detection
+  id: 4
+  impact: Improves efficiency of solar panel maintenance by enabling quick and automated
+    defect detection, reducing manual inspection effort and supporting scalable renewable
+    energy operations.
+  known_limitations:
+  - Single-label classification cannot handle images with multiple simultaneous defect
+    types.
+  - Model has not been validated on real-world solar farm imagery from diverse geographic
+    regions.
+  - No real-time video stream or drone integration is currently supported.
+  learning_outcomes:
+  - Developed a multi-class computer vision system for automated industrial inspection
+    across six defect categories.
+  - Fine-tuned a pretrained ResNet50 model on a specialized image dataset, achieving
+    81.4% validation accuracy.
+  - Built and deployed a Streamlit application providing real-time defect classification,
+    Top-3 prediction analysis, and confidence score visualization.
+  live: https://solarpaneldefectdetection.streamlit.app/
+  media:
+  - type: image
+    url: https://i.ibb.co/fdj291HQ/Gemini-Generated-Image-14r8ms14r8ms14r8.png
+  metrics:
+    Validation Accuracy: 81.4%
+  model_inputs:
+  - Solar panel images (224×224 RGB)
+  model_outputs:
+  - Defect class label
+  - Top-3 class probabilities with confidence scores
+  modeling:
+  - Pretrained ResNet50 Backbone
+  - Custom Classification Head
+  - Fully Connected Dense Layer
+  - ReLU Activation
+  - Dropout Regularization
+  - Output Classification Layer
+  - Categorical Cross Entropy Loss
+  - Adam Optimizer
+  monitoring:
+  - Confidence score thresholding to flag low-certainty predictions
+  - Streamlit interface displays all Top-3 predictions for human review
+  objectives:
+  - Build an accurate multi-class solar panel defect classifier using transfer learning.
+  - Classify 6 defect categories — dust, bird drops, electrical damage, physical damage,
+    snow coverage, and clean panels.
+  - Deploy an interactive web application for real-time defect detection.
+  - Minimize training data requirements by leveraging pretrained ResNet50 weights.
+  - Provide Top-3 class predictions with confidence scores for each inference.
+  open_resources:
+  - label: Streamlit App
+    url: https://solarpaneldefectdetection.streamlit.app/
+  - label: GitHub Repository
+    url: https://github.com/Shivanshvyas1729/solar_panel_defect_detection
+  preprocessing:
+  - Image loading using PIL
+  - Image resizing for ResNet50
+  - Tensor conversion
+  - Pixel normalization
+  - Batch dimension creation for inference
+  problem_statement: Manual inspection of solar panels across large solar farms is
+    time-consuming, error-prone, and costly. Defects such as dust accumulation, bird
+    droppings, physical cracks, and electrical damage significantly reduce energy
+    output if left undetected. There is a need for an automated, scalable, and accurate
+    computer vision system that can classify panel defects from images and enable
+    proactive maintenance to maximise renewable energy generation efficiency.
+  risks:
+  - Model performance may degrade for images with lighting conditions not represented
+    in training data.
+  - Overlapping defect types (e.g., dust + bird drops) may confuse single-label classification.
+  - Deployment on Streamlit Community Cloud has resource constraints limiting batch
+    inference.
+  - The system should not be used as a replacement for professional medical diagnosis.
+  success_criteria:
+  - Achieve high classification accuracy across all 6 defect categories.
+  - Generate Top-3 prediction probabilities for each uploaded image.
+  - Successfully deploy a responsive Streamlit web app for real-time inference.
+  - Enable fast inference suitable for field-use inspection workflows.
+  target_variable: Solar Panel Defect Class (6 categories — Bird Drop, Dust, Electrical
+    Damage, Physical Damage, Snow, Clean)
+  tech:
+  - Python
+  - TensorFlow
+  - ResNet50
+  - Streamlit
+  - Computer Vision
+  title: Automated Defect Detection System (Computer Vision)
+  training_environment:
+  - Python 3.x local environment
+  - TensorFlow with GPU support for accelerated training
+  validation_strategy: Train-validation-test split with stratified sampling across
+    all 6 defect classes
+- architecture: The user enters atmospheric measurements (CAPE, K-Index, Lifted Index,
+    etc.) into the Streamlit web interface. The inputs are serialised and sent as
+    a POST request to the FastAPI prediction endpoint. The trained Scikit-learn classifier
+    processes the features and returns a thunderstorm probability prediction, which
+    is displayed to the user in the Streamlit dashboard.
+  category:
+  - Machine Learning
+  - Python
+  data_sources:
+  - Meteorological atmospheric instability index dataset (CAPE, K-Index, Lifted Index,
+    Dew Point Depression, etc.)
+  deployment: FastAPI backend serving the trained Scikit-learn model as a REST API,
+    with a Streamlit frontend deployed on Streamlit Community Cloud for real-time
+    user interaction.
+  description: A machine learning-based system for real-time thunderstorm prediction
+    using atmospheric instability indices. The system leverages ensemble ML models
+    trained on meteorological data to classify thunderstorm occurrence, deployed through
+    a FastAPI backend and an interactive Streamlit interface for real-time forecasting.
+  domain: 🌤️ Meteorology
+  ethics:
+  - Predictions are intended as decision-support tools and should not replace certified
+    meteorological warnings.
+  - No personally identifiable information is collected or stored.
+  - Model limitations are disclosed clearly in the application interface.
+  evaluation_metrics:
+  - Accuracy
+  - Precision
+  - Recall
+  - F1-Score
+  - ROC-AUC Score
+  explainability: Feature importance scores from the Random Forest classifier indicate
+    which atmospheric instability indices are most predictive of thunderstorm occurrence,
+    offering meteorological interpretability to domain experts.
+  feature_engineering:
+  - Atmospheric instability index calculation from raw meteorological measurements
+  - Interaction terms between CAPE and Lifted Index for improved separability
+  featured: true
+  features:
+  - CAPE (Convective Available Potential Energy)
+  - K-Index (Thunderstorm Instability Index)
+  - Lifted Index (Atmospheric Stability Index)
+  - Dew Point Depression
+  - Relative Humidity
+  - Temperature at Various Pressure Levels
+  - Wind Shear Indices
+  future_improvements:
+  - Integrate live weather API data (e.g., OpenWeatherMap) for automated real-time
+    inference.
+  - Extend model to predict storm severity levels beyond binary classification.
+  - Add geographic location-based forecasting using spatial features.
+  - Implement time-series models (LSTM) for temporal forecasting.
+  github: https://github.com/Shivanshvyas1729/Thunderstrom_forcast
+  id: 3
+  impact: Real-time thunderstorm prediction with optimized ML model and interactive
+    UI, enabling early weather warnings for safety and operational planning.
+  known_limitations:
+  - Manual input of atmospheric indices limits automation for real-time operational
+    use.
+  - The model does not currently integrate live meteorological API data feeds.
+  - Binary classification does not capture storm severity or location.
+  learning_outcomes:
+  - Trained and evaluated multiple Scikit-learn classification models on meteorological
+    data.
+  - Handled class imbalance using SMOTE oversampling from the Imbalanced-learn library.
+  - Built a RESTful prediction API using FastAPI for scalable model serving.
+  - Developed a real-time Streamlit dashboard for meteorological data input and forecast
+    display.
+  - Gained hands-on experience with atmospheric instability indices such as CAPE,
+    K-Index, and Lifted Index.
+  - Learned feature engineering techniques for tabular meteorological datasets.
+  live: https://thunderstromforcast.streamlit.app/
+  media:
+  - type: image
+    url: https://www.reconnectwithnature.org/getContentAsset/a2de823c-a1ae-491e-a47b-f373af403d4e/dfc3d011-8f63-43f6-9ed8-4b444333a1d0/Thunderstorm-lightning-strike-shutterstock-1.jpg?language=en-US
+  model_inputs:
+  - Atmospheric instability indices (CAPE, K-Index, Lifted Index, Dew Point, Humidity)
+  model_outputs:
+  - Binary thunderstorm occurrence prediction (0 = No Thunderstorm, 1 = Thunderstorm)
+  - Prediction confidence probability
+  modeling:
+  - Random Forest Classifier
+  - Gradient Boosting Classifier
+  - Logistic Regression (baseline)
+  - Cross-validation for model selection
+  - Hyperparameter tuning using GridSearchCV
+  objectives:
+  - Build a binary classification model to predict thunderstorm occurrence from atmospheric
+    indices.
+  - Address class imbalance in the meteorological dataset using oversampling techniques.
+  - Develop and deploy a RESTful FastAPI backend for real-time prediction serving.
+  - Create an interactive Streamlit interface for meteorological data input and result
+    visualization.
+  open_resources:
+  - label: System Architecture
+    url: https://excalidraw.com/#json=9Nw6RepmXxt43Pa_0WrYS,pVW7PrOSRwuehccI2tgGmA
+  - label: GitHub Repository
+    url: https://github.com/Shivanshvyas1729/Thunderstrom_forcast
+  preprocessing:
+  - Missing value imputation with median strategy
+  - Feature scaling using StandardScaler
+  - SMOTE oversampling to address class imbalance
+  - Train-test splitting with stratified sampling
+  problem_statement: Traditional thunderstorm forecasting depends on complex Numerical
+    Weather Prediction (NWP) models that require significant computational resources
+    and expert meteorological knowledge. There is a growing demand for lightweight,
+    data-driven ML models that can predict thunderstorm occurrence using atmospheric
+    instability indices, enabling real-time forecasting accessible through web-based
+    interfaces.
+  resources:
+  - label: System Architecture (Excalidraw)
+    url: https://excalidraw.com/#json=9Nw6RepmXxt43Pa_0WrYS,pVW7PrOSRwuehccI2tgGmA
+  risks:
+  - Model trained on a specific geographic region may not generalise to other climate
+    zones.
+  - Extreme weather events outside the training distribution may produce unreliable
+    predictions.
+  - Real-time data ingestion is not currently integrated; users must manually input
+    atmospheric values.
+  success_criteria:
+  - Achieve strong classification performance on the thunderstorm prediction task.
+  - Successfully handle class imbalance to avoid biased predictions.
+  - Deploy a responsive API and UI capable of real-time inference.
+  target_variable: Thunderstorm Occurrence (0 = No Thunderstorm, 1 = Thunderstorm)
+  tech:
+  - Python
+  - Scikit-learn
+  - FastAPI
+  - Streamlit
+  - Pandas
+  - NumPy
+  - Imbalanced-learn
+  title: 🌦 Thunderstorm Forecasting System
+  training_environment:
+  - Python 3.x local environment with Scikit-learn and Imbalanced-learn
+  validation_strategy: Stratified K-Fold cross-validation to ensure balanced class
+    representation across all folds, followed by final evaluation on a held-out test
+    set.
+- category:
+  - Machine Learning
+  - MLOps
+  - Python
+  description: An end-to-end machine learning pipeline for predicting beverage quality
+    using physicochemical properties. The system features automated CI/CD deployment
+    with Docker containerization on AWS EC2 via AWS ECR and GitHub Actions, demonstrating
+    production-grade MLOps practices with a fully automated build, test, and deploy
+    workflow.
+  domain: 🍶 Food & Beverage
+  featured: true
+  github: https://github.com/Shivanshvyas1729/drink_quality_prediction
+  id: 2
+  impact: Automated ML pipeline with production-ready CI/CD deployment, demonstrating
+    end-to-end MLOps from data ingestion to containerised cloud deployment.
+  live: https://drinkqualityprediction.streamlit.app/
+  media:
+  - type: image
+    url: https://labelyourdata.com/cms/wp-content/uploads/2023/10/machine-learning-for-wine-quality-prediction_1.jpg
+  tech:
+  - Python
+  - Scikit-learn
+  - Docker
+  - AWS EC2
+  - AWS ECR
+  - GitHub Actions
+  - Streamlit
+  - Pandas
+  - YAML
+  title: 🥤 Drink Quality Prediction System
+- architecture: A user visits the Streamlit frontend to define audio parameters. A
+    Python orchestration layer coordinates NLP analysis to detect timestamps, passes
+    data to Pydub and FFmpeg for editing, and returns a processed video and audio
+    file directly to the browser for download.
+  architectureImage: ''
+  category:
+  - Python
+  data_sources:
+  - YouTube Data API v3
+  - Spotify Web API
+  deployment: Deployed as a containerized Streamlit Web App on Streamlit Community
+    Cloud.
+  description: Automated system that creates mixtapes...
+  domain: 🎵 Media & Entertainment
+  ethics:
+  - Strict filtering to ignore copyrighted material not licensed for remixing
+  evaluation_metrics:
+  - Processing pipeline time
+  - API response latency
+  explainability: All steps in the timeline creation are printed to screen for debugging
+    and human verification.
+  featured: true
+  features:
+  - Auto-timestamp extraction
+  - Audio cross-fading
+  - Dynamic video rendering
+  github: https://github.com/Shivanshvyas1729/Automated-YouTube-Mixtape-Creation1/tree/main
+  id: 1
+  impact: Zero manual editing
+  learning_outcomes:
+  - Integrate third-party multimedia APIs securely
+  - Orchestrate FFmpeg sub-processes for scalable audio processing
+  - Design and deploy interactive interfaces with Streamlit
+  live: https://automated-youtube-mixtape-creation.streamlit.app/
+  media:
+  - type: image
+    url: https://images.unsplash.com/photo-1620712943543-bcc4688e7485
+  modeling:
+  - Spacy for NLP entity extraction in music titles
+  objectives:
+  - Reduce video production time from hours to minutes
+  - Implement an error-free timeline alignment algorithm
+  open_resources:
+  - label: FFmpeg Documentation
+    url: https://ffmpeg.org/documentation.html
+  - label: Pydub GitHub
+    url: https://github.com/jiaaro/pydub
+  preprocessing:
+  - Sanitize user prompt inputs
+  - Normalize retrieved audio levels
+  - Transcode all media to a standard format prior to editing
+  problem_statement: Content creators spend hours manually compiling, trimming, and
+    producing mixtapes for YouTube. There exists a need for an automated solution
+    capable of digesting input criteria, extracting audio sources, and exporting a
+    polished output with zero manual editing.
+  resources:
+  - label: Architecture PDF
+    url: https://drive.google.com/drive/folders/1zYdh2-eu6yUfUA4IYokQsziallVQXCGr
+  - label: System Design Spec
+    url: https://example.com/design.pdf
+  risks:
+  - Rate-limiting by YouTube API
+  - High memory consumption during render
+  success_criteria:
+  - Successfully render a 15-minute mixtape in under 2 minutes
+  - Maintain HD audio quality with zero clipping during transitions
+  target_variable: Not applicable (Rule-based automation)
+  tech:
+  - Python
+  - Streamlit
+  - NLP
+  - Pydub
+  - MoviePy
+  - FFmpeg
+  title: 🎧 Automated YouTube Mixtape Creation
+  validation_strategy: Extensive manual QA across 50 different genres of music
+
+
+=== CONTENT SOURCE: BLOGS AND ARTICLES ===
+blog:
+- category: AWS
+  content: How to Get AWS Credentials and Create an S3 Bucket
+  date: 2026-07-02
+  draft: false
+  excerpt: how to create different key it is shown there for aws
+  featured: false
+  id: 16
+  link: https://github.com/Shivanshvyas1729/pydantic_notes/blob/main/aws_keys%20kese%20bana%20a.md
+  linkText: Click me
+  resources: []
+  slug: creating-aws-keys
+  title: Creating AWS keys
+  type:
+  - Cloud
+- category: Gernal
+  content: '# Python Virtual Environment Setup Methods
+
+
+    This guide lists several popular ways to create and manage Python virtual environments.
+
+
+    ## Quick Comparison
+
+
+    | Method | Best For | Cross-Platform |
+
+    |---------|----------|----------------|
+
+    | **uv** | Fast project setup, modern workflows | ✅ |
+
+    | **venv** | Standard Python projects | ✅ |
+
+    | **conda** | Data science, ML, AI | ✅ |
+
+    | **virtualenv** | Legacy projects | ✅ |
+
+    | **pyenv + venv** | Managing multiple Python versions | macOS/Linux ⭐ |
+
+    | **Poetry** | Dependency & package management | ✅ |'
+  date: 2026-07-02
+  draft: false
+  featured: false
+  id: 15
+  link: https://github.com/Shivanshvyas1729/pydantic_notes/blob/main/create_env.md
+  linkText: full notes
+  resources: []
+  slug: different-techniques-to-create-virtual-enviroment
+  title: different techniques to create virtual enviroment
+  type: []
+- category: Codes
+  content: '**Ultralytics YOLO** (YOLO11 / YOLO26 / YOLOv8) supports multiple computer
+    vision tasks with a clean, unified API.
+
+
+    ### Supported Tasks
+
+
+    | Task                        | Model Suffix | Purpose                                      |
+    Pretrained Example          |
+
+    |-----------------------------|--------------|----------------------------------------------|-----------------------------|
+
+    | **Detect** (Object Detection) | (default)   | Bounding boxes + class + confidence         |
+    `yolo11n.pt`               |
+
+    | **Segment** (Instance Segmentation) | `-seg`     | Bounding boxes + pixel masks                |
+    `yolo11n-seg.pt`           |
+
+    | **Pose** (Keypoint Detection) | `-pose`     | Bounding boxes + keypoints (skeleton)       |
+    `yolo11n-pose.pt`          |
+
+    | **Classify** (Image Classification) | `-cls`     | Whole-image class probabilities             |
+    `yolo11n-cls.pt`           |
+
+    | **OBB** (Oriented Bounding Boxes) | `-obb`     | Rotated bounding boxes                      |
+    `yolo11n-obb.pt`           |
+
+
+    **Tracking** (ByteTrack / BoTSORT) works with Detect, Segment, and Pose models.
+
+    '
+  date: 2026-06-09
+  draft: false
+  excerpt: 'basic codes for yolo '
+  featured: false
+  id: 14
+  link: https://github.com/Shivanshvyas1729/pydantic_notes/blob/main/yolo%20notes.md
+  linkText: all codes are here
+  resources: []
+  slug: yolo-codes
+  title: YOLO codes
+  type:
+  - Computer Vision
+  - Deep Learning
+  - Yolo
+- category: Gernal
+  content: "## Q: Why do we use raise?\n\nA: The raise keyword is used to explicitly\
+    \ trigger an exception. It stops the normal flow of execution and transfers control\
+    \ to the nearest exception handler (except block). In FastAPI, it is commonly\
+    \ used with HTTPException to return error responses such as 404, 400, or 500.\n\
+    \nWithout it \n\n\"raise is used to explicitly throw an exception. Without raise,\
+    \ the program may continue execution even after a critical failure, whereas raise\
+    \ stops the normal flow and allows the error to be handled by the caller or global\
+    \ exception handlers.\"\n\n## Q: why we convert image to **base 64** ?\nWe convert\
+    \ images to Base64 to encode raw binary image data into a safe ASCII text string,\
+    \ which allows you to transmit, embed, or store the image easily across text-based\
+    \ protocols without data corruption\n\n**Safe Transmission**: Web protocols like\
+    \ HTTP, JSON, and XML are designed for text. Raw binary data contains special\
+    \ characters that can break these formats. Base64 uses only 64 safe characters\
+    \ (A-Z, a-z, 0-9, +, /) to ensure text-safe delivery\n\n**API Compatibility**\
+    \ : Many REST APIs require payload data to be in strict JSON format. JSON cannot\
+    \ naturally handle binary image data, so converting the image to a Base64 string\
+    \ allows it to be sent inside a standard JSON key-value pair.\n### ***Trade-offs\
+    \ to Keep in Mind***\n**Size Increase**: Base64 encoding increases the file data\
+    \ size by roughly 33% compared to the original binary file.\n**Performance Impact**:\
+    \ It is ideal for small images or icons."
+  date: 2026-06-05
+  draft: false
+  excerpt: basic questions about exp handling
+  featured: false
+  id: 13
+  title: 'Exection Handling '
+  type:
+  - Exception Handling
+- category: Links
+  content: https://github.com/Shivanshvyas1729/Cancer_Detection_with_xai#appendix-master-prompt--dynamic-ai-document-generator
+  date: 2026-05-28 00:00:00+00:00
+  draft: false
+  excerpt: a prompt to make a functionality that   makes a   word file for u
+  featured: false
+  id: 10
+  title: all secret prompt and flow
+  type: []
+- category: Notes
+  content: ">  PART 1\n\n# TensorFlow/Keras Layer Writing Methods\n\n---\n\n# 1. Functional\
+    \ API Style (Most Common)\n\n```python\nfrom tensorflow.keras import layers\n\n\
+    inputs = layers.Input(shape=(224, 224, 3))\n\nx = layers.Conv2D(21, 3, padding='same')(inputs)\n\
+    \nx = layers.ReLU()(x)\n```\n\n## Explanation\n\n```text\nlayers.Conv2D(...) \
+    \  → creates layer object\n(inputs)             → applies layer on input tensor\n\
+    ```\n\n## Best For\n\n* Complex architectures\n* ResNet\n* EfficientNet\n* Multiple\
+    \ inputs/outputs\n* Skip connections\n\n---\n\n# 2. Separated Layer Object Style\n\
+    \n```python\nfrom tensorflow.keras import layers\n\ninputs = layers.Input(shape=(224,\
+    \ 224, 3))\n\nconv = layers.Conv2D(21, 3, padding='same')\n\nx = conv(inputs)\n\
+    \nrelu = layers.ReLU()\n\nx = relu(x)\n```\n\n## Explanation\n\n```text\nFirst\
+    \ create layer\nThen apply layer separately\n```\n\n## Best For\n\n* Beginners\n\
+    * Debugging\n* Understanding internals\n\n---\n\n# 3. Sequential API Style\n\n\
+    ```python\nimport tensorflow as tf\nfrom tensorflow.keras import layers\n\nmodel\
+    \ = tf.keras.Sequential([\n\n    layers.Conv2D(\n        21,\n        3,\n   \
+    \     padding='same',\n        input_shape=(224, 224, 3)\n    ),\n\n    layers.ReLU(),\n\
+    \n    layers.MaxPooling2D(2)\n\n])\n```\n\n## Explanation\n\n```text\nSequential\
+    \ automatically passes output\nfrom one layer to next layer\n```\n\nNo manual:\n\
+    \n```python\nx = layer(x)\n```\n\nneeded.\n\n## Best For\n\n* Simple CNNs\n* Linear\
+    \ architectures\n* Quick prototyping\n\n---\n\n# 4. Custom Layer Style\n\n```python\n\
+    import tensorflow as tf\nfrom tensorflow.keras import layers\n\nclass MyBlock(layers.Layer):\n\
+    \n    def __init__(self):\n\n        super().__init__()\n\n        self.conv =\
+    \ layers.Conv2D(\n            32,\n            3,\n            padding='same'\n\
+    \        )\n\n        self.relu = layers.ReLU()\n\n    def call(self, inputs):\n\
+    \n        x = self.conv(inputs)\n\n        x = self.relu(x)\n\n        return\
+    \ x\n```\n\n## Explanation\n\n```text\nLayers stored inside self\nthen used inside\
+    \ call()\n```\n\n## Best For\n\n* Reusable CNN blocks\n* MobileNet\n* Residual\
+    \ blocks\n* Attention modules\n* Custom architectures\n"
+  date: 2026-05-21 00:00:00+00:00
+  draft: false
+  excerpt: some style of writing in tensorflow
+  featured: false
+  id: 9
+  link: https://github.com/Shivanshvyas1729/pydantic_notes/blob/main/tensorflow%20writting%20method.md
+  linkText: more details
+  resources: []
+  title: TensorFlow Layer Writing Styles and Best Practices
+  type:
+  - Python
+  - Tensorflow
+- category: Notes
+  content: "[paper](https://drive.google.com/file/d/1Tv7Q6qpaJCSE72zsyXi4TOpOH6MNKXyL/view?usp=sharing)\n\
+    # Fibonacci-Net\n![fibo_arch](https://raw.githubusercontent.com/Shivanshvyas1729/My_personal_portfolio/main/public/assets/uploads/img_1779438605641_671.webp)\n\
+    ![Gemini_Generated_Image_kkgz25kkgz25kkgz](https://res.cloudinary.com/dnw73uesc/image/upload/v1779445041/Gemini_Generated_Image_kkgz25kkgz25kkgz_dpokaw.png)\n\
+    \nFibonacci-Net is a lightweight CNN architecture designed for:\n- efficient feature\
+    \ extraction\n- low computational cost\n- mobile/edge AI deployment\n- medical\
+    \ imaging\n- small datasets\n\nIt combines:\n- Fibonacci-based filter scaling\n\
+    - depthwise separable convolutions\n- residual/skip connections\n- Avg-2Max pooling\n\
+    \n---\n\n# Architecture Diagram\n\n[Excalidraw Architecture Link](https://link.excalidraw.com/p/readonly/nTbHqs6Z6NhUWvvaQ1Zq)\n\
+    \n---\n\n# 1. Fibonacci Convolution Arrangement\n(Fibonacci-based filters)\n\n\
+    ## Idea\n\nInstead of increasing filters aggressively like:\n\n```text\n32 → 64\
+    \ → 128\n```\n\nFibonacci-Net increases them using Fibonacci numbers:\n\n```text\n\
+    21 → 34 → 55 → 89\n```\n\nThe Fibonacci sequence:\n\n```text\n1, 1, 2, 3, 5, 8,\
+    \ 13, 21, 34, 55, 89...\n```\n\n---\n\n<u>## What are filters?</u>\n\nFilters\
+    \ (kernels) in CNNs detect:\n- edges\n- textures\n- shapes\n- patterns\n\nMore\
+    \ filters = more learning capacity.\n\n---\n\n## Why use Fibonacci growth?\n\n\
+    Traditional CNNs often:\n- consume large memory\n- use many parameters\n- overfit\
+    \ on small datasets\n\nFibonacci scaling provides smoother growth.\n\n### Benefits\n\
+    \n- fewer parameters\n- lower memory usage\n- lightweight architecture\n- gradual\
+    \ feature learning\n\n---\n\n## Intuition\n\nInstead of sudden complexity jumps:\n\
+    \n```text\n32 → 64 → 128\n```\n\nwe use smoother growth:\n\n```text\n21 → 34 →\
+    \ 55 → 89\n```\n\nThis improves efficiency and regularization.\n\n---\n\n# 2.\
+    \ Depthwise Separable Convolution\n\nA lightweight alternative to standard convolution.\n\
+    \n---\n\n## Standard Convolution\n\nNormal CNN convolution processes all channels\
+    \ together.\n\nExample:\nRGB image → one filter operates on R, G, and B simultaneously.\n\
+    \nThis is computationally expensive.\n\n---d<u></u>\n\n## Depthwise Separable\
+    \ Convolution\n\nIt splits convolution into TWO operations.\n\n---\n\n## Step\
+    \ 1: Depthwise Convolution\n\nEach channel is processed independently.\n\n```text\n\
+    R → filter\nG → filter\nB → filter\n```\n\nNo channel mixing yet.\n\n---\n\n##\
+    \ Step 2: Pointwise Convolution\n\nA `1 × 1` convolution combines channel information.\n\
+    \nThis performs feature fusion.\n\n---\n\n## Computational Efficiency\n\n### Standard\
+    \ convolution cost\n\n```math\nK × K × M × N\n```\n\n### Depthwise separable convolution\
+    \ cost\n\n```math\nK × K × M + M × N\n```\n\nThis drastically reduces computation.\n\
+    \n---\n\n## Benefits\n\n- faster training\n- reduced computation\n- fewer parameters\n\
+    - ideal for mobile and embedded AI\n\nUsed in:\n- MobileNet\n- Xception\n\n---\n\
+    \n# 3. Residual / Skip Connections\n\nInspired by ResNet.\n\n---\n\n## Main Idea\n\
+    \nOutputs from earlier layers are passed directly to deeper layers.\n\n```text\n\
+    Layer1 → Layer2 → Layer3 → Layer4\n   \\_________________________/\n```\n\nLayer1\
+    \ information skips intermediate layers.\n\n---\n\n## Why is this important?\n\
+    \nDeep networks suffer from:\n- vanishing gradients\n- feature degradation\n-\
+    \ information loss\n\nSkip connections help gradients flow easily.\n\n---\n\n\
+    ## Residual Learning\n\nInstead of learning:\n\n```math\nH(x)\n```\n\nthe network\
+    \ learns:\n\n```math\nF(x) = H(x) - x\n```\n\nFinal output:\n\n```math\ny = F(x)\
+    \ + x\n```\n\nThis simplifies optimization.\n\n---\n\n## Benefits\n\n### Prevents\
+    \ vanishing gradients\nEnables stable deep learning.\n\n### Preserves important\
+    \ features\nEarlier representations survive deeper layers.\n\n### Enables deeper\
+    \ CNNs\nAllows training of very deep architectures.\n\n---\n\n## Intuition\n\n\
+    If deeper layers fail to improve features,\nthe original features are still preserved.\n\
+    \n---\n\n# 4. Avg-2-Max Pooling\n\nCombines:\n- Max Pooling\n- Average Pooling\n\
+    \ninto a hybrid pooling strategy.\n\n---\n\n# Max Pooling\n\nSelects the strongest\
+    \ activation.\n\nExample:\n\n```math\n\\begin{bmatrix}\n1 & 5 \\\\\n2 & 8\n\\\
+    end{bmatrix}\n\\rightarrow 8\n```\n\nGood for:\n- edge detection\n- dominant features\n\
+    \nBut may lose smooth information.\n\n---\n\n# Average Pooling\n\nComputes the\
+    \ average activation.\n\n```math\n\\frac{1+5+2+8}{4}=4\n```\n\nGood for:\n- smooth\
+    \ textures\n- global context\n\nBut weak features may dominate.\n\n---\n\n# Avg-2-Max\
+    \ Pooling Idea   (used in skip connection)\n\n```text\nOutput = Average Information\
+    \ + Max Information\n```\n\nThis captures:\n- sharp local features\n- smooth contextual\
+    \ features\n\n--->  Give  a good read \n<mark>1. It Creates \"Overlapping Pooling\"\
+    \ to Prevent Information LossStandard Pooling (Pool 2, Stride 2): The pooling\
+    \ window moves exactly 2 pixels at a time with no overlap. It aggressively discards\
+    \ 75% of your feature data in one step.Overlapping Pooling (Pool 3, Stride 2):\
+    \ The 3×3 window moves 2 steps at a time. This means adjacent pooling regions\
+    \ overlap by 1 row/column of pixels. This redundancy ensures that features on\
+    \ the boundaries of the pooling window are not abruptly cut off or entirely lost,\
+    \ allowing the network to retain a richer context.\n\n2. Digital Image Processing\
+    \ (DIP) AnalogyAccording to the Fibonacci-Net research paper, this custom layer\
+    \ relies heavily on traditional image processing principles:An Average Pooling\
+    \ layer with a 3×3 pool size acts exactly like a traditional blur/smoothing filter.By\
+    \ subtracting twice the Max Pooling output (avg - 2 * max), a 3×3 pool size forces\
+    \ the layer to behave like a sharp edge detection filter.A 3×3 spatial window\
+    \ is the absolute minimum requirement to extract structural edges in all directions\
+    \ (horizontal, vertical, and diagonal). A 2×2 pool size cannot capture geometric\
+    \ edges accurately.\n\n3. Automatic Feature Augmentation & InversionThe math in\
+    \ your custom call function (avg_pool - 2 * max_pool) creates a mathematical \"\
+    negative\" inversion of the feature maps.A 3×3 window provides enough local pixel\
+    \ variance to compute a stable average versus maximum contrast.This inversion\
+    \ forces the network to give extreme attention to structural boundaries. For Fibonacci-Net's\
+    \ primary task (identifying things like brain tumors on MRI scans), a 3×3 grid\
+    \ size is perfect for spotlighting the abnormal perimeter of a lesion or tumor.\n\
+    > \n## Benefits\n\n### Better feature extraction\nCaptures diverse representations.\n\
+    \n### Improved image understanding\nUseful for medical and texture-based datasets.\n\
+    \n### Better edge-texture balance\nRetains both strong and subtle information.\n\
+    \n---\n\n# Overall Flow of Fibonacci-Net\n\n## Step-by-Step Pipeline\n\n### 1.\
+    \ Fibonacci Filter Arrangement\nEfficient feature scaling.\n\n↓\n\n### 2. Depthwise\
+    \ Separable Convolution\nFast lightweight computation.\n\n↓\n\n### 3. Residual\
+    \ Connections\nPreserve information across layers.\n\n↓\n\n### 4. Avg-2-Max Pooling\n\
+    Capture both sharp and smooth features.\n\n---\n\n# Handling Class Imbalance\n\
+    \nFibonacci-Net is NOT explicitly designed for class imbalance,\nbut several architectural\
+    \ components naturally help minority-class learning.\n\n---\n\n# Components Helping\
+    \ Class Imbalance\n\n## 1. Skip Connections / Parallel Concatenation (Strongest\
+    \ Effect)\n\n- reuse shallow + deep features\n- improve gradient flow\n- preserve\
+    \ rare-class information\n- create richer feature diversity\n\nThis prevents minority-class\
+    \ features from being forgotten.\n\n---\n\n## 2. Avg-2Max Pooling\n\nCombines:\n\
+    - Max pooling → strong edge features\n- Average pooling → smooth/global features\n\
+    \nHelps preserve:\n- subtle textures\n- weak edges\n- rare patterns\n\nUseful\
+    \ for minority classes containing fine-grained details.\n\n---\n\n## 3. Fibonacci\
+    \ Filter Scaling\n\nGradual scaling:\n- reduces parameters\n- lowers overfitting\n\
+    - improves generalization on small datasets\n\nIndirectly reduces bias toward\
+    \ majority classes.\n\n---\n\n## 4. Depthwise Separable Convolution\n\nMain contribution:\n\
+    - lightweight computation\n- efficiency\n- smaller models\n\nIndirect imbalance\
+    \ benefit:\n- smaller networks tend to overfit less\n\nBut it is NOT a direct\
+    \ imbalance-learning mechanism.\n\n---\n\n# Overall Imbalance Assessment\n\nFibonacci-Net\
+    \ helps imbalance through:\n- richer feature diversity\n- better feature preservation\n\
+    - improved gradient propagation\n- reduced overfitting\n\nHowever, it is NOT sufficient\
+    \ for severe long-tail imbalance problems.\n\n---\n\n# Recommended Additions for\
+    \ Strong Imbalance\n\nFor highly imbalanced datasets, combine Fibonacci-Net with:\n\
+    - Focal Loss\n- Class-Weighted Cross Entropy\n- Oversampling / Data Augmentation\n\
+    - Balanced Batch Sampling\n\nUse metrics like:\n- F1-score\n- Recall\n- ROC-AUC\n\
+    \ninstead of accuracy alone.\n\n---\n\n# Why Fibonacci-Net is Useful\n\nDesigned\
+    \ for:\n- lightweight AI\n- edge devices\n- medical imaging\n- mobile deployment\n\
+    - small datasets\n\nGoals:\n- reduce computation\n- reduce model size\n- maintain\
+    \ high accuracy\n- improve efficiency\n- reduce overfitting\n\n---\n\n# One-Line\
+    \ Summary\n\n> Fibonacci-Net combines Fibonacci-based filter scaling, lightweight\
+    \ convolutions, residual learning, and hybrid pooling to build an efficient and\
+    \ compact CNN architecture."
+  date: 2026-05-21 00:00:00+00:00
+  draft: false
+  excerpt: '- Lightweight deep learning models with very few parameters (~1.4M)
+
+    - Fast inference and low computational cost
+
+    - Efficient deployment on edge/mobile/low-resource devices
+
+    - Better handling of class imbalance and edge-sensitive features
+
+    - Improved feature reuse without extremely deep architectures
+
+    - Reduced memory usage compared to standard CNNs
+
+    '
+  featured: false
+  id: 8
+  link: https://github.com/Shivanshvyas1729/pydantic_notes/blob/main/fibonaacinet.md
+  linkText: give a better read
+  resources: []
+  slug: ''
+  title: Fibonacci-Net architecture
+  type:
+  - Deep Learning
+  - Computer Vision
+- category: Notes
+  content: '| Function      | What it does                                                    |
+    Main Use                   | Most Used Parameters               |
+
+    | ------------- | ---------------------------------------------------------------
+    | -------------------------- | ---------------------------------- |
+
+    | `pd.concat()` | Combines DataFrames by stacking them vertically or horizontally
+    | Add rows or columns        | `axis=0/1`, `ignore_index=True`    |
+
+    | `df.join()`   | Joins DataFrames mainly using indexes                           |
+    Attach columns using index | `how`, `on`                        |
+
+    | `pd.merge()`  | SQL-style join using common columns                             |
+    Relational data joining    | `on`, `how`, `left_on`, `right_on` |
+
+
+    ### Quick Meaning
+
+
+    * `concat` → Stack data
+
+    * `join` → Index-based combine
+
+    * `merge` → Database/SQL-like join
+
+    '
+  date: 2026-05-19 00:00:00+00:00
+  draft: false
+  excerpt: concat vs join vs merge
+  featured: false
+  id: 7
+  readingTime: 1
+  slug: pandas-data-combining-functions-purpose-key-parameters
+  title: Pandas Data Combining Functions — Purpose & Key Parameters
+  type:
+  - pandas
+  - python
+- category: Notes
+  content: '# Types of Cloud Storage
+
+
+    Cloud storage is mainly divided based on **how data is stored**.
+
+
+    | Type               | How It Works                                        | Best
+    For                                           | Examples                                              |
+
+    | ------------------ | --------------------------------------------------- | --------------------------------------------------
+    | ----------------------------------------------------- |
+
+    | **Object Storage** | Stores data as objects with unique IDs and metadata | Photos,
+    videos, backups, AI data                   | Amazon Web Services S3, Google Cloud
+    Storage          |
+
+    | **Block Storage**  | Splits data into fixed-size blocks for fast access  | Databases,
+    virtual machines, high-performance apps | Amazon Web Services EBS, Microsoft Azure
+    Disk Storage |
+
+    | **File Storage**   | Uses folders and files like a normal computer       | Shared
+    drives, team collaboration, documents       | Microsoft Azure Files, Dropbox Dropbox                |
+
+
+    ## Quick Summary
+
+
+    * **Object Storage →** Massive unstructured data
+
+    * **Block Storage →** High speed & performance
+
+    * **File Storage →** Easy sharing & collaboration'
+  date: 2026-05-09 00:00:00+00:00
+  draft: false
+  excerpt: 'some info about cloud type '
+  featured: false
+  id: 5
+  link: ''
+  readingTime: 1
+  slug: type-of-cloud-storage-based-on-by-architecture
+  title: type of Cloud storage based on  By Architecture
+  type:
+  - cloud
+- category: Thoughts
+  content: I love my life
+  date: 2026-04-11 00:00:00+00:00
+  draft: true
+  featured: true
+  id: 4
+  link: ''
+  readingTime: 1
+  slug: my-life
+  title: MY LIFE
+  type:
+  - gernal
+- category: Notes
+  content: These are my NLP note for quick reference -hope it will help
+  date: 2026-04-11 00:00:00+00:00
+  draft: false
+  featured: false
+  id: 3
+  link: ''
+  readingTime: 1
+  resources:
+  - label: Git hub
+    url: https://github.com/Shivanshvyas1729/MY-Complete-NLP-NoteBook
+  slug: nlp-notes
+  title: NLP NOTES
+  type:
+  - Deep Learning
+  - NLP
+- category: Thoughts
+  content: “Time doesn’t just pass… it teaches. Every second you lose either becomes
+    a regret or a lesson.”
+  date: 2026-04-10 00:00:00+00:00
+  id: 2
+  link: false
+  title: Time
+- category: Links
+  content: Some agents for research help .
+  date: 2026-05-17 00:00:00+00:00
+  draft: false
+  featured: true
+  id: 6
+  link: ''
+  readingTime: 1
+  resources:
+  - label: 'scispace '
+    url: https://scispace.com/
+  - label: 'bohrium '
+    url: https://www.bohrium.com/en
+  - label: 'openbio '
+    url: https://openbio.tech/
+  slug: research-agents-and-platform
+  title: Research agents and platform
+  type:
+  - GERNAL
+- category: Links
+  content: one min look
+  date: 2026-06-05
+  draft: false
+  featured: false
+  id: 12
+  link: https://chatgpt.com/c/6a2402e4-a114-8321-828a-4b4d557c4ba2
+  linkText: database notes
+  readingTime: 1
+  resources:
+  - label: basic questions
+    url: https://drive.google.com/drive/u/0/folders/17qeN5jTs2Vh5EyQWOk0NCNJIoJu2mG17
+  slug: fastapi-questions-and-backend-connections
+  title: FastAPI Questions and backend connections
+  type:
+  - Questions

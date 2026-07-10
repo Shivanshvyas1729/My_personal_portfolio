@@ -10,13 +10,13 @@ async function getVectorDb(): Promise<any[]> {
   if (vectorDbCache) return vectorDbCache;
 
   try {
-    const res = await fetch("/data/knowledge/vector_db.json");
+    const res = await fetch("/data/knowledge/faiss_index.json");
     if (!res.ok) {
-      throw new Error("No vector database found. Please run `build_knowledge_base.ipynb` to create the embeddings before using the RAG chatbot.");
+      throw new Error("No FAISS vector database found. Please run `build_knowledge_base.ipynb` to create the embeddings before using the RAG chatbot.");
     }
     const data = await res.json();
     if (!Array.isArray(data)) {
-      throw new Error("Vector database format invalid. Expected array of chunk embeddings.");
+      throw new Error("FAISS vector database format invalid. Expected array of chunk embeddings.");
     }
     vectorDbCache = data;
     return vectorDbCache;
@@ -24,7 +24,7 @@ async function getVectorDb(): Promise<any[]> {
     if (err.message && err.message.includes("build_knowledge_base.ipynb")) {
       throw err;
     }
-    throw new Error("No vector database found. Please run `build_knowledge_base.ipynb` to create the embeddings before using the RAG chatbot.");
+    throw new Error("No FAISS vector database found. Please run `build_knowledge_base.ipynb` to create the embeddings before using the RAG chatbot.");
   }
 }
 
@@ -96,7 +96,7 @@ async function retrieveContext(queryVector: number[]): Promise<string> {
 /**
  * Request text generation from OpenAI gpt-4o-mini with context injected into the prompt.
  */
-async function generateRAGAnswer(message: string, context: string, apiKey: string, baseUrl: string): Promise<string> {
+async function generateRAGAnswer(message: string, context: string, apiKey: string, baseUrl: string, maxTokens?: number): Promise<string> {
   const prompt = `You are a helpful, professional AI assistant for a portfolio website. Answer the user's question using the retrieved context from the owner's projects, experience, skills, and resume.
 
 Context:
@@ -124,7 +124,8 @@ Instructions:
           content: prompt
         }
       ],
-      temperature: 0.2
+      temperature: 0.2,
+      ...(maxTokens ? { max_completion_tokens: maxTokens } : {})
     }),
     signal: AbortSignal.timeout(10000), // 10-second timeout
   });
@@ -145,7 +146,7 @@ Instructions:
  * Main retrieval-augmented generation response generator.
  * Automatically throws descriptive errors on failure to allow seamless fallback.
  */
-export async function getRAGResponse(message: string): Promise<string | null> {
+export async function getRAGResponse(message: string, maxTokens?: number): Promise<string | null> {
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
   const baseUrl = import.meta.env.VITE_OPENAI_BASE_URL || "https://api.openai.com/v1";
 
@@ -171,7 +172,7 @@ export async function getRAGResponse(message: string): Promise<string | null> {
 
     // 4. Generate RAG response
     logger.info("RAGService", "Requesting LLM generation with context...");
-    const response = await generateRAGAnswer(message, context, apiKey, baseUrl);
+    const response = await generateRAGAnswer(message, context, apiKey, baseUrl, maxTokens);
     
     logger.info("RAGService", "RAG pipeline executed successfully.");
     return response;

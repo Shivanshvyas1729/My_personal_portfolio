@@ -785,6 +785,7 @@ export const UnifiedAdminDashboard = () => {
     timeline: false,
     settings_sync: false,
     settings_effects: false,
+    settings_chatbot: false,
     settings_aesthetics: false
   });
 
@@ -1381,7 +1382,149 @@ export const UnifiedAdminDashboard = () => {
                           </button>
                         </div>
 
+                        {/* Smooth Scrolling Toggle */}
+                        <div className={`p-4 rounded-xl border transition-all duration-300 flex items-center justify-between gap-4 ${
+                          previewData.settings?.smoothScrollEnabled !== false ? 'border-primary/30 bg-primary/5' : 'border-border/50 bg-muted/10'
+                        }`}>
+                          <div className="flex items-center gap-3">
+                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 ${
+                              previewData.settings?.smoothScrollEnabled !== false ? 'bg-primary/15 text-primary' : 'bg-muted/40 text-muted-foreground'
+                            }`}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="m3 16 4 4 4-4M7 20V4M21 8l-4-4-4 4M17 4v16" />
+                              </svg>
+                            </div>
+                            <div>
+                              <p className="font-bold text-sm">Smooth Scrolling</p>
+                              <p className="text-xs text-muted-foreground mt-0.5">
+                                {previewData.settings?.smoothScrollEnabled !== false ? 'Lenis inertial scrolling active' : 'Standard system scrolling active'}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => {
+                              const next = previewData.settings?.smoothScrollEnabled === false ? true : false;
+                              const updated = { ...previewData.settings, smoothScrollEnabled: next };
+                              updateLiveSection('settings', updated);
+                              updatePreviewSection('settings', updated);
+                            }}
+                            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                              previewData.settings?.smoothScrollEnabled !== false ? 'bg-primary border-primary shadow-[0_0_10px_hsl(var(--primary)/0.4)]' : 'bg-muted border-border/60'
+                            }`}
+                            role="switch" aria-checked={previewData.settings?.smoothScrollEnabled !== false}
+                            title="Toggle smooth scrolling on/off"
+                          >
+                            <span className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-md transition-transform duration-200 ${
+                              previewData.settings?.smoothScrollEnabled !== false ? 'translate-x-5' : 'translate-x-0.5'
+                            }`} />
+                          </button>
+                        </div>
+
                         {/* Save / Push buttons for Global Effects */}
+                        <div className="mt-4 pt-3 border-t border-border/30 flex justify-end gap-3">
+                          {isLocalEnvironment && (
+                            <button
+                              disabled={isLoading}
+                              onClick={() => saveContent('settings', previewData.settings || {})}
+                              className="px-4 py-2.5 bg-muted text-foreground border border-border/60 rounded-xl font-semibold text-sm flex items-center gap-2 hover:bg-muted/80 disabled:opacity-50 transition-colors"
+                            >
+                              {isLoading ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
+                              Save Local
+                            </button>
+                          )}
+                          <button
+                            disabled={isLoading}
+                            onClick={async () => {
+                              const prevForce = forceLocalMode;
+                              setForceLocalMode(false);
+                              await saveContent('settings', previewData.settings || {});
+                              setForceLocalMode(prevForce);
+                            }}
+                            className="px-4 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm flex items-center gap-2 hover:bg-primary/90 disabled:opacity-50 transition-colors shadow-lg"
+                          >
+                            {isLoading ? <RefreshCw size={14} className="animate-spin" /> : <Github size={14} />}
+                            Push to GitHub
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ── Chatbot Settings ── */}
+                  <div className="border border-border/40 bg-card rounded-2xl overflow-hidden">
+                    <button
+                      onClick={() => toggleGroup('settings_chatbot')}
+                      className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors"
+                    >
+                      <h3 className="text-sm font-bold flex items-center gap-2">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground">
+                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        Chatbot Settings
+                      </h3>
+                      <ChevronDown size={15} className={`text-muted-foreground transition-transform duration-200 ${openGroups.settings_chatbot ? 'rotate-180' : ''}`} />
+                    </button>
+                    {openGroups.settings_chatbot && (
+                      <div className="px-4 pb-4 border-t border-border/40 pt-4 space-y-4 animate-in fade-in duration-200">
+                        {/* Work Mode Toggle */}
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Chatbot Work Mode</label>
+                          <div className="flex bg-muted/20 border border-border/50 p-1 rounded-xl gap-1">
+                            {(['offline', 'online', 'auto'] as const).map((mode) => (
+                              <button
+                                key={mode}
+                                onClick={() => {
+                                  const updated = { ...previewData.settings, chatbotWorkMode: mode };
+                                  updateLiveSection('settings', updated);
+                                  updatePreviewSection('settings', updated);
+                                }}
+                                className={`flex-1 py-2 px-3 rounded-lg font-semibold text-xs transition-all duration-200 capitalize ${
+                                  (previewData.settings?.chatbotWorkMode || 'auto') === mode
+                                    ? 'bg-primary text-primary-foreground shadow-md'
+                                    : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground'
+                                }`}
+                              >
+                                {mode}
+                              </button>
+                            ))}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {(previewData.settings?.chatbotWorkMode || 'auto') === 'offline' && 'Offline: Chatbot runs purely offline (local model fallback only).'}
+                            {(previewData.settings?.chatbotWorkMode || 'auto') === 'online' && 'Online: Chatbot strictly uses RAG embeddings. No local fallback if it fails.'}
+                            {(previewData.settings?.chatbotWorkMode || 'auto') === 'auto' && 'Auto (Recommended): Chatbot queries RAG embeddings first, falling back to local model if API is offline.'}
+                          </p>
+                        </div>
+
+                        {/* Max Completion Tokens Input */}
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Max Completion Tokens</label>
+                            <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md">
+                              {previewData.settings?.chatbotMaxTokens || 800} tokens
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="range"
+                              min="50"
+                              max="4000"
+                              step="50"
+                              value={previewData.settings?.chatbotMaxTokens || 800}
+                              onChange={(e) => {
+                                const val = parseInt(e.target.value, 10);
+                                const updated = { ...previewData.settings, chatbotMaxTokens: val };
+                                updateLiveSection('settings', updated);
+                                updatePreviewSection('settings', updated);
+                              }}
+                              className="w-full h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                            />
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Controls the max_completion_tokens (max_tokens) parameter sent during RAG answer generation. Higher values support longer answers but consume more API credits.
+                          </p>
+                        </div>
+
+                        {/* Save / Push buttons for Chatbot Settings */}
                         <div className="mt-4 pt-3 border-t border-border/30 flex justify-end gap-3">
                           {isLocalEnvironment && (
                             <button
@@ -1462,7 +1605,8 @@ export const UnifiedAdminDashboard = () => {
                           schema={(SECTION_SCHEMAS['settings'] as any).omit({
                             introEnabled: true, introStyle: true, introPrimaryText: true,
                             introSubtitle: true, introTagline: true, introColors: true,
-                            introDuration: true, customCursorEnabled: true, edgeLightsEnabled: true
+                            introDuration: true, customCursorEnabled: true, edgeLightsEnabled: true,
+                            smoothScrollEnabled: true, chatbotWorkMode: true, chatbotMaxTokens: true
                           })}
                           data={previewData.settings || {}}
                           onChange={(newSettings) => updatePreviewSection('settings', newSettings)}
