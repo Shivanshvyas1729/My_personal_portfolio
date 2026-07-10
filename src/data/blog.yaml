@@ -1,4 +1,18 @@
 blog:
+  - id: 17
+    title: 8 RAG Architecture
+    content: Details will be updated soon
+    category: Notes
+    type:
+      - Rag
+    featured: false
+    draft: false
+    resources: []
+    date: 2026-07-10
+    excerpt: "Different Types of RAG Architecture "
+    link: https://media.licdn.com/dms/image/v2/D5622AQG2IuggxF5LYw/feedshare-shrink_800/B56Z1Ta2YnHcAc-/0/1775221040908?e=1785369600&v=beta&t=Or68CG3yD0mjrGVWvtOjTkCnnzMShIzPDM_p8iiwtvA
+    linkText: SEE this BRO&SIS
+    slug: 8-rag-architecture
   - id: 16
     title: Creating AWS keys
     content: How to Get AWS Credentials and Create an S3 Bucket
