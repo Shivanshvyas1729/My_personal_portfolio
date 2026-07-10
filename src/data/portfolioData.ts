@@ -158,6 +158,8 @@ export interface Settings {
   smoothScrollEnabled?: boolean;
   chatbotWorkMode?: 'offline' | 'online' | 'auto';
   chatbotMaxTokens?: number;
+  chatbotModel?: string;
+  chatbotBaseUrl?: string;
 
   // Intro / Transition Settings
   introEnabled?: boolean;

@@ -149,7 +149,6 @@ export const GlobalSettingsSchema = z.object({
   chatbotMaxTokens: z.number().min(1).max(4000).optional(),
   chatbotModel: z.string().optional(),
   chatbotBaseUrl: z.string().optional(),
-  chatbotApiKey: z.string().optional(),
 
   // ─── Intro / Transition Settings ───
   introEnabled: z.boolean().optional(),

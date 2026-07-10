@@ -34,17 +34,20 @@ async function getVectorDb(): Promise<any[]> {
 async function embedQuery(text: string, apiKey: string, baseUrl: string): Promise<number[]> {
   const url = `${baseUrl}/embeddings`;
   
-  const res = await fetch(url, {
+  const res = await fetch("/api/proxy-openai", {
     method: "POST",
     headers: { 
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`
+      "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      model: "text-embedding-3-small",
-      input: text
+      endpoint: "embeddings",
+      payload: {
+        model: "text-embedding-3-small",
+        input: text
+      },
+      customBaseUrl: baseUrl
     }),
-    signal: AbortSignal.timeout(5000), // 5-second timeout
+    signal: AbortSignal.timeout(10000), // 10-second timeout
   });
 
   if (!res.ok) {
@@ -96,7 +99,7 @@ async function retrieveContext(queryVector: number[]): Promise<string> {
 /**
  * Request text generation from OpenAI gpt-4o-mini with context injected into the prompt.
  */
-async function generateRAGAnswer(message: string, context: string, apiKey: string, baseUrl: string, maxTokens?: number): Promise<string> {
+async function generateRAGAnswer(message: string, context: string, apiKey: string, baseUrl: string, maxTokens?: number, model?: string): Promise<string> {
   const prompt = `You are a helpful, professional AI assistant for a portfolio website. Answer the user's question using the retrieved context from the owner's projects, experience, skills, and resume.
 
 Context:
@@ -109,29 +112,39 @@ Instructions:
 - If the context doesn't contain the answer, say "I don't have that specific information in my database, but here is what I know:" and then answer as best as you can or guide them on how to contact the owner.
 - Maintain a friendly, direct tone. Use markdown formatting.`;
 
-  const url = `${baseUrl}/chat/completions`;
-  const res = await fetch(url, {
+  const res = await fetch("/api/proxy-openai", {
     method: "POST",
     headers: { 
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`
+      "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      temperature: 0.2,
-      ...(maxTokens ? { max_completion_tokens: maxTokens } : {})
+      endpoint: "chat/completions",
+      payload: {
+        model: model || "gpt-4o-mini",
+        messages: [
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0.2,
+        ...(maxTokens
+          ? ((model && (model.startsWith("o1") || model.startsWith("o3")))
+            ? { max_completion_tokens: maxTokens }
+            : { max_tokens: maxTokens })
+          : {})
+      },
+      customBaseUrl: baseUrl
     }),
-    signal: AbortSignal.timeout(10000), // 10-second timeout
+    signal: AbortSignal.timeout(15000), // Increased to 15-second timeout for third-party inference
   });
 
   if (!res.ok) {
-    throw new Error(`OpenAI chat completions returned HTTP ${res.status}`);
+    let errorDetail = "";
+    try {
+      errorDetail = await res.text();
+    } catch {}
+    throw new Error(`Chat completions returned HTTP ${res.status}: ${errorDetail}`);
   }
 
   const data = await res.json();
@@ -146,12 +159,17 @@ Instructions:
  * Main retrieval-augmented generation response generator.
  * Automatically throws descriptive errors on failure to allow seamless fallback.
  */
-export async function getRAGResponse(message: string, maxTokens?: number): Promise<string | null> {
+export async function getRAGResponse(
+  message: string,
+  maxTokens?: number,
+  chatbotModel?: string,
+  chatbotBaseUrl?: string
+): Promise<string | null> {
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-  const baseUrl = import.meta.env.VITE_OPENAI_BASE_URL || "https://api.openai.com/v1";
+  const baseUrl = chatbotBaseUrl || import.meta.env.VITE_OPENAI_BASE_URL || "https://api.openai.com/v1";
 
   if (!apiKey) {
-    logger.warn("RAGService", "No VITE_OPENAI_API_KEY found in environment variables. Falling back to local chatbot.");
+    logger.warn("RAGService", "No VITE_OPENAI_API_KEY found in environment variables or secrets. Falling back to local chatbot.");
     return null;
   }
 
@@ -171,8 +189,9 @@ export async function getRAGResponse(message: string, maxTokens?: number): Promi
     const context = await retrieveContext(queryVector);
 
     // 4. Generate RAG response
-    logger.info("RAGService", "Requesting LLM generation with context...");
-    const response = await generateRAGAnswer(message, context, apiKey, baseUrl, maxTokens);
+    const activeModel = chatbotModel || import.meta.env.VITE_OPENAI_MODEL || "gpt-4o-mini";
+    logger.info("RAGService", `Requesting LLM generation with context using model: ${activeModel}...`);
+    const response = await generateRAGAnswer(message, context, apiKey, baseUrl, maxTokens, activeModel);
     
     logger.info("RAGService", "RAG pipeline executed successfully.");
     return response;

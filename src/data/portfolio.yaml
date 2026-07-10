@@ -49,6 +49,8 @@ settings:
   smoothScrollEnabled: true
   chatbotWorkMode: "auto"
   chatbotMaxTokens: 800
+  chatbotModel: "gpt-4o-mini"
+  chatbotBaseUrl: "https://api.openai.com/v1"
 
   # Intro / Transition
   introEnabled: true

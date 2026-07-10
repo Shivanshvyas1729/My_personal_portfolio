@@ -1524,6 +1524,46 @@ export const UnifiedAdminDashboard = () => {
                           </p>
                         </div>
 
+                        {/* Custom Model Settings */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-border/20">
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Chatbot Model</label>
+                            <input
+                              type="text"
+                              value={previewData.settings?.chatbotModel || ''}
+                              onChange={(e) => {
+                                const updated = { ...previewData.settings, chatbotModel: e.target.value };
+                                updateLiveSection('settings', updated);
+                                updatePreviewSection('settings', updated);
+                              }}
+                              placeholder="e.g., gpt-4o-mini"
+                              className="w-full bg-muted/20 border border-border/50 rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-primary/50 text-foreground placeholder:text-muted-foreground/50 transition-colors"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Base URL Override</label>
+                            <input
+                              type="text"
+                              value={previewData.settings?.chatbotBaseUrl || ''}
+                              onChange={(e) => {
+                                const updated = { ...previewData.settings, chatbotBaseUrl: e.target.value };
+                                updateLiveSection('settings', updated);
+                                updatePreviewSection('settings', updated);
+                              }}
+                              placeholder="e.g., https://api.openai.com/v1"
+                              className="w-full bg-muted/20 border border-border/50 rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-primary/50 text-foreground placeholder:text-muted-foreground/50 transition-colors"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="p-3.5 bg-primary/5 border border-primary/20 rounded-xl flex items-start gap-2.5">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                          <p className="text-[11px] text-muted-foreground leading-normal">
+                            <strong className="text-foreground">Security Note:</strong> For safety, API keys are never stored in your repository config (<code className="bg-muted px-1 rounded">portfolio.yaml</code>). Configure your API key as <code className="bg-muted px-1 rounded">VITE_OPENAI_API_KEY</code> in your local <code className="bg-muted px-1 rounded">.env</code> file or within your Vercel project environment secrets.
+                          </p>
+                        </div>
+
                         {/* Save / Push buttons for Chatbot Settings */}
                         <div className="mt-4 pt-3 border-t border-border/30 flex justify-end gap-3">
                           {isLocalEnvironment && (
@@ -1606,7 +1646,8 @@ export const UnifiedAdminDashboard = () => {
                             introEnabled: true, introStyle: true, introPrimaryText: true,
                             introSubtitle: true, introTagline: true, introColors: true,
                             introDuration: true, customCursorEnabled: true, edgeLightsEnabled: true,
-                            smoothScrollEnabled: true, chatbotWorkMode: true, chatbotMaxTokens: true
+                            smoothScrollEnabled: true, chatbotWorkMode: true, chatbotMaxTokens: true,
+                            chatbotModel: true, chatbotBaseUrl: true
                           })}
                           data={previewData.settings || {}}
                           onChange={(newSettings) => updatePreviewSection('settings', newSettings)}

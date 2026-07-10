@@ -190,7 +190,13 @@ const ChatAssistant = () => {
     setInput("");
     setIsTyping(true);
     try {
-      const response = await getChatResponse(text, settings?.chatbotWorkMode, settings?.chatbotMaxTokens);
+      const response = await getChatResponse(
+        text,
+        settings?.chatbotWorkMode,
+        settings?.chatbotMaxTokens,
+        settings?.chatbotModel,
+        settings?.chatbotBaseUrl
+      );
       setMessages(prev => [...prev, { role: "bot", content: response }]);
     } catch {
       setMessages(prev => [...prev, { role: "bot", content: "Sorry, I'm having trouble right now. Please try again." }]);
@@ -249,9 +255,19 @@ const ChatAssistant = () => {
                 </div>
                 <div>
                   <p className="text-sm font-bold !text-foreground tracking-tight" style={{color: 'inherit'}} data-no-hover>AI Assistant</p>
-                  <p className="text-[10px] !text-green-500 font-medium flex items-center gap-1.5 uppercase tracking-widest" data-no-hover>
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                    Live
+                  <p className="text-[9px] font-semibold flex items-center gap-1 uppercase tracking-widest text-muted-foreground" data-no-hover>
+                    <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${
+                      (settings?.chatbotWorkMode || 'auto') === 'offline' ? 'bg-amber-500' : 'bg-green-500'
+                    }`} />
+                    <span className={
+                      (settings?.chatbotWorkMode || 'auto') === 'offline' ? 'text-amber-500' : 'text-green-500'
+                    }>
+                      {settings?.chatbotWorkMode || 'auto'}
+                    </span>
+                    <span className="opacity-40">|</span>
+                    <span className="lowercase truncate max-w-[120px] font-medium text-muted-foreground/80" title={settings?.chatbotModel || import.meta.env.VITE_OPENAI_MODEL || 'gpt-4o-mini'}>
+                      {settings?.chatbotModel || import.meta.env.VITE_OPENAI_MODEL || 'gpt-4o-mini'}
+                    </span>
                   </p>
                 </div>
               </div>

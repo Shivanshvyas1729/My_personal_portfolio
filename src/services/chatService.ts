@@ -1,5 +1,6 @@
 import { portfolioData } from "@/data/portfolioData";
 import { logger } from "@/utils/logger";
+import { logger as auditLogger } from "@/lib/logger";
 
 // ============================================================
 // CONFIGURATION
@@ -254,25 +255,82 @@ import { getRAGResponse } from "./ragService";
 export const getChatResponse = async (
   message: string,
   chatbotWorkMode?: 'offline' | 'online' | 'auto',
-  chatbotMaxTokens?: number
+  chatbotMaxTokens?: number,
+  chatbotModel?: string,
+  chatbotBaseUrl?: string
 ): Promise<string> => {
   const mode = chatbotWorkMode || 'auto';
 
   // 1. Offline Mode: Go straight to local backend/mock
   if (mode === 'offline') {
     logger.info("ChatService", "Offline mode active. Bypassing RAG database.");
+    auditLogger.addLog({
+      action: "CHATBOT_OFFLINE",
+      status: "pending",
+      message: `Offline mode query: "${message.substring(0, 60)}${message.length > 60 ? '...' : ''}"`,
+      metadata: { query: message }
+    });
     const backendResponse = await callBackend(message);
-    if (backendResponse !== null) return backendResponse;
-    return mockAI(message);
+    if (backendResponse !== null) {
+      auditLogger.addLog({
+        action: "CHATBOT_OFFLINE",
+        status: "success",
+        message: "Offline local model query successful",
+        metadata: { response: backendResponse }
+      });
+      return backendResponse;
+    }
+    const mockResponse = await mockAI(message);
+    auditLogger.addLog({
+      action: "CHATBOT_OFFLINE",
+      status: "success",
+      message: "Offline mock AI fallback successful",
+      metadata: { response: mockResponse }
+    });
+    return mockResponse;
   }
 
   // 2. Online / Auto Modes: Try RAG first
   try {
-    const ragResponse = await getRAGResponse(message, chatbotMaxTokens);
+    const ragResponse = await getRAGResponse(message, chatbotMaxTokens, chatbotModel, chatbotBaseUrl);
     if (ragResponse !== null) {
+      auditLogger.addLog({
+        action: "CHATBOT_RAG",
+        status: "success",
+        message: `RAG search successful. Model: ${chatbotModel || import.meta.env.VITE_OPENAI_MODEL || 'gpt-4o-mini'}`,
+        metadata: { 
+          query: message, 
+          model: chatbotModel || import.meta.env.VITE_OPENAI_MODEL || 'gpt-4o-mini', 
+          baseUrl: chatbotBaseUrl || import.meta.env.VITE_OPENAI_BASE_URL || 'https://api.openai.com/v1',
+          response: ragResponse
+        }
+      });
       return ragResponse;
     }
+    // If ragResponse is null, it means the API key is not configured.
+    if (mode === 'online') {
+      const errMsg = "VITE_OPENAI_API_KEY is not set in environment variables or project secrets.";
+      auditLogger.addLog({
+        action: "CHATBOT_ERROR",
+        status: "error",
+        message: `RAG service unavailable: ${errMsg}`,
+        metadata: { model: chatbotModel, baseUrl: chatbotBaseUrl }
+      });
+      return "⚠️ Chatbot is configured to work in Online-Only mode, but the RAG completion service is currently unavailable.\n\n**Error details:** VITE_OPENAI_API_KEY is not set in environment variables or project secrets.";
+    }
   } catch (err: any) {
+    auditLogger.addLog({
+      action: "CHATBOT_ERROR",
+      status: "error",
+      message: `RAG pipeline encountered an error: ${err.message || err}`,
+      metadata: { 
+        query: message, 
+        model: chatbotModel || import.meta.env.VITE_OPENAI_MODEL || 'gpt-4o-mini', 
+        baseUrl: chatbotBaseUrl || import.meta.env.VITE_OPENAI_BASE_URL || 'https://api.openai.com/v1',
+        error: err.stack || err.message || String(err)
+      }
+    });
+
     if (err.message && err.message.includes("No FAISS vector database found")) {
       logger.warn("ChatService", "RAG FAISS vector database is missing.");
       if (mode === 'online') {
@@ -283,15 +341,36 @@ export const getChatResponse = async (
 
     // If online-only, do NOT fall back to local model
     if (mode === 'online') {
-      return "⚠️ Chatbot is configured to work in Online-Only mode, but the RAG completion service is currently unavailable.";
+      return `⚠️ Chatbot is configured to work in Online-Only mode, but the RAG completion service is currently unavailable.\n\n**Error details:** ${err.message || err}`;
     }
   }
 
   // 3. Auto Mode fallback: call local backend Gemini/Mock
   logger.info("ChatService", "Falling back to local chatbot model.");
-  const backendResponse = await callBackend(message);
-  if (backendResponse !== null) return backendResponse;
+  auditLogger.addLog({
+    action: "CHATBOT_FALLBACK",
+    status: "pending",
+    message: "Falling back to local chatbot (Gemini / Mock AI)",
+    metadata: { query: message }
+  });
 
-  // Last fallback: mock responses
-  return mockAI(message);
+  const backendResponse = await callBackend(message);
+  if (backendResponse !== null) {
+    auditLogger.addLog({
+      action: "CHATBOT_FALLBACK",
+      status: "success",
+      message: "Fallback to local Gemini model successful",
+      metadata: { response: backendResponse }
+    });
+    return backendResponse;
+  }
+
+  const mockResponse = await mockAI(message);
+  auditLogger.addLog({
+    action: "CHATBOT_FALLBACK",
+    status: "success",
+    message: "Fallback to local Mock AI successful",
+    metadata: { response: mockResponse }
+  });
+  return mockResponse;
 };
