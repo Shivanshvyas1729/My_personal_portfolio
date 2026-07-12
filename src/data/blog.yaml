@@ -8,8 +8,8 @@ blog:
     featured: false
     draft: false
     resources: []
-    date: 2026-07-10
-    excerpt: "Different Types of RAG Architecture "
+    date: 2026-07-10T00:00:00.000Z
+    excerpt: 'Different Types of RAG Architecture '
     link: https://media.licdn.com/dms/image/v2/D5622AQG2IuggxF5LYw/feedshare-shrink_800/B56Z1Ta2YnHcAc-/0/1775221040908?e=1785369600&v=beta&t=Or68CG3yD0mjrGVWvtOjTkCnnzMShIzPDM_p8iiwtvA
     linkText: SEE this BRO&SIS
     slug: 8-rag-architecture
@@ -22,7 +22,7 @@ blog:
     featured: false
     draft: false
     resources: []
-    date: 2026-07-02
+    date: 2026-07-02T00:00:00.000Z
     slug: creating-aws-keys
     excerpt: how to create different key it is shown there for aws
     link: https://github.com/Shivanshvyas1729/pydantic_notes/blob/main/aws_keys%20kese%20bana%20a.md
@@ -49,7 +49,7 @@ blog:
     featured: false
     draft: false
     resources: []
-    date: 2026-07-02
+    date: 2026-07-02T00:00:00.000Z
     slug: different-techniques-to-create-virtual-enviroment
     link: https://github.com/Shivanshvyas1729/pydantic_notes/blob/main/create_env.md
     linkText: full notes
@@ -76,14 +76,14 @@ blog:
       - Yolo
     featured: false
     draft: false
-    date: 2026-06-09
+    date: 2026-06-09T00:00:00.000Z
     slug: yolo-codes
-    excerpt: "basic codes for yolo "
+    excerpt: 'basic codes for yolo '
     link: https://github.com/Shivanshvyas1729/pydantic_notes/blob/main/yolo%20notes.md
     linkText: all codes are here
     resources: []
   - id: 13
-    title: "Exection Handling "
+    title: 'Exection Handling '
     content: |-
       ## Q: Why do we use raise?
 
@@ -107,7 +107,7 @@ blog:
       - Exception Handling
     featured: false
     draft: false
-    date: 2026-06-05
+    date: 2026-06-05T00:00:00.000Z
     excerpt: basic questions about exp handling
   - id: 10
     title: all secret prompt and flow
@@ -757,7 +757,7 @@ blog:
     featured: false
     draft: false
     date: 2026-05-21T00:00:00.000Z
-    slug: ""
+    slug: ''
     excerpt: |
       - Lightweight deep learning models with very few parameters (~1.4M)
       - Fast inference and low computational cost
@@ -815,11 +815,11 @@ blog:
     category: Notes
     type:
       - cloud
-    link: ""
+    link: ''
     date: 2026-05-09T00:00:00.000Z
     featured: false
     draft: false
-    excerpt: "some info about cloud type "
+    excerpt: 'some info about cloud type '
   - id: 4
     title: MY LIFE
     slug: my-life
@@ -828,7 +828,7 @@ blog:
     category: Thoughts
     type:
       - gernal
-    link: ""
+    link: ''
     date: 2026-04-11T00:00:00.000Z
     featured: true
     draft: true
@@ -841,7 +841,7 @@ blog:
     type:
       - Deep Learning
       - NLP
-    link: ""
+    link: ''
     date: 2026-04-11T00:00:00.000Z
     featured: false
     draft: false
@@ -852,7 +852,7 @@ blog:
     title: Time
     content: “Time doesn’t just pass… it teaches. Every second you lose either becomes a regret or a lesson.”
     category: Thoughts
-    link: no
+    link: 'no'
     date: 2026-04-10T00:00:00.000Z
   - id: 6
     title: Research agents and platform
@@ -862,16 +862,16 @@ blog:
     category: Links
     type:
       - GERNAL
-    link: ""
+    link: ''
     date: 2026-05-17T00:00:00.000Z
     featured: true
     draft: false
     resources:
-      - label: "scispace "
+      - label: 'scispace '
         url: https://scispace.com/
-      - label: "bohrium "
+      - label: 'bohrium '
         url: https://www.bohrium.com/en
-      - label: "openbio "
+      - label: 'openbio '
         url: https://openbio.tech/
   - id: 12
     title: FastAPI Questions and backend connections
@@ -882,10 +882,23 @@ blog:
     type:
       - Questions
     link: https://chatgpt.com/c/6a2402e4-a114-8321-828a-4b4d557c4ba2
-    date: 2026-06-05
+    date: 2026-06-05T00:00:00.000Z
     featured: false
     draft: false
     resources:
       - label: basic questions
         url: https://drive.google.com/drive/u/0/folders/17qeN5jTs2Vh5EyQWOk0NCNJIoJu2mG17
     linkText: database notes
+  - id: 18
+    title: RAG Matrix
+    slug: rag-matrix
+    readingTime: 1
+    content: Check these man
+    category: Notes
+    type:
+      - Rag
+    link: https://github.com/Shivanshvyas1729/pydantic_notes/blob/main/RAG%20Matrixs.md
+    linkText: Rag Matrix
+    date: '2026-07-12'
+    featured: false
+    draft: false
