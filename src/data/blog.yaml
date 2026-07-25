@@ -123,6 +123,9 @@ blog:
     draft: false
     date: 2026-06-05
     excerpt: basic questions about exp handling
+    link: https://github.com/Shivanshvyas1729/pydantic_notes/blob/main/raise%20vs%20exp%20as%20e%20handling%20.md
+    linkText: raise vs exception
+    resources: []
   - id: 10
     title: all secret prompt and flow
     content: https://github.com/Shivanshvyas1729/Cancer_Detection_with_xai#appendix-master-prompt--dynamic-ai-document-generator
