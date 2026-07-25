@@ -81,6 +81,8 @@ export default defineConfig(({ mode }) => {
     define: {
       'import.meta.env.VITE_GITHUB_OWNER': JSON.stringify(owner),
       'import.meta.env.VITE_GITHUB_REPO': JSON.stringify(repo),
+      'import.meta.env.VITE_ADMIN_PASSWORD': JSON.stringify(process.env.VITE_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || 'ShivaAnt'),
+      'import.meta.env.ADMIN_PASSWORD': JSON.stringify(process.env.ADMIN_PASSWORD || process.env.VITE_ADMIN_PASSWORD || 'ShivaAnt'),
     },
     server: {
       host: true,

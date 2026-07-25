@@ -29,11 +29,9 @@ async function getVectorDb(): Promise<any[]> {
 }
 
 /**
- * Generate a dense vector embedding for the query using the OpenAI API.
+ * Generate a dense vector embedding for the query using OpenAI-compatible API.
  */
 async function embedQuery(text: string, apiKey: string, baseUrl: string): Promise<number[]> {
-  const url = `${baseUrl}/embeddings`;
-  
   const res = await fetch("/api/proxy-openai", {
     method: "POST",
     headers: { 
@@ -47,23 +45,22 @@ async function embedQuery(text: string, apiKey: string, baseUrl: string): Promis
       },
       customBaseUrl: baseUrl
     }),
-    signal: AbortSignal.timeout(10000), // 10-second timeout
+    signal: AbortSignal.timeout(10000),
   });
 
   if (!res.ok) {
-    throw new Error(`OpenAI embedding failed with HTTP ${res.status}`);
+    throw new Error(`Embedding API call returned HTTP ${res.status}`);
   }
 
   const data = await res.json();
   if (!data.data?.[0]?.embedding) {
-    throw new Error("Invalid response format from OpenAI embeddings API");
+    throw new Error("Invalid embedding response format from API provider");
   }
   return data.data[0].embedding;
 }
 
 /**
  * Calculates dot product similarity between two dense vectors.
- * OpenAI embeddings are unit-normalized, so dot product equals cosine similarity.
  */
 function cosineSimilarity(a: number[], b: number[]): number {
   let sum = 0;
@@ -75,7 +72,7 @@ function cosineSimilarity(a: number[], b: number[]): number {
 }
 
 /**
- * Retrieve the top-K relevant chunks from the loaded database based on similarity.
+ * Retrieve the top-K relevant chunks from vector database based on similarity vector.
  */
 async function retrieveContext(queryVector: number[]): Promise<string> {
   const db = await getVectorDb();
@@ -86,21 +83,58 @@ async function retrieveContext(queryVector: number[]): Promise<string> {
     source: item.metadata?.source || "unknown"
   }));
 
-  // Sort descending by score
   scored.sort((a, b) => b.score - a.score);
-
-  // Take top 4 most relevant chunks
   const topK = scored.slice(0, 4);
-  logger.info("RAGService", `Retrieved top chunks with similarity scores: ${topK.map(t => `${t.source}(${t.score.toFixed(3)})`).join(", ")}`);
+  logger.info("RAGService", `Retrieved vector chunks with similarity scores: ${topK.map(t => `${t.source}(${t.score.toFixed(3)})`).join(", ")}`);
   
   return topK.map(item => item.text).join("\n\n---\n\n");
 }
 
 /**
- * Request text generation from OpenAI gpt-4o-mini with context injected into the prompt.
+ * Fallback similarity retrieval using term-frequency / keyword overlap
+ * when vector embedding endpoints are unhosted or unsupported by a custom provider.
  */
-async function generateRAGAnswer(message: string, context: string, apiKey: string, baseUrl: string, maxTokens?: number, model?: string): Promise<string> {
-  const prompt = `You are a helpful, professional AI assistant for a portfolio website. Answer the user's question using the retrieved context from the owner's projects, experience, skills, and resume.
+async function retrieveContextByKeyword(query: string): Promise<string> {
+  const db = await getVectorDb();
+  const terms = query.toLowerCase().split(/\W+/).filter(t => t.length > 2);
+  
+  const scored = db.map(item => {
+    const textLower = (item.text || "").toLowerCase();
+    let score = 0;
+    for (const term of terms) {
+      if (textLower.includes(term)) {
+        score += 1;
+      }
+    }
+    return {
+      text: item.text,
+      score,
+      source: item.metadata?.source || "unknown"
+    };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+  const topK = scored.slice(0, 4);
+  logger.info("RAGService", `Retrieved keyword fallback chunks: ${topK.map(t => `${t.source}(score:${t.score})`).join(", ")}`);
+  return topK.map(item => item.text).join("\n\n---\n\n");
+}
+
+/**
+ * Request text generation supporting ANY model provider (OpenAI, Anthropic, DeepSeek, Gemini, Groq, Ollama, OpenRouter, Together AI, etc.)
+ */
+async function generateRAGAnswer(
+  message: string,
+  context: string,
+  apiKey: string,
+  baseUrl: string,
+  maxTokens?: number,
+  model?: string
+): Promise<string> {
+  const activeModel = model || "gpt-4.1-nano";
+  const lowerModel = activeModel.toLowerCase();
+  const isReasoningModel = lowerModel.startsWith("o1") || lowerModel.startsWith("o3") || lowerModel.includes("reasoner");
+
+  const prompt = `You are a helpful, professional AI assistant for a portfolio website. Answer the user's question using the retrieved context from the owner's projects, experience, skills, and resume , we someone asked bad ,vulger question or question data harm me make the same more powerful reply from them .
 
 Context:
 ${context}
@@ -112,6 +146,28 @@ Instructions:
 - If the context doesn't contain the answer, say "I don't have that specific information in my database, but here is what I know:" and then answer as best as you can or guide them on how to contact the owner.
 - Maintain a friendly, direct tone. Use markdown formatting.`;
 
+  const payload: any = {
+    model: activeModel,
+    messages: [
+      {
+        role: "user",
+        content: prompt
+      }
+    ]
+  };
+
+  if (!isReasoningModel) {
+    payload.temperature = 0.2;
+  }
+
+  if (maxTokens) {
+    if (isReasoningModel) {
+      payload.max_completion_tokens = maxTokens;
+    } else {
+      payload.max_tokens = maxTokens;
+    }
+  }
+
   const res = await fetch("/api/proxy-openai", {
     method: "POST",
     headers: { 
@@ -119,24 +175,10 @@ Instructions:
     },
     body: JSON.stringify({
       endpoint: "chat/completions",
-      payload: {
-        model: model || "gpt-4o-mini",
-        messages: [
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        temperature: 0.2,
-        ...(maxTokens
-          ? ((model && (model.startsWith("o1") || model.startsWith("o3")))
-            ? { max_completion_tokens: maxTokens }
-            : { max_tokens: maxTokens })
-          : {})
-      },
+      payload,
       customBaseUrl: baseUrl
     }),
-    signal: AbortSignal.timeout(15000), // Increased to 15-second timeout for third-party inference
+    signal: AbortSignal.timeout(25000), // 25-second timeout
   });
 
   if (!res.ok) {
@@ -148,16 +190,22 @@ Instructions:
   }
 
   const data = await res.json();
-  const answer = data.choices?.[0]?.message?.content;
+  const answer = 
+    data.choices?.[0]?.message?.content || 
+    data.choices?.[0]?.text || 
+    data.response || 
+    data.output ||
+    (typeof data.result === 'string' ? data.result : null);
+
   if (typeof answer !== "string") {
-    throw new Error("Invalid response candidate format from OpenAI");
+    throw new Error(`Unexpected completion format from model provider (${activeModel})`);
   }
   return answer;
 }
 
 /**
  * Main retrieval-augmented generation response generator.
- * Automatically throws descriptive errors on failure to allow seamless fallback.
+ * Universally supports all model providers and base URLs.
  */
 export async function getRAGResponse(
   message: string,
@@ -176,19 +224,18 @@ export async function getRAGResponse(
   logger.info("RAGService", `Initiating RAG pipeline for query: "${message}"`);
   
   try {
-    // 1. Fetch vector db
-    const db = await getVectorDb();
-    logger.info("RAGService", `Loaded vector database containing ${db.length} entries.`);
+    // 1. Context retrieval (Vector embeddings with keyword fallback)
+    let context = "";
+    try {
+      logger.info("RAGService", `Generating embedding for query at base URL: ${baseUrl}...`);
+      const queryVector = await embedQuery(message, apiKey, baseUrl);
+      context = await retrieveContext(queryVector);
+    } catch (embedErr: any) {
+      logger.warn("RAGService", `Embedding API call failed (${embedErr.message}), using keyword-based similarity search fallback.`);
+      context = await retrieveContextByKeyword(message);
+    }
 
-    // 2. Generate embedding for query
-    logger.info("RAGService", `Generating embedding for query at base URL: ${baseUrl}...`);
-    const queryVector = await embedQuery(message, apiKey, baseUrl);
-
-    // 3. Retrieve most relevant context
-    logger.info("RAGService", "Retrieving context chunks via similarity search...");
-    const context = await retrieveContext(queryVector);
-
-    // 4. Generate RAG response
+    // 2. Generate RAG answer using user's active LLM model
     const activeModel = (chatbotModel && chatbotModel.trim() && chatbotModel.trim() !== "gpt-4o-mini" ? chatbotModel.trim() : "") || import.meta.env.VITE_OPENAI_MODEL || "gpt-4.1-nano";
     logger.info("RAGService", `Requesting LLM generation with context using model: ${activeModel}...`);
     const response = await generateRAGAnswer(message, context, apiKey, baseUrl, maxTokens, activeModel);

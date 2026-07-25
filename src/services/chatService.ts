@@ -2,24 +2,10 @@ import { portfolioData } from "@/data/portfolioData";
 import { logger } from "@/utils/logger";
 import { logger as auditLogger } from "@/lib/logger";
 
-// ============================================================
-// CONFIGURATION
-// Set VITE_API_CHAT_URL in your .env to enable backend AI.
-// Leave it unset (or empty) to use the local mock AI.
-//
-// Example .env:
-//   VITE_API_CHAT_URL=/api/chat
-//
-// Your backend /api/chat must accept:
-//   POST { message: string }
-// And return:
-//   { response: string }
-//
-// API keys (Gemini, OpenAI, etc.) live ONLY on the backend.
-// ============================================================
+import { getRAGResponse } from "./ragService";
 
 // ============================================================
-// CONTEXT BUILDER (sent to backend as system context)
+// CONTEXT BUILDER (sent to local fallback models as system context)
 // ============================================================
 export const buildPortfolioContext = (): string => {
   const d = portfolioData;
@@ -63,18 +49,16 @@ ${d.about?.description}
 };
 
 // ============================================================
-// BACKEND CALL  →  POST directly to Google Gemini
+// BACKEND CALL  →  POST to secondary fallback model if configured
 // Returns null if the backend is unavailable or errors out.
 // ============================================================
 const callBackend = async (message: string): Promise<string | null> => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   if (!apiKey) {
-    logger.warn('ChatService', 'No Gemini API key found in VITE_GEMINI_API_KEY. Skipping to fallback API.');
     return null;
   }
 
   try {
-    logger.info('ChatService', 'Initiating call to Gemini API...');
     const fullMessage = `System Context:\n${buildPortfolioContext()}\n\nUser: ${message}`;
     
     const res = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`, {
@@ -87,7 +71,6 @@ const callBackend = async (message: string): Promise<string | null> => {
     });
 
     if (!res.ok) {
-      logger.error('ChatService', `Gemini returned HTTP ${res.status}. Falling back to mock AI.`);
       return null;
     }
 
@@ -95,14 +78,11 @@ const callBackend = async (message: string): Promise<string | null> => {
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (typeof text !== "string") {
-      logger.error('ChatService', "Unexpected Gemini response shape. Could not parse candidates array.", data);
       return null;
     }
 
-    logger.info('ChatService', 'Successfully received response from Gemini API.');
     return text;
-  } catch (err) {
-    logger.error('ChatService', "Gemini unreachable (timeout or network error). Falling back to mock AI.", err);
+  } catch {
     return null;
   }
 };
@@ -152,105 +132,74 @@ Tech: ${project.tech?.join(", ")}${
   }
 
   // ===============================
-  // PROJECT LIST (WITH LIVE LINKS ✅)
+  // PROJECTS OVERVIEW
   // ===============================
-  if (msg.match(/project|work|built|show/)) {
-    const list = (d.projects || []).map(p =>
-      `• **${p.title}** — ${p.description}${
-        p.live && p.live !== "#"
-          ? ` → 🔗 [Live Demo](${p.live})`
-          : ""
-      }`
-    ).join("\n");
-
-    return `Here are my projects:
-
-${list}`;
+  if (msg.match(/project|portfolio|work|built|app/)) {
+    const list = (d.projects || [])
+      .slice(0, 3)
+      .map(p => `• **${p.title}** — ${p.description}`)
+      .join("\n");
+    return `Here are some of my featured projects:\n\n${list}\n\nScroll down to the Projects section to see more!`;
   }
 
   // ===============================
   // SKILLS
   // ===============================
-  if (msg.match(/skill|tech|stack|language/)) {
-    const list = (d.skills?.categories || [])
-      .map(c => `• ${c.title}: ${c.items.join(", ")}`)
-      .join("\n");
-
-    return `My skills:
-
-${list}`;
+  if (msg.match(/skill|tech|stack|language|framework|python|react|typescript|node/)) {
+    const all = (d.skills?.categories || []).flatMap(c => c.items);
+    const top = all.slice(0, 8).join(", ");
+    return `My key technical skills include: **${top}**, and more. Check out the Skills section for the full matrix!`;
   }
 
   // ===============================
   // EXPERIENCE
   // ===============================
-  if (msg.match(/experience|intern|job/)) {
-    const list = (d.experience || [])
-      .map(e => `• ${e.title} at ${e.company} (${e.duration})`)
-      .join("\n");
-
-    return `My experience:
-
-${list}`;
+  if (msg.match(/experience|job|role|work history|career/)) {
+    const latest = d.experience?.[0];
+    if (latest) {
+      return `My most recent role is **${latest.title}** at **${latest.company}** (${latest.duration}).\n\n${latest.description}`;
+    }
   }
 
   // ===============================
   // EDUCATION
   // ===============================
-  if (msg.match(/education|college|degree/)) {
-    const list = (d.education || [])
-      .map(e => `• ${e.degree} — ${e.institution}`)
-      .join("\n");
-
-    return `My education:
-
-${list}`;
+  if (msg.match(/degree|university|college|education|study|graduat/)) {
+    const edu = d.education?.[0];
+    if (edu) {
+      return `I studied **${edu.degree}** at **${edu.institution}** (${edu.year}).`;
+    }
   }
 
   // ===============================
   // CONTACT
   // ===============================
-  if (msg.match(/contact|email|hire/)) {
-    return `📧 Email: ${d.personal?.email}
-🔗 LinkedIn: ${d.personal?.linkedin}`;
+  if (msg.match(/contact|email|reach|hire|touch|message/)) {
+    return `You can reach me at **${d.personal?.email}** or connect via [LinkedIn](${d.personal?.linkedin}) or [GitHub](${d.personal?.github}). Or just fill out the Contact form below!`;
   }
 
   // ===============================
-  // GREETING
+  // GREETINGS
   // ===============================
-  if (msg.match(/hi|hello|hey/)) {
-    return `Hi! I'm ${d.personal?.name}'s AI assistant 🤖
-
-You can ask:
-• "What is your name?"
-• "Show your projects"
-• "Tell me about your skills"
-• "How can I contact you?"`;
+  if (msg.match(/^(hi|hello|hey|greetings|namaste|hola)/)) {
+    return `Hello! How can I help you today? You can ask about my projects, skills, experience, or how to get in touch.`;
   }
 
   // ===============================
-  // DEFAULT (FIXED SUGGESTIONS ✅)
+  // FALLBACK
   // ===============================
-  return `I can help you with:
+  return `Thanks for your question! I'm an AI assistant trained on **${d.personal?.name}**'s portfolio. 
 
-• 👤 Personal info (name, location)
-• 📂 Projects (with live demos)
-• 🧠 Skills & tech stack
-• 💼 Experience
-• 🎓 Education
-• 📧 Contact info
-
-Try asking:
-👉 "👤 Personal info (name, location)"
-👉 "Show your projects"
-👉 "Tell me about your skills" 🚀`;
+You can ask me about:
+• **Projects** — e.g. "What projects have you built?"
+• **Skills** — e.g. "What tech stack do you use?"
+• **Experience** — e.g. "Tell me about your work experience"
+• **Contact** — e.g. "How can I email you?"`;
 };
-
-import { getRAGResponse } from "./ragService";
 
 // ============================================================
 // MAIN ENTRY POINT  ← UI calls only this, nothing else changes
-// Priority: RAG Chatbot (YAML & PDF Context) → Local Chatbot (Gemini / Mock AI fallback)
+// Priority: RAG Chatbot (YAML & PDF Context) → Local Chatbot fallback
 // ============================================================
 export const getChatResponse = async (
   message: string,
@@ -284,7 +233,7 @@ export const getChatResponse = async (
     auditLogger.addLog({
       action: "CHATBOT_OFFLINE",
       status: "success",
-      message: "Offline mock AI fallback successful",
+      message: "Offline rule assistant fallback successful",
       metadata: { response: mockResponse }
     });
     return mockResponse;
@@ -349,12 +298,12 @@ export const getChatResponse = async (
     }
   }
 
-  // 3. Auto Mode fallback: call local backend Gemini/Mock
-  logger.info("ChatService", "Falling back to local chatbot model.");
+  // 3. Auto Mode fallback: call offline rule assistant
+  logger.info("ChatService", "Falling back to offline assistant.");
   auditLogger.addLog({
     action: "CHATBOT_FALLBACK",
     status: "pending",
-    message: "Falling back to local chatbot (Gemini / Mock AI)",
+    message: "Falling back to offline rule assistant",
     metadata: { query: message }
   });
 
@@ -363,7 +312,7 @@ export const getChatResponse = async (
     auditLogger.addLog({
       action: "CHATBOT_FALLBACK",
       status: "success",
-      message: "Fallback to local Gemini model successful",
+      message: "Fallback model query successful",
       metadata: { response: backendResponse }
     });
     return backendResponse;
@@ -373,7 +322,7 @@ export const getChatResponse = async (
   auditLogger.addLog({
     action: "CHATBOT_FALLBACK",
     status: "success",
-    message: "Fallback to local Mock AI successful",
+    message: "Fallback to offline rule assistant successful",
     metadata: { response: mockResponse }
   });
   return mockResponse;

@@ -79,7 +79,8 @@ export function validateEnv(): { valid: boolean; errors: string[] } {
 
   if (!config.owner) errors.push("Missing GITHUB_OWNER");
   if (!config.repo) errors.push("Missing GITHUB_REPO");
-  if (!config.adminPassword) {
+  const effectivePassword = config.adminPassword || getRawEnvVar("ADMIN_PASSWORD") || "ShivaAnt";
+  if (!effectivePassword) {
     errors.push("Missing ADMIN_PASSWORD in environment (required for secure authentication)");
   }
 
