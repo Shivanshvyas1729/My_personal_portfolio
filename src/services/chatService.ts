@@ -292,16 +292,18 @@ export const getChatResponse = async (
 
   // 2. Online / Auto Modes: Try RAG first
   try {
+    const resolvedBaseUrl = (chatbotBaseUrl && chatbotBaseUrl.trim() && chatbotBaseUrl.trim() !== "https://api.openai.com/v1" ? chatbotBaseUrl.trim() : "") || import.meta.env.VITE_OPENAI_BASE_URL || 'https://api.openai.com/v1';
+    const resolvedModel = (chatbotModel && chatbotModel.trim() && chatbotModel.trim() !== "gpt-4o-mini" ? chatbotModel.trim() : "") || import.meta.env.VITE_OPENAI_MODEL || 'gpt-4.1-nano';
     const ragResponse = await getRAGResponse(message, chatbotMaxTokens, chatbotModel, chatbotBaseUrl);
     if (ragResponse !== null) {
       auditLogger.addLog({
         action: "CHATBOT_RAG",
         status: "success",
-        message: `RAG search successful. Model: ${chatbotModel || import.meta.env.VITE_OPENAI_MODEL || 'gpt-4o-mini'}`,
+        message: `RAG search successful. Model: ${resolvedModel}`,
         metadata: { 
           query: message, 
-          model: chatbotModel || import.meta.env.VITE_OPENAI_MODEL || 'gpt-4o-mini', 
-          baseUrl: chatbotBaseUrl || import.meta.env.VITE_OPENAI_BASE_URL || 'https://api.openai.com/v1',
+          model: resolvedModel, 
+          baseUrl: resolvedBaseUrl,
           response: ragResponse
         }
       });
@@ -314,19 +316,21 @@ export const getChatResponse = async (
         action: "CHATBOT_ERROR",
         status: "error",
         message: `RAG service unavailable: ${errMsg}`,
-        metadata: { model: chatbotModel, baseUrl: chatbotBaseUrl }
+        metadata: { model: resolvedModel, baseUrl: resolvedBaseUrl }
       });
       return "⚠️ Chatbot is configured to work in Online-Only mode, but the RAG completion service is currently unavailable.\n\n**Error details:** VITE_OPENAI_API_KEY is not set in environment variables or project secrets.";
     }
   } catch (err: any) {
+    const resolvedBaseUrl = (chatbotBaseUrl && chatbotBaseUrl.trim() && chatbotBaseUrl.trim() !== "https://api.openai.com/v1" ? chatbotBaseUrl.trim() : "") || import.meta.env.VITE_OPENAI_BASE_URL || 'https://api.openai.com/v1';
+    const resolvedModel = (chatbotModel && chatbotModel.trim() && chatbotModel.trim() !== "gpt-4o-mini" ? chatbotModel.trim() : "") || import.meta.env.VITE_OPENAI_MODEL || 'gpt-4.1-nano';
     auditLogger.addLog({
       action: "CHATBOT_ERROR",
       status: "error",
       message: `RAG pipeline encountered an error: ${err.message || err}`,
       metadata: { 
         query: message, 
-        model: chatbotModel || import.meta.env.VITE_OPENAI_MODEL || 'gpt-4o-mini', 
-        baseUrl: chatbotBaseUrl || import.meta.env.VITE_OPENAI_BASE_URL || 'https://api.openai.com/v1',
+        model: resolvedModel, 
+        baseUrl: resolvedBaseUrl,
         error: err.stack || err.message || String(err)
       }
     });

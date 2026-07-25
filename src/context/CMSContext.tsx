@@ -64,10 +64,21 @@ const sanitizeProjects = (projects: any[]): any[] => {
 
 const sanitizePortfolioData = (data: any): any => {
   if (!data) return data;
-  return {
+  const sanitized = {
     ...data,
     projects: sanitizeProjects(data.projects)
   };
+  if (sanitized.settings) {
+    const rawUrl = sanitized.settings.chatbotBaseUrl;
+    if ((!rawUrl || rawUrl === "https://api.openai.com/v1") && import.meta.env.VITE_OPENAI_BASE_URL) {
+      sanitized.settings.chatbotBaseUrl = import.meta.env.VITE_OPENAI_BASE_URL;
+    }
+    const rawModel = sanitized.settings.chatbotModel;
+    if ((!rawModel || rawModel === "gpt-4o-mini") && import.meta.env.VITE_OPENAI_MODEL) {
+      sanitized.settings.chatbotModel = import.meta.env.VITE_OPENAI_MODEL;
+    }
+  }
+  return sanitized;
 };
 
 
@@ -163,7 +174,16 @@ export const CMSProvider = ({ children }: { children: ReactNode }) => {
         const savedRedo = sessionStorage.getItem("cms-redo-stack");
         
         if (savedPreview) {
-          setPreviewData(JSON.parse(savedPreview));
+          const parsed = JSON.parse(savedPreview);
+          if (parsed.settings) {
+            if (parsed.settings.chatbotBaseUrl === "https://api.openai.com/v1" && import.meta.env.VITE_OPENAI_BASE_URL) {
+              parsed.settings.chatbotBaseUrl = import.meta.env.VITE_OPENAI_BASE_URL;
+            }
+            if (parsed.settings.chatbotModel === "gpt-4o-mini" && import.meta.env.VITE_OPENAI_MODEL) {
+              parsed.settings.chatbotModel = import.meta.env.VITE_OPENAI_MODEL;
+            }
+          }
+          setPreviewData(parsed);
           logger.addLog({
             action: "RECOVER_SESSION",
             status: "success",

@@ -166,7 +166,7 @@ export async function getRAGResponse(
   chatbotBaseUrl?: string
 ): Promise<string | null> {
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-  const baseUrl = chatbotBaseUrl || import.meta.env.VITE_OPENAI_BASE_URL || "https://api.openai.com/v1";
+  const baseUrl = (chatbotBaseUrl && chatbotBaseUrl.trim() && chatbotBaseUrl.trim() !== "https://api.openai.com/v1" ? chatbotBaseUrl.trim() : "") || import.meta.env.VITE_OPENAI_BASE_URL || "https://api.openai.com/v1";
 
   if (!apiKey) {
     logger.warn("RAGService", "No VITE_OPENAI_API_KEY found in environment variables or secrets. Falling back to local chatbot.");
@@ -181,7 +181,7 @@ export async function getRAGResponse(
     logger.info("RAGService", `Loaded vector database containing ${db.length} entries.`);
 
     // 2. Generate embedding for query
-    logger.info("RAGService", "Generating embedding for query...");
+    logger.info("RAGService", `Generating embedding for query at base URL: ${baseUrl}...`);
     const queryVector = await embedQuery(message, apiKey, baseUrl);
 
     // 3. Retrieve most relevant context
@@ -189,7 +189,7 @@ export async function getRAGResponse(
     const context = await retrieveContext(queryVector);
 
     // 4. Generate RAG response
-    const activeModel = chatbotModel || import.meta.env.VITE_OPENAI_MODEL || "gpt-4o-mini";
+    const activeModel = (chatbotModel && chatbotModel.trim() && chatbotModel.trim() !== "gpt-4o-mini" ? chatbotModel.trim() : "") || import.meta.env.VITE_OPENAI_MODEL || "gpt-4.1-nano";
     logger.info("RAGService", `Requesting LLM generation with context using model: ${activeModel}...`);
     const response = await generateRAGAnswer(message, context, apiKey, baseUrl, maxTokens, activeModel);
     

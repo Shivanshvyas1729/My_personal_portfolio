@@ -30,7 +30,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(500).json({ error: "VITE_OPENAI_API_KEY is not configured on the server environment." });
     }
 
-    const baseUrl = customBaseUrl || process.env.VITE_OPENAI_BASE_URL || "https://api.openai.com/v1";
+    const rawCustomUrl = customBaseUrl ? String(customBaseUrl).trim() : "";
+    const baseUrl = (rawCustomUrl && rawCustomUrl !== "https://api.openai.com/v1" ? rawCustomUrl : "") || process.env.VITE_OPENAI_BASE_URL || "https://api.openai.com/v1";
     
     // Construct target URL safely
     const cleanBaseUrl = baseUrl.replace(/\/$/, "");

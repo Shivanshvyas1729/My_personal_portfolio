@@ -1536,7 +1536,7 @@ export const UnifiedAdminDashboard = () => {
                                 updateLiveSection('settings', updated);
                                 updatePreviewSection('settings', updated);
                               }}
-                              placeholder="e.g., gpt-4o-mini"
+                              placeholder={import.meta.env.VITE_OPENAI_MODEL ? `Default: ${import.meta.env.VITE_OPENAI_MODEL}` : "e.g., gpt-4.1-nano"}
                               className="w-full bg-muted/20 border border-border/50 rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-primary/50 text-foreground placeholder:text-muted-foreground/50 transition-colors"
                             />
                           </div>
@@ -1551,7 +1551,7 @@ export const UnifiedAdminDashboard = () => {
                                 updateLiveSection('settings', updated);
                                 updatePreviewSection('settings', updated);
                               }}
-                              placeholder="e.g., https://api.openai.com/v1"
+                              placeholder={import.meta.env.VITE_OPENAI_BASE_URL ? `Default: ${import.meta.env.VITE_OPENAI_BASE_URL}` : "e.g., https://api.openai.com/v1"}
                               className="w-full bg-muted/20 border border-border/50 rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-primary/50 text-foreground placeholder:text-muted-foreground/50 transition-colors"
                             />
                           </div>
