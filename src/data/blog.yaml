@@ -1,4 +1,90 @@
 blog:
+  - id: 19
+    title: "Python Unpacking Operators (* and **): Lists, Tuples, Sets, Ranges, Strings & Dictionaries"
+    content: |
+      ![image](https://res.cloudinary.com/dnw73uesc/image/upload/v1785170093/image_r7ptes.png)
+
+      ## `*` Unpacking Examples
+
+      ### List
+
+      ```python
+      nums = [1, 2, 3]
+      print(*nums)      # 1 2 3
+      ```
+
+      ### Tuple
+
+      ```python
+      nums = (1, 2, 3)
+      print(*nums)      # 1 2 3
+      ```
+
+      ### Set
+
+      ```python
+      nums = {1, 2, 3}
+      print(*nums)      # 1 2 3 (order may vary)
+      ```
+
+      ### String
+
+      ```python
+      text = "ABC"
+      print(*text)      # A B C
+      ```
+
+      ### Range
+
+      ```python
+      nums = range(1, 4)
+      print(*nums)      # 1 2 3
+      ```
+
+      ### Generator
+
+      ```python
+      nums = (x for x in range(1, 4))
+      print(*nums)      # 1 2 3
+      ```
+
+      ### Custom Iterable
+
+      ```python
+      class MyNumbers:
+          def __iter__(self):
+              return iter([1, 2, 3])
+
+      nums = MyNumbers()
+      print(*nums)      # 1 2 3
+      ```
+
+      ---
+
+      ## `**` Unpacking Example (Dictionary)
+
+      ```python
+      person = {"name": "Bob", "age": 22}
+
+      def show(name, age):
+          print(name, age)
+
+      show(**person)    # Bob 22
+      ```
+
+      **Key takeaway:**
+
+      * `*` → Unpacks **any iterable** into positional arguments.
+      * `**` → Unpacks a **mapping (usually a dictionary)** into keyword arguments.
+    category: Codes
+    type:
+      - Python
+    featured: false
+    draft: true
+    resources: []
+    date: 2026-07-27
+    excerpt: short of unpaking
+    slug: python-unpacking-operators-and-lists-tuples-sets-ranges-strings-dictionaries
   - id: 18
     title: RAG EVALUATION MATRICS
     content: check this once
