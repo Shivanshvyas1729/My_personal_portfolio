@@ -16,114 +16,125 @@ const REQUIRED_FIELDS: Record<string, string> = {
 // Example project JSON template pre-filled with descriptive comments
 const SCHEMA_EXAMPLE_JSON = `{
   "id": 6,
-  "// id": "Unique positive integer. Auto-incremented for new projects.",
+  "// id": "🟡 OPTIONAL — Unique positive integer. Auto-incremented if omitted.",
 
   "title": "Solar Panel Defect Detection System",
-  "// title": "Clear, impact-oriented title shown on the portfolio grid card",
+  "// title": "🔴 REQUIRED — Clear, impact-oriented title shown on portfolio grid cards",
 
   "category": ["Deep Learning", "Computer Vision"],
-  "// category": "AI/ML sub-field tags used for filtering on the All Projects page",
+  "// category": "🟡 OPTIONAL — AI/ML sub-field tags used for filtering on the All Projects page",
 
   "domain": "🏥 Healthcare",
-  "// domain": "OPTIONAL — Real-world industry sector. Adds a separate Domain filter. Examples: '🏥 Healthcare', '⚡ Renewable Energy', '🌤️ Meteorology', '🍶 Food & Beverage', '🎵 Media & Entertainment'. Remove this field entirely if not applicable.",
+  "// domain": "🟡 OPTIONAL — Industry sector filter. Examples: '🏥 Healthcare', '⚡ Renewable Energy', '🌤️ Meteorology'. Remove if not applicable.",
 
   "description": "An AI-powered solar panel defect detection system using transfer learning with EfficientNet-B0.",
-  "// description": "Compelling 1–2 sentence summary of what the project does and its value",
+  "// description": "🔴 REQUIRED — Compelling 1–2 sentence summary of what the project does and its value",
 
   "tech": ["Python", "PyTorch", "Torchvision", "Streamlit"],
-  "// tech": "Core frameworks, tools, and languages used",
+  "// tech": "🟡 OPTIONAL — Core frameworks, tools, and languages used",
 
   "github": "https://github.com/your-username/project",
-  "// github": "Public repository URL (optional — omit if private)",
+  "// github": "🟡 OPTIONAL — Public repository URL (omit if private)",
 
   "live": "https://your-app.streamlit.app/",
-  "// live": "Live demo or deployed app URL (optional)",
+  "// live": "🟡 OPTIONAL — Live demo or deployed app URL",
 
   "featured": true,
-  "// featured": "Set true to show this on the home page Featured Work carousel",
+  "// featured": "🟡 OPTIONAL — Set true to show on home page Featured Work carousel",
 
   "impact": "Reduces manual solar farm inspection time by 80% with automated AI defect classification.",
-  "// impact": "One sentence quantifying the real-world operational or business impact",
+  "// impact": "🟡 OPTIONAL — One sentence quantifying real-world business impact",
 
   "problem_statement": "Manual inspection of solar panels across large farms is slow and costly. Defects like dust, cracks, and electrical damage reduce energy output if undetected.",
-  "// problem_statement": "The business or engineering challenge this project solves",
+  "// problem_statement": "🟡 OPTIONAL — The engineering or core problem this project solves",
+
+  "business_problem": "Solar panel degradation and undetected physical defects reduce energy generation yield by up to 15% annually, leading to unnecessary maintenance expenses.",
+  "// business_problem": "🟡 OPTIONAL — Expanded detail on the monetary or strategic business issue",
+
+  "media": [
+    {
+      "type": "image",
+      "url": "https://i.ibb.co/..."
+    }
+  ],
+  "// media": "🟡 OPTIONAL — Array of screenshots, diagrams, or video links for gallery",
 
   "learning_outcomes": [
     "Applied EfficientNet-B0 transfer learning for multi-class image classification with limited labelled data",
     "Built a custom PyTorch classification head with BatchNorm, ReLU, and Dropout",
     "Deployed a real-time Streamlit inference app on Streamlit Community Cloud"
   ],
-  "// learning_outcomes": "Key skills or techniques you gained from building this project",
+  "// learning_outcomes": "🟡 OPTIONAL — Key skills or techniques gained from building this project",
 
   "architecture": "User uploads image → PIL preprocessing → Torchvision normalization → EfficientNet-B0 inference → Top-3 softmax predictions returned with confidence scores.",
-  "// architecture": "Text description of system topology, data flow, or pipeline stages",
+  "// architecture": "🟡 OPTIONAL — Text description of system topology or data flow",
 
   "architectureImage": "https://i.ibb.co/.../architecture.png",
-  "// architectureImage": "URL to an architecture diagram image (optional)",
+  "// architectureImage": "🟡 OPTIONAL — URL to an architecture diagram image",
 
   "resources": [
     { "label": "Architecture PDF", "url": "https://drive.google.com/..." }
   ],
-  "// resources": "Private/gated assets shown behind a Resources modal button (optional)",
+  "// resources": "🟡 OPTIONAL — Private/gated assets shown behind a Resources modal button",
 
   "open_resources": [
     { "label": "PyTorch EfficientNet Docs", "url": "https://pytorch.org/vision/stable/models/efficientnet.html" },
     { "label": "Kaggle Dataset", "url": "https://www.kaggle.com/datasets/..." }
   ],
-  "// open_resources": "Publicly accessible papers, docs, or datasets shown at the bottom of the project page",
+  "// open_resources": "🟡 OPTIONAL — Publicly accessible papers, docs, or datasets",
 
   "howItWorks": "1. User uploads a panel image. 2. PIL converts to RGB and resizes to 224×224. 3. Torchvision normalizes to ImageNet stats. 4. EfficientNet-B0 forward pass runs. 5. Softmax returns Top-3 predictions with confidence.",
-  "// howItWorks": "Numbered step-by-step walkthrough of the execution pipeline",
+  "// howItWorks": "🟡 OPTIONAL — Numbered step-by-step walkthrough of the execution pipeline",
 
   "objectives": [
     "Classify 6 solar panel defect categories with >90% accuracy using transfer learning",
     "Deploy real-time inference app with <500ms response per image"
   ],
-  "// objectives": "Measurable engineering goals defined before development started",
+  "// objectives": "🟡 OPTIONAL — Measurable engineering goals defined before development started",
 
   "success_criteria": [
     "Top-1 accuracy exceeds 90% on held-out test set",
     "Streamlit app serves predictions in under 500ms on CPU"
   ],
-  "// success_criteria": "Conditions that define when the project is considered complete and successful",
+  "// success_criteria": "🟡 OPTIONAL — Conditions defining when project is complete and successful",
 
   "data_sources": [
     "https://www.kaggle.com/datasets/pythonafroz/solar-panel-images-for-defect-detection"
   ],
-  "// data_sources": "URLs or names of source datasets used for training",
+  "// data_sources": "🟡 OPTIONAL — URLs or names of source datasets used for training",
 
   "data_volume": "2,624 labeled solar panel images across 6 defect classes",
-  "// data_volume": "Total size of the dataset (images, rows, tokens, etc.)",
+  "// data_volume": "🟡 OPTIONAL — Total size of dataset (images, rows, tokens, etc.)",
 
   "class_distribution": "Dust: 22%, Bird Drop: 18%, Electrical Damage: 15%, Physical Damage: 17%, Snow: 13%, Clean: 15%",
-  "// class_distribution": "Label balance across classes — highlight imbalance if significant",
+  "// class_distribution": "🟡 OPTIONAL — Label balance across classes",
 
   "target_variable": "Defect Class: Bird Drop | Dust | Electrical Damage | Physical Damage | Snow | Clean",
-  "// target_variable": "The label, class, or value the model predicts",
+  "// target_variable": "🟡 OPTIONAL — The target label or value predicted",
 
   "features": [
     "224×224 RGB pixel tensors normalized to ImageNet statistics",
     "EfficientNet-B0 convolutional feature maps (1280-dim global average pooling output)"
   ],
-  "// features": "Input feature representations or engineered columns fed to the model",
+  "// features": "🟡 OPTIONAL — Input feature representations or engineered columns",
 
   "feature_engineering": [
     "Data augmentation: RandomHorizontalFlip, RandomRotation(±15°), ColorJitter(brightness=0.2)",
     "Stratified 70/15/15 train-validation-test split by class label"
   ],
-  "// feature_engineering": "Augmentation, transformation, or feature derivation steps applied (optional)",
+  "// feature_engineering": "🟡 OPTIONAL — Data augmentation or feature derivation steps",
 
   "model_inputs": [
     "Image tensor of shape (batch_size, 3, 224, 224)",
     "Normalized with mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]"
   ],
-  "// model_inputs": "Exact shape and format of tensors or data passed into the model",
+  "// model_inputs": "🟡 OPTIONAL — Exact shape and format of input tensors",
 
   "model_outputs": [
     "6-class softmax probability vector of shape (batch_size, 6)",
     "Top-3 (class_name, confidence%) tuples for display"
   ],
-  "// model_outputs": "Shape and format of model predictions returned",
+  "// model_outputs": "🟡 OPTIONAL — Shape and format of predictions returned",
 
   "preprocessing": [
     "PIL image loading and RGB conversion",
@@ -131,7 +142,7 @@ const SCHEMA_EXAMPLE_JSON = `{
     "Normalize channels with ImageNet mean and std",
     "Unsqueeze batch dimension: tensor.unsqueeze(0) for single-image inference"
   ],
-  "// preprocessing": "Data cleaning, resizing, scaling, or tokenization operations",
+  "// preprocessing": "🟡 OPTIONAL — Data cleaning, resizing, scaling, or tokenization operations",
 
   "modeling": [
     "Pretrained EfficientNet-B0 backbone (ImageNet weights, frozen during warmup phase)",
@@ -140,7 +151,7 @@ const SCHEMA_EXAMPLE_JSON = `{
     "Optimizer: Adam(lr=1e-4 backbone, lr=1e-3 head, weight_decay=1e-5)",
     "LR Scheduler: CosineAnnealingLR over 30 epochs"
   ],
-  "// modeling": "Model architecture, loss functions, optimizers, and training configuration",
+  "// modeling": "🟡 OPTIONAL — Model architecture, loss functions, optimizers, & training setup",
 
   "hyperparameters": [
     "Backbone LR: 1e-4 | Head LR: 1e-3",
@@ -150,7 +161,7 @@ const SCHEMA_EXAMPLE_JSON = `{
     "Label Smoothing: 0.1",
     "Image Size: 224×224"
   ],
-  "// hyperparameters": "Key tunable configuration values used during training (optional)",
+  "// hyperparameters": "🟡 OPTIONAL — Tunable configuration values used during training",
 
   "evaluation_metrics": [
     "Top-1 Classification Accuracy",
@@ -158,7 +169,7 @@ const SCHEMA_EXAMPLE_JSON = `{
     "Top-3 Prediction Accuracy",
     "Mean Inference Latency (ms/image on CPU)"
   ],
-  "// evaluation_metrics": "Metrics used to evaluate model quality and operational performance",
+  "// evaluation_metrics": "🟡 OPTIONAL — Metrics used to evaluate model quality and performance",
 
   "metrics": {
     "Test Accuracy": "96.2%",
@@ -167,23 +178,23 @@ const SCHEMA_EXAMPLE_JSON = `{
     "Dataset Size": "3,654 images",
     "Avg Inference Time": "45ms"
   },
-  "// metrics": "Highlighted key-value metrics and statistics displayed as a summary grid in the details view",
+  "// metrics": "🟡 OPTIONAL — Highlighted key-value metrics summary grid in details view",
 
   "validation_strategy": "Stratified 70/15/15 train-validation-test split with random_seed=42. Early stopping on validation loss.",
-  "// validation_strategy": "How data is split and how overfitting is prevented during training",
+  "// validation_strategy": "🟡 OPTIONAL — How data is split and how overfitting is prevented",
 
   "explainability": "Top-3 softmax probabilities displayed with percentage confidence bars. Planned: Grad-CAM heatmaps to highlight defect regions in the uploaded image.",
-  "// explainability": "Explainability method used: Grad-CAM, SHAP, LIME, attention maps, confidence intervals, etc.",
+  "// explainability": "🟡 OPTIONAL — Explainability method used (Grad-CAM, SHAP, attention maps, etc.)",
 
   "training_environment": [
     "Python 3.10, PyTorch 2.1.0, Torchvision 0.16.0",
     "Hardware: NVIDIA T4 GPU (Google Colab Pro)",
     "Training time: ~12 minutes for 30 epochs on T4 GPU"
   ],
-  "// training_environment": "Hardware, runtime, and software version details used for training (optional)",
+  "// training_environment": "🟡 OPTIONAL — Hardware, runtime, and environment specs",
 
   "deployment": "Streamlit Community Cloud. Model checkpoint (.pth) stored in GitHub repo root. Loaded once at app startup. CPU inference on user-uploaded images.",
-  "// deployment": "Production hosting details — cloud platform, container setup, API gateway, or edge runtime",
+  "// deployment": "🟡 OPTIONAL — Production hosting & deployment setup",
 
   "inference_pipeline": [
     "Load model checkpoint from repo at Streamlit app startup",
@@ -192,46 +203,46 @@ const SCHEMA_EXAMPLE_JSON = `{
     "Forward pass: model.eval() with torch.no_grad()",
     "Softmax output → sort by confidence → return Top-3 (label, %) pairs"
   ],
-  "// inference_pipeline": "Step-by-step execution flow from raw input to final prediction output (optional)",
+  "// inference_pipeline": "🟡 OPTIONAL — Step-by-step execution flow from raw input to prediction",
 
   "monitoring": [
     "Confidence threshold alert: predictions below 60% confidence flagged for manual review",
     "All Top-3 predictions always surfaced in UI for human validation"
   ],
-  "// monitoring": "How model outputs are tracked, flagged, or reviewed in production (optional)",
+  "// monitoring": "🟡 OPTIONAL — Production monitoring & alert guardrails",
 
   "versioning": [
     "Model weights versioned as GitHub Releases: v1.0.0 (initial), v1.1.0 (improved head)",
     "Codebase versioned with Git tags matching model release numbers"
   ],
-  "// versioning": "How model weights, datasets, and code are version-controlled (optional)",
+  "// versioning": "🟡 OPTIONAL — Model & dataset versioning strategy",
 
   "risks": [
     "Accuracy degrades for panel images taken in unusual lighting (overexposed, night-time)",
     "Single-label classification fails for images with multiple co-occurring defects",
     "Streamlit Community Cloud memory limits cap batch inference to ~5 images at once"
   ],
-  "// risks": "Known failure modes, edge cases, or operational constraints",
+  "// risks": "🟡 OPTIONAL — Known failure modes or operational constraints",
 
   "ethics": [
     "Dataset sourced from Kaggle under CC0 public domain licence — no proprietary data",
     "Model predictions are advisory only — qualified technicians must confirm before any action",
     "No personally identifiable information is collected or stored"
   ],
-  "// ethics": "Data licensing, bias considerations, safety guardrails, or compliance requirements",
+  "// ethics": "🟡 OPTIONAL — Data licensing, bias considerations, or compliance requirements",
 
   "privacy": [
     "Uploaded images processed in-memory only and never stored server-side",
     "No user data is logged, retained, or shared with any third party"
   ],
-  "// privacy": "Data retention policy, encryption, or user privacy protections (optional)",
+  "// privacy": "🟡 OPTIONAL — Data retention policy & user privacy protections",
 
   "known_limitations": [
     "Cannot detect multiple defect types simultaneously in a single image",
     "Not validated on real-world drone or satellite solar farm imagery",
     "Requires clear, well-lit panel images for reliable classification"
   ],
-  "// known_limitations": "Honest list of current model constraints or unresolved shortcomings",
+  "// known_limitations": "🟡 OPTIONAL — Current model constraints or unresolved shortcomings",
 
   "future_improvements": [
     "Add Grad-CAM heatmap overlay to visually highlight the defect region in predictions",
@@ -239,7 +250,7 @@ const SCHEMA_EXAMPLE_JSON = `{
     "Integrate real-time drone image stream for autonomous field inspection",
     "Fine-tune on proprietary solar farm imagery for higher real-world accuracy"
   ],
-  "// future_improvements": "Planned enhancements or next-iteration research directions",
+  "// future_improvements": "🟡 OPTIONAL — Planned enhancements or next-iteration directions",
 
   "knowledge_overrides": [
     {
@@ -249,7 +260,7 @@ const SCHEMA_EXAMPLE_JSON = `{
       "why_used": "Excellent accuracy-to-parameter ratio enables high-quality feature extraction with minimal CPU inference overhead, perfect for Streamlit Community Cloud deployment."
     }
   ],
-  "// knowledge_overrides": "Override or extend the global knowledge base for specific terms used in this project. Each entry needs 'id' (exact term match) and optionally: definition, real_world_example, why_used, advantages, limitations."
+  "// knowledge_overrides": "🟡 OPTIONAL — Override global knowledge base terms for this project. Needs 'id' and optionally: definition, real_world_example, why_used."
 }`;
 
 interface ProjectsAdminProps {
@@ -387,7 +398,7 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
     const highestId = projects.reduce((max, p) => (p.id || 0) > max ? p.id : max, 0);
     setTempProject({
       id: highestId + 1,
-      title: "",
+      title: "Solar Panel Defect Detection System",
       category: ["Deep Learning", "Computer Vision"],
       description: "An AI-powered solar panel defect detection system...",
       tech: ["Python", "PyTorch", "Streamlit"],
@@ -401,7 +412,8 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
           url: "https://i.ibb.co/..."
         }
       ],
-      problem_statement: "Explain the core challenge/problem your project solves...",
+      problem_statement: "Manual inspection of solar panels across large farms is slow and costly. Defects like dust, cracks, and electrical damage reduce energy output if undetected.",
+      business_problem: "Solar panel degradation and undetected physical defects reduce energy generation yield by up to 15% annually, leading to unnecessary maintenance expenses.",
       learning_outcomes: [
         "Architected custom Transfer Learning models",
         "Streamlined containerized MLOps pipelines"
@@ -426,10 +438,24 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
       data_sources: [
         "https://www.kaggle.com/datasets/..."
       ],
+      data_volume: "2,624 labeled solar panel images across 6 defect classes",
+      class_distribution: "Dust: 22%, Bird Drop: 18%, Electrical Damage: 15%, Physical Damage: 17%, Snow: 13%, Clean: 15%",
       target_variable: "Defect Label (Dust, Bird Drops, Physical Damage, Clean)",
       features: [
         "Grayscale luminance histogram values",
         "Normalized RGB color channel moments"
+      ],
+      feature_engineering: [
+        "Data augmentation: RandomHorizontalFlip, RandomRotation(±15°), ColorJitter(brightness=0.2)",
+        "Stratified 70/15/15 train-validation-test split by class label"
+      ],
+      model_inputs: [
+        "Image tensor of shape (batch_size, 3, 224, 224)",
+        "Normalized with mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]"
+      ],
+      model_outputs: [
+        "6-class softmax probability vector of shape (batch_size, 6)",
+        "Top-3 (class_name, confidence%) tuples for display"
       ],
       preprocessing: [
         "Resize all input frames to 224x224 pixels",
@@ -438,6 +464,12 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
       modeling: [
         "Transfer Learning utilizing pre-trained EfficientNet-B0 weights",
         "Linear dense head with dropout regularization"
+      ],
+      hyperparameters: [
+        "Backbone LR: 1e-4 | Head LR: 1e-3",
+        "Batch Size: 32",
+        "Epochs: 30 with early stopping (patience=5)",
+        "Dropout Rate: 0.3"
       ],
       evaluation_metrics: [
         "Weighted F1-Score (Primary metric due to class skew)",
@@ -452,7 +484,24 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
       },
       validation_strategy: "5-Fold stratified cross-validation split across localized images",
       explainability: "Integrated Grad-CAM heatmaps showing exact visual pixels triggering defect predictions",
+      training_environment: [
+        "Python 3.10, PyTorch 2.1.0, Torchvision 0.16.0",
+        "Hardware: NVIDIA T4 GPU (Google Colab Pro)"
+      ],
       deployment: "Deployed as a Streamlit server connected to an AWS ECS Fargate container instance",
+      inference_pipeline: [
+        "Load model checkpoint from repo at Streamlit app startup",
+        "Accept user image via st.file_uploader()",
+        "Preprocess and run forward pass with torch.no_grad()",
+        "Return Top-3 predictions"
+      ],
+      monitoring: [
+        "Confidence threshold alert: predictions below 60% confidence flagged for manual review"
+      ],
+      versioning: [
+        "Model weights versioned as GitHub Releases: v1.0.0",
+        "Codebase versioned with Git tags"
+      ],
       risks: [
         "Sensitivity to low lighting or deep shadow variations",
         "Potential false positives on reflective panel borders"
@@ -461,10 +510,29 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
         "All data gathered from public and consented community databases",
         "Algorithms audited to prevent biased false detections across regional modules"
       ],
+      privacy: [
+        "Uploaded images processed in-memory only and never stored server-side"
+      ],
+      known_limitations: [
+        "Cannot detect multiple defect types simultaneously in a single image",
+        "Not validated on real-world drone imagery"
+      ],
+      future_improvements: [
+        "Add Grad-CAM heatmap overlay to visually highlight defect regions",
+        "Extend model to multi-label classification"
+      ],
       open_resources: [
         {
           label: "Research Drive Folder",
           url: "https://drive.google.com/..."
+        }
+      ],
+      knowledge_overrides: [
+        {
+          id: "EfficientNet-B0",
+          definition: "A lightweight CNN scaled via compound coefficient across depth, width, and resolution.",
+          real_world_example: "EfficientNet-B0 achieves 77.1% top-1 accuracy on ImageNet with only 5.3M parameters.",
+          why_used: "Excellent accuracy-to-parameter ratio enables high-quality feature extraction."
         }
       ]
     });
@@ -943,6 +1011,24 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
                       </div>
                       <span className="text-[9px] text-primary/70 font-semibold">
                         Edit raw project attributes below
+                      </span>
+                    </div>
+
+                    {/* Required vs Optional Legend Banner */}
+                    <div className="mb-2 px-3 py-1.5 rounded-lg bg-muted/20 border border-border/30 flex items-center justify-between text-[10px] text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <span className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-destructive inline-block" />
+                          <strong className="text-foreground">Required:</strong> <code className="text-foreground font-mono font-bold">title</code>, <code className="text-foreground font-mono font-bold">description</code>
+                        </span>
+                        <span className="text-border">|</span>
+                        <span className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
+                          <strong className="text-foreground">Optional:</strong> 45 fields (may be omitted)
+                        </span>
+                      </div>
+                      <span className="text-[9px] text-muted-foreground/70 italic">
+                        Real-time Zod validation
                       </span>
                     </div>
                     <textarea
