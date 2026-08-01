@@ -4,8 +4,6 @@ projects:
     title: Real-Time YouTube Script Generator & MCP Server
     category:
       - LLMs & Generative AI
-      - Agentic Systems & MCP
-      - Web Applications
     description: An AI-powered application and FastMCP server that retrieves real-time web information using Tavily Search API and converts it into high-retention, production-ready short video scripts (YouTube Shorts / Reels) using Gemini LLM.
     tech:
       - Python
@@ -17,7 +15,7 @@ projects:
     github: https://github.com/Shivanshvyas1729/Real-Time-YouTube-Script-Generator-MCP-Server
     live: https://real-time-youtube-script-generator-mcp-server-kv2sp2x863hpu8bh.streamlit.app/
     featured: true
-    domain: 🎬 Content & Media Creation
+    domain: Media & Entertainment
     media:
       - secureUrl: https://res.cloudinary.com/dnw73uesc/image/upload/v1785582812/Gemini_Generated_Image_t9zmutt9zmutt9zm_sivbr0.png
         publicId: Gemini_Generated_Image_t9zmutt9zmutt9zm_sivbr0
@@ -122,7 +120,7 @@ projects:
     github: https://github.com/Shivanshvyas1729/Cancer_Detection_with_xai
     live: https://cancerdetectionwithxai.streamlit.app/
     featured: true
-    domain: 🏥 Healthcare
+    domain: Healthcare
     media:
       - url: https://i.ibb.co/0j93F19k/719086-750.jpg
         type: image
@@ -235,7 +233,7 @@ projects:
     github: https://github.com/Shivanshvyas1729/solar_panel_defect_detection
     live: https://solarpaneldefectdetection.streamlit.app/
     featured: true
-    domain: ⚡ Renewable Energy
+    domain: Renewable Energy
     impact: Improves efficiency of solar panel maintenance by enabling quick and automated defect detection, reducing manual inspection effort and supporting scalable renewable energy operations.
     architectureImage: https://backend.krishnaik.in/media/project_architecture_diagrams/Gemini_Generated_Image_vwro75vwro75vwro_UvMo1qV.jpg
     problem_statement: Manual inspection of solar panels across large solar farms is time-consuming, error-prone, and costly. Defects such as dust accumulation, bird droppings, physical cracks, and electrical damage significantly reduce energy output if left undetected. There is a need for an automated, scalable, and accurate computer vision system that can classify panel defects from images and enable proactive maintenance to maximise renewable energy generation efficiency.
@@ -346,7 +344,7 @@ projects:
     github: https://github.com/Shivanshvyas1729/Thunderstrom_forcast
     live: https://thunderstromforcast.streamlit.app/
     featured: true
-    domain: 🌤️ Meteorology
+    domain: Meteorology
     impact: Real-time thunderstorm prediction with optimized ML model and interactive UI, enabling early weather warnings for safety and operational planning.
     resources:
       - url: https://excalidraw.com/#json=9Nw6RepmXxt43Pa_0WrYS,pVW7PrOSRwuehccI2tgGmA
@@ -455,112 +453,7 @@ projects:
     github: https://github.com/Shivanshvyas1729/drink_quality_prediction
     live: https://drinkqualityprediction.streamlit.app/
     featured: true
-    domain: 🍶 Food & Beverage
+    domain: Food & Beverage
     impact: Automated ML pipeline with production-ready CI/CD deployment, demonstrating end-to-end MLOps from data ingestion to containerised cloud deployment.
-  - id: 1
-    title: Real-Time YouTube Script Generator & MCP Server
-    category:
-      - LLMs & Generative AI
-      - Agentic Systems & MCP
-      - Web Applications
-    description: An AI-powered application and FastMCP server that retrieves real-time web information using Tavily Search API and converts it into high-retention, production-ready short video scripts (YouTube Shorts / Reels) using Gemini LLM.
-    tech:
-      - Python
-      - FastMCP
-      - Streamlit
-      - Tavily Search API
-      - Google Gemini API
-      - OpenAI SDK
-    github: https://github.com/Shivanshvyas1729/Real-Time-YouTube-Script-Generator-MCP-Server
-    live: https://real-time-youtube-script-generator-mcp-server-kv2sp2x863hpu8bh.streamlit.app/
-    featured: true
-    domain: 🎬 Content & Media Creation
-    media:
-      - secureUrl: https://res.cloudinary.com/dnw73uesc/image/upload/v1785582812/Gemini_Generated_Image_t9zmutt9zmutt9zm_sivbr0.png
-        publicId: Gemini_Generated_Image_t9zmutt9zmutt9zm_sivbr0
-        resourceType: image
-    problem_statement: Standard LLMs suffer from knowledge cutoff dates and hallucinate when asked to generate scripts on breaking news or current events. Additionally, drafting engaging short-form video scripts (Shorts/Reels) requires strict structural formatting (hooks, visual cues, spoken dialogue) that standard prompts fail to deliver reliably.
-    business_problem: Content creators and video marketing teams spend excessive hours manually researching current web trends and writing formatted video scripts, resulting in low publishing velocity and missed viral opportunities on trending topics.
-    learning_outcomes:
-      - Architected real-time retrieval-augmented pipelines using Tavily Search API to eliminate LLM hallucinations on breaking news
-      - Implemented Model Context Protocol (FastMCP) servers to expose Python functions directly as tools for AI assistants like Claude Desktop and Cursor
-      - Built resilient fallback mechanisms to ensure 100% UI uptime even during third-party LLM API rate limits or failures
-      - Crafted structured short-form script prompt templates that separate visual cues from spoken dialogue for immediate production use
-    architecture: Dual-interface architecture featuring an interactive Streamlit Web Application and a FastMCP Server over stdio. The core Python engine queries Tavily API for top real-time search results, summarizes the content using Gemini LLM (via OpenAI SDK compatibility or native Google GenAI SDK), and feeds the context into a specialized scriptwriter engine structured for maximum audience retention (Hook → Frame → Payload → CTA).
-    architectureImage: https://res.cloudinary.com/dnw73uesc/image/upload/v1785582067/3242_pwn0wl.png
-    resources:
-      - label: Live Streamlit App
-        url: https://real-time-youtube-script-generator-mcp-server-kv2sp2x863hpu8bh.streamlit.app/
-      - label: GitHub Repository
-        url: https://github.com/Shivanshvyas1729/Real-Time-YouTube-Script-Generator-MCP-Server
-    howItWorks: |-
-      1. User inputs a topic/query via the Streamlit UI or MCP client tool.
-      2. Tavily Search API fetches top 3 advanced real-time web results.
-      3. Gemini LLM synthesizes search snippets into a ~200-word factual summary (with fallback to raw search snippets if LLM fails).
-      4. Scriptwriter engine converts summary context into a YouTube Shorts script complete with [Visual Cues] and (Spoken Words).
-      5. User previews, edits, or downloads the script as a `.txt` file.
-    objectives:
-      - Achieve real-time web retrieval and AI summarization in under 3 seconds per query
-      - Expose standardized MCP tools (`get_latest_info_mcp`, `get_video_script_mcp`) for external AI agents
-      - Ensure zero app crashes via robust try/except fallback mechanisms
-    success_criteria:
-      - Zero application downtime when external LLM endpoints fail
-      - Seamless one-click script download (.txt) for creators
-      - Full compatibility with FastMCP tools inspector and Claude Desktop
-    data_sources:
-      - Tavily Search API (Real-Time Web Crawl & Search Snippets)
-    model_inputs:
-      - User topic query (str)
-      - Real-time web search markdown context string
-    model_outputs:
-      - Concise AI research summary (~200 words)
-      - Production video script with [Visual Cues] and (Spoken Words)
-    preprocessing:
-      - Filter and format Tavily JSON search results into Markdown snippets containing title, content, and URL source
-      - Construct role-based system and user prompt payloads
-    modeling:
-      - Gemini 2.0 Flash Lite (`gemini-2.0-flash-lite-001`) via OpenAI SDK endpoint compatibility
-      - Gemini 2.0 Flash (`gemini-2.0-flash`) via official `google-genai` SDK
-    hyperparameters:
-      - "Summarization Temperature: 0.3 (Fact-focused & concise)"
-      - "Script Generation Temperature: 0.7 (Creative & engaging)"
-      - "Search Max Results: 3"
-      - "Search Depth: 'advanced'"
-    evaluation_metrics:
-      - Real-Time Retrieval Speed (seconds)
-      - Script Retention Structure Adherence (Hook/Frame/Payload/CTA presence)
-      - Fallback Activation Reliability
-    deployment: Streamlit Community Cloud (for browser UI) and local FastMCP server execution via `uv run mcp_server.py`.
-    inference_pipeline:
-      - Receive search query string
-      - Query Tavily Client API for max 3 advanced web results
-      - Run LLM Summarization prompt with temperature 0.3
-      - Fallback to raw markdown snippets if summarization raises an exception
-      - Run Scriptwriter prompt with temperature 0.7
-      - Return script string to UI text area or MCP caller
-    risks:
-      - Dependence on third-party Tavily API service availability and query quotas
-      - Variable web search snippet quality depending on niche topic specificity
-    ethics:
-      - Includes source URLs for web content attribution in fallback mode
-      - Uses official API endpoints avoiding unauthorized website scraping
-    privacy:
-      - Search queries and script contents are processed in-memory only and never persisted to a database
-    known_limitations:
-      - Requires active internet connection and valid API keys (`TAVILY_API_KEY`, `AICREDITS_API_KEY` / `GEMINI_API_KEY`)
-      - Tailored specifically for short-form scripts (15-60 seconds)
-    future_improvements:
-      - Add multi-modal AI storyboarding (automated image generation for visual cues)
-      - Support adjustable video lengths (15s, 30s, 60s, 3-min longform)
-      - Integrate text-to-speech audio generation (e.g. ElevenLabs API) for automated voiceovers
-    knowledge_overrides:
-      - id: FastMCP
-        definition: A high-level Python framework for building Model Context Protocol (MCP) servers effortlessly.
-        real_world_example: Exposing local Python functions as executable tools in Cursor IDE or Claude Desktop.
-        why_used: Enables seamless AI tool interoperability without writing raw MCP transport boilerplate.
-      - id: Tavily Search API
-        definition: A search engine optimized specifically for AI agents and LLMs to retrieve real-time, factual web data.
-        real_world_example: Fetching up-to-the-minute news snippets formatted for direct prompt context insertion.
-        why_used: Eliminates LLM training cutoff limits and reduces hallucination on recent topics.
 
 # endregion
