@@ -30,7 +30,7 @@ projects:
       - Built resilient fallback mechanisms to ensure 100% UI uptime even during third-party LLM API rate limits or failures
       - Crafted structured short-form script prompt templates that separate visual cues from spoken dialogue for immediate production use
     architecture: Dual-interface architecture featuring an interactive Streamlit Web Application and a FastMCP Server over stdio. The core Python engine queries Tavily API for top real-time search results, summarizes the content using Gemini LLM (via OpenAI SDK compatibility or native Google GenAI SDK), and feeds the context into a specialized scriptwriter engine structured for maximum audience retention (Hook → Frame → Payload → CTA).
-    architectureImage: assests/3242.png
+    architectureImage: https://res.cloudinary.com/dnw73uesc/image/upload/v1785582067/3242_pwn0wl.png
     resources:
       - label: Live Streamlit App
         url: https://real-time-youtube-script-generator-mcp-server-kv2sp2x863hpu8bh.streamlit.app/
@@ -487,7 +487,7 @@ projects:
       - Built resilient fallback mechanisms to ensure 100% UI uptime even during third-party LLM API rate limits or failures
       - Crafted structured short-form script prompt templates that separate visual cues from spoken dialogue for immediate production use
     architecture: Dual-interface architecture featuring an interactive Streamlit Web Application and a FastMCP Server over stdio. The core Python engine queries Tavily API for top real-time search results, summarizes the content using Gemini LLM (via OpenAI SDK compatibility or native Google GenAI SDK), and feeds the context into a specialized scriptwriter engine structured for maximum audience retention (Hook → Frame → Payload → CTA).
-    architectureImage: assests/3242.png
+    architectureImage: https://res.cloudinary.com/dnw73uesc/image/upload/v1785582067/3242_pwn0wl.png
     resources:
       - label: Live Streamlit App
         url: https://real-time-youtube-script-generator-mcp-server-kv2sp2x863hpu8bh.streamlit.app/
