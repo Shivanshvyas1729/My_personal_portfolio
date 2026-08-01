@@ -3,7 +3,6 @@ projects:
   - id: 6
     title: Real-Time YouTube Script Generator & MCP Server
     category:
-      - Agentic Systems & MCP
       - LLMs & Generative AI
       - Python
     description: An AI-powered application and FastMCP server that retrieves real-time web information using Tavily Search API and converts it into high-retention, production-ready short video scripts (YouTube Shorts / Reels) using Gemini LLM.
