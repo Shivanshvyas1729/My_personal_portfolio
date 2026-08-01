@@ -1,4 +1,15 @@
 blog:
+  - id: 20
+    title: api's
+    content: "**Tavily Search API** ,**AICredits API**  , **Official Google Gemini API (google-genai SDK)**  = https://github.com/Shivanshvyas1729/Real-Time-YouTube-Script-Generator-MCP-Server#-api-code-examples-parameters--incoming-result-formats"
+    category: api
+    type: []
+    featured: false
+    draft: true
+    resources: []
+    date: 2026-08-01
+    slug: apis
+    excerpt: breif intro of using different api
   - id: 19
     title: "Python Unpacking Operators (* and **): Lists, Tuples, Sets, Ranges, Strings & Dictionaries"
     content: |
