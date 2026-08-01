@@ -19,8 +19,8 @@ projects:
     featured: true
     domain: 🎬 Content & Media Creation
     media:
-      - secureUrl: https://res.cloudinary.com/dnw73uesc/image/upload/v1785582067/3242_pwn0wl.png
-        publicId: 3242_pwn0wl
+      - secureUrl: https://res.cloudinary.com/dnw73uesc/image/upload/v1785582812/Gemini_Generated_Image_t9zmutt9zmutt9zm_sivbr0.png
+        publicId: Gemini_Generated_Image_t9zmutt9zmutt9zm_sivbr0
         resourceType: image
     problem_statement: Standard LLMs suffer from knowledge cutoff dates and hallucinate when asked to generate scripts on breaking news or current events. Additionally, drafting engaging short-form video scripts (Shorts/Reels) requires strict structural formatting (hooks, visual cues, spoken dialogue) that standard prompts fail to deliver reliably.
     business_problem: Content creators and video marketing teams spend excessive hours manually researching current web trends and writing formatted video scripts, resulting in low publishing velocity and missed viral opportunities on trending topics.
@@ -476,8 +476,8 @@ projects:
     featured: true
     domain: 🎬 Content & Media Creation
     media:
-      - secureUrl: https://res.cloudinary.com/dnw73uesc/image/upload/v1785582067/3242_pwn0wl.png
-        publicId: 3242_pwn0wl
+      - secureUrl: https://res.cloudinary.com/dnw73uesc/image/upload/v1785582812/Gemini_Generated_Image_t9zmutt9zmutt9zm_sivbr0.png
+        publicId: Gemini_Generated_Image_t9zmutt9zmutt9zm_sivbr0
         resourceType: image
     problem_statement: Standard LLMs suffer from knowledge cutoff dates and hallucinate when asked to generate scripts on breaking news or current events. Additionally, drafting engaging short-form video scripts (Shorts/Reels) requires strict structural formatting (hooks, visual cues, spoken dialogue) that standard prompts fail to deliver reliably.
     business_problem: Content creators and video marketing teams spend excessive hours manually researching current web trends and writing formatted video scripts, resulting in low publishing velocity and missed viral opportunities on trending topics.
