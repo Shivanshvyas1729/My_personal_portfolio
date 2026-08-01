@@ -13,6 +13,7 @@ projects:
       - Tavily Search API
       - Google Gemini API
       - OpenAI SDK
+      - Web-Searching RAG
     github: https://github.com/Shivanshvyas1729/Real-Time-YouTube-Script-Generator-MCP-Server
     live: https://real-time-youtube-script-generator-mcp-server-kv2sp2x863hpu8bh.streamlit.app/
     featured: true
