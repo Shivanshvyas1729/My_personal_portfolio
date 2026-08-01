@@ -80,7 +80,7 @@ blog:
     type:
       - Python
     featured: false
-    draft: true
+    draft: false
     resources: []
     date: 2026-07-27
     excerpt: short of unpaking
