@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useGithubStats } from "@/hooks/useGithubStats";
 import Tilt from "react-parallax-tilt";
 import { ResourcesModal } from "./ResourcesModal";
-import { convertToRawGitHubUrl } from "@/components/cms/FormHelpers";
+import { convertToRawGitHubUrl, getMediaUrl } from "@/components/cms/FormHelpers";
 
 interface Props {
   project: Project;
@@ -44,7 +44,7 @@ const ProjectCard = ({ project, index, disableInViewAnimation = false, onClick }
 
   const { stats, loading } = useGithubStats(project.github, isInView);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const mediaUrl = project.media?.[0]?.url;
+  const mediaUrl = getMediaUrl(project.media?.[0]);
 
   const handleCardClick = (e: React.MouseEvent) => {
     // If the click is inside a real link or button, let the browser handle it (e.g. GitHub or Live Demo buttons)

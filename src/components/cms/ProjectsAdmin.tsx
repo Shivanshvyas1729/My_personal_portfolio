@@ -22,10 +22,10 @@ const SCHEMA_EXAMPLE_JSON = `{
   "// title": "🔴 REQUIRED — Clear, impact-oriented title shown on portfolio grid cards",
 
   "category": ["Deep Learning", "Computer Vision"],
-  "// category": "🟡 OPTIONAL — AI/ML sub-field tags used for filtering on the All Projects page",
+  "// category": "🟡 OPTIONAL — AI/ML sub-field tags. Existing Categories: ['Machine Learning', 'Agentic Systems & MCP', 'Computer Vision', 'Deep Learning', 'Explainable AI (XAI)', 'MLOps', 'Python', 'Web Applications']. RULE: Reuse existing categories when applicable; create a new category only when needed for a distinct technical field.",
 
-  "domain": "🏥 Healthcare",
-  "// domain": "🟡 OPTIONAL — Industry sector filter. Examples: '🏥 Healthcare', '⚡ Renewable Energy', '🌤️ Meteorology'. Remove if not applicable.",
+  "domain": "Healthcare",
+  "// domain": "🟡 OPTIONAL — Industry sector filter. Existing Domains: ['Renewable Energy', 'Meteorology', 'Food & Beverage', 'Media & Entertainment', 'Healthcare']. RULE: Reuse an existing domain if applicable; create a new domain only when launching a project in a new industry sector. Remove if not applicable.",
 
   "description": "An AI-powered solar panel defect detection system using transfer learning with EfficientNet-B0.",
   "// description": "🔴 REQUIRED — Compelling 1–2 sentence summary of what the project does and its value",
@@ -285,6 +285,8 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
   const [copySuccess, setCopySuccess] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const isModalOpen = editingId !== null || addingNew;
+
   const filteredProjects = useMemo(() => {
     if (!searchQuery.trim()) return projects;
     const query = searchQuery.toLowerCase().trim();
@@ -405,7 +407,7 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
       github: "https://github.com/...",
       live: "https://...",
       featured: false,
-      domain: "🏥 Healthcare",
+      domain: "Healthcare",
       media: [
         {
           type: "image",
@@ -623,7 +625,11 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
     lastLoggedValueRef.current = "";
   };
 
-  const isModalOpen = editingId !== null || addingNew;
+  const highestId = useMemo(() => projects.reduce((max, p) => (p.id || 0) > max ? p.id : max, 0), [projects]);
+  const nextId = (tempProject.id && tempProject.id > 0) ? tempProject.id : highestId + 1;
+  const dynamicExampleJson = useMemo(() => {
+    return SCHEMA_EXAMPLE_JSON.replace(/"id": \d+/, `"id": ${nextId}`);
+  }, [nextId]);
 
   return (
     <div className="flex flex-col h-full bg-background relative">
@@ -1031,6 +1037,25 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
                         Real-time Zod validation
                       </span>
                     </div>
+
+                    {/* Existing Categories & Domains Quick Reference */}
+                    <div className="mb-2.5 px-3 py-2 rounded-xl bg-primary/5 border border-primary/20 text-[10px] space-y-1 shadow-sm">
+                      <div className="flex items-start gap-1.5">
+                        <span className="font-bold text-primary shrink-0 uppercase tracking-wider text-[9px]">Categories:</span>
+                        <span className="text-foreground/90 font-medium leading-relaxed">
+                          Machine Learning &bull; Agentic Systems & MCP &bull; Computer Vision &bull; Deep Learning &bull; Explainable AI (XAI) &bull; MLOps &bull; Python &bull; Web Applications
+                        </span>
+                      </div>
+                      <div className="flex items-start gap-1.5 border-t border-primary/10 pt-1">
+                        <span className="font-bold text-primary shrink-0 uppercase tracking-wider text-[9px]">Domains:</span>
+                        <span className="text-foreground/90 font-medium leading-relaxed">
+                          Renewable Energy &bull; Meteorology &bull; Food & Beverage &bull; Media & Entertainment &bull; Healthcare
+                        </span>
+                      </div>
+                      <p className="text-[9px] text-muted-foreground/80 italic pt-0.5 leading-snug">
+                        💡 <strong>Usage Rule:</strong> Reuse existing categories & domains whenever applicable for clean filter aggregation. Create a new category or domain <em>only when needed</em> for a brand new technical sub-field or industry sector.
+                      </p>
+                    </div>
                     <textarea
                       value={codeValue}
                       onChange={(e) => handleCodeChange(e.target.value)}
@@ -1185,7 +1210,7 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
                 </span>
                 <button
                   onClick={() => {
-                    navigator.clipboard.writeText(SCHEMA_EXAMPLE_JSON);
+                    navigator.clipboard.writeText(dynamicExampleJson);
                     setCopySuccess(true);
                     setTimeout(() => setCopySuccess(false), 2000);
                   }}
@@ -1195,7 +1220,7 @@ export const ProjectsAdmin: React.FC<ProjectsAdminProps> = ({ projects, onChange
                 </button>
               </div>
               <pre className="text-foreground bg-muted/40 p-4 rounded-lg border border-border/30 overflow-x-auto select-text whitespace-pre">
-                {SCHEMA_EXAMPLE_JSON}
+                {dynamicExampleJson}
               </pre>
             </div>
             

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Project } from "@/data/portfolioData";
-import { convertToRawGitHubUrl } from "@/components/cms/FormHelpers";
+import { convertToRawGitHubUrl, getMediaUrl, isMediaVideo } from "@/components/cms/FormHelpers";
 import { Calendar, ExternalLink, Link as LinkIcon, BookOpen, Star, Lock, X, Play, ShieldAlert, HeartHandshake } from "lucide-react";
 import { KnowledgeTooltip, renderTextWithLinks } from "./KnowledgeTooltip";
 
@@ -355,13 +355,13 @@ export function ProjectModal({ project, isOpen, onClose }: ProjectModalProps) {
                 {hasMedia && (
                   <div className="space-y-4">
                     <div className="glass-card rounded-xl overflow-hidden aspect-video border border-border/40 relative">
-                      {activeProject.media![activeMedia].type === "video" || (!activeProject.media![activeMedia].type && activeProject.media![activeMedia].url?.match(/\.(mp4|webm|ogg)$/i)) ? (
-                        <video src={convertToRawGitHubUrl(activeProject.media![activeMedia].url || '')} controls className="w-full h-full object-cover" />
+                      {isMediaVideo(activeProject.media![activeMedia]) ? (
+                        <video src={getMediaUrl(activeProject.media![activeMedia])} controls className="w-full h-full object-cover" />
                       ) : (
-                        <img src={convertToRawGitHubUrl(activeProject.media![activeMedia].url || '')} alt={activeProject.media![activeMedia].caption || activeProject.title} className="w-full h-full object-cover" />
+                        <img src={getMediaUrl(activeProject.media![activeMedia])} alt={activeProject.media![activeMedia]?.caption || activeProject.title} className="w-full h-full object-cover" />
                       )}
                     </div>
-                    {activeProject.media![activeMedia].caption && (
+                    {activeProject.media![activeMedia]?.caption && (
                       <p className="text-xs text-muted-foreground text-center italic">{activeProject.media![activeMedia].caption}</p>
                     )}
 
@@ -373,12 +373,12 @@ export function ProjectModal({ project, isOpen, onClose }: ProjectModalProps) {
                             onClick={() => setActiveMedia(i)}
                             className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-300 ${i === activeMedia ? "border-primary scale-95" : "border-border/30 opacity-60 hover:opacity-100"}`}
                           >
-                            {m.type === "video" || (!m.type && m.url?.match(/\.(mp4|webm|ogg)$/i)) ? (
+                            {isMediaVideo(m) ? (
                               <div className="w-full h-full bg-muted flex items-center justify-center">
                                 <Play size={14} className="text-primary" />
                               </div>
                             ) : (
-                              <img src={convertToRawGitHubUrl(m.url || '')} alt="" className="w-full h-full object-cover" />
+                              <img src={getMediaUrl(m)} alt="" className="w-full h-full object-cover" />
                             )}
                           </button>
                         ))}
@@ -426,7 +426,7 @@ export function ProjectModal({ project, isOpen, onClose }: ProjectModalProps) {
                   {activeProject.architectureImage && (
                     <div className="pt-4">
                       <h3 className="text-xs uppercase tracking-widest font-bold text-primary mb-3">Architecture</h3>
-                      <img src={convertToRawGitHubUrl(activeProject.architectureImage)} alt="Architecture" className="w-full object-contain rounded-xl border border-border/40 bg-background/50 p-2" />
+                      <img src={getMediaUrl(activeProject.architectureImage)} alt="Architecture" className="w-full object-contain rounded-xl border border-border/40 bg-background/50 p-2" />
                     </div>
                   )}
                 </div>

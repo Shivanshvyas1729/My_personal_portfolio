@@ -10,26 +10,28 @@ import { clearLocalImages } from "@/lib/localImageStore";
 const sanitizeProjects = (projects: any[]): any[] => {
   if (!Array.isArray(projects)) return [];
   const domainNames = [
-    "healthcare", "renewable energy", "meteorology", "food & beverage", "media & entertainment",
-    "🏥 healthcare", "⚡ renewable energy", "🌤️ meteorology", "🍶 food & beverage", "🎵 media & entertainment",
+    "healthcare", "renewable energy", "meteorology", "food & beverage", "media & entertainment", "content & media creation",
+    "🏥 healthcare", "⚡ renewable energy", "🌤️ meteorology", "🍶 food & beverage", "🎵 media & entertainment", "🎬 content & media creation",
     "weather forecasting", "🌦 thunderstorm forecasting system"
   ];
   
   const domainStandardMap: Record<string, string> = {
-    "healthcare": "🏥 Healthcare",
-    "🏥 healthcare": "🏥 Healthcare",
-    "renewable energy": "⚡ Renewable Energy",
-    "⚡ renewable energy": "⚡ Renewable Energy",
-    "meteorology": "🌤️ Meteorology",
-    "🌤️ meteorology": "🌤️ Meteorology",
-    "weather forecasting": "🌤️ Meteorology",
-    "food & beverage": "🍶 Food & Beverage",
-    "🍶 food & beverage": "🍶 Food & Beverage",
-    "media & entertainment": "🎵 Media & Entertainment",
-    "🎵 media & entertainment": "🎵 Media & Entertainment"
+    "healthcare": "Healthcare",
+    "🏥 healthcare": "Healthcare",
+    "renewable energy": "Renewable Energy",
+    "⚡ renewable energy": "Renewable Energy",
+    "meteorology": "Meteorology",
+    "🌤️ meteorology": "Meteorology",
+    "weather forecasting": "Meteorology",
+    "food & beverage": "Food & Beverage",
+    "🍶 food & beverage": "Food & Beverage",
+    "media & entertainment": "Media & Entertainment",
+    "content & media creation": "Media & Entertainment",
+    "🎵 media & entertainment": "Media & Entertainment",
+    "🎬 content & media creation": "Media & Entertainment"
   };
 
-  return projects.map(p => {
+  const processed = projects.map(p => {
     let domain = p.domain || "";
     let categories = Array.isArray(p.category) ? p.category : [];
     
@@ -60,6 +62,28 @@ const sanitizeProjects = (projects: any[]): any[] => {
       category: categories
     };
   });
+
+  // Unique project deduplication by ID or Title (prevents duplicate rendering)
+  const uniqueProjects: any[] = [];
+  const seenIds = new Set<any>();
+  const seenTitles = new Set<string>();
+
+  for (const proj of processed) {
+    if (!proj) continue;
+    const idKey = proj.id;
+    const titleKey = proj.title?.toLowerCase().trim();
+
+    if (idKey !== undefined && idKey !== null) {
+      if (seenIds.has(idKey)) continue;
+      seenIds.add(idKey);
+    } else if (titleKey) {
+      if (seenTitles.has(titleKey)) continue;
+      seenTitles.add(titleKey);
+    }
+    uniqueProjects.push(proj);
+  }
+
+  return uniqueProjects;
 };
 
 const sanitizePortfolioData = (data: any): any => {

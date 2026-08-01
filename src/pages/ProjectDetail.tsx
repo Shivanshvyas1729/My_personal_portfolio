@@ -8,7 +8,7 @@ import { useState } from "react";
 import { useCMSData } from "@/context/CMSContext";
 import Magnetic from "@/components/ui/Magnetic";
 import { motion } from "framer-motion";
-import { convertToRawGitHubUrl } from "@/components/cms/FormHelpers";
+import { convertToRawGitHubUrl, getMediaUrl, isMediaVideo } from "@/components/cms/FormHelpers";
 import { ResourcesModal } from "@/components/portfolio/ResourcesModal";
 import { KnowledgeTooltip, renderTextWithLinks } from "@/components/portfolio/KnowledgeTooltip";
 import type { Project } from "@/data/portfolioData";
@@ -82,7 +82,7 @@ const ProjectDetail = () => {
     );
   }
 
-  const hasMedia = project.media && project.media.length > 0;
+  const hasMedia = Array.isArray(project.media) && project.media.length > 0 && getMediaUrl(project.media[0]) !== "";
 
   const renderArraySection = (key: keyof Project, title?: string, icon?: React.ReactNode, extraClasses = "") => {
     let data = project[key] as string[] | undefined;
@@ -205,7 +205,7 @@ const ProjectDetail = () => {
       <SEO
         title={project.title} 
         description={project.description} 
-        image={project.media?.[0]?.url} 
+        image={getMediaUrl(project.media?.[0])} 
       />
       <Navbar />
       <ErrorBoundary fallbackTitle="Failed to render project details">
@@ -300,21 +300,21 @@ const ProjectDetail = () => {
               <div className="space-y-3">
                 {/* Active media display */}
                 <div className="glass-card rounded-xl overflow-hidden aspect-video">
-                  {project.media![activeMedia].type === "video" || (!project.media![activeMedia].type && project.media![activeMedia].url?.match(/\.(mp4|webm|ogg)$/i)) ? (
+                  {isMediaVideo(project.media![activeMedia]) ? (
                     <video
-                      src={convertToRawGitHubUrl(project.media![activeMedia].url || '')}
+                      src={getMediaUrl(project.media![activeMedia])}
                       controls
                       className="w-full h-full object-cover"
                     />
                   ) : (
                     <img
-                      src={convertToRawGitHubUrl(project.media![activeMedia].url || '')}
-                      alt={project.media![activeMedia].caption || project.title}
+                      src={getMediaUrl(project.media![activeMedia])}
+                      alt={project.media![activeMedia]?.caption || project.title}
                       className="w-full h-full object-cover"
                     />
                   )}
                 </div>
-                {project.media![activeMedia].caption && (
+                {project.media![activeMedia]?.caption && (
                   <p className="text-xs text-muted-foreground text-center">{project.media![activeMedia].caption}</p>
                 )}
                 {/* Thumbnails */}
@@ -328,12 +328,12 @@ const ProjectDetail = () => {
                           i === activeMedia ? "border-primary" : "border-border/30 opacity-60 hover:opacity-100"
                         }`}
                       >
-                        {m.type === "video" || (!m.type && m.url?.match(/\.(mp4|webm|ogg)$/i)) ? (
+                        {isMediaVideo(m) ? (
                           <div className="w-full h-full bg-muted flex items-center justify-center">
                             <Play size={14} className="text-primary" />
                           </div>
                         ) : (
-                          <img src={convertToRawGitHubUrl(m.url || '')} alt="" className="w-full h-full object-cover" />
+                          <img src={getMediaUrl(m)} alt="" className="w-full h-full object-cover" />
                         )}
                       </button>
                     ))}
@@ -376,7 +376,7 @@ const ProjectDetail = () => {
             
             {project.architectureImage ? (
               <img 
-                src={convertToRawGitHubUrl(project.architectureImage)} 
+                src={getMediaUrl(project.architectureImage)} 
                 alt="Architecture" 
                 className="w-full max-h-[70vh] object-contain rounded-xl border border-border bg-muted/5 mx-auto" 
               />

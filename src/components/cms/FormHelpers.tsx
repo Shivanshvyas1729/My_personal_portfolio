@@ -61,13 +61,17 @@ export const formatLabel = (key: string) => {
 
 const APP_BOOT_TIME = Date.now();
 
-// Helper to safely resolve local embedded base64 images for live preview rendering
+// Helper to safely resolve local embedded base64 images, Cloudinary secureUrls, or GitHub URLs
 export function getPreviewUrl(url: any): string {
   if (!url) return '';
   
   if (typeof url === 'object' && url !== null) {
-    if (url.secureUrl) return url.secureUrl;
-    if (url.value) url = url.value; // Fallback to extract string from legacy object
+    const raw = url.secureUrl || url.url || url.value;
+    if (raw && typeof raw === 'string') {
+      url = raw;
+    } else {
+      return '';
+    }
   }
 
   if (typeof url === 'string') {
@@ -82,7 +86,7 @@ export function getPreviewUrl(url: any): string {
     }
 
     // If it's a regular URL, return the GitHub raw URL with a cache buster
-    const rawUrl = convertToRawGitHubUrl(url);
+    const rawUrl = convertToRawGitHubUrl(trimmed);
     if (rawUrl.includes('raw.githubusercontent.com')) {
       return `${rawUrl}?t=${APP_BOOT_TIME}`;
     }
@@ -90,6 +94,20 @@ export function getPreviewUrl(url: any): string {
   }
   
   return '';
+}
+
+export function getMediaUrl(item: any): string {
+  return getPreviewUrl(item);
+}
+
+export function isMediaVideo(item: any): boolean {
+  if (!item) return false;
+  if (typeof item === 'object' && item !== null) {
+    const resType = item.resourceType || item.type;
+    if (resType === 'video') return true;
+  }
+  const url = getMediaUrl(item);
+  return /\.(mp4|webm|ogg|mov)$/i.test(url) || /youtube|vimeo/i.test(url);
 }
 
 // Helper to convert GitHub blob URLs and relative upload paths to raw.githubusercontent.com direct image URLs
@@ -220,7 +238,7 @@ export const getSuggestionsForField = (path: string[], previewData: any, isArray
       }
     }
     // Pre-populate with standard industry domains
-    ['🏥 Healthcare', '⚡ Renewable Energy', '🌤️ Meteorology', '🍶 Food & Beverage', '🎵 Media & Entertainment'].forEach(s => suggestions.add(s));
+    ['Healthcare', 'Renewable Energy', 'Meteorology', 'Food & Beverage', 'Media & Entertainment'].forEach(s => suggestions.add(s));
   }
 
   // 2. TECH STACK (for 'tech' inside project, 'featured' or 'all' inside techStack, etc.)
