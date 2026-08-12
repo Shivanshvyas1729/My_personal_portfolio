@@ -1,4 +1,5 @@
 import { createRoot } from "react-dom/client";
+import "@/utils/patchTilt";
 import { applyThemeSetup } from "@/lib/themeSetup";
 import { verifyStartup } from "@/config";
 
