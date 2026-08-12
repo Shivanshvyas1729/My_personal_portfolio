@@ -25,8 +25,7 @@ projects:
     featured: true
     domain: E-Commerce & EdTech
     media:
-      - type: image
-        url: https://raw.githubusercontent.com/Shivanshvyas1729/ai-powered-Behavioral-Recommendation-system-/main/ai%20behaviral%20recommandation%20system%402x.png
+      - secureUrl: https://miro.medium.com/v2/1*jVnBkXrPQT4viyV1JPszLQ.png
     problem_statement: Traditional e-commerce recommendation widgets rely on static 'related items' rules or simple click counters that ignore rich user context. Users are served cold, irrelevant product recommendations because legacy systems fail to observe active exploration signals like dwell duration, curriculum expansions, text highlighting, and search query shifts.
     business_problem: Generic recommendation widgets suffer from low conversion rates (under 2%) and high drop-offs due to irrelevant suggestions. Slow multi-pass LLM recommendation chains (4.5s+ latency) degrade user experience and consume excessive API tokens, resulting in high cloud runtime costs and missed revenue.
     learning_outcomes:
