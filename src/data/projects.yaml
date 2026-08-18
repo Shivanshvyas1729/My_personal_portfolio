@@ -3,7 +3,6 @@ projects:
   - id: 7
     title: NeuroCart / SmartReco — Behavioral AI Recommendation Agent
     category:
-      - Agentic Systems & MCP
       - Machine Learning
       - MLOps
       - Python
