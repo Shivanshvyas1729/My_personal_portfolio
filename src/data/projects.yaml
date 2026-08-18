@@ -3,10 +3,9 @@ projects:
   - id: 7
     title: NeuroCart / SmartReco — Behavioral AI Recommendation Agent
     category:
-      - Machine Learning
-      - MLOps
       - Python
       - Web Applications
+      - LLMs & Generative AI
     description: An agentic, hyper-personalized recommendation platform for modern e-commerce and learning marketplaces. Instead of static rules or cold click counts, NeuroCart features a real-time 17-signal behavioral AI agent that continuously observes user browsing activity, semantically retrieves candidate items via ChromaDB Vector RAG, and re-ranks courses using Mesh API LLM with Pydantic structured output validation.
     tech:
       - Python
