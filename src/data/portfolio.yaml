@@ -182,40 +182,46 @@ skills:
 # region TECH STACK
 techStack:
   featured:
-    - "Python"
-    - "Scikit-learn"
-    - "TensorFlow"
-    - "PyTorch"
-    - "LangChain"
-    - "Docker"
-    - "FastAPI"
-    - "Streamlit"
-    - "Mlflow"
-    - "RAG"
+    - Python
+    - Scikit-learn
+    - TensorFlow
+    - PyTorch
+    - LangChain
+    - Docker
+    - FastAPI
+    - Streamlit
+    - Mlflow
+    - RAG
 
   all:
-    - "Python"
-    - "Pandas"
-    - "NumPy"
-    - "Scikit-learn"
-    - "TensorFlow"
-    - "PyTorch"
-    - "LangChain"
-    - "MLflow"
-    - "FastAPI"
-    - "Streamlit"
-    - "Docker"
-    - "MySQL"
-    - "MongoDB"
-    - "Git"
-    - "GitHub"
-    - "AWS"
+    - Python
+    - Pandas
+    - NumPy
+    - Scikit-learn
+    - TensorFlow
+    - PyTorch
+    - LangChain
+    - MLflow
+    - FastAPI
+    - Streamlit
+    - Docker
+    - MySQL
+    - MongoDB
+    - Git
+    - GitHub
+    - AWS
+    - "Agentic AI "
   connections:
-    - [ "Python", "PyTorch" ]
-    - [ "PyTorch", "TensorFlow" ]
-    - [ "TensorFlow", "Scikit-learn" ]
-    - [ "LangChain", "FastAPI" ]
-    - [ "FastAPI", "Docker" ]
+    - - Python
+      - PyTorch
+    - - PyTorch
+      - TensorFlow
+    - - TensorFlow
+      - Scikit-learn
+    - - LangChain
+      - FastAPI
+    - - FastAPI
+      - Docker
 # endregion
 
 # region SERVICES
