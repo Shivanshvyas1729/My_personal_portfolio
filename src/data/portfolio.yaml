@@ -226,21 +226,18 @@ techStack:
 
 # region SERVICES
 services:
-  - title: "AI & ML Solutions"
-    description: "End-to-end intelligent systems"
-    icon: "Brain"
-
-  - title: "Data Science Projects"
-    description: "Analysis, modeling, visualization"
-    icon: "BarChart3"
-
-  - title: "Generative AI Apps"
-    description: "RAG, chatbots, LLM apps"
-    icon: "Sparkles"
-
-  - title: "Intelligent Automation"
-    description: "AI-driven workflows"
-    icon: "Zap"
+  - title: AI & ML Solutions
+    description: End-to-end intelligent systems
+    icon: Brain
+  - title: Data Science Projects
+    description: Analysis, modeling, visualization
+    icon: BarChart3
+  - title: Generative AI Apps
+    description: RAG, chatbots, LLM apps
+    icon: Sparkles
+  - title: Intelligent Automation
+    description: AI-driven workflows
+    icon: Zap
 # endregion
 
 # region RESUME
