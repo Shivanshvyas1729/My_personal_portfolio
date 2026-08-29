@@ -1,5 +1,95 @@
 # region PROJECTS
 projects:
+  - id: 8
+    title: Real-Time Voice AI Agent & RAG System
+    category:
+      - Agentic Systems & MCP
+      - Deep Learning
+      - Python
+      - Web Applications
+    description: A real-time, low-latency conversational Voice AI Agent and RAG system for industrial equipment diagnostics. Built with Pipecat AI, WebSockets, Deepgram Nova-3 STT, Groq LLM, ElevenLabs Flash v2.5 TTS, and MongoDB Atlas Vector Search.
+    tech:
+      - Python
+      - FastAPI
+      - Pipecat AI
+      - React
+      - TypeScript
+      - Deepgram
+      - Groq
+      - ElevenLabs
+      - MongoDB Atlas
+      - Docker
+      - AWS ECS Fargate
+    github: https://github.com/Shivanshvyas1729/Real-Time-Voice-AI-Agent-with-RAG
+    featured: true
+    domain: Industrial Automation
+    problem_statement: Technicians repairing equipment on the factory floor need hands-free, instant technical answers from lengthy manuals without stopping work to search manually.
+    business_problem: Manual manual searches during industrial downtime increase Mean Time To Repair (MTTR) and cause operational productivity losses.
+    learning_outcomes:
+      - Architected real-time voice streaming pipelines with Pipecat AI and WebSockets
+      - Implemented MongoDB Atlas $vectorSearch for RAG-based technical manual retrieval
+      - Optimized end-to-end voice latency to sub-800ms using streaming STT, LLM, and TTS services
+    architecture: Real-time audio captured via browser Web Audio API -> WebSockets -> FastAPI backend -> Pipecat Frame Processor Pipeline -> Deepgram Nova-3 STT -> LLM Context Aggregator with Groq -> Vector Search RAG tool against MongoDB Atlas -> ElevenLabs Flash v2.5 TTS -> PCM audio streamed back to React UI.
+    howItWorks: |-
+      1. Frontend captures 16kHz PCM audio stream over WebSockets.
+      2. Deepgram Nova-3 transcribes incoming audio to text.
+      3. Groq LLM determines if equipment manual context is needed and calls the search_knowledge_base RAG tool.
+      4. MongoDB Atlas $vectorSearch retrieves relevant document chunks embedded via BAAI/BGE-M3.
+      5. ElevenLabs Flash v2.5 synthesizes response text to audio and streams PCM frames back to the user.
+    objectives:
+      - Achieve sub-800ms end-to-end voice response latency
+      - Ground LLM diagnostic answers in technical equipment manuals using RAG
+    success_criteria:
+      - Sub-800ms end-to-end SLA across STT, LLM, RAG, and TTS pipeline
+      - Accurate manual chunk retrieval with source citation metadata
+    data_sources:
+      - Industrial equipment PDF manuals and technical specification documents
+    data_volume: Document chunks embedded as 1024-dimensional vectors in MongoDB Atlas
+    target_variable: Equipment diagnostic response with cited manual source files
+    model_inputs:
+      - Audio PCM 16kHz stream (STT)
+      - User text query & document vector embeddings (RAG/LLM)
+    model_outputs:
+      - Real-time PCM 16kHz audio stream (TTS)
+      - Text response with cited PDF source metadata
+    preprocessing:
+      - Audio framing & 16kHz PCM mono conversion
+      - Text chunking (500-1000 chars) with BAAI/BGE-M3 embedding generation
+    modeling:
+      - Deepgram Nova-3 (STT)
+      - Groq LLM (OpenAI-compatible / Llama)
+      - BAAI/BGE-M3 (Embeddings)
+      - ElevenLabs Flash v2.5 (TTS)
+    hyperparameters:
+      - "VAD Confidence: 0.7 | Start: 0.2s | Stop: 0.2s"
+      - "RAG Vector Search Top-K: 3"
+      - "LLM Max Output Tokens: Concise (<30 words per response)"
+    evaluation_metrics:
+      - End-to-End Latency (ms)
+      - Time-To-First-Byte (TTFB)
+      - RAG Context Relevance & Source Precision
+    metrics:
+      End-to-End Latency: < 800ms
+      STT Latency: ~150ms
+      TTS Latency: ~75ms
+      Embedding Dimensions: "1024"
+    training_environment:
+      - Python 3.12, Pipecat AI 0.0.108, FastAPI 0.141.1
+      - MongoDB Atlas live_db cluster
+    deployment: AWS ECS Fargate (Production) / Render & Vercel (Free-Tier) / Local Docker Compose & WSL
+    inference_pipeline:
+      - Establish WebSocket connection via /api/v1/stream/connect
+      - Stream audio frames through Pipecat pipeline
+      - Execute vector search tool call on Groq LLM demand
+      - Stream audio chunks back to browser Web Audio context
+    privacy:
+      - Audio processed in-memory during WebSocket session with zero audio persistence
+    known_limitations:
+      - Requires active Internet connectivity for external cloud API providers (Deepgram, Groq, ElevenLabs)
+    future_improvements:
+      - Multi-Modal Vision RAG for equipment photo analysis
+      - Offline edge container deployment
+      - Hybrid BM25 + Vector Search (Reciprocal Rank Fusion)
   - id: 7
     title: NeuroCart / SmartReco — Behavioral AI Recommendation Agent
     category:
