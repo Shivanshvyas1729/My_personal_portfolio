@@ -154,27 +154,29 @@ education:
 # region SKILLS
 skills:
   categories:
-    - title: "Core AI/ML"
+    - title: Core AI/ML
       items:
-        - "Machine Learning"
-        - "Deep Learning"
-        - "NLP"
-        - "Computer Vision"
-        - "Data Analysis"
-
-    - title: "Advanced AI"
+        - Machine Learning
+        - Deep Learning
+        - NLP
+        - Computer Vision
+        - Data Analysis
+    - title: Advanced AI
       items:
-        - "Generative AI"
-        - "Agentic AI"
-        - "RAG"
-
-    - title: "Tools & Infra"
+        - Generative AI
+        - Agentic AI
+        - RAG
+        - Agentic RAG
+        - MCP
+        - Voice AI engine
+    - title: Tools & Infra
       items:
-        - "Docker"
-        - "Flask"
-        - "FastAPI"
-        - "Git"
-        - "Github"
+        - Docker
+        - Flask
+        - FastAPI
+        - Git
+        - Github
+        - AWS (S3,EC2,IAM,VPC)
 # endregion
 
 # region TECH STACK
