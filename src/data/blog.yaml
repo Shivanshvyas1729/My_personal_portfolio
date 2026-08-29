@@ -101,17 +101,20 @@ blog:
     resources: []
     date: 2026-08-03
     slug: essential-linux-packages-and-ssltls-security
+    readingTime: 5
+    excerpt: "A comprehensive guide to essential Linux packages and the SSL/TLS security protocol — covering the TLS handshake, encryption principles, and why HTTPS matters."
   - id: 20
-    title: api's
+    title: "API Reference: Tavily, AICredits & Google Gemini"
     content: "**Tavily Search API** ,**AICredits API**  , **Official Google Gemini API (google-genai SDK)**  = https://github.com/Shivanshvyas1729/Real-Time-YouTube-Script-Generator-MCP-Server#-api-code-examples-parameters--incoming-result-formats"
-    category: api
+    category: API
     type: []
     featured: false
     draft: false
     resources: []
     date: 2026-08-01
     slug: apis
-    excerpt: breif intro of using different api
+    readingTime: 1
+    excerpt: "A quick reference to three essential AI APIs — Tavily Search, AICredits, and the Google Gemini API via the google-genai SDK."
   - id: 19
     title: "Python Unpacking Operators (* and **): Lists, Tuples, Sets, Ranges, Strings & Dictionaries"
     content: |
@@ -196,38 +199,41 @@ blog:
     draft: false
     resources: []
     date: 2026-07-27
-    excerpt: short of unpaking
+    excerpt: "A concise code reference for Python's * and ** unpacking operators — covering lists, tuples, sets, strings, ranges, generators, and dictionaries."
     slug: python-unpacking-operators-and-lists-tuples-sets-ranges-strings-dictionaries
+    readingTime: 3
   - id: 18
-    title: RAG EVALUATION MATRICS
+    title: RAG Evaluation Metrics
     content: check this once
     category: Notes
     type:
-      - Rag
+      - RAG
     featured: false
     draft: false
     resources: []
     date: 2026-07-12
-    slug: rag-evaluation-matrics
-    excerpt: ""
-    link: https://github.com/Shivanshvyas1729/pydantic_notes/blob/main/RAG%20Matrixs.md
+    slug: rag-evaluation-metrics
+    readingTime: 1
+    excerpt: "An overview of the key metrics used to evaluate Retrieval-Augmented Generation (RAG) systems — essential for building and assessing RAG pipelines."
+    link: https://github.com/Shivanshvyas1729/various_notes/blob/main/RAG%20Matrixs.md
     linkText: RAG MATRIX click here
   - id: 17
-    title: 8 RAG Architecture
+    title: "8 Types of RAG Architecture"
     content: Details will be updated soon
     category: Notes
     type:
-      - Rag
+      - RAG
     featured: false
     draft: false
     resources: []
     date: 2026-07-10
-    excerpt: "Different Types of RAG Architecture "
+    excerpt: "A visual overview of 8 different RAG architecture patterns — from naive RAG to advanced hybrid and agentic retrieval designs."
     link: https://media.licdn.com/dms/image/v2/D5622AQG2IuggxF5LYw/feedshare-shrink_800/B56Z1Ta2YnHcAc-/0/1775221040908?e=1785369600&v=beta&t=Or68CG3yD0mjrGVWvtOjTkCnnzMShIzPDM_p8iiwtvA
     linkText: SEE this BRO&SIS
     slug: 8-rag-architecture
+    readingTime: 1
   - id: 16
-    title: Creating AWS keys
+    title: Creating AWS Keys
     content: How to Get AWS Credentials and Create an S3 Bucket
     category: AWS
     type:
@@ -237,11 +243,12 @@ blog:
     resources: []
     date: 2026-07-02
     slug: creating-aws-keys
-    excerpt: how to create different key it is shown there for aws
-    link: https://github.com/Shivanshvyas1729/pydantic_notes/blob/main/aws_keys%20kese%20bana%20a.md
+    readingTime: 2
+    excerpt: "Step-by-step guide to creating AWS credentials and setting up an S3 bucket — covering IAM key management and access configuration."
+    link: https://github.com/Shivanshvyas1729/various_notes/blob/main/aws_keys%20kese%20bana%20a.md
     linkText: Click me
   - id: 15
-    title: different techniques to create virtual enviroment
+    title: "Different Techniques to Create a Python Virtual Environment"
     content: |-
       # Python Virtual Environment Setup Methods
 
@@ -257,17 +264,19 @@ blog:
       | **virtualenv** | Legacy projects | ✅ |
       | **pyenv + venv** | Managing multiple Python versions | macOS/Linux ⭐ |
       | **Poetry** | Dependency & package management | ✅ |
-    category: Gernal
+    category: General
     type: []
     featured: false
     draft: false
     resources: []
     date: 2026-07-02
-    slug: different-techniques-to-create-virtual-enviroment
-    link: https://github.com/Shivanshvyas1729/pydantic_notes/blob/main/create_env.md
+    slug: different-techniques-to-create-virtual-environment
+    readingTime: 2
+    excerpt: "A quick comparison of popular Python virtual environment tools — uv, venv, conda, virtualenv, pyenv, and Poetry — with their best use cases."
+    link: https://github.com/Shivanshvyas1729/various_notes/blob/main/create_env.md
     linkText: full notes
   - id: 14
-    title: YOLO codes
+    title: "YOLO Model Tasks & Code Reference"
     content: |
       **Ultralytics YOLO** (YOLO11 / YOLO26 / YOLOv8) supports multiple computer vision tasks with a clean, unified API.
 
@@ -286,17 +295,18 @@ blog:
     type:
       - Computer Vision
       - Deep Learning
-      - Yolo
+      - YOLO
     featured: false
     draft: false
     date: 2026-06-09
     slug: yolo-codes
-    excerpt: "basic codes for yolo "
-    link: https://github.com/Shivanshvyas1729/pydantic_notes/blob/main/yolo%20notes.md
+    readingTime: 2
+    excerpt: "A reference table for Ultralytics YOLO supported tasks — object detection, segmentation, pose estimation, classification, and oriented bounding boxes — with pretrained model examples."
+    link: https://github.com/Shivanshvyas1729/various_notes/blob/main/yolo%20notes.md
     linkText: all codes are here
     resources: []
   - id: 13
-    title: "Exection Handling "
+    title: "Exception Handling & Base64 Encoding: Key Concepts"
     content: |-
       ## Q: Why do we use raise?
 
@@ -315,25 +325,30 @@ blog:
       ### ***Trade-offs to Keep in Mind***
       **Size Increase**: Base64 encoding increases the file data size by roughly 33% compared to the original binary file.
       **Performance Impact**: It is ideal for small images or icons.
-    category: Gernal
+    category: General
     type:
       - Exception Handling
     featured: false
     draft: false
     date: 2026-06-05
-    excerpt: basic questions about exp handling
-    link: https://github.com/Shivanshvyas1729/pydantic_notes/blob/main/raise%20vs%20exp%20as%20e%20handling%20.md
+    slug: exception-handling-and-base64-encoding
+    readingTime: 2
+    excerpt: "Key Q&A on Python's raise keyword, FastAPI exception handling patterns, and why images are Base64 encoded for API transmission."
+    link: https://github.com/Shivanshvyas1729/various_notes/blob/main/raise%20vs%20exp%20as%20e%20handling%20.md
     linkText: raise vs exception
     resources: []
   - id: 10
-    title: all secret prompt and flow
+    title: "AI Prompt Engineering: Secret Prompts & Document Generation"
     content: https://github.com/Shivanshvyas1729/Cancer_Detection_with_xai#appendix-master-prompt--dynamic-ai-document-generator
     category: Links
     type: []
     featured: false
     draft: false
     date: 2026-05-28T00:00:00.000Z
-    excerpt: a prompt to make a functionality that   makes a   word file for u
+    slug: ai-secret-prompt-and-document-flow
+    readingTime: 1
+    resources: []
+    excerpt: "A master prompt and AI workflow for dynamically generating Word document reports — from the Cancer Detection with XAI project appendix."
   - id: 9
     title: TensorFlow Layer Writing Styles and Best Practices
     content: |
@@ -494,16 +509,18 @@ blog:
     category: Notes
     type:
       - Python
-      - Tensorflow
+      - TensorFlow
     featured: false
     draft: false
     date: 2026-05-21T00:00:00.000Z
-    excerpt: some style of writing in tensorflow
-    link: https://github.com/Shivanshvyas1729/pydantic_notes/blob/main/tensorflow%20writting%20method.md
+    slug: tensorflow-layer-writing-styles-and-best-practices
+    readingTime: 8
+    excerpt: "A structured guide to the four main TensorFlow/Keras layer writing styles — Functional API, Separated Object, Sequential, and Custom Layer — with code examples and best use cases."
+    link: https://github.com/Shivanshvyas1729/various_notes/blob/main/tensorflow%20writting%20method.md
     linkText: more details
     resources: []
   - id: 8
-    title: Fibonacci-Net architecture
+    title: "Fibonacci-Net Architecture: Lightweight CNN Design"
     content: |-
       [paper](https://drive.google.com/file/d/1Tv7Q6qpaJCSE72zsyXi4TOpOH6MNKXyL/view?usp=sharing)
       # Fibonacci-Net
@@ -973,7 +990,8 @@ blog:
     featured: false
     draft: false
     date: 2026-05-21T00:00:00.000Z
-    slug: ""
+    slug: fibonacci-net-architecture
+    readingTime: 12
     excerpt: |
       - Lightweight deep learning models with very few parameters (~1.4M)
       - Fast inference and low computational cost
@@ -981,7 +999,7 @@ blog:
       - Better handling of class imbalance and edge-sensitive features
       - Improved feature reuse without extremely deep architectures
       - Reduced memory usage compared to standard CNNs
-    link: https://github.com/Shivanshvyas1729/pydantic_notes/blob/main/fibonaacinet.md
+    link: https://github.com/Shivanshvyas1729/various_notes/blob/main/fibonaacinet.md
     linkText: give a better read
     resources: []
   - id: 7
@@ -1000,17 +1018,17 @@ blog:
       * `merge` → Database/SQL-like join
     category: Notes
     type:
-      - pandas
-      - python
+      - Pandas
+      - Python
     featured: false
     draft: false
     date: 2026-05-19T00:00:00.000Z
     slug: pandas-data-combining-functions-purpose-key-parameters
     readingTime: 1
-    excerpt: concat vs join vs merge
+    excerpt: "A concise comparison of Pandas data-combining functions — pd.concat(), df.join(), and pd.merge() — with key parameters and when to use each."
   - id: 5
-    title: type of Cloud storage based on  By Architecture
-    slug: type-of-cloud-storage-based-on-by-architecture
+    title: "Types of Cloud Storage by Architecture"
+    slug: types-of-cloud-storage-by-architecture
     readingTime: 1
     content: |-
       # Types of Cloud Storage
@@ -1030,12 +1048,12 @@ blog:
       * **File Storage →** Easy sharing & collaboration
     category: Notes
     type:
-      - cloud
+      - Cloud
     link: ""
     date: 2026-05-09T00:00:00.000Z
     featured: false
     draft: false
-    excerpt: "some info about cloud type "
+    excerpt: "A quick reference comparing the three main cloud storage types — Object, Block, and File — with real-world use cases and cloud provider examples."
   - id: 4
     title: MY LIFE
     slug: my-life
@@ -1043,13 +1061,13 @@ blog:
     content: I love my life
     category: Thoughts
     type:
-      - gernal
+      - General
     link: ""
     date: 2026-04-11T00:00:00.000Z
     featured: true
     draft: true
   - id: 3
-    title: NLP NOTES
+    title: NLP Notes
     slug: nlp-notes
     readingTime: 1
     content: These are my NLP note for quick reference -hope it will help
@@ -1064,20 +1082,28 @@ blog:
     resources:
       - label: Git hub
         url: https://github.com/Shivanshvyas1729/MY-Complete-NLP-NoteBook
+    excerpt: "Personal NLP study notes covering key concepts — from tokenization and embeddings to sequence models and transformers — great for quick revision."
   - id: 2
     title: Time
     content: “Time doesn’t just pass… it teaches. Every second you lose either becomes a regret or a lesson.”
     category: Thoughts
+    type: []
+    featured: false
+    draft: false
+    resources: []
+    slug: time-thoughts
+    readingTime: 1
     link: no
     date: 2026-04-10T00:00:00.000Z
+    excerpt: "A brief reflection on the value of time — every moment either becomes a regret or a lesson learned."
   - id: 6
-    title: Research agents and platform
+    title: "Research Agents & Platforms"
     slug: research-agents-and-platform
     readingTime: 1
     content: Some agents for research help .
     category: Links
     type:
-      - GERNAL
+      - General
     link: ""
     date: 2026-05-17T00:00:00.000Z
     featured: true
@@ -1089,8 +1115,9 @@ blog:
         url: https://www.bohrium.com/en
       - label: "openbio "
         url: https://openbio.tech/
+    excerpt: "A curated list of AI-powered research platforms — SciSpace, Bohrium, and OpenBio — for accelerating literature review and scientific discovery."
   - id: 12
-    title: FastAPI Questions and backend connections
+    title: "FastAPI Questions & Backend Connections"
     slug: fastapi-questions-and-backend-connections
     readingTime: 1
     content: one min look
@@ -1105,3 +1132,4 @@ blog:
       - label: basic questions
         url: https://drive.google.com/drive/u/0/folders/17qeN5jTs2Vh5EyQWOk0NCNJIoJu2mG17
     linkText: database notes
+    excerpt: "A curated collection of FastAPI interview questions, backend connection patterns, and database notes — useful for quick technical revision."
